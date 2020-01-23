@@ -118,7 +118,7 @@ public class TestDvk extends TestCase{
 	/**
 	 * Tests the get_time() and set_time() methods.
 	 */
-	public static void test_get_set_time(){
+	public static void test_get_set_time() {
 		Dvk dvk = new Dvk();
 		dvk.set_time(null);
 		assertEquals("0000/00/00|00:00", dvk.get_time());
@@ -128,5 +128,21 @@ public class TestDvk extends TestCase{
 		assertEquals("0000/00/00|00:00", dvk.get_time());
 		dvk.set_time("2017!10!06!05!00");
 		assertEquals("2017/10/06|05:00", dvk.get_time());
+	}
+	
+	/**
+	 * Tests the get_web_tags and set_web_tags methods.
+	 */
+	public static void test_get_set_web_tags() {
+		Dvk dvk = new Dvk();
+		dvk.set_web_tags(null);
+		assertEquals(null, dvk.get_web_tags());
+		dvk.set_web_tags(new String[0]);
+		assertEquals(null, dvk.get_web_tags());
+		String[] input = {"tag1", "Tag2", "tag1", null};
+		dvk.set_web_tags(input);
+		assertEquals(2, dvk.get_web_tags().length);
+		assertEquals("tag1", dvk.get_web_tags()[0]);
+		assertEquals("Tag2", dvk.get_web_tags()[1]);
 	}
 }

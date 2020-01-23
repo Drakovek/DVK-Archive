@@ -37,6 +37,11 @@ public class Dvk{
 	private String time;
 	
 	/**
+	 * Web tags for the Dvk.
+	 */
+	private String[] web_tags;
+	
+	/**
 	 * Initializes a Dvk object with no filled fields.
 	 */
 	public Dvk(){
@@ -205,7 +210,30 @@ public class Dvk{
 	 * 
 	 * @return Dvk time published
 	 */
-	public String get_time(){
+	public String get_time() {
 		return this.time;
+	}
+	
+	/**
+	 * Sets Dvk web tags.
+	 * 
+	 * @param web_tags Dvk web tags.
+	 */
+	public void set_web_tags(final String[] web_tags) {
+		if(web_tags == null || web_tags.length == 0) {
+			this.web_tags = null;
+		}
+		else {
+			this.web_tags = ArrayProcessing.clean_array(web_tags);
+		}
+	}
+	
+	/**
+	 * Returns Dvk web tags.
+	 * 
+	 * @return Dvk web tags.
+	 */
+	public String[] get_web_tags() {
+		return this.web_tags;
 	}
 }
