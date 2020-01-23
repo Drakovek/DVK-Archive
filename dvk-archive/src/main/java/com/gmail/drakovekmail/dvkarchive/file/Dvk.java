@@ -145,7 +145,9 @@ public class Dvk
 		}
 		else
 		{
-			this.artists = ArrayProcessing.clean_array(artists);
+			String[] array = ArrayProcessing.clean_array(artists);
+			array = ArrayProcessing.sort_alphanum(array);
+			this.artists = array;
 		}
 	}
 	

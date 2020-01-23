@@ -1,6 +1,7 @@
 package com.gmail.drakovekmail.dvkarchive.processing;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Class containing methods to process String arrays.
@@ -84,5 +85,22 @@ public class ArrayProcessing
 			}
 		}
 		return list_to_array(list);
+	}
+	
+	/**
+	 * Sorts a given String array alpha-numerically.
+	 * 
+	 * @param array Given String array
+	 * @return Sorted String array
+	 */
+	public static String[] sort_alphanum(final String[] array)
+	{
+		if(array == null)
+		{
+			return new String[0];
+		}
+		String[] return_array = array;
+		Arrays.sort(return_array, new StringCompare());
+		return return_array;
 	}
 }

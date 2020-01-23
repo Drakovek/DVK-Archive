@@ -78,10 +78,9 @@ public class TestDvk extends TestCase
 		artists[5] = "test1.0.20-stuff";
 		artists[6] = "test10.0.0-stuff";
 		dvk.set_artists(artists);
-		assertEquals(5, dvk.get_artists().length);
-		assertEquals("artist10", dvk.get_artists()[0]);
-		assertEquals("", dvk.get_artists()[1]);
-		assertEquals("artist1", dvk.get_artists()[2]);
+		assertEquals("", dvk.get_artists()[0]);
+		assertEquals("artist1", dvk.get_artists()[1]);
+		assertEquals("artist10", dvk.get_artists()[2]);
 		assertEquals("test1.0.20-stuff", dvk.get_artists()[3]);
 		assertEquals("test10.0.0-stuff", dvk.get_artists()[4]);
 	}

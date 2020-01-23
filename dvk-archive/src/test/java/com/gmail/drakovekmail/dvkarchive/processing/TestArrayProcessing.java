@@ -72,4 +72,20 @@ public class TestArrayProcessing extends TestCase
 		assertEquals("things", array[2]);
 		assertEquals("", array[3]);
 	}
+	
+	/**
+	 * Tests the sort_alphanum method.
+	 */
+	public static void test_sort_alphanum()
+	{
+		String[] array = ArrayProcessing.sort_alphanum(null);
+		assertEquals(0, array.length);
+		String[] input = {"10.05", "a", "5", "010,5"};
+		array = ArrayProcessing.sort_alphanum(input);
+		assertEquals(4, array.length);
+		assertEquals("5", array[0]);
+		assertEquals("10.05", array[1]);
+		assertEquals("010,5", array[2]);
+		assertEquals("a", array[3]);
+	}
 }
