@@ -9,8 +9,7 @@ import com.gmail.drakovekmail.dvkarchive.processing.StringProcessing;
  * 
  * @author Drakovek
  */
-public class Dvk
-{
+public class Dvk{
 	/**
 	 * File object for the Dvk
 	 */
@@ -40,8 +39,7 @@ public class Dvk
 	/**
 	 * Initializes a Dvk object with no filled fields.
 	 */
-	public Dvk()
-	{
+	public Dvk(){
 	}
 
 	/**
@@ -49,8 +47,7 @@ public class Dvk
 	 * 
 	 * @param dvk_file Dvk file
 	 */
-	public void set_dvk_file(final File dvk_file)
-	{
+	public void set_dvk_file(final File dvk_file){
 		this.dvk_file = dvk_file;
 	}
 	
@@ -59,8 +56,7 @@ public class Dvk
 	 * 
 	 * @return Dvk file
 	 */
-	public File get_dvk_file()
-	{
+	public File get_dvk_file(){
 		return this.dvk_file;
 	}
 	
@@ -69,14 +65,11 @@ public class Dvk
 	 * 
 	 * @param id Dvk ID.
 	 */
-	public void set_id(final String id)
-	{
-		if(id == null)
-		{
+	public void set_id(final String id){
+		if(id == null){
 			this.id = "";
 		}
-		else
-		{
+		else{
 			this.id = id.toUpperCase();
 		}
 	}
@@ -86,8 +79,7 @@ public class Dvk
 	 *
 	 * @return Dvk ID
 	 */
-	public String get_id()
-	{
+	public String get_id(){
 		return this.id;
 	}
 	
@@ -96,8 +88,7 @@ public class Dvk
 	 * 
 	 * @param title Dvk title
 	 */
-	public void set_title(final String title)
-	{
+	public void set_title(final String title){
 		this.title = title;
 	}
 	
@@ -106,8 +97,7 @@ public class Dvk
 	 * 
 	 * @return Dvk title
 	 */
-	public String get_title()
-	{
+	public String get_title(){
 		return this.title;
 	}
 	
@@ -116,14 +106,11 @@ public class Dvk
 	 * 
 	 * @param artist Dvk artist
 	 */
-	public void set_artist(final String artist)
-	{
-		if(artist == null)
-		{
+	public void set_artist(final String artist){
+		if(artist == null){
 			this.artists = new String[0];
 		}
-		else
-		{
+		else{
 			this.artists = new String[1];
 			this.artists[0] = artist;
 		}
@@ -134,14 +121,11 @@ public class Dvk
 	 * 
 	 * @param artists Dvk artists
 	 */
-	public void set_artists(final String[] artists)
-	{
-		if(artists == null)
-		{
+	public void set_artists(final String[] artists){
+		if(artists == null){
 			this.artists = new String[0];
 		}
-		else
-		{
+		else{
 			String[] array = ArrayProcessing.clean_array(artists);
 			array = ArrayProcessing.sort_alphanum(array);
 			this.artists = array;
@@ -153,8 +137,7 @@ public class Dvk
 	 * 
 	 * @return Dvk artists.
 	 */
-	public String[] get_artists()
-	{
+	public String[] get_artists(){
 		return this.artists;
 	}
 	
@@ -172,18 +155,15 @@ public class Dvk
 			final int month,
 			final int day,
 			final int hour,
-			final int minute)
-	{
+			final int minute){
 		if(year < 1 || year > 9999 
 				|| month < 1 || month > 12
 				|| day < 1 || day > 31
 				|| hour < 0 || hour > 23
-				|| minute < 0 || minute > 59)
-		{
+				|| minute < 0 || minute > 59){
 			this.time = "0000/00/00|00:00";
 		}
-		else
-		{
+		else{
 			String year_str = StringProcessing.extend_int(year, 4);
 			String month_str = StringProcessing.extend_int(month, 2);
 			String day_str = StringProcessing.extend_int(day, 2);
@@ -200,16 +180,12 @@ public class Dvk
 	 * 
 	 * @param time Time String, formatted YYYY/MM/DD|hh:mm
 	 */
-	public void set_time(final String time)
-	{
-		if(time == null || time.length() != 16)
-		{
+	public void set_time(final String time){
+		if(time == null || time.length() != 16){
 			this.time = "0000/00/00|00:00";
 		}
-		else
-		{
-			try
-			{
+		else{
+			try{
 				int year = Integer.parseInt(time.substring(0,4));
 				int month = Integer.parseInt(time.substring(5,7));
 				int day = Integer.parseInt(time.substring(8,10));
@@ -217,8 +193,7 @@ public class Dvk
 				int minute = Integer.parseInt(time.substring(14,16));
 				set_time_int(year, month, day, hour, minute);
 			}
-			catch(NumberFormatException e)
-			{
+			catch(NumberFormatException e){
 				this.time = "0000/00/00|00:00";
 			}
 		}
@@ -230,8 +205,7 @@ public class Dvk
 	 * 
 	 * @return Dvk time published
 	 */
-	public String get_time()
-	{
+	public String get_time(){
 		return this.time;
 	}
 }
