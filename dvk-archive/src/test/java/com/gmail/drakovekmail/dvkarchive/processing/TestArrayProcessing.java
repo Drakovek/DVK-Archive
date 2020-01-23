@@ -8,11 +8,11 @@ import junit.framework.TestCase;
  * 
  * @author Drakovek
  */
-public class TestArrayProcessing extends TestCase{
+public class TestArrayProcessing extends TestCase {
 	/**
 	 * Tests the array_to_list method.
 	 */
-	public static void test_array_to_list(){
+	public static void test_array_to_list() {
 		ArrayList<String> list;
 		list = ArrayProcessing.array_to_list(null);
 		assertEquals(0, list.size());
@@ -31,7 +31,7 @@ public class TestArrayProcessing extends TestCase{
 	/**
 	 * Tests the list_to_array method.
 	 */
-	public static void test_list_to_array(){
+	public static void test_list_to_array() {
 		String[] array;
 		array = ArrayProcessing.list_to_array(null);
 		assertEquals(0, array.length);
@@ -50,7 +50,7 @@ public class TestArrayProcessing extends TestCase{
 	/**
 	 * Tests the clean_array() method.
 	 */
-	public static void test_clean_array(){
+	public static void test_clean_array() {
 		String[] array;
 		array = ArrayProcessing.clean_array(null);
 		assertEquals(0, array.length);
@@ -72,7 +72,7 @@ public class TestArrayProcessing extends TestCase{
 	/**
 	 * Tests the sort_alphanum method.
 	 */
-	public static void test_sort_alphanum(){
+	public static void test_sort_alphanum() {
 		String[] array = ArrayProcessing.sort_alphanum(null);
 		assertEquals(0, array.length);
 		String[] input = {"10.05", "a", "5", "010,5"};

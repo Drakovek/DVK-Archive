@@ -7,11 +7,11 @@ import junit.framework.TestCase;
  * 
  * @author Drakovek
  */
-public class TestStringProcessing extends TestCase{
+public class TestStringProcessing extends TestCase {
 	/**
 	 * Tests the extend_int method.
 	 */
-	public static void test_extend_int(){
+	public static void test_extend_int() {
 		assertEquals("00", StringProcessing.extend_int(256, 2));
 		assertEquals("", StringProcessing.extend_int(12, 0));
 		assertEquals("", StringProcessing.extend_int(12, -1));

@@ -9,11 +9,11 @@ import junit.framework.TestCase;
  * 
  * @author Drakovek
  */
-public class TestDvk extends TestCase{
+public class TestDvk extends TestCase {
 	/**
 	 * Tests the get_dvk_file and set_dvk_file methods.
 	 */
-	public static void test_get_set_dvk_file(){
+	public static void test_get_set_dvk_file() {
 		Dvk dvk = new Dvk();
 		dvk.set_dvk_file(null);
 		assertEquals(null, dvk.get_dvk_file());
@@ -24,7 +24,7 @@ public class TestDvk extends TestCase{
 	/**
 	 * Tests the get_id and set_id methods.
 	 */
-	public static void test_get_set_id(){
+	public static void test_get_set_id() {
 		Dvk dvk = new Dvk();
 		dvk.set_id(null);
 		assertEquals("", dvk.get_id());
@@ -37,7 +37,7 @@ public class TestDvk extends TestCase{
 	/**
 	 * Tests the get_title and set_title methods.
 	 */
-	public static void test_get_set_title(){
+	public static void test_get_set_title() {
 		Dvk dvk = new Dvk();
 		dvk.set_title(null);
 		assertEquals(null, dvk.get_title());
@@ -50,7 +50,7 @@ public class TestDvk extends TestCase{
 	/**
 	 * Tests the get_artists, set_artist and set_artists methods.
 	 */
-	public static void test_get_set_artists(){
+	public static void test_get_set_artists() {
 		Dvk dvk = new Dvk();
 		//TEST SET_ARTIST
 		dvk.set_artist(null);
@@ -83,7 +83,7 @@ public class TestDvk extends TestCase{
 	/**
 	 * Tests the set_time_int method.
 	 */
-	public static void test_set_time_int(){
+	public static void test_set_time_int() {
 		Dvk dvk = new Dvk();
 		dvk.set_time_int(0, 0, 0, 0, 0);
 		assertEquals("0000/00/00|00:00", dvk.get_time());
