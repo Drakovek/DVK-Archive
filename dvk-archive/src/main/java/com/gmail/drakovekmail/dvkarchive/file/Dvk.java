@@ -1,6 +1,7 @@
 package com.gmail.drakovekmail.dvkarchive.file;
 
 import java.io.File;
+import com.gmail.drakovekmail.dvkarchive.processing.ArrayProcessing;
 
 /**
  * Class for handling a single DVK file.
@@ -23,6 +24,11 @@ public class Dvk
 	 * Title of the Dvk
 	 */
 	private String title;
+	
+	/**
+	 * Artist(s) of the Dvk
+	 */
+	private String[] artists;
 	
 	/**
 	 * Initializes a Dvk object with no filled fields.
@@ -106,5 +112,50 @@ public class Dvk
 	public String get_title()
 	{
 		return this.title;
+	}
+	
+	/**
+	 * Sets the Dvk artists variable for a single artist.
+	 * 
+	 * @param artist Dvk artist
+	 */
+	public void set_artist(final String artist)
+	{
+		if(artist == null)
+		{
+			this.artists = new String[0];
+		}
+		else
+		{
+			this.artists = new String[1];
+			this.artists[0] = artist;
+		}
+	}
+	
+	/**
+	 * Sets the Dvk artists.
+	 * 
+	 * @param artists Dvk artists
+	 */
+	public void set_artists(final String[] artists)
+	{
+		if(artists == null)
+		{
+			this.artists = new String[0];
+		}
+		else
+		{
+			this.artists = ArrayProcessing.clean_array(artists);
+		}
+	}
+	
+	/**
+	 * Returns the Dvk artists.
+	 * 
+	 * @return Dvk artists.
+	 */
+	public String[] get_artists()
+	{
+		return this.artists;
 	}
 }
