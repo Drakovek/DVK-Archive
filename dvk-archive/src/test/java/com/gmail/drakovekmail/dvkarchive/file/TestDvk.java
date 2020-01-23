@@ -84,4 +84,56 @@ public class TestDvk extends TestCase
 		assertEquals("test1.0.20-stuff", dvk.get_artists()[3]);
 		assertEquals("test10.0.0-stuff", dvk.get_artists()[4]);
 	}
+	
+	/**
+	 * Tests the set_time_int method.
+	 */
+	public static void test_set_time_int()
+	{
+		Dvk dvk = new Dvk();
+		dvk.set_time_int(0, 0, 0, 0, 0);
+		assertEquals("0000/00/00|00:00", dvk.get_time());
+		//TEST INVALID YEAR
+		dvk.set_time_int(0, 10, 10, 7, 15);
+		assertEquals("0000/00/00|00:00", dvk.get_time());
+		//TEST INVALID MONTH
+		dvk.set_time_int(2017, 0, 10, 7, 15);
+		assertEquals("0000/00/00|00:00", dvk.get_time());
+		dvk.set_time_int(2017, 13, 10, 7, 15);
+		assertEquals("0000/00/00|00:00", dvk.get_time());
+		//TEST INVALID DAY
+		dvk.set_time_int(2017, 10, 0, 7, 15);
+		assertEquals("0000/00/00|00:00", dvk.get_time());
+		dvk.set_time_int(2017, 10, 32, 7, 15);
+		assertEquals("0000/00/00|00:00", dvk.get_time());
+		//TEST INVALID HOUR
+		dvk.set_time_int(2017, 10, 10, -1, 15);
+		assertEquals("0000/00/00|00:00", dvk.get_time());
+		dvk.set_time_int(2017, 10, 10, 24, 15);
+		assertEquals("0000/00/00|00:00", dvk.get_time());
+		//TEST INVALID MINUTE
+		dvk.set_time_int(2017, 10, 10, 7, -1);
+		assertEquals("0000/00/00|00:00", dvk.get_time());
+		dvk.set_time_int(2017, 10, 10, 7, 60);
+		assertEquals("0000/00/00|00:00", dvk.get_time());
+		//TEST VALID TIME
+		dvk.set_time_int(2017, 10, 6, 19, 15);
+		assertEquals("2017/10/06|19:15", dvk.get_time());
+	}
+	
+	/**
+	 * Tests the get_time() and set_time() methods.
+	 */
+	public static void test_get_set_time()
+	{
+		Dvk dvk = new Dvk();
+		dvk.set_time(null);
+		assertEquals("0000/00/00|00:00", dvk.get_time());
+		dvk.set_time("2017/10/06");
+		assertEquals("0000/00/00|00:00", dvk.get_time());
+		dvk.set_time("yyyy/mm/dd/hh/tt");
+		assertEquals("0000/00/00|00:00", dvk.get_time());
+		dvk.set_time("2017!10!06!05!00");
+		assertEquals("2017/10/06|05:00", dvk.get_time());
+	}
 }
