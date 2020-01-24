@@ -29,4 +29,25 @@ public class StringProcessing {
 		}
 		return builder.toString();
 	}
+	
+	/**
+	 * Removes the whitespace at the beginning and end of a given String.
+	 * 
+	 * @param str Given String
+	 * @return String without whitespace
+	 */
+	public static String remove_whitespace(final String str) {
+		if(str == null) {
+			return new String();
+		}
+		int start = 0;
+		int end = 0;
+		for(start = 0; start < str.length() && str.charAt(start) == ' '; start++);
+		for(end = str.length() - 1; end > -1 && str.charAt(end) == ' '; end--);
+		end++;
+		if(end < start) {
+			return str.substring(start);
+		}
+		return str.substring(start, end);
+	}
 }

@@ -2,6 +2,7 @@ package com.gmail.drakovekmail.dvkarchive.file;
 
 import java.io.File;
 import com.gmail.drakovekmail.dvkarchive.processing.ArrayProcessing;
+import com.gmail.drakovekmail.dvkarchive.processing.HtmlProcessing;
 import com.gmail.drakovekmail.dvkarchive.processing.StringProcessing;
 
 /**
@@ -40,6 +41,12 @@ public class Dvk {
 	 * Web tags for the Dvk.
 	 */
 	private String[] web_tags;
+	
+	/**
+	 * Description for the Dvk.
+	 * In HTML format.
+	 */
+	private String description;
 	
 	/**
 	 * Initializes a Dvk object with no filled fields.
@@ -235,5 +242,36 @@ public class Dvk {
 	 */
 	public String[] get_web_tags() {
 		return this.web_tags;
+	}
+	
+	/**
+	 * Sets the Dvk description.
+	 * 
+	 * @param description Dvk description
+	 */
+	public void set_description(final String description) {
+		if(description == null) {
+			this.description = null;
+		}
+		else {
+			//REMOVE WHITESPACE
+			String desc = StringProcessing.remove_whitespace(description);
+			if(desc.length() == 0){
+				this.description = null;
+			}
+			else {
+				this.description = HtmlProcessing.add_escapes_to_html(desc);
+			}
+		}
+		
+	}
+	
+	/**
+	 * Returns the Dvk description.
+	 * 
+	 * @return Dvk description
+	 */
+	public String get_description() {
+		return this.description;
 	}
 }

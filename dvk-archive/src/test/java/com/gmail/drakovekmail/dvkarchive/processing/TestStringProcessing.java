@@ -18,4 +18,18 @@ public class TestStringProcessing extends TestCase {
 		assertEquals("15", StringProcessing.extend_int(15, 2));
 		assertEquals("00012", StringProcessing.extend_int(12, 5));
 	}
+	
+	/**
+	 * Tests the remove_whitespace method.
+	 */
+	public static void test_remove_whitespace() {
+		assertEquals("", StringProcessing.remove_whitespace(null));
+		assertEquals("", StringProcessing.remove_whitespace(""));
+		assertEquals("", StringProcessing.remove_whitespace(" "));
+		assertEquals("", StringProcessing.remove_whitespace("   "));
+		assertEquals("blah", StringProcessing.remove_whitespace("  blah"));
+		assertEquals("blah", StringProcessing.remove_whitespace("blah   "));
+		assertEquals("blah", StringProcessing.remove_whitespace("  blah "));
+		assertEquals("blah", StringProcessing.remove_whitespace("blah"));
+	}
 }

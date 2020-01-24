@@ -145,4 +145,21 @@ public class TestDvk extends TestCase {
 		assertEquals("tag1", dvk.get_web_tags()[0]);
 		assertEquals("Tag2", dvk.get_web_tags()[1]);
 	}
+	
+	/**
+	 * Tests the get_description and set_descritpion methods.
+	 */
+	public static void test_get_set_description() {
+		Dvk dvk = new Dvk();
+		dvk.set_description(null);
+		assertEquals(null, dvk.get_description());
+		dvk.set_description("");
+		assertEquals(null, dvk.get_description());
+		dvk.set_description("   ");
+		assertEquals(null, dvk.get_description());
+		dvk.set_description("   <i>Baño</i>  ");
+		assertEquals("<i>Ba&#241;o</i>", dvk.get_description());
+		dvk.set_description("<i>Ba&#241;o</i>");
+		assertEquals("<i>Ba&#241;o</i>", dvk.get_description());
+	}
 }
