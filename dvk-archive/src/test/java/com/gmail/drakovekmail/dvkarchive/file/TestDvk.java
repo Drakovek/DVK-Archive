@@ -162,4 +162,43 @@ public class TestDvk extends TestCase {
 		dvk.set_description("<i>Ba&#241;o</i>");
 		assertEquals("<i>Ba&#241;o</i>", dvk.get_description());
 	}
+	
+	/**
+	 * Tests the get_page_url and set_page_url methods.
+	 */
+	public static void test_get_set_page_url() {
+		Dvk dvk = new Dvk();
+		dvk.set_page_url(null);
+		assertEquals(null, dvk.get_page_url());
+		dvk.set_page_url("");
+		assertEquals(null, dvk.get_page_url());
+		dvk.set_page_url("/Page/url");
+		assertEquals("/Page/url", dvk.get_page_url());
+	}
+	
+	/**
+	 * Tests the get_direct_url and set_direct_url methods.
+	 */
+	public static void test_get_set_direct_url() {
+		Dvk dvk = new Dvk();
+		dvk.set_direct_url(null);
+		assertEquals(null, dvk.get_direct_url());
+		dvk.set_direct_url("");
+		assertEquals(null, dvk.get_direct_url());
+		dvk.set_direct_url("/direct/URL");
+		assertEquals("/direct/URL", dvk.get_direct_url());
+	}
+	
+	/**
+	 * Tests the get_secondary_url and set_secondary_url methods.
+	 */
+	public static void test_get_set_secondary_url() {
+		Dvk dvk = new Dvk();
+		dvk.set_secondary_url(null);
+		assertEquals(null, dvk.get_secondary_url());
+		dvk.set_secondary_url("");
+		assertEquals(null, dvk.get_secondary_url());
+		dvk.set_secondary_url("/Page/url");
+		assertEquals("/Page/url", dvk.get_secondary_url());
+	}
 }

@@ -49,6 +49,21 @@ public class Dvk {
 	private String description;
 	
 	/**
+	 * Page URL of the Dvk's origin.
+	 */
+	private String page_url;
+	
+	/**
+	 * Direct URL for the Dvk's referenced media.
+	 */
+	private String direct_url;
+	
+	/**
+	 * Direct URL for the Dvk's referenced secondary media.
+	 */
+	private String secondary_url;
+	
+	/**
 	 * Initializes a Dvk object with no filled fields.
 	 */
 	public Dvk() {
@@ -273,5 +288,74 @@ public class Dvk {
 	 */
 	public String get_description() {
 		return this.description;
+	}
+	
+	/**
+	 * Sets the Dvk page URL.
+	 * 
+	 * @param page_url Page URL
+	 */
+	public void set_page_url(final String page_url) {
+		if(page_url == null || page_url.length() == 0) {
+			this.page_url = null;
+		}
+		else {
+			this.page_url = page_url;
+		}
+	}
+	
+	/**
+	 * Returns the Dvk page URL.
+	 * 
+	 * @return Page URL
+	 */
+	public String get_page_url() {
+		return this.page_url;
+	}
+	
+	/**
+	 * Sets the direct media URL.
+	 * 
+	 * @param direct_url Direct media URL
+	 */
+	public void set_direct_url(final String direct_url) {
+		if(direct_url == null || direct_url.length() == 0) {
+			this.direct_url = null;
+		}
+		else {
+			this.direct_url = direct_url;
+		}
+	}
+	
+	/**
+	 * Returns the direct media URL.
+	 * 
+	 * @return Direct media URL
+	 */
+	public String get_direct_url() {
+		return this.direct_url;
+	}
+	
+	/**
+	 * Sets the direct secondary media URL.
+	 * 
+	 * @param secondary_url Direct secondary media URL
+	 */
+	public void set_secondary_url(final String secondary_url) {
+		if(secondary_url == null || secondary_url.length() == 0) {
+			this.secondary_url = null;
+		}
+		else {
+			this.secondary_url = secondary_url;
+		}
+	}
+	
+	/**
+	 * Returns the direct secondary media URL.
+	 * 
+	 * @return Direct secondary media URL
+	 */
+	public String get_secondary_url() {
+		return this.secondary_url;
 	}
 }
