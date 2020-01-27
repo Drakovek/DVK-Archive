@@ -201,4 +201,52 @@ public class TestDvk extends TestCase {
 		dvk.set_secondary_url("/Page/url");
 		assertEquals("/Page/url", dvk.get_secondary_url());
 	}
+	
+	/**
+	 * Tests the get_media_file and set_media_file methods.
+	 */
+	public static void test_get_set_media_file() {
+		Dvk dvk = new Dvk();
+		dvk.set_media_file("bleh");
+		assertEquals(null, dvk.get_media_file());
+		dvk.set_dvk_file(new File("blahFolder"));
+		dvk.set_media_file("media");
+		assertEquals(null, dvk.get_media_file());
+		String user_dir = System.getProperty("user.dir");
+		File parent = new File(user_dir);
+		dvk.set_dvk_file(new File(parent, "thing.dvk"));
+		dvk.set_media_file(null);
+		assertEquals(null, dvk.get_media_file());
+		dvk.set_media_file("media.png");
+		String out = parent.getAbsolutePath();
+		File media = dvk.get_media_file().getParentFile();
+		assertEquals(out, media.getAbsolutePath());
+		assertEquals("media.png", dvk.get_media_file().getName());
+		dvk.set_media_file("");
+		assertEquals(null, dvk.get_media_file());
+	}
+	
+	/**
+	 * Tests the get_secondary_file and set_secondar_file methods.
+	 */
+	public static void test_get_set_secondary_file() {
+		Dvk dvk = new Dvk();
+		dvk.set_secondary_file("bleh");
+		assertEquals(null, dvk.get_secondary_file());
+		dvk.set_dvk_file(new File("blahFolder"));
+		dvk.set_secondary_file("media");
+		assertEquals(null, dvk.get_secondary_file());
+		String user_dir = System.getProperty("user.dir");
+		File parent = new File(user_dir);
+		dvk.set_dvk_file(new File(parent, "thing.dvk"));
+		dvk.set_secondary_file(null);
+		assertEquals(null, dvk.get_secondary_file());
+		dvk.set_secondary_file("media.png");
+		String out = parent.getAbsolutePath();
+		File media = dvk.get_secondary_file().getParentFile();
+		assertEquals(out, media.getAbsolutePath());
+		assertEquals("media.png", dvk.get_secondary_file().getName());
+		dvk.set_secondary_file("");
+		assertEquals(null, dvk.get_secondary_file());
+	}
 }

@@ -64,6 +64,16 @@ public class Dvk {
 	private String secondary_url;
 	
 	/**
+	 * Associated media file for the Dvk object.
+	 */
+	private File media_file;
+	
+	/**
+	 * Associated secondary media file for the Dvk object.
+	 */
+	private File secondary_file;
+	
+	/**
 	 * Initializes a Dvk object with no filled fields.
 	 */
 	public Dvk() {
@@ -357,5 +367,65 @@ public class Dvk {
 	 */
 	public String get_secondary_url() {
 		return this.secondary_url;
+	}
+	
+	/**
+	 * Sets the associated media file for the Dvk.
+	 * Assumes media is in the same directory as dvk_file.
+	 * 
+	 * @param filename Filename for the associated media.
+	 */
+	public void set_media_file(final String filename) {
+		try {
+			File parent = this.dvk_file.getParentFile();
+			if (parent.isDirectory() && filename.length() > 0) {
+				this.media_file = new File(parent, filename);
+			}
+			else {
+				this.media_file = null;
+			}
+		}
+		catch(Exception e) {
+			this.media_file = null;
+		}
+	}
+	
+	/**
+	 * Returns the Dvk's associated media file.
+	 * 
+	 * @return Associated media file.
+	 */
+	public File get_media_file() {
+		return this.media_file;
+	}
+	
+	/**
+	 * Sets the associated secondary media file for the Dvk.
+	 * Assumes media is in the same directory as dvk_file.
+	 * 
+	 * @param filename Filename for the secondary associated media.
+	 */
+	public void set_secondary_file(final String filename) {
+		try {
+			File parent = this.dvk_file.getParentFile();
+			if (parent.isDirectory() && filename.length() > 0) {
+				this.secondary_file = new File(parent, filename);
+			}
+			else {
+				this.secondary_file = null;
+			}
+		}
+		catch(Exception e) {
+			this.secondary_file = null;
+		}	
+	}
+	
+	/**
+	 * Returns the Dvk's secondary associated media file.
+	 * 
+	 * @return Secondary associated media file.
+	 */
+	public File get_secondary_file() {
+		return this.secondary_file;
 	}
 }
