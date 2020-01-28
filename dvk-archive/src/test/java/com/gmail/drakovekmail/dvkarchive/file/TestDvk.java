@@ -48,6 +48,44 @@ public class TestDvk {
 	}
 	
 	/**
+	 * Tests the constructors for the Dvk class.
+	 */
+	@Test
+	public void test_constructor() {
+		//TEST EMPTY CONSTRUCTOR
+		Dvk dvk = new Dvk();
+		assertEquals(null, dvk.get_title());
+		assertEquals(null, dvk.get_id());
+		assertEquals(null, dvk.get_title());
+		assertEquals(0, dvk.get_artists().length);
+		assertEquals("0000/00/00|00:00", dvk.get_time());
+		assertTrue(dvk.get_web_tags() == null);
+		assertEquals(null, dvk.get_description());
+		assertEquals(null, dvk.get_page_url());
+		assertEquals(null, dvk.get_direct_url());
+		assertEquals(null, dvk.get_secondary_url());
+		assertEquals(null, dvk.get_media_file());
+		assertEquals(null, dvk.get_secondary_file());
+		//TEST FILE READING CONSTRUCTOR
+		Dvk save_dvk = new Dvk();
+		File dvk_file = new File(this.test_dir, "dvk.dvk");
+		save_dvk.set_dvk_file(dvk_file);
+		save_dvk.set_id("id702");
+		save_dvk.set_title("CTestTitle");
+		save_dvk.set_artist("artistName");
+		save_dvk.set_page_url("/url/");
+		save_dvk.set_media_file("media.jpg");
+		save_dvk.write_dvk();
+		dvk = new Dvk(dvk_file);
+		assertEquals("ID702", dvk.get_id());
+		assertEquals("CTestTitle", dvk.get_title());
+		assertEquals(1, dvk.get_artists().length);
+		assertEquals("artistName", dvk.get_artists()[0]);
+		assertEquals("/url/", dvk.get_page_url());
+		assertEquals("media.jpg", dvk.get_media_file().getName());
+	}
+	
+	/**
 	 * Tests the test_can_write method.
 	 */
 	@Test

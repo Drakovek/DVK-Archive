@@ -78,10 +78,20 @@ public class Dvk {
 	private File secondary_file;
 	
 	/**
-	 * Initializes a Dvk object with no filled fields.
+	 * Initializes the Dvk object with no filled fields.
 	 */
 	public Dvk() {
 		clear_dvk();
+	}
+	
+	/**
+	 * Initializes the Dvk object by loading from a given DVK file.
+	 * 
+	 * @param dvk_file Given DVK file
+	 */
+	public Dvk(final File dvk_file) {
+		set_dvk_file(dvk_file);
+		read_dvk();
 	}
 	
 	/**
