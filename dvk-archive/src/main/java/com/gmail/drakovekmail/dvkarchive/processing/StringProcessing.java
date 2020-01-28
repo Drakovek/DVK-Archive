@@ -50,4 +50,147 @@ public class StringProcessing {
 		}
 		return str.substring(start, end);
 	}
+	
+	/**
+	 * Returns a version of a given String that is safe for use as a filename.
+	 * Defaults to maximum size of 90 characters.
+	 * 
+	 * @param str Given String
+	 * @return Filename
+	 */
+	public static String get_filename(final String str) {
+		return get_filename(str, 90);
+	}
+	
+	/**
+	 * Returns a version of a given String that is safe for use as a filename.
+	 * 
+	 * @param str Given String
+	 * @param length Maximum length of the returned filename
+	 * @return Filename
+	 */
+	public static String get_filename(final String str, final int length) {
+		if(str == null) {
+			return "0";
+		}
+		//REMOVE ALL NON-LETTER, NON-NUMERIC CHARACTERS
+		StringBuilder builder = new StringBuilder();
+		for(int i = 0; i < str.length(); i++) {
+			char val = str.charAt(i);
+			if((val > 47 && val < 58)
+					|| (val > 64 && val < 91)
+					|| (val > 96 && val < 123)
+					|| val == ' ') {
+				builder.append(val);
+			}
+			else {
+				builder.append('-');
+			}
+		}
+		//REMOVE START AND END SPACERS
+		while(builder.length() > 0 
+				&& (builder.charAt(0) == ' ' 
+				|| builder.charAt(0) == '-')) {
+			builder.deleteCharAt(0);
+		}
+		while(builder.length() > 0 
+				&& (builder.charAt(builder.length() - 1) == ' ' 
+				|| builder.charAt(builder.length() - 1) == '-')) {
+			builder.deleteCharAt(builder.length() - 1);
+		}
+		//REMOVE DUPLICATE SPACERS
+		for(int i = 1; i < builder.length(); i++) {
+			if((builder.charAt(i) == ' '
+					|| builder.charAt(i) == '-')
+					&& builder.charAt(i) == builder.charAt(i - 1)) {
+				builder.deleteCharAt(i);
+				i--;
+			}
+		}
+		//REMOVE HANGING HYPHENS
+		for(int i = 1; i < builder.length() - 1; i++) {
+			if(builder.charAt(i) == '-') {
+				if((builder.charAt(i - 1) == ' '
+						&& builder.charAt(i + 1) != ' ')
+						|| (builder.charAt(i - 1) != ' '
+						&& builder.charAt(i + 1) == ' ')) {
+					builder.deleteCharAt(i);
+					i--;
+				}
+			}
+		}
+		//TRUNCATE STRING
+		String cleaned = truncate_string(builder.toString(), length);
+		//RETURN CLEANED STRING
+		if(cleaned.length() == 0) {
+			return "0";
+		}
+		return cleaned;
+	}
+	
+	/**
+	 * Shortens a given string to be at or below a given length.
+	 * Attempts to keep readable by removing characters at break-points.
+	 * 
+	 * @param str Given String
+	 * @param length Maximum length of the returned String
+	 * @return Shortened String
+	 */
+	public static String truncate_string(final String str, final int length) {
+		if(str == null || length < 1) {
+			return new String();
+		}
+		if(str.length() <= length) {
+			return str;
+		}
+		// GET INDEX TO REMOVE FROM
+		int index;
+		if(str.contains(" ")) {
+			index = str.lastIndexOf(' ');
+		}
+		else if(str.contains("-")) {
+			index = str.lastIndexOf('-');
+		}
+		else {
+			index = (int)Math.floor(str.length() / 2);
+		}
+		// DELETE CHARACTERS
+		StringBuilder tr = new StringBuilder(str);
+		if(index < tr.length() - index) {
+			index++;
+			while(index < tr.length() && length < tr.length()) {
+				tr.deleteCharAt(index);
+			}
+		}
+		else {
+			index--;
+			while(index > -1 && tr.length() > length) {
+			    tr.deleteCharAt(index);
+			    index--;
+			}
+			if (index > -1
+					&& index < tr.length() - 2
+					&& tr.charAt(index) == tr.charAt(index + 1)
+					&& (tr.charAt(index) == ' '
+					|| tr.charAt(index) == '-')) {
+				tr.deleteCharAt(index);
+			}
+		}
+		//IF STILL TOO LONG
+		if(tr.length() > length) {
+			tr = new StringBuilder(tr.substring(0, length));
+		}
+		//REMOVE START AND END SPACERS
+		while(tr.length() > 0 
+				&& (tr.charAt(0) == ' ' 
+				|| tr.charAt(0) == '-')) {
+			tr.deleteCharAt(0);
+		}
+		while(tr.length() > 0 
+				&& (tr.charAt(tr.length() - 1) == ' ' 
+				|| tr.charAt(tr.length() - 1) == '-')) {
+			tr.deleteCharAt(tr.length() - 1);
+		}
+		return tr.toString();
+	}
 }

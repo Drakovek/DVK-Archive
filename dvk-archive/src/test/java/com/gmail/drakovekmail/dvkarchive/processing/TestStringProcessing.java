@@ -38,4 +38,54 @@ public class TestStringProcessing {
 		assertEquals("blah", StringProcessing.remove_whitespace("  blah "));
 		assertEquals("blah", StringProcessing.remove_whitespace("blah"));
 	}
+	
+	/**
+	 * Tests the get_filename method.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_get_filename() {
+		assertEquals("0", StringProcessing.get_filename(null));
+		assertEquals("0", StringProcessing.get_filename(""));
+		assertEquals("This - That 2", StringProcessing.get_filename("This & That 2"));
+		assertEquals("end filler", StringProcessing.get_filename("! !end filler!??  "));
+		assertEquals("0", StringProcessing.get_filename("$"));
+		assertEquals("thing-stuff - bleh", StringProcessing.get_filename("thing--stuff  @*-   bleh"));
+		assertEquals("a - b - c", StringProcessing.get_filename("a% - !b @  ??c"));
+		assertEquals("Test", StringProcessing.get_filename("Test String", 5));
+	}
+	
+	/**
+	 * Tests the truncate_string method.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_truncate_string() {
+	    assertEquals("", StringProcessing.truncate_string(null, 2));
+	    assertEquals("", StringProcessing.truncate_string("blah", 0));
+	    assertEquals("", StringProcessing.truncate_string("bleh", -1));
+	    assertEquals("bleh", StringProcessing.truncate_string("bleh", 4));
+	    assertEquals("wor", StringProcessing.truncate_string("words", 3));
+	    assertEquals("word", StringProcessing.truncate_string("word-stuff", 5));
+	    assertEquals("stu", StringProcessing.truncate_string("words n stuff", 4));
+	    assertEquals("word", StringProcessing.truncate_string("word stuff", 5));
+	    assertEquals("stu", StringProcessing.truncate_string("words-n-stuff", 4));
+	    String i = "This string is way too long to work as a title p25";
+	    String o = "This string is way too long to work p25";
+	    assertEquals(o, StringProcessing.truncate_string(i, 40));
+	    i = "HereIsA LongThingWithoutManySpacesWhichCanBeShort";
+	    o = "HereIsA WithoutManySpacesWhichCanBeShort";
+	    assertEquals(o, StringProcessing.truncate_string(i, 40));
+	    i = "ThisMessageIsAbsolutelyWayToLongToWorkFor-";
+	    i = i + "AnyThingAtAllSoLetsSeeHowThisWillFareISuppose";
+	    o = "ThisMessageIsAbsolutelyWayToLongToWorkFo";
+	    assertEquals(o, StringProcessing.truncate_string(i, 40));
+	    i = "ThisMessageIsAbsolutelyWayToLongToWorkForAnyThing-";
+	    i = i + "AtAllSoLetsSeeHowThisWillFareISuppose";
+	    o = "Th-AtAllSoLetsSeeHowThisWillFareISuppose";
+	    assertEquals(o, StringProcessing.truncate_string(i, 40));
+	    i = "ThisLongTitleHasNoSpacesAtAllSoItHasAMiddleBreak";
+	    o = "ThisLongTitleHasAtAllSoItHasAMiddleBreak";
+	    assertEquals(o, StringProcessing.truncate_string(i, 40));
+	}
 }

@@ -462,4 +462,23 @@ public class TestDvk {
 		dvk.set_secondary_file("");
 		assertEquals(null, dvk.get_secondary_file());
 	}
+	
+	/**
+	 * Tests the get_filename method.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_get_filename() {
+		Dvk dvk = new Dvk();
+		assertEquals("", dvk.get_filename());
+		dvk.set_title("Title");
+		assertEquals("", dvk.get_filename());
+		dvk.set_id("ID123");
+		dvk.set_title(null);
+		assertEquals("", dvk.get_filename());
+		dvk.set_title("a   B-cd!");
+		assertEquals("a B-cd_ID123", dvk.get_filename());
+		dvk.set_title("");
+		assertEquals("0_ID123", dvk.get_filename());
+	}
 }

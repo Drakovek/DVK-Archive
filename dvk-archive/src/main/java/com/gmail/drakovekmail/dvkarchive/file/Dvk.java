@@ -594,4 +594,18 @@ public class Dvk {
 	public File get_secondary_file() {
 		return this.secondary_file;
 	}
+	
+	/**
+	 * Returns a filename for the Dvk based on title and id.
+	 * Doesn't include extension.
+	 * 
+	 * @return Dvk filename
+	 */
+	public String get_filename() {
+		if(get_id() == null || get_title() == null) {
+			return new String();
+		}
+		String t = StringProcessing.get_filename(get_title());
+		return t + '_' + get_id();
+	}
 }
