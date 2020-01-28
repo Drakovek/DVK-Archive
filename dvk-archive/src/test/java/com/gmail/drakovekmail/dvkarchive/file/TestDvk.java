@@ -1,19 +1,170 @@
 package com.gmail.drakovekmail.dvkarchive.file;
 
 import java.io.File;
+import java.io.IOException;
 
-import junit.framework.TestCase;
+import org.apache.commons.io.FileUtils;
+import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for the Dvk class.
  * 
  * @author Drakovek
  */
-public class TestDvk extends TestCase {
+public class TestDvk {
+	
+	/**
+	 * Directory to hold all test files during testing.
+	 */
+	private File test_dir;
+	
+	/**
+	 * Creates the test directory for holding test files.
+	 */
+	@Before
+	public void create_test_directory() {
+		String user_dir = System.getProperty("user.dir");
+		this.test_dir = new File(user_dir, "dvkobject");
+		if(!this.test_dir.isDirectory()) {
+			this.test_dir.mkdir();
+		}
+	}
+	
+	/**
+	 * Deletes the test directory after testing.
+	 */
+	@After
+	public void delete_test_directory() {
+		try {
+			FileUtils.deleteDirectory(this.test_dir);
+		}
+		catch(IOException e) {}
+	}
+	
+	/**
+	 * Tests the test_can_write method.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_can_write() {
+		Dvk dvk = new Dvk();
+		File user_dir = new File(System.getProperty("user.dir"));
+		dvk.set_dvk_file(new File(user_dir, "not_real.dvk"));
+		dvk.set_id("id");
+		dvk.set_title("title");
+		dvk.set_artist("artist");
+		dvk.set_page_url("page_url");
+		dvk.set_media_file("media.png");
+		assertTrue(dvk.can_write());
+		dvk.set_dvk_file(null);
+		assertFalse(dvk.can_write());
+		dvk.set_dvk_file(new File("file.dvk"));
+		dvk.set_id(null);
+		assertFalse(dvk.can_write());
+		dvk.set_id("id123");
+		dvk.set_title(null);
+		assertFalse(dvk.can_write());
+		dvk.set_title("title");
+		dvk.set_artist(null);
+		assertFalse(dvk.can_write());
+		dvk.set_artist("artist");
+		dvk.set_page_url(null);
+		assertFalse(dvk.can_write());
+		dvk.set_page_url("page_url");
+		dvk.set_media_file(null);
+		assertFalse(dvk.can_write());
+	}
+	
+	/**
+	 * Tests the read_dvk and write_dvk methods.
+	 */
+	@Test
+	public void test_read_write_dvk() {
+		//SET DVK DATA
+		Dvk dvk = new Dvk();
+		File dvk_file = new File(this.test_dir, "dvk1.dvk");
+		dvk.set_dvk_file(dvk_file);
+		dvk.set_id("id1234");
+		dvk.set_title("WriteTestTitle");
+		String[] artists = {"other", "Artist"};
+		dvk.set_artists(artists);
+		dvk.set_time_int(1864, 10, 31, 7, 2);
+		String[] web_tags = {"test", "Tags"};
+		dvk.set_web_tags(web_tags);
+		dvk.set_description("<b>desc</b>");
+		dvk.set_page_url("http://somepage.com");
+		dvk.set_direct_url("http://image.png");
+		dvk.set_secondary_url("https://other.png");
+		dvk.set_media_file("media.png");
+		dvk.set_secondary_file("2nd.jpg");
+		//WRITE THEN READ
+		dvk.write_dvk();
+		dvk.clear_dvk();
+		dvk.set_dvk_file(dvk_file);
+		dvk.read_dvk();
+		//CHECK VALUES
+		String in = dvk.get_dvk_file().getAbsolutePath();
+		assertEquals(dvk_file.getAbsolutePath(), in);
+		assertEquals("ID1234", dvk.get_id());
+		assertEquals("WriteTestTitle", dvk.get_title());
+		assertEquals(2, dvk.get_artists().length);
+		assertEquals("Artist", dvk.get_artists()[0]);
+		assertEquals("other", dvk.get_artists()[1]);
+		assertEquals("1864/10/31|07:02", dvk.get_time());
+		assertEquals(2, dvk.get_web_tags().length);
+		assertEquals("test", dvk.get_web_tags()[0]);
+		assertEquals("Tags", dvk.get_web_tags()[1]);
+		assertEquals("<b>desc</b>", dvk.get_description());
+		assertEquals("http://somepage.com", dvk.get_page_url());
+		assertEquals("http://image.png", dvk.get_direct_url());
+		assertEquals("https://other.png", dvk.get_secondary_url());
+		assertEquals("media.png", dvk.get_media_file().getName());
+		assertEquals("2nd.jpg", dvk.get_secondary_file().getName());
+		//TEST READING N0N-EXISTANT FILE
+		dvk.set_dvk_file(null);
+		dvk.read_dvk();
+		assertEquals(null, dvk.get_title());
+		dvk.set_dvk_file(new File(this.test_dir, "kjsdf.txt"));
+		dvk.read_dvk();
+		assertEquals(null, dvk.get_title());
+		//TEST READING NON-DVK FILES
+		dvk_file = new File(this.test_dir, "other.dvk");
+		InOut.write_file(dvk_file, "Not a dvk");
+		dvk.set_dvk_file(dvk_file);
+		dvk.read_dvk();
+		assertEquals(null, dvk.get_title());
+		JSONObject json = new JSONObject();
+		json.put("thing", "nope");
+		json.put("not", "dvk");
+		InOut.write_file(dvk_file, json.toString());
+		dvk.set_dvk_file(dvk_file);
+		dvk.read_dvk();
+		assertEquals(null, dvk.get_title());
+		json.put("file_type", "not_dvk");
+		InOut.write_file(dvk_file, json.toString());
+		dvk.set_dvk_file(dvk_file);
+		dvk.read_dvk();
+		assertEquals(null, dvk.get_title());
+		// TEST WRITING INVALID FILE
+		dvk_file = new File(this.test_dir, "dvk2.dvk");
+		Dvk invalid = new Dvk();
+		invalid.set_dvk_file(dvk_file);
+		invalid.write_dvk();
+		assertFalse(dvk_file.exists());
+	}
+	
 	/**
 	 * Tests the get_dvk_file and set_dvk_file methods.
 	 */
-	public static void test_get_set_dvk_file() {
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_get_set_dvk_file() {
 		Dvk dvk = new Dvk();
 		dvk.set_dvk_file(null);
 		assertEquals(null, dvk.get_dvk_file());
@@ -24,12 +175,14 @@ public class TestDvk extends TestCase {
 	/**
 	 * Tests the get_id and set_id methods.
 	 */
-	public static void test_get_set_id() {
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_get_set_id() {
 		Dvk dvk = new Dvk();
 		dvk.set_id(null);
-		assertEquals("", dvk.get_id());
+		assertEquals(null, dvk.get_id());
 		dvk.set_id("");
-		assertEquals("", dvk.get_id());
+		assertEquals(null, dvk.get_id());
 		dvk.set_id("id1234");
 		assertEquals("ID1234", dvk.get_id());	
 	}
@@ -37,7 +190,9 @@ public class TestDvk extends TestCase {
 	/**
 	 * Tests the get_title and set_title methods.
 	 */
-	public static void test_get_set_title() {
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_get_set_title() {
 		Dvk dvk = new Dvk();
 		dvk.set_title(null);
 		assertEquals(null, dvk.get_title());
@@ -50,7 +205,9 @@ public class TestDvk extends TestCase {
 	/**
 	 * Tests the get_artists, set_artist and set_artists methods.
 	 */
-	public static void test_get_set_artists() {
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_get_set_artists() {
 		Dvk dvk = new Dvk();
 		//TEST SET_ARTIST
 		dvk.set_artist(null);
@@ -83,7 +240,9 @@ public class TestDvk extends TestCase {
 	/**
 	 * Tests the set_time_int method.
 	 */
-	public static void test_set_time_int() {
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_set_time_int() {
 		Dvk dvk = new Dvk();
 		dvk.set_time_int(0, 0, 0, 0, 0);
 		assertEquals("0000/00/00|00:00", dvk.get_time());
@@ -118,7 +277,9 @@ public class TestDvk extends TestCase {
 	/**
 	 * Tests the get_time() and set_time() methods.
 	 */
-	public static void test_get_set_time() {
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_get_set_time() {
 		Dvk dvk = new Dvk();
 		dvk.set_time(null);
 		assertEquals("0000/00/00|00:00", dvk.get_time());
@@ -133,12 +294,14 @@ public class TestDvk extends TestCase {
 	/**
 	 * Tests the get_web_tags and set_web_tags methods.
 	 */
-	public static void test_get_set_web_tags() {
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_get_set_web_tags() {
 		Dvk dvk = new Dvk();
 		dvk.set_web_tags(null);
-		assertEquals(null, dvk.get_web_tags());
+		assertTrue(dvk.get_web_tags() == null);
 		dvk.set_web_tags(new String[0]);
-		assertEquals(null, dvk.get_web_tags());
+		assertTrue(dvk.get_web_tags() == null);
 		String[] input = {"tag1", "Tag2", "tag1", null};
 		dvk.set_web_tags(input);
 		assertEquals(2, dvk.get_web_tags().length);
@@ -149,7 +312,9 @@ public class TestDvk extends TestCase {
 	/**
 	 * Tests the get_description and set_descritpion methods.
 	 */
-	public static void test_get_set_description() {
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_get_set_description() {
 		Dvk dvk = new Dvk();
 		dvk.set_description(null);
 		assertEquals(null, dvk.get_description());
@@ -166,7 +331,9 @@ public class TestDvk extends TestCase {
 	/**
 	 * Tests the get_page_url and set_page_url methods.
 	 */
-	public static void test_get_set_page_url() {
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_get_set_page_url() {
 		Dvk dvk = new Dvk();
 		dvk.set_page_url(null);
 		assertEquals(null, dvk.get_page_url());
@@ -179,7 +346,9 @@ public class TestDvk extends TestCase {
 	/**
 	 * Tests the get_direct_url and set_direct_url methods.
 	 */
-	public static void test_get_set_direct_url() {
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_get_set_direct_url() {
 		Dvk dvk = new Dvk();
 		dvk.set_direct_url(null);
 		assertEquals(null, dvk.get_direct_url());
@@ -192,7 +361,9 @@ public class TestDvk extends TestCase {
 	/**
 	 * Tests the get_secondary_url and set_secondary_url methods.
 	 */
-	public static void test_get_set_secondary_url() {
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_get_set_secondary_url() {
 		Dvk dvk = new Dvk();
 		dvk.set_secondary_url(null);
 		assertEquals(null, dvk.get_secondary_url());
@@ -205,7 +376,9 @@ public class TestDvk extends TestCase {
 	/**
 	 * Tests the get_media_file and set_media_file methods.
 	 */
-	public static void test_get_set_media_file() {
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_get_set_media_file() {
 		Dvk dvk = new Dvk();
 		dvk.set_media_file("bleh");
 		assertEquals(null, dvk.get_media_file());
@@ -229,7 +402,9 @@ public class TestDvk extends TestCase {
 	/**
 	 * Tests the get_secondary_file and set_secondar_file methods.
 	 */
-	public static void test_get_set_secondary_file() {
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_get_set_secondary_file() {
 		Dvk dvk = new Dvk();
 		dvk.set_secondary_file("bleh");
 		assertEquals(null, dvk.get_secondary_file());

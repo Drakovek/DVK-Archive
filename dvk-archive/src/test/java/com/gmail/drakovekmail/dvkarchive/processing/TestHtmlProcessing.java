@@ -1,18 +1,21 @@
 package com.gmail.drakovekmail.dvkarchive.processing;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for the HtmlProcessing class.
  * 
  * @author Drakovek
  */
-public class TestHtmlProcessing extends TestCase{
+public class TestHtmlProcessing {
 	
 	/**
 	 * Tests the escape_to_char method.
 	 */
-	public static void test_escape_to_char() {
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_escape_to_char() {
 		assertEquals("", HtmlProcessing.escape_to_char(null));
 		assertEquals("", HtmlProcessing.escape_to_char(" "));
 		assertEquals("", HtmlProcessing.escape_to_char("&;"));
@@ -31,7 +34,9 @@ public class TestHtmlProcessing extends TestCase{
 	/**
 	 * Tests the replace_escapes method.
 	 */
-	public static void test_replace_escapes() {
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_replace_escapes() {
 		assertEquals("", HtmlProcessing.replace_escapes(null));
 		String in = "&lt;i&gt;Test HTML&#60;&#47;i&#62;";
 		String out = "<i>Test HTML</i>";
@@ -46,7 +51,9 @@ public class TestHtmlProcessing extends TestCase{
 	/**
 	 * Tests the add_escapes method.
 	 */
-	public static void test_add_escapes() {
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_add_escapes() {
 		assertEquals("", HtmlProcessing.add_escapes(null));
 		String in = "<b>Fake tags.</b>";
 		String out = "&#60;b&#62;Fake tags&#46;&#60;&#47;b&#62;";
@@ -58,7 +65,9 @@ public class TestHtmlProcessing extends TestCase{
 	/**
 	 * Tests the add_escapes_to_html method.
 	 */
-	public static void test_add_escapes_to_html() {
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_add_escapes_to_html() {
 		assertEquals("", HtmlProcessing.add_escapes_to_html(null));
 		String in = "<a href=\"Sommarfågel\">Sommarfågel</a>";
 		String out = "<a href=\"Sommarfågel\">Sommarf&#229;gel</a>";

@@ -1,6 +1,10 @@
 package com.gmail.drakovekmail.dvkarchive.file;
 
 import java.io.File;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.gmail.drakovekmail.dvkarchive.processing.ArrayProcessing;
 import com.gmail.drakovekmail.dvkarchive.processing.HtmlProcessing;
 import com.gmail.drakovekmail.dvkarchive.processing.StringProcessing;
@@ -77,6 +81,158 @@ public class Dvk {
 	 * Initializes a Dvk object with no filled fields.
 	 */
 	public Dvk() {
+		clear_dvk();
+	}
+	
+	/**
+	 * Clears all Dvk fields to their default values.
+	 */
+	public void clear_dvk() {
+		set_id(null);
+		set_title(null);
+		set_artists(null);
+		set_time(null);
+		set_web_tags(null);
+		set_description(null);
+		set_page_url(null);
+		set_direct_url(null);
+		set_secondary_url(null);
+		set_media_file(null);
+		set_secondary_file(null);
+	}
+	
+	/**
+	 * Returns whether the Dvk object can be written.
+	 * Returns false if Dvk doesn't contain necessary info.
+	 * 
+	 * @return Whether Dvk can be written.
+	 */
+	public boolean can_write() {
+		if(get_dvk_file() == null
+				|| get_id() == null
+				|| get_title() == null
+				|| get_artists().length == 0
+				|| get_page_url() == null
+				|| get_media_file() == null) {
+			return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * Writes the Dvk object parameters to dvk_file.
+	 */
+	public void write_dvk() {
+		if(can_write()) {
+			JSONObject json = new JSONObject();
+			json.put("file_type", "dvk");
+			json.put("id", get_id());
+			//INFO
+			JSONObject info = new JSONObject();
+			info.put("title", get_title());
+			JSONArray array = new JSONArray(get_artists());
+			info.put("artists", array);
+			if(!get_time().equals("0000/00/00|00:00")) {
+				info.put("time", get_time());
+			}
+			if(get_web_tags() != null) {
+				array = new JSONArray(get_web_tags());
+				info.put("web_tags", array);
+			}
+			if(get_description() != null) {
+				info.put("description", get_description());
+			}
+			json.put("info", info);
+			//WEB
+			JSONObject web = new JSONObject();
+			web.put("page_url", get_page_url());
+			if(get_page_url() != null) {
+				web.put("direct_url", get_direct_url());
+			}
+			if(get_secondary_url() != null) {
+				web.put("secondary_url", get_secondary_url());
+			}
+			json.put("web", web);
+			//FILE
+			JSONObject file = new JSONObject();
+			file.put("media_file", get_media_file().getName());
+			if(get_secondary_file() != null) {
+				file.put("secondary_file", get_secondary_file().getName());
+			}
+			json.put("file", file);
+			InOut.write_file(get_dvk_file(), json.toString());
+		}
+	}
+	
+	/**
+	 * Reads DVK info from the file referenced in dvk_file.
+	 */
+	public void read_dvk() {
+		clear_dvk();
+		String source = InOut.read_file(get_dvk_file());
+		try {
+			JSONObject json = new JSONObject(source);
+			if(json.getString("file_type").equals("dvk")) {
+				set_id(get_json_string(json, "id"));
+				//INFO
+				JSONObject info = json.getJSONObject("info");
+				set_title(get_json_string(info, "title"));
+				set_artists(get_json_array(info, "artists"));
+				set_time(get_json_string(info, "time"));
+				set_web_tags(get_json_array(info, "web_tags"));
+				set_description(get_json_string(info, "description"));
+				//WEB
+				JSONObject web = json.getJSONObject("web");
+				set_page_url(get_json_string(web, "page_url"));
+				set_direct_url(get_json_string(web, "direct_url"));
+				set_secondary_url(get_json_string(web, "secondary_url"));
+				//FILE
+				JSONObject file = json.getJSONObject("file");
+				set_media_file(get_json_string(file, "media_file"));
+				set_secondary_file(get_json_string(file, "secondary_file"));
+			}
+		}
+		catch(JSONException e) {
+			clear_dvk();
+		}
+	}
+	
+	/**
+	 * Returns the String for a key in a given JSONObject.
+	 * 
+	 * @param json JSONObject to parse
+	 * @param key JSON key
+	 * @return String for JSON key
+	 */
+	private static String get_json_string(final JSONObject json, final String key) {
+		try {
+			String str = json.getString(key);
+			return str;
+		}
+		catch(JSONException e) {
+			return null;
+		}
+	}
+	
+	/**
+	 * Returns the String array for a key in a given JSONObject.
+	 * 
+	 * @param json JSONObject to parse
+	 * @param key JSON key
+	 * @return String array for JSON key
+	 */
+	private static String[] get_json_array(final JSONObject json, final String key) {
+		try {
+			JSONArray array = json.getJSONArray(key);
+			String[] str_array = new String[array.length()];
+			for(int i = 0; i < str_array.length; i++) {
+				str_array[i] = array.getString(i);
+			}
+			return str_array;
+		}
+		catch(JSONException e) {
+			return null;
+		}
 	}
 
 	/**
@@ -103,8 +259,8 @@ public class Dvk {
 	 * @param id Dvk ID.
 	 */
 	public void set_id(final String id) {
-		if(id == null) {
-			this.id = "";
+		if(id == null || id.length() == 0) {
+			this.id = null;
 		}
 		else {
 			this.id = id.toUpperCase();
