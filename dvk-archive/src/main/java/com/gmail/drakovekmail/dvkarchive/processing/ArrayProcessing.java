@@ -50,11 +50,22 @@ public class ArrayProcessing {
 	 * @return String array without duplicate or null entries.
 	 */
 	public static String[] clean_array(final String[] array) {
-		if(array == null) {
-			return new String[0];
+		ArrayList<String> list = array_to_list(array);
+		list = clean_list(list);
+		return list_to_array(list);
+	}
+	
+	/**
+	 * Removes all duplicate and null entries from an ArrayList<String>.
+	 * 
+	 * @param list Given ArrayList<String>
+	 * @return ArrayList<String> without duplicate or null entries.
+	 */
+	public static ArrayList<String> clean_list(final ArrayList<String> list) {
+		if(list == null) {
+			return new ArrayList<>();
 		}
 		//REMOVE NULL ENTRIES
-		ArrayList<String> list = array_to_list(array);
 		for(int i = 0; i < list.size(); i++) {
 			if(list.get(i) == null) {
 				list.remove(i);
@@ -70,7 +81,7 @@ public class ArrayProcessing {
 				}
 			}
 		}
-		return list_to_array(list);
+		return list;
 	}
 	
 	/**
@@ -84,7 +95,7 @@ public class ArrayProcessing {
 			return new String[0];
 		}
 		String[] return_array = array;
-		Arrays.sort(return_array, new StringCompare());
+		Arrays.parallelSort(return_array, new StringCompare());
 		return return_array;
 	}
 }

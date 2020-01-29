@@ -78,6 +78,30 @@ public class TestArrayProcessing {
 	}
 	
 	/**
+	 * Tests the clean_list method.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_clean_list() {
+		ArrayList<String> list = new ArrayList<>();
+		list = ArrayProcessing.clean_list(null);
+		assertEquals(0, list.size());
+		list.clear();
+		list.add("these");
+		list.add("are");
+		list.add("things");
+		list.add("");
+		list.add(null);
+		list.add("are");
+		list = ArrayProcessing.clean_list(list);
+		assertEquals(4, list.size());
+		assertEquals("these", list.get(0));
+		assertEquals("are", list.get(1));
+		assertEquals("things", list.get(2));
+		assertEquals("", list.get(3));
+	}
+	
+	/**
 	 * Tests the sort_alphanum method.
 	 */
 	@Test
