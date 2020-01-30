@@ -116,6 +116,17 @@ public class TestDvkHandler {
 	}
 	
 	/**
+	 * Deletes the test directory after testing.
+	 */
+	@After
+	public void delete_test_directory() {
+		try {
+			FileUtils.deleteDirectory(this.test_dir);
+		}
+		catch(IOException e) {}
+	}
+	
+	/**
 	 * Tests the read_dvks method.
 	 */
 	@Test
@@ -153,17 +164,6 @@ public class TestDvkHandler {
 		assertEquals(0, handler.get_size());
 		handler.read_dvks(this.test_dir);
 		assertEquals(5, handler.get_size());
-	}
-	
-	/**
-	 * Deletes the test directory after testing.
-	 */
-	@After
-	public void delete_test_directory() {
-		try {
-			FileUtils.deleteDirectory(this.test_dir);
-		}
-		catch(IOException e) {}
 	}
 	
 	/**
