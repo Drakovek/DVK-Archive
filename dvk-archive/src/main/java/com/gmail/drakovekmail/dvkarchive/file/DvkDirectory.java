@@ -45,21 +45,11 @@ public class DvkDirectory {
 	}
 	
 	/**
-	 * Returns the number of Dvk objects loaded.
+	 * Returns ArrayList of loaded Dvk objects.
 	 * 
-	 * @return Size of dvks list.
+	 * @return ArrayList of Dvk objects
 	 */
-	public int get_size() {
-		return this.dvks.size();
-	}
-	
-	/**
-	 * Returns the Dvk located at a given index in the dvks list.
-	 * 
-	 * @param index Dvk index
-	 * @return Dvk at index
-	 */
-	public Dvk get_dvk(final int index) {
-		return this.dvks.get(index);
+	public ArrayList<Dvk> get_dvks() {
+		return this.dvks;
 	}
 }

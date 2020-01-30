@@ -6,6 +6,7 @@ package com.gmail.drakovekmail.dvkarchive.processing;
  * @author Drakovek
  */
 public class StringProcessing {
+	
 	/**
 	 * Returns a String for a given int of a given length.
 	 * If too small, pads out String with zeros.

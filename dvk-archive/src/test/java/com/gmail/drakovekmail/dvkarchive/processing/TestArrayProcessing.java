@@ -117,4 +117,22 @@ public class TestArrayProcessing {
 		assertEquals("010,5", array[2]);
 		assertEquals("a", array[3]);
 	}
+	
+	/**
+	 * Tests the array_to_string method.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_array_to_string() {
+		String out;
+		out = ArrayProcessing.array_to_string(null, 0);
+		assertEquals(0, out.length());
+		String[] in = {"I-1", "I-2", "Other"};
+		out = ArrayProcessing.array_to_string(in, 0);
+		assertEquals("I-1,I-2,Other", out);
+		out = ArrayProcessing.array_to_string(in, -1);
+		assertEquals("I-1,I-2,Other", out);
+		out = ArrayProcessing.array_to_string(in, 2);
+		assertEquals("I-1,  I-2,  Other", out);
+	}
 }

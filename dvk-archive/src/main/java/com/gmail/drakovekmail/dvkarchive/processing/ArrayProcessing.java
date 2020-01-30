@@ -98,4 +98,29 @@ public class ArrayProcessing {
 		Arrays.parallelSort(return_array, new StringCompare());
 		return return_array;
 	}
+	
+	/**
+	 * Converts a given String array to a String.
+	 * Items separated by commas and indent.
+	 * 
+	 * @param array Given String array
+	 * @param indent Number of spaces to use as indent between items
+	 * @return String of given array
+	 */
+	public static String array_to_string(String[] array, int indent) {
+		if(array == null) {
+			return new String();
+		}
+		StringBuilder builder = new StringBuilder();
+		for(int i = 0; i < array.length; i++) {
+			if(i > 0) {
+				builder.append(',');
+				for(int k = 0; k < indent; k++) {
+					builder.append(' ');
+				}
+			}
+			builder.append(array[i]);
+		}
+		return builder.toString();
+	}
 }

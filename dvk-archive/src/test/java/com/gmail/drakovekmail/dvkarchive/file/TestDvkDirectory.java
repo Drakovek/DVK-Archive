@@ -85,44 +85,15 @@ public class TestDvkDirectory {
 	public void test_read_dvks() {
 		//LOAD INVALID DIRECTORIES
 		DvkDirectory dir = new DvkDirectory();
-		assertEquals(0, dir.get_size());
+		assertEquals(0, dir.get_dvks().size());
 		dir.read_dvks(null);
-		assertEquals(0, dir.get_size());
+		assertEquals(0, dir.get_dvks().size());
 		dir.read_dvks(new File("lsjdfwneajiqemrq"));
-		assertEquals(0, dir.get_size());
+		assertEquals(0, dir.get_dvks().size());
 		//LOAD TEST DIRECTORY
 		dir.read_dvks(this.test_dir);
-		assertEquals(2, dir.get_size());
-		assertEquals("Title 1", dir.get_dvk(0).get_title());
-		assertEquals("Title 2", dir.get_dvk(1).get_title());
-	}
-	
-	/**
-	 * Tests the get_size method.
-	 */
-	@Test
-	public void test_get_size() {
-		//LOAD INVALID DIRECTORIES
-		DvkDirectory dir = new DvkDirectory();
-		assertEquals(0, dir.get_size());
-		dir.read_dvks(null);
-		assertEquals(0, dir.get_size());
-		dir.read_dvks(new File("lsjdfwneajiqemrq"));
-		assertEquals(0, dir.get_size());
-		//LOAD TEST DIRECTORY
-		dir.read_dvks(this.test_dir);
-		assertEquals(2, dir.get_size());
-	}
-	
-	/**
-	 * Tests the get_dvk method.
-	 */
-	@Test
-	public void test_get_dvk() {
-		DvkDirectory dir = new DvkDirectory();
-		dir.read_dvks(this.test_dir);
-		assertEquals(2, dir.get_size());
-		assertEquals("Title 1", dir.get_dvk(0).get_title());
-		assertEquals("Title 2", dir.get_dvk(1).get_title());
+		assertEquals(2, dir.get_dvks().size());
+		assertEquals("Title 1", dir.get_dvks().get(0).get_title());
+		assertEquals("Title 2", dir.get_dvks().get(1).get_title());
 	}
 }

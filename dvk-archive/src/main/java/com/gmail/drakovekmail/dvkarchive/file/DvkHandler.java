@@ -14,6 +14,65 @@ import com.gmail.drakovekmail.dvkarchive.processing.ArrayProcessing;
 public class DvkHandler {
 	
 	/**
+	 * ArrayList of all loaded Dvk objects.
+	 */
+	private ArrayList<Dvk> dvks;
+	
+	/**
+	 * Initializes DvkHandler with empty Dvk list.
+	 */
+	public DvkHandler() {
+		this.dvks = new ArrayList<>();
+	}
+	
+	/**
+	 * Loads all the DVK files within the given directory.
+	 * Includes sub-directories.
+	 * 
+	 * @param dir Directory in which to search for files
+	 */
+	public void read_dvks(final File dir) {
+		File[] dirs = {dir};
+		read_dvks(dirs);
+	}
+	
+	/**
+	 * Loads all the DVK files within the given directories.
+	 * Includes sub-directories.
+	 * 
+	 * @param dirs Directories in which to search for files
+	 */
+	public void read_dvks(final File[] dirs) {
+		this.dvks = new ArrayList<>();
+		File[] dvk_dirs = get_directories(dirs);
+		for(File dir: dvk_dirs) {
+			DvkDirectory dvkd = new DvkDirectory();
+			dvkd.read_dvks(dir);
+			this.dvks.addAll(dvkd.get_dvks());
+			dvkd = null;
+		}
+	}
+	
+	/**
+	 * Returns the number of Dvk objects loaded.
+	 * 
+	 * @return Size of dvks list
+	 */
+	public int get_size() {
+		return this.dvks.size();
+	}
+	
+	/**
+	 * Returns the Dvk at a given index of the dvks list.
+	 * 
+	 * @param index Index of Dvk
+	 * @return Dvk object
+	 */
+	public Dvk get_dvk(final int index) {
+		return this.dvks.get(index);
+	}
+	
+	/**
 	 * Returns an array of sub-directories within a given directory.
 	 * Only lists directories that contain DVK files.
 	 * 
@@ -70,5 +129,37 @@ public class DvkHandler {
 			end_dirs[i] = new File(dvk_dirs.get(i));
 		}
 		return end_dirs;
+	}
+	
+	/**
+	 * Sorts all Dvks alpha-numerically by title.
+	 * 
+	 * @param group_artists Whether to group Dvks of the same artist
+	 * @param reverse Whether to reverse the sorting order
+	 */
+	public void sort_dvks_title(
+			final boolean group_artists, 
+			final boolean reverse) {
+		DvkCompare compare = new DvkCompare();
+		compare.set_parameters(DvkCompare.TITLE,
+				group_artists,
+				reverse);
+		Collections.sort(this.dvks, compare);
+	}
+	
+	/**
+	 * Sorts all Dvks by time published.
+	 * 
+	 * @param group_artists Whether to group Dvks of the same artist
+	 * @param reverse Whether to reverse the sorting order
+	 */
+	public void sort_dvks_time(
+			final boolean group_artists, 
+			final boolean reverse) {
+		DvkCompare compare = new DvkCompare();
+		compare.set_parameters(DvkCompare.TIME,
+				group_artists,
+				reverse);
+		Collections.sort(this.dvks, compare);
 	}
 }
