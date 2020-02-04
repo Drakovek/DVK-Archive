@@ -8,6 +8,8 @@ import java.awt.Font;
 
 import org.junit.Test;
 
+import com.gmail.drakovekmail.dvkarchive.gui.language.LanguageHandler;
+
 /**
  * Unit tests for the BaseGUI class.
  * 
@@ -84,5 +86,18 @@ public class TestBaseGUI {
 		assertEquals("Metal", base.get_theme());
 		base.set_theme("Nimbus");
 		assertEquals("Nimbus", base.get_theme());
+	}
+	
+	/**
+	 * Tests the get_language_string method.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_get_language_string() {
+		BaseGUI base = new BaseGUI();
+		LanguageHandler lang = base.get_language_handler();
+		lang.set_language("English");
+		assertEquals("^File", base.get_language_string("file"));
+		assertEquals("", base.get_language_string("Nope"));
 	}
 }
