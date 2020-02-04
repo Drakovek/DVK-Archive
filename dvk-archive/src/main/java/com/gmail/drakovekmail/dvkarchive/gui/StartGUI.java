@@ -2,7 +2,7 @@ package com.gmail.drakovekmail.dvkarchive.gui;
 
 import java.awt.BorderLayout;
 import com.gmail.drakovekmail.dvkarchive.gui.settings.SettingsBarGUI;
-import com.gmail.drakovekmail.dvkarchive.gui.swing.DFrame;
+import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DFrame;
 
 /**
  * Class dealing with the main GUI.

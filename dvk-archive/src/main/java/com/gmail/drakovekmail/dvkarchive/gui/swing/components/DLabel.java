@@ -1,4 +1,4 @@
-package com.gmail.drakovekmail.dvkarchive.gui.swing;
+package com.gmail.drakovekmail.dvkarchive.gui.swing.components;
 
 import javax.swing.JLabel;
 import com.gmail.drakovekmail.dvkarchive.gui.BaseGUI;

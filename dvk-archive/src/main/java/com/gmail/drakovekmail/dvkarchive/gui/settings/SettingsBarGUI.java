@@ -3,21 +3,20 @@ package com.gmail.drakovekmail.dvkarchive.gui.settings;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
-
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
-
 import com.gmail.drakovekmail.dvkarchive.gui.BaseGUI;
-import com.gmail.drakovekmail.dvkarchive.gui.swing.DButton;
-import com.gmail.drakovekmail.dvkarchive.gui.swing.DLabel;
+import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DButton;
+import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DLabel;
+import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
 
 /**
  * Settings bar GUI object for accessing program settings.
  * 
  * @author Drakovek
  */
-public class SettingsBarGUI extends JPanel {
+public class SettingsBarGUI extends JPanel implements DActionEvent{
 	
 	/**
 	 * SerialVersionUID
@@ -31,7 +30,7 @@ public class SettingsBarGUI extends JPanel {
 	 */
 	public SettingsBarGUI(BaseGUI base_gui) {
 		//CREATE BUTTON AND LABEL
-		DButton btn = new DButton(base_gui, "settings");
+		DButton btn = new DButton(base_gui, this, "settings");
 		DLabel lbl = new DLabel(base_gui, "no_dir_select");
 		//CREATE INTERNAL BAR
 		JPanel internal = new JPanel();
@@ -57,5 +56,10 @@ public class SettingsBarGUI extends JPanel {
 		//ADD SPACES
 		this.setLayout(new GridLayout(1, 1));
 		this.add(base_gui.get_spaced_panel(bar, 1, 0, false, true, true, true));
+	}
+
+	@Override
+	public void event(String id) {
+		System.out.println("Something happened.");
 	}
 }
