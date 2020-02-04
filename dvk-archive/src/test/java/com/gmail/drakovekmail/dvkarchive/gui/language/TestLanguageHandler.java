@@ -62,4 +62,29 @@ public class TestLanguageHandler {
 		out = LanguageHandler.get_key_code('m');
 		assertEquals(109, out);
 	}
+	
+	/**
+	 * Tests the get_language and set_language methods.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_get_set_language() {
+		LanguageHandler lang = new LanguageHandler();
+		lang.set_language("English");
+		assertEquals("English", LanguageHandler.get_language());
+		lang.set_language("Spanish not available");
+		assertEquals("English", LanguageHandler.get_language());
+	}
+	
+	/**
+	 * Tests the get_language_string method.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_get_language_string() {
+		LanguageHandler lang = new LanguageHandler();
+		lang.set_language("English");
+		assertEquals("^File", lang.get_language_string("file"));
+		assertEquals("", lang.get_language_string("Nope"));
+	}
 }
