@@ -1,5 +1,6 @@
 package com.gmail.drakovekmail.dvkarchive.file;
 
+import com.gmail.drakovekmail.dvkarchive.gui.BaseGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
 
 /**
@@ -16,6 +17,7 @@ public class Start {
 	 */
 	@SuppressWarnings("unused")
 	public static void main(String[] args) {
-		new StartGUI();
+		BaseGUI base_gui = new BaseGUI();
+		new StartGUI(base_gui);
 	}
 }

@@ -31,7 +31,7 @@ public class SettingsBarGUI extends JPanel implements DActionEvent{
 	public SettingsBarGUI(BaseGUI base_gui) {
 		//CREATE BUTTON AND LABEL
 		DButton btn = new DButton(base_gui, this, "settings");
-		DLabel lbl = new DLabel(base_gui, "no_dir_select");
+		DLabel lbl = new DLabel(base_gui, null, "no_dir_select");
 		//CREATE INTERNAL BAR
 		JPanel internal = new JPanel();
 		internal.setLayout(new GridBagLayout());
