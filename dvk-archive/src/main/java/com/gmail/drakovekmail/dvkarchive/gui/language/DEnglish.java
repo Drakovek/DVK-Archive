@@ -16,8 +16,10 @@ public class DEnglish extends LanguageMap{
 		this.lang_keys = new HashMap<>();
 		//MAIN GUI
 		this.lang_keys.put("dvk_archive", "DVK Archive");
-		this.lang_keys.put("category", "^Category");
+		this.lang_keys.put("category", "Ca^tegory");
 		this.lang_keys.put("service", "S^ervice");
+		this.lang_keys.put("cancel", "^Cancel");
+		this.lang_keys.put("console_log", "Console Log");
 		//SETTINGS
 		this.lang_keys.put("no_dir_select", "(No Directories Selected)");
 		this.lang_keys.put("settings", "^Settings");

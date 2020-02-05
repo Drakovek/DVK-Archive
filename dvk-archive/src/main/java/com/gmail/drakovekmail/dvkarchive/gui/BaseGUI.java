@@ -299,20 +299,20 @@ public class BaseGUI {
 	/**
 	 * Returns a JPanel with a component surrounded by spaces.
 	 * Surrounds component with spaces in all directions.
-	 * Sets weight of component to 0.
+	 * Sets weight of component to 1.
 	 * 
 	 * @param cmp Main component of the panel.
 	 * @return JPanel with cmp surrounded by spaces.
 	 */
 	public JPanel get_spaced_panel(Component cmp) {
 		JPanel pnl = get_spaced_panel(
-				cmp, 0, 0, true, true, true, true);
+				cmp, 1, 1, true, true, true, true);
 		return pnl;
 	}
 	
 	/**
 	 * Returns a JPanel with a component surrounded by spaces.
-	 * Sets weight of component to 0.
+	 * Sets weight of component to 1.
 	 * 
 	 * @param cmp Main component of the panel.
 	 * @param top Whether to have a top space
@@ -328,7 +328,7 @@ public class BaseGUI {
 			boolean left,
 			boolean right) {
 		JPanel pnl = get_spaced_panel(
-				cmp, 0, 0, top, bottom, left, right);
+				cmp, 1, 1, top, bottom, left, right);
 		return pnl;
 	}
 	

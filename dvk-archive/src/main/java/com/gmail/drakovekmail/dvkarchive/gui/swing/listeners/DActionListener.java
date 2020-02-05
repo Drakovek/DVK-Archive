@@ -23,8 +23,8 @@ public class DActionListener implements ActionListener{
 	/**
 	 * Initializes DActionListener.
 	 * 
-	 * @param event DActionEvent to call when action occurs.
-	 * @param id ID of component calling the action.
+	 * @param event DActionEvent to call when action occurs
+	 * @param id ID of component calling the action
 	 */
 	public DActionListener(DActionEvent event, String id) {
 		this.event = event;
