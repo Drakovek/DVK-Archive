@@ -1,17 +1,14 @@
 package com.gmail.drakovekmail.dvkarchive.gui;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-
-import javax.swing.Box;
+import java.awt.GridLayout;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-import javax.swing.JSplitPane;
+import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 
+import com.gmail.drakovekmail.dvkarchive.gui.error.UnlinkedMediaGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.settings.SettingsBarGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DButton;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DComboBox;
@@ -51,6 +48,16 @@ public class StartGUI implements DActionEvent{
 	private String current_service;
 	
 	/**
+	 * Panel for holding service_pnl
+	 */
+	private JPanel content_pnl;
+	
+	/**
+	 * Panel containing GUI elements for the current service
+	 */
+	private ServiceGUI service_pnl;
+	
+	/**
 	 * Creates the Start GUI.
 	 * 
 	 * @param base_gui BaseGUI for getting UI settings
@@ -77,9 +84,9 @@ public class StartGUI implements DActionEvent{
 		DScrollPane serve_scr;
 		serve_scr = new DScrollPane(this.service_list);
 		DLabel serve_lbl = new DLabel(this.base_gui, this.service_list, "service");
-		JPanel service_pnl = this.base_gui.get_y_stack(serve_lbl, 0, serve_scr, 1);
+		JPanel serve_pnl = this.base_gui.get_y_stack(serve_lbl, 0, serve_scr, 1);
 		//CREATE SIDE PANEL
-		JPanel prog_pnl = this.base_gui.get_y_stack(cat_pnl, 0, service_pnl, 1);
+		JPanel prog_pnl = this.base_gui.get_y_stack(cat_pnl, 0, serve_pnl, 1);
 		JPanel side_pnl = this.base_gui.get_spaced_panel(prog_pnl, 0, 1, true, true, true, false);
 		frame.getContentPane().add(side_pnl, BorderLayout.WEST);
 		//CREATE PROGRESS BAR
@@ -87,43 +94,23 @@ public class StartGUI implements DActionEvent{
 		JProgressBar progress_bar = new JProgressBar();
 		JPanel bar_pnl = base_gui.get_x_stack(progress_bar, 1, cancel_btn, 0);
 		//CREATE CONSOLE LOG
-		Dimension space;
-		space = new Dimension(1, base_gui.get_font().getSize() * 8);
 		DLabel console_lbl = new DLabel(base_gui, null, "console_log");
 		console_lbl.setHorizontalAlignment(SwingConstants.CENTER);
 		JPanel console_pnl = new JPanel();
-		console_pnl.setLayout(new GridBagLayout());
-		GridBagConstraints cst = new GridBagConstraints();
-		cst.gridx = 1;
-		cst.gridy = 1;
-		cst.gridwidth = 1;
-		cst.gridheight = 1;
-		cst.weightx = 0;
-		cst.weighty = 0;
-		cst.fill = GridBagConstraints.BOTH;
-		console_pnl.add(base_gui.get_y_space(), cst);
-		cst.gridx = 0;
-		cst.gridy = 0;
-		cst.gridwidth = 3;
-		cst.weightx = 1;
-		console_pnl.add(console_lbl, cst);
-		cst.gridy = 2;
-		cst.gridwidth = 1;
-		cst.weightx = 0;
-		console_pnl.add(Box.createRigidArea(space), cst);
-		cst.gridx = 2;
-		console_pnl.add(Box.createRigidArea(space), cst);
-		cst.gridx = 1;
-		cst.weightx = 1;
-		cst.weighty = 1;
 		JTextArea console = new JTextArea();
 		DScrollPane console_scr = new DScrollPane(console);
-		console_pnl.add(console_scr, cst);
-		//CREATE FULL LOG BANNEL
+		console_pnl = base_gui.get_y_stack(console_lbl, 0, console_scr, 1);
 		JPanel log_pnl = base_gui.get_y_stack(console_pnl, 1, bar_pnl, 0);
-		JPanel spaced_log = base_gui.get_spaced_panel(log_pnl);
-		JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT,new JPanel(), spaced_log);
-		frame.getContentPane().add(base_gui.get_spaced_panel(split), BorderLayout.CENTER);
+		//CREATE CENTER PANEL
+		this.content_pnl = new JPanel();
+		this.content_pnl.setLayout(new GridLayout(1, 1));
+		JPanel center_pnl = new JPanel();
+		center_pnl.setLayout(new GridLayout(2, 1));
+		center_pnl.add(this.content_pnl);
+		JSeparator sep = new JSeparator(SwingConstants.HORIZONTAL);
+		JPanel bottom_pnl = base_gui.get_y_stack(sep, 0, log_pnl, 1);
+		center_pnl.add(bottom_pnl);
+		frame.getContentPane().add(base_gui.get_spaced_panel(center_pnl), BorderLayout.CENTER);
 		//PACK AND CREATE FRAME
 		frame.pack();
 		frame.setLocationRelativeTo(null);
@@ -200,13 +187,26 @@ public class StartGUI implements DActionEvent{
 	public void change_service() {
 		int selected = this.service_list.getSelectedIndex();
 		if(selected != -1) {
+			//DETERMINE SERVICE SELECTED
 			String cat;
 			int index = this.cat_box.getSelectedIndex();
 			cat = get_categories(false)[index];
 			String service = get_services(cat, false)[selected];
 			if(!this.current_service.equals(service)) {
+				//CHANGE SERVICE GUI
+				this.content_pnl.removeAll();
+				this.service_pnl = null;
+				switch(service) {
+					case "unlinked_media":
+						this.service_pnl = new UnlinkedMediaGUI(this.base_gui);
+						break;
+					default:
+						this.service_pnl = new ServiceGUI(this.base_gui);
+				}
+				this.content_pnl.add(this.service_pnl);
+				this.content_pnl.revalidate();
+				this.content_pnl.repaint();
 				this.current_service = service;
-				System.out.println(service);
 			}
 		}
 	}

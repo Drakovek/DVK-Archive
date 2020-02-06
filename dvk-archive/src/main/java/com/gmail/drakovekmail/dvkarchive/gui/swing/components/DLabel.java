@@ -12,11 +12,11 @@ import com.gmail.drakovekmail.dvkarchive.gui.language.LanguageHandler;
  * @author Drakovek
  */
 public class DLabel extends JLabel {
-	
+
 	/**
 	 * SerialVersionUID
 	 */
-	private static final long serialVersionUID = 5127923494478187393L;
+	private static final long serialVersionUID = -7257680866439028386L;
 
 	/**
 	 * Initializes the DLabel object.
@@ -36,5 +36,24 @@ public class DLabel extends JLabel {
 			this.setDisplayedMnemonic(label.charAt(index));
 			this.setLabelFor(comp);
 		}
+	}
+	
+	/**
+	 * Wraps the text of the DLabel.
+	 * 
+	 * @param center Whether to center the text.
+	 */
+	public void wrap_text(boolean center) {
+		StringBuilder builder = new StringBuilder();
+		builder.append("<html>");
+		if(center) {
+			builder.append("<center>");
+		}
+		builder.append(this.getText());
+		if(center) {
+			builder.append("</center>");
+		}
+		builder.append("</html>");
+		this.setText(builder.toString());
 	}
 }

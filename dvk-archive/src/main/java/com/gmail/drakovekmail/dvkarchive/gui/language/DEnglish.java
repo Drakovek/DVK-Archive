@@ -20,6 +20,7 @@ public class DEnglish extends LanguageMap{
 		this.lang_keys.put("service", "S^ervice");
 		this.lang_keys.put("cancel", "^Cancel");
 		this.lang_keys.put("console_log", "Console Log");
+		this.lang_keys.put("run", "^Run");
 		//SETTINGS
 		this.lang_keys.put("no_dir_select", "(No Directories Selected)");
 		this.lang_keys.put("settings", "^Settings");
@@ -36,5 +37,10 @@ public class DEnglish extends LanguageMap{
 		this.lang_keys.put("same_ids", "Same IDs");
 		this.lang_keys.put("missing_media", "Missing Media");
 		this.lang_keys.put("unlinked_media", "Unlinked Media");
+		//UNLINKED MEDIA
+		this.lang_keys.put("unlinked_title", "     Find Unlinked Media     ");
+		String desc = "Finds media files in DVK directories that ";
+		desc = desc + "do not have a corresponding DVK file.";
+		this.lang_keys.put("unlinked_desc", desc);
 	}
 }
