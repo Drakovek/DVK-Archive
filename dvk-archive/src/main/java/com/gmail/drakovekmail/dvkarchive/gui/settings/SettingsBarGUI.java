@@ -1,8 +1,7 @@
 package com.gmail.drakovekmail.dvkarchive.gui.settings;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.io.File;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
@@ -24,6 +23,11 @@ public class SettingsBarGUI extends JPanel implements DActionEvent{
 	private static final long serialVersionUID = 720135488118796515L;
 
 	/**
+	 * Directory label for the settings bar.
+	 */
+	private DLabel lbl;
+	
+	/**
 	 * Creates the settings bar GUI object.
 	 * 
 	 * @param base_gui BaseGUI for UI settings
@@ -31,24 +35,9 @@ public class SettingsBarGUI extends JPanel implements DActionEvent{
 	public SettingsBarGUI(BaseGUI base_gui) {
 		//CREATE BUTTON AND LABEL
 		DButton btn = new DButton(base_gui, this, "settings");
-		DLabel lbl = new DLabel(base_gui, null, "no_dir_select");
+		this.lbl = new DLabel(base_gui, null, "no_dir_select");
 		//CREATE INTERNAL BAR
-		JPanel internal = new JPanel();
-		internal.setLayout(new GridBagLayout());
-		GridBagConstraints cst = new GridBagConstraints();
-		cst.gridx = 2;
-		cst.gridy = 0;
-		cst.gridwidth = 1;
-		cst.gridheight = 3;
-		cst.weightx = 0;
-		cst.weighty = 0;
-		cst.fill = GridBagConstraints.BOTH;
-		internal.add(btn, cst);
-		cst.gridx = 1;
-		internal.add(base_gui.get_x_space(), cst);
-		cst.gridx = 0;
-		cst.weightx = 1;
-		internal.add(lbl, cst);
+		JPanel internal = base_gui.get_x_stack(this.lbl, 1, btn, 0);
 		//ADD SEPARATOR
 		JSeparator sep;
 		sep = new JSeparator(SwingConstants.HORIZONTAL);
@@ -56,6 +45,20 @@ public class SettingsBarGUI extends JPanel implements DActionEvent{
 		//ADD SPACES
 		this.setLayout(new GridLayout(1, 1));
 		this.add(base_gui.get_spaced_panel(bar, 1, 0, false, true, true, true));
+	}
+	
+	/**
+	 * Sets the directory shown in the settings bar.
+	 * 
+	 * @param dir Directory to show.
+	 */
+	public void set_directory(File dir) {
+		if(dir == null) {
+			this.lbl.set_text_id("no_dir_select");
+		}
+		else {
+			this.lbl.setText(dir.getAbsolutePath());
+		}
 	}
 
 	@Override

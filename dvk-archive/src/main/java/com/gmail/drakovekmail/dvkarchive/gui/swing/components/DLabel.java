@@ -16,8 +16,13 @@ public class DLabel extends JLabel {
 	/**
 	 * SerialVersionUID
 	 */
-	private static final long serialVersionUID = -7257680866439028386L;
-
+	private static final long serialVersionUID = -6373707390656666673L;
+	
+	/**
+	 * BaseGUI for getting UI settings
+	 */
+	private BaseGUI base_gui;
+	
 	/**
 	 * Initializes the DLabel object.
 	 * 
@@ -26,7 +31,8 @@ public class DLabel extends JLabel {
 	 * @param id Label text ID
 	 */
 	public DLabel(BaseGUI base_gui, Component comp, String id) {
-		super(LanguageHandler.get_text(base_gui.get_language_string(id)));
+		this.base_gui = base_gui;
+		set_text_id(id);
 		this.setFont(base_gui.get_font());
 		if(comp != null) {
 			String label = base_gui.get_language_string(id);
@@ -36,6 +42,15 @@ public class DLabel extends JLabel {
 			this.setDisplayedMnemonic(label.charAt(index));
 			this.setLabelFor(comp);
 		}
+	}
+	
+	/**
+	 * Sets the text of the label based on a Language ID.
+	 * 
+	 * @param id Language ID
+	 */
+	public void set_text_id(String id) {
+		setText(LanguageHandler.get_text(this.base_gui.get_language_string(id)));
 	}
 	
 	/**

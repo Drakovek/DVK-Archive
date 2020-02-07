@@ -1,6 +1,10 @@
 package com.gmail.drakovekmail.dvkarchive.gui;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+
 import org.junit.Test;
 import com.gmail.drakovekmail.dvkarchive.gui.language.LanguageHandler;
 
@@ -23,7 +27,7 @@ public class TestStartGUI {
 		language = base_gui.get_language_handler();
 		language.set_language("English");
 		//TEST CATEGORY IDS
-		StartGUI gui = new StartGUI(base_gui);
+		StartGUI gui = new StartGUI(base_gui, false);
 		String[] categories = gui.get_categories(false);
 		assertEquals(2, categories.length);
 		assertEquals("artist_hosting", categories[0]);
@@ -48,7 +52,7 @@ public class TestStartGUI {
 		language = base_gui.get_language_handler();
 		language.set_language("English");
 		//TEST ARTIST HOSTING
-		StartGUI gui = new StartGUI(base_gui);
+		StartGUI gui = new StartGUI(base_gui, false);
 		String[] services;
 		services = gui.get_services("artist_hosting", false);
 		assertEquals(4, services.length);
@@ -63,5 +67,47 @@ public class TestStartGUI {
 		assertEquals("Missing Media", services[1]);
 		assertEquals("Unlinked Media", services[2]);
 		gui = null;
+	}
+	
+	/**
+	 * Tests the reset_directory method.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_reset_directory() {
+		//RESET DIRECTORY
+		BaseGUI base_gui = new BaseGUI();
+		StartGUI gui = new StartGUI(base_gui, false);
+		gui.reset_directory();
+		assertEquals(null, gui.get_directory());
+	}
+	
+	/**
+	 * Tests the get_directory and set_directory methods.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_get_set_directory() {
+		//RESET DIRECTORY
+		BaseGUI base_gui = new BaseGUI();
+		StartGUI gui = new StartGUI(base_gui, false);
+		gui.reset_directory();
+		//TEST INVALID FILE WHILE NULL
+		gui.set_directory(new File("ksdlkfjw"));
+		assertEquals(null, gui.get_directory());
+		//TEST VALID FILE
+		String user_dir = System.getProperty("user.dir");
+		File dir = new File(user_dir);
+		assertTrue(dir.isDirectory());
+		gui.set_directory(dir);
+		assertEquals(dir.getAbsolutePath(),
+				gui.get_directory().getAbsolutePath());
+		//TEST INVALLID FILES
+		gui.set_directory(null);
+		assertEquals(dir.getAbsolutePath(),
+				gui.get_directory().getAbsolutePath());
+		gui.set_directory(new File("kjskdjfklsjw"));
+		assertEquals(dir.getAbsolutePath(),
+				gui.get_directory().getAbsolutePath());
 	}
 }

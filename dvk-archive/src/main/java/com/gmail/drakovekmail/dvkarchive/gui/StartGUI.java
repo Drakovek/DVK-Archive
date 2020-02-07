@@ -2,12 +2,15 @@ package com.gmail.drakovekmail.dvkarchive.gui;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.io.File;
+
+import javax.swing.JFileChooser;
+import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
-
 import com.gmail.drakovekmail.dvkarchive.gui.error.UnlinkedMediaGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.settings.SettingsBarGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DButton;
@@ -15,6 +18,8 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DComboBox;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DFrame;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DLabel;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DList;
+import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DMenu;
+import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DMenuItem;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DScrollPane;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
 
@@ -25,7 +30,22 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
  * @author Drakovek
  *
  */
-public class StartGUI implements DActionEvent{
+public class StartGUI implements DActionEvent {
+	
+	/**
+	 * Current directory for the StartGUI
+	 */
+	private File directory;
+	
+	/**
+	 * Settings bar for the StartGUI
+	 */
+	private SettingsBarGUI settings_bar;
+	
+	/**
+	 * Main frame of the StartGUI
+	 */
+	private DFrame frame;
 	
 	/**
 	 * ComboBox for selecting service categories
@@ -61,15 +81,17 @@ public class StartGUI implements DActionEvent{
 	 * Creates the Start GUI.
 	 * 
 	 * @param base_gui BaseGUI for getting UI settings
+	 * @param show_gui Whether or not to display the GUI
 	 */
-	public StartGUI(BaseGUI base_gui) {
+	public StartGUI(BaseGUI base_gui, boolean show_gui) {
 		//INITIALIZE INSTANCE VARIABLES
 		this.base_gui = base_gui;
 		this.base_gui.set_font("", 14, true);
 		this.current_service = new String();
-		DFrame frame = new DFrame(this.base_gui, "dvk_archive");
+		this.frame = new DFrame(this.base_gui, "dvk_archive");
 		//CREATE SETTINGS BAR
-		frame.getContentPane().add(new SettingsBarGUI(this.base_gui),
+		this.settings_bar = new SettingsBarGUI(this.base_gui);
+		this.frame.getContentPane().add(this.settings_bar,
 				BorderLayout.SOUTH);
 		//CREATE CATEGORY PANEL
 		this.cat_box = new DComboBox(
@@ -88,7 +110,7 @@ public class StartGUI implements DActionEvent{
 		//CREATE SIDE PANEL
 		JPanel prog_pnl = this.base_gui.get_y_stack(cat_pnl, 0, serve_pnl, 1);
 		JPanel side_pnl = this.base_gui.get_spaced_panel(prog_pnl, 0, 1, true, true, true, false);
-		frame.getContentPane().add(side_pnl, BorderLayout.WEST);
+		this.frame.getContentPane().add(side_pnl, BorderLayout.WEST);
 		//CREATE PROGRESS BAR
 		DButton cancel_btn = new DButton(base_gui, this, "cancel");
 		JProgressBar progress_bar = new JProgressBar();
@@ -110,12 +132,25 @@ public class StartGUI implements DActionEvent{
 		JSeparator sep = new JSeparator(SwingConstants.HORIZONTAL);
 		JPanel bottom_pnl = base_gui.get_y_stack(sep, 0, log_pnl, 1);
 		center_pnl.add(bottom_pnl);
-		frame.getContentPane().add(base_gui.get_spaced_panel(center_pnl), BorderLayout.CENTER);
+		this.frame.getContentPane().add(base_gui.get_spaced_panel(center_pnl), BorderLayout.CENTER);
+		//CREATE MENU BAR
+		JMenuBar menu_bar = new JMenuBar();
+		DMenu file_menu = new DMenu(base_gui, "file");
+		DMenuItem open_mit = new DMenuItem(base_gui, this, "open");
+		DMenuItem exit_mit = new DMenuItem(base_gui, this, "exit");
+		file_menu.add(open_mit);
+		file_menu.addSeparator();
+		file_menu.add(exit_mit);
+		menu_bar.add(file_menu);
+		this.frame.setJMenuBar(menu_bar);
 		//PACK AND CREATE FRAME
-		frame.pack();
-		frame.setLocationRelativeTo(null);
-		frame.setMinimumSize(frame.getSize());
-		frame.setVisible(true);
+		reset_directory();
+		this.frame.pack();
+		this.frame.setLocationRelativeTo(null);
+		this.frame.setMinimumSize(this.frame.getSize());
+		if(show_gui) {
+			this.frame.setVisible(true);
+		}
 	}
 	
 	/**
@@ -210,10 +245,68 @@ public class StartGUI implements DActionEvent{
 			}
 		}
 	}
+	
+	/**
+	 * Exits the program, disposing the main frame.
+	 */
+	public void exit() {
+		this.frame.dispose();
+		this.frame = null;
+	}
+	
+	/**
+	 * Resets the current directory to null.
+	 */
+	public void reset_directory() {
+		this.directory = null;
+		this.settings_bar.set_directory(get_directory());
+	}
+	
+	/**
+	 * Sets the current directory.
+	 * 
+	 * @param dir Given directory
+	 */
+	public void set_directory(File dir) {
+		if(dir != null && dir.isDirectory()) {
+			this.directory = dir;
+			this.settings_bar.set_directory(get_directory());
+		}
+	}
+
+	/**
+	 * Returns the current directory.
+	 * 
+	 * @return Current directory
+	 */
+	public File get_directory() {
+		return this.directory;
+	}
+	
+	/**
+	 * Opens a file dialog to select the current directory.
+	 */
+	public void open() {
+		JFileChooser fc = new JFileChooser();
+		if(get_directory() != null) {
+			fc.setCurrentDirectory(get_directory());
+		}
+		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		int value = fc.showOpenDialog(this.frame);
+		if(value == JFileChooser.APPROVE_OPTION) {
+			set_directory(fc.getSelectedFile());
+		}
+	}
 
 	@Override
 	public void event(String id) {
 		switch(id) {
+			case "open":
+				open();
+				break;
+			case "exit":
+				exit();
+				break;
 			case "category":
 				update_services();
 				break;

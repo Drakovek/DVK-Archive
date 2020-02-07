@@ -18,6 +18,6 @@ public class Start {
 	@SuppressWarnings("unused")
 	public static void main(String[] args) {
 		BaseGUI base_gui = new BaseGUI();
-		new StartGUI(base_gui);
+		new StartGUI(base_gui, true);
 	}
 }

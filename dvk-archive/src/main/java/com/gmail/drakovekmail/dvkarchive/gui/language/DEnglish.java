@@ -21,10 +21,12 @@ public class DEnglish extends LanguageMap{
 		this.lang_keys.put("cancel", "^Cancel");
 		this.lang_keys.put("console_log", "Console Log");
 		this.lang_keys.put("run", "^Run");
+		this.lang_keys.put("file", "^File");
+		this.lang_keys.put("open", "^Open");
+		this.lang_keys.put("exit", "^Exit");
 		//SETTINGS
 		this.lang_keys.put("no_dir_select", "(No Directories Selected)");
 		this.lang_keys.put("settings", "^Settings");
-		this.lang_keys.put("file", "^File");
 		//PROGRAM CATEGORIES
 		this.lang_keys.put("artist_hosting", "Artist Hosting");
 		this.lang_keys.put("error_finding", "Error Finding");
