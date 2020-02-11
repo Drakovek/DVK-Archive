@@ -1,12 +1,10 @@
 package com.gmail.drakovekmail.dvkarchive.gui.error;
 
 import java.io.File;
-import java.util.ArrayList;
-
-import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
 import com.gmail.drakovekmail.dvkarchive.file.ErrorFinding;
 import com.gmail.drakovekmail.dvkarchive.gui.SimpleServiceGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
+import com.gmail.drakovekmail.dvkarchive.gui.work.DSwingWorker;
 
 /**
  * GUI for getting unlinked media.
@@ -14,11 +12,11 @@ import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
  * @author Drakovek
  */
 public class UnlinkedMediaGUI extends SimpleServiceGUI {
-	
+
 	/**
 	 * SerialVersionUID
 	 */
-	private static final long serialVersionUID = 7109589706058802015L;
+	private static final long serialVersionUID = -5777741199565492675L;
 
 	/**
 	 * Initializes the UnlinkedMediaGUI object.
@@ -30,20 +28,50 @@ public class UnlinkedMediaGUI extends SimpleServiceGUI {
 	}
 
 	/**
-	 * Runs the unlinked media finding service.
+	 * Starts SwingWorker for the unlinked media process.
 	 */
-	@Override
-	public void run() {
+	private void start_get_unlinked() {
+		this.sw = new DSwingWorker(this, "unlinked");
+		this.sw.execute();
+	}
+
+	/**
+	 * Runs process to get unlinked media.
+	 * Displays results in the start GUI.
+	 */
+	public void get_unlinked() {
+		this.start_gui.get_progress_bar().set_progress(true, false, 0, 0);
 		this.start_gui.append_console("", false);
 		this.start_gui.append_console("unlinked_console", true);
-		DvkHandler handler = new DvkHandler();
-		handler.read_dvks(this.start_gui.get_directory());
 		File[] dirs = {this.start_gui.get_directory()};
-		ArrayList<File> unlinked;
-		unlinked = ErrorFinding.get_unlinked_media(handler, dirs);
-		for(int i = 0; i < unlinked.size(); i++) {
-			this.start_gui.append_console(unlinked.get(i).getAbsolutePath(), false);
+		ErrorFinding.get_unlinked_media(this.dvk_handler, dirs, this.start_gui);
+	}
+
+	@Override
+	public void run(String id) {
+		switch(id) {
+			case "read_dvks":
+				read_dvks();
+				break;
+			case "unlinked":
+				get_unlinked();
+				break;
 		}
-		this.start_gui.append_console("finished", true);
+	}
+
+	@Override
+	public void done(String id) {
+		switch(id) {
+			case "read_dvks":
+				this.start_gui.get_progress_bar()
+					.set_progress(true, false, 0, 0);
+				start_get_unlinked();
+				break;
+			case "unlinked":
+				this.start_gui.get_progress_bar()
+					.set_progress(false, false, 0, 0);
+				this.start_gui.append_console("finished", true);
+				break;
+		}
 	}
 }

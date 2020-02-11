@@ -133,14 +133,13 @@ public class TestDvkHandler {
 	public void test_read_dvks() {
 		//TEST INVALID DIRECTORIES
 		DvkHandler handler = new DvkHandler();
-		File dir = null;
-		File[] dirs = null;
-		handler.read_dvks(dir);
+		handler.read_dvks(null, null);
 		assertEquals(0, handler.get_size());
-		handler.read_dvks(dirs);
+		handler.read_dvks(null, null);
 		assertEquals(0, handler.get_size());
 		//LOAD FROM MAIN TEST DIRECTORY
-		handler.read_dvks(this.test_dir);
+		File[] dirs = {this.test_dir};
+		handler.read_dvks(dirs, null);
 		assertEquals(5, handler.get_size());
 		assertEquals("Page 1", handler.get_dvk(0).get_title());
 		assertEquals("Page 1.05", handler.get_dvk(1).get_title());
@@ -151,7 +150,7 @@ public class TestDvkHandler {
 		dirs = new File[2];
 		dirs[0] = this.f1;
 		dirs[1] = this.f2;
-		handler.read_dvks(dirs);
+		handler.read_dvks(dirs, null);
 		assertEquals(3, handler.get_size());
 	}
 	
@@ -162,7 +161,8 @@ public class TestDvkHandler {
 	public void test_get_size() {
 		DvkHandler handler = new DvkHandler();
 		assertEquals(0, handler.get_size());
-		handler.read_dvks(this.test_dir);
+		File[] dirs = {this.test_dir};
+		handler.read_dvks(dirs, null);
 		assertEquals(5, handler.get_size());
 	}
 	
@@ -225,7 +225,8 @@ public class TestDvkHandler {
 	@Test
 	public void test_sort_title() {
 		DvkHandler handler = new DvkHandler();
-		handler.read_dvks(this.test_dir);
+		File[] dirs = {this.test_dir};
+		handler.read_dvks(dirs, null);
 		//TEST STANDARD TITLE SORT
 		handler.sort_dvks_title(false, false);
 		assertEquals(5, handler.get_size());
@@ -258,7 +259,8 @@ public class TestDvkHandler {
 	@Test
 	public void test_sort_time() {
 		DvkHandler handler = new DvkHandler();
-		handler.read_dvks(this.test_dir);
+		File[] dirs = {this.test_dir};
+		handler.read_dvks(dirs, null);
 		//TEST STANDARD TIME SORT
 		handler.sort_dvks_time(false, false);
 		assertEquals(5, handler.get_size());

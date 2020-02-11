@@ -12,7 +12,7 @@ public class ServiceGUI extends JPanel {
 	/**
 	 * SerialVersionUID
 	 */
-	private static final long serialVersionUID = 6231675453440569722L;
+	private static final long serialVersionUID = 1079185111615979346L;
 	
 	/**
 	 * BaseGUI for getting UI settings
@@ -26,5 +26,14 @@ public class ServiceGUI extends JPanel {
 	 */
 	public ServiceGUI(StartGUI start_gui) {
 		this.start_gui = start_gui;
+	}
+	
+	/**
+	 * Returns whether start_gui currently has a directory loaded.
+	 * 
+	 * @return Whether directory is loaded
+	 */
+	public boolean directory_loaded() {
+		return this.start_gui.get_directory() != null;
 	}
 }

@@ -1,25 +1,38 @@
 package com.gmail.drakovekmail.dvkarchive.gui;
 
 import java.awt.GridLayout;
-
+import java.io.File;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
+import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DButton;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DLabel;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
+import com.gmail.drakovekmail.dvkarchive.gui.work.DSwingWorker;
+import com.gmail.drakovekmail.dvkarchive.gui.work.DWorker;
 
 /**
  * Framework for a simple ServiceGUI with only one runnable task.
  * 
  * @author Drakovek
  */
-public abstract class SimpleServiceGUI extends ServiceGUI implements DActionEvent {
-	
+public abstract class SimpleServiceGUI extends ServiceGUI implements DActionEvent, DWorker {
+
 	/**
 	 * SerialVersionUID
 	 */
-	private static final long serialVersionUID = 7717006779177292600L;
+	private static final long serialVersionUID = 7833809474544376938L;
+
+	/**
+	 * DvkHandler for reading Dvk objects
+	 */
+	protected DvkHandler dvk_handler;
+	
+	/**
+	 * SwingWorker for running processes
+	 */
+	protected DSwingWorker sw;
 
 	/**
 	 * Initializes the SimpleServiceGUI object.
@@ -50,14 +63,28 @@ public abstract class SimpleServiceGUI extends ServiceGUI implements DActionEven
 		this.setLayout(new GridLayout(1, 1));
 		this.add(service_pnl);
 	}
-
+	
 	/**
-	 * Method called when run button is pressed.
+	 * Starts SwingWorker to read Dvk objects.
 	 */
-	public abstract void run();
+	private void start_read_dvks() {
+		this.sw = new DSwingWorker(this, "read_dvks");
+		this.sw.execute();
+	}
+	
+	/**
+	 * Reads all dvks in base_gui's selected directory.
+	 */
+	protected void read_dvks() {
+		this.dvk_handler = new DvkHandler();
+		File[] dirs = {this.start_gui.get_directory()};
+		this.dvk_handler.read_dvks(dirs, this.start_gui);
+	}
 	
 	@Override
 	public void event(String id) {
-		run();
+		if(directory_loaded()) {
+			start_read_dvks();
+		}
 	}
 }

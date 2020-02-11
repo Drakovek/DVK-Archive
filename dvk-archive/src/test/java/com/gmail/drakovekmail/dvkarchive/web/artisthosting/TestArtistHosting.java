@@ -78,7 +78,8 @@ public class TestArtistHosting {
 		dvk.write_dvk();
 		//TEST GETTING ARTISTS
 		DvkHandler handler = new DvkHandler();
-		handler.read_dvks(this.test_dir);
+		File[] dirs = {this.test_dir};
+		handler.read_dvks(dirs, null);
 		ArrayList<Dvk> dvks;
 		dvks = ArtistHosting.get_artists(handler, "url.com");
 		assertEquals(2, dvks.size());

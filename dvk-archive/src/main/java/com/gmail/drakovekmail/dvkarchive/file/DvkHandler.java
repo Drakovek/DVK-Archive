@@ -3,7 +3,7 @@ package com.gmail.drakovekmail.dvkarchive.file;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-
+import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
 import com.gmail.drakovekmail.dvkarchive.processing.ArrayProcessing;
 
 /**
@@ -26,28 +26,27 @@ public class DvkHandler {
 	}
 	
 	/**
-	 * Loads all the DVK files within the given directory.
-	 * Includes sub-directories.
-	 * 
-	 * @param dir Directory in which to search for files
-	 */
-	public void read_dvks(final File dir) {
-		File[] dirs = {dir};
-		read_dvks(dirs);
-	}
-	
-	/**
 	 * Loads all the DVK files within the given directories.
 	 * Includes sub-directories.
 	 * 
 	 * @param dirs Directories in which to search for files
+	 * @param start_gui Used for displaying progress.
 	 */
-	public void read_dvks(final File[] dirs) {
+	public void read_dvks(final File[] dirs, StartGUI start_gui) {
+		if(start_gui != null) {
+			start_gui.append_console("", false);
+			start_gui.append_console("reading_dvks", true);
+			start_gui.get_progress_bar().set_progress(true, false, 0, 0);
+		}
 		this.dvks = new ArrayList<>();
 		File[] dvk_dirs = get_directories(dirs);
-		for(File dir: dvk_dirs) {
+		int max = dvk_dirs.length;
+		for(int i = 0; i < max; i++) {
+			if(start_gui != null) {
+				start_gui.get_progress_bar().set_progress(false, true, i, max);
+			}
 			DvkDirectory dvkd = new DvkDirectory();
-			dvkd.read_dvks(dir);
+			dvkd.read_dvks(dvk_dirs[i]);
 			this.dvks.addAll(dvkd.get_dvks());
 			dvkd = null;
 		}
@@ -161,5 +160,26 @@ public class DvkHandler {
 				group_artists,
 				reverse);
 		Collections.sort(this.dvks, compare);
+	}
+	
+	/**
+	 * Returns whether any loaded Dvk is linked to given file.
+	 * 
+	 * @param file Given file
+	 * @return Whether any Dvks link to the given file
+	 */
+	public boolean contains_file(File file) {
+		int size = get_size();
+		for(int i = 0; i < size; i++) {
+			File media = get_dvk(i).get_media_file();
+			if(file.equals(media)) {
+				return true;
+			}
+			File second = get_dvk(i).get_secondary_file();
+			if(second != null && file.equals(second)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

@@ -2,7 +2,8 @@ package com.gmail.drakovekmail.dvkarchive.file;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
+import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
 
 /**
  * Class containing methods for finding errors in DVK files.
@@ -16,44 +17,36 @@ public class ErrorFinding {
 	 * Only returns files in the same directories as DVK files.
 	 * 
 	 * @param handler DvkHandler with Dvk to check links
-	 * @param directories Directories in which to search for files.
+	 * @param directories Directories in which to search for files
+	 * @param start_gui Used for displaying progress and results
 	 * @return List of unlinked files
 	 */
 	public static ArrayList<File> get_unlinked_media(
-			DvkHandler handler, File[] directories) {
+			DvkHandler handler,
+			File[] directories,
+			StartGUI start_gui) {
 		//FIND ALL MEDIA FILES
 		File[] dirs = DvkHandler.get_directories(directories);
 		ArrayList<File> missing = new ArrayList<>();
 		for(File dir: dirs) {
 			File[] files = dir.listFiles();
+			Arrays.sort(files);
 			for(File file: files) {
+				//CHECK IF FILE IS MISSING
 				if(!file.isDirectory()
 						&& !file.getName().endsWith(".dvk")
-						&& !missing.contains(file)) {
+						&& !missing.contains(file)
+						&& !handler.contains_file(file)) {
 					missing.add(file);
+					//PRINT PATH
+					if(start_gui != null) {
+						start_gui.append_console(
+								file.getAbsolutePath(),
+								false);
+					}
 				}
 			}
 		}
-		//REMOVE LINKED FILES
-		int size = handler.get_size();
-		for(int i = 0; i < size; i++) {
-			//CHECK FOR MEDIA FILE
-			Dvk dvk = handler.get_dvk(i);
-			File media = dvk.get_media_file();
-			int index = missing.indexOf(media);
-			if(index != -1) {
-				missing.remove(index);
-			}
-			//CHECK FOR SECONDARY MEDIA FILE
-			media = dvk.get_secondary_file();
-			if(media != null) {
-				index = missing.indexOf(media);
-				if(index != -1) {
-					missing.remove(index);
-				}
-			}
-		}
-		Collections.sort(missing);
 		return missing;
 	}
 }

@@ -7,7 +7,6 @@ import java.io.File;
 import javax.swing.JFileChooser;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 import com.gmail.drakovekmail.dvkarchive.gui.error.UnlinkedMediaGUI;
@@ -19,6 +18,7 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DLabel;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DList;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DMenu;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DMenuItem;
+import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DProgressBar;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DScrollPane;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DTextArea;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
@@ -63,9 +63,14 @@ public class StartGUI implements DActionEvent {
 	private BaseGUI base_gui;
 	
 	/**
-	 * DTextArea used as the console log.
+	 * DTextArea used as the console log
 	 */
 	private DTextArea console;
+	
+	/**
+	 * Main progress bar for the GUI
+	 */
+	private DProgressBar progress_bar;
 	
 	/**
 	 * ID of the currently selected service
@@ -118,8 +123,8 @@ public class StartGUI implements DActionEvent {
 		this.frame.getContentPane().add(side_pnl, BorderLayout.WEST);
 		//CREATE PROGRESS BAR
 		DButton cancel_btn = new DButton(base_gui, this, "cancel");
-		JProgressBar progress_bar = new JProgressBar();
-		JPanel bar_pnl = base_gui.get_x_stack(progress_bar, 1, cancel_btn, 0);
+		this.progress_bar = new DProgressBar(base_gui);
+		JPanel bar_pnl = base_gui.get_x_stack(this.progress_bar, 1, cancel_btn, 0);
 		//CREATE CONSOLE LOG
 		DLabel console_lbl = new DLabel(base_gui, null, "console_log");
 		console_lbl.setHorizontalAlignment(SwingConstants.CENTER);
@@ -261,6 +266,15 @@ public class StartGUI implements DActionEvent {
 		this.console.append_text(text, is_id);
 	}
 	
+	/**
+	 * Returns the GUI's progress bar.
+	 * 
+	 * @return Progress bar
+	 */
+	public DProgressBar get_progress_bar() {
+		return this.progress_bar;
+	}
+
 	/**
 	 * Exits the program, disposing the main frame.
 	 */

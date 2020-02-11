@@ -25,6 +25,7 @@ public class DEnglish extends LanguageMap{
 		this.lang_keys.put("open", "^Open");
 		this.lang_keys.put("exit", "^Exit");
 		this.lang_keys.put("finished", "[FINISHED]");
+		this.lang_keys.put("reading_dvks", "Reading DVK Files...");
 		//SETTINGS
 		this.lang_keys.put("no_dir_select", "(No Directories Selected)");
 		this.lang_keys.put("settings", "^Settings");
