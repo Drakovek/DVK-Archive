@@ -24,6 +24,7 @@ public class DEnglish extends LanguageMap{
 		this.lang_keys.put("file", "^File");
 		this.lang_keys.put("open", "^Open");
 		this.lang_keys.put("exit", "^Exit");
+		this.lang_keys.put("finished", "[FINISHED]");
 		//SETTINGS
 		this.lang_keys.put("no_dir_select", "(No Directories Selected)");
 		this.lang_keys.put("settings", "^Settings");
@@ -41,6 +42,7 @@ public class DEnglish extends LanguageMap{
 		this.lang_keys.put("unlinked_media", "Unlinked Media");
 		//UNLINKED MEDIA
 		this.lang_keys.put("unlinked_title", "     Find Unlinked Media     ");
+		this.lang_keys.put("unlinked_console", "[FINDING UNLINKED MEDIA]");
 		String desc = "Finds media files in DVK directories that ";
 		desc = desc + "do not have a corresponding DVK file.";
 		this.lang_keys.put("unlinked_desc", desc);

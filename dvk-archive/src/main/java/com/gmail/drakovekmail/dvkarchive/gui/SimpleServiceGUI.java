@@ -14,7 +14,7 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
  * 
  * @author Drakovek
  */
-public class SimpleServiceGUI extends ServiceGUI implements DActionEvent {
+public abstract class SimpleServiceGUI extends ServiceGUI implements DActionEvent {
 	
 	/**
 	 * SerialVersionUID
@@ -24,25 +24,26 @@ public class SimpleServiceGUI extends ServiceGUI implements DActionEvent {
 	/**
 	 * Initializes the SimpleServiceGUI object.
 	 * 
-	 * @param base_gui BaseGUI for getting UI settings
+	 * @param start_gui Parent of the SimpleServiceGUI
 	 * @param title Title ID for the service GUI
 	 * @param desc Description of the task in the service GUI
 	 */
-	public SimpleServiceGUI(BaseGUI base_gui, String title, String desc) {
-		super(base_gui);
+	public SimpleServiceGUI(StartGUI start_gui, String title, String desc) {
+		super(start_gui);
+		BaseGUI base_gui = this.start_gui.get_base_gui();
 		//CREATE TITLE PANEL
-		DLabel title_lbl = new DLabel(this.base_gui, null, title);
+		DLabel title_lbl = new DLabel(base_gui, null, title);
 		title_lbl.setHorizontalAlignment(SwingConstants.CENTER);
 		JSeparator sep = new JSeparator(SwingConstants.HORIZONTAL);
-		JPanel title_pnl = this.base_gui.get_y_stack(title_lbl, sep);
+		JPanel title_pnl = base_gui.get_y_stack(title_lbl, sep);
 		//CREATE DESCRIPTION PANEL
-		DLabel desc_lbl = new DLabel(this.base_gui, null, desc);
+		DLabel desc_lbl = new DLabel(base_gui, null, desc);
 		desc_lbl.setHorizontalAlignment(SwingConstants.CENTER);
 		desc_lbl.wrap_text(true);
-		JPanel desc_pnl = this.base_gui.get_y_stack(title_pnl, desc_lbl);
+		JPanel desc_pnl = base_gui.get_y_stack(title_pnl, desc_lbl);
 		//CREATE BUTTON PANEL
-		DButton run_btn = new DButton(this.base_gui, this, "run");
-		JPanel button_pnl = this.base_gui.get_y_stack(desc_pnl, run_btn);
+		DButton run_btn = new DButton(base_gui, this, "run");
+		JPanel button_pnl = base_gui.get_y_stack(desc_pnl, run_btn);
 		//CREATE SERVICE PANEL
 		JPanel service_pnl = base_gui.get_spaced_panel(
 				button_pnl, 0, 0, false, false, false, false);
@@ -50,7 +51,13 @@ public class SimpleServiceGUI extends ServiceGUI implements DActionEvent {
 		this.add(service_pnl);
 	}
 
+	/**
+	 * Method called when run button is pressed.
+	 */
+	public abstract void run();
+	
 	@Override
 	public void event(String id) {
+		run();
 	}
 }

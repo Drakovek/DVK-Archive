@@ -17,14 +17,14 @@ public class ServiceGUI extends JPanel {
 	/**
 	 * BaseGUI for getting UI settings
 	 */
-	protected BaseGUI base_gui;
+	protected StartGUI start_gui;
 	
 	/***
 	 * Initializes the ServiceGUI object.
 	 * 
-	 * @param base_gui BaseGUI for getting UI settings.
+	 * @param start_gui Parent of the ServiceGUI
 	 */
-	public ServiceGUI(BaseGUI base_gui) {
-		this.base_gui = base_gui;
+	public ServiceGUI(StartGUI start_gui) {
+		this.start_gui = start_gui;
 	}
 }

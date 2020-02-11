@@ -9,7 +9,6 @@ import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JSeparator;
-import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import com.gmail.drakovekmail.dvkarchive.gui.error.UnlinkedMediaGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.settings.SettingsBarGUI;
@@ -21,6 +20,7 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DList;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DMenu;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DMenuItem;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DScrollPane;
+import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DTextArea;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
 
 /**
@@ -61,6 +61,11 @@ public class StartGUI implements DActionEvent {
 	 * BaseGUI for getting UI settings
 	 */
 	private BaseGUI base_gui;
+	
+	/**
+	 * DTextArea used as the console log.
+	 */
+	private DTextArea console;
 	
 	/**
 	 * ID of the currently selected service
@@ -119,8 +124,8 @@ public class StartGUI implements DActionEvent {
 		DLabel console_lbl = new DLabel(base_gui, null, "console_log");
 		console_lbl.setHorizontalAlignment(SwingConstants.CENTER);
 		JPanel console_pnl = new JPanel();
-		JTextArea console = new JTextArea();
-		DScrollPane console_scr = new DScrollPane(console);
+		this.console = new DTextArea(base_gui);
+		DScrollPane console_scr = new DScrollPane(this.console);
 		console_pnl = base_gui.get_y_stack(console_lbl, 0, console_scr, 1);
 		JPanel log_pnl = base_gui.get_y_stack(console_pnl, 1, bar_pnl, 0);
 		//CREATE CENTER PANEL
@@ -233,10 +238,10 @@ public class StartGUI implements DActionEvent {
 				this.service_pnl = null;
 				switch(service) {
 					case "unlinked_media":
-						this.service_pnl = new UnlinkedMediaGUI(this.base_gui);
+						this.service_pnl = new UnlinkedMediaGUI(this);
 						break;
 					default:
-						this.service_pnl = new ServiceGUI(this.base_gui);
+						this.service_pnl = new ServiceGUI(this);
 				}
 				this.content_pnl.add(this.service_pnl);
 				this.content_pnl.revalidate();
@@ -244,6 +249,16 @@ public class StartGUI implements DActionEvent {
 				this.current_service = service;
 			}
 		}
+	}
+	
+	/**
+	 * Appends text to the console log.
+	 * 
+	 * @param text Text to append.
+	 * @param is_id Whether text is a language ID
+	 */
+	public void append_console(String text, boolean is_id) {
+		this.console.append_text(text, is_id);
 	}
 	
 	/**
@@ -281,6 +296,15 @@ public class StartGUI implements DActionEvent {
 	 */
 	public File get_directory() {
 		return this.directory;
+	}
+	
+	/**
+	 * Returns the BaseGUI object for this object.
+	 * 
+	 * @return BaseGUI
+	 */
+	public BaseGUI get_base_gui() {
+		return this.base_gui;
 	}
 	
 	/**
