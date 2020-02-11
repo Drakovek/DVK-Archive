@@ -33,6 +33,11 @@ public abstract class SimpleServiceGUI extends ServiceGUI implements DActionEven
 	 * SwingWorker for running processes
 	 */
 	protected DSwingWorker sw;
+	
+	/**
+	 * Main button for running services
+	 */
+	private DButton run_btn;
 
 	/**
 	 * Initializes the SimpleServiceGUI object.
@@ -55,8 +60,8 @@ public abstract class SimpleServiceGUI extends ServiceGUI implements DActionEven
 		desc_lbl.wrap_text(true);
 		JPanel desc_pnl = base_gui.get_y_stack(title_pnl, desc_lbl);
 		//CREATE BUTTON PANEL
-		DButton run_btn = new DButton(base_gui, this, "run");
-		JPanel button_pnl = base_gui.get_y_stack(desc_pnl, run_btn);
+		this.run_btn = new DButton(base_gui, this, "run");
+		JPanel button_pnl = base_gui.get_y_stack(desc_pnl, this.run_btn);
 		//CREATE SERVICE PANEL
 		JPanel service_pnl = base_gui.get_spaced_panel(
 				button_pnl, 0, 0, false, false, false, false);
@@ -84,7 +89,20 @@ public abstract class SimpleServiceGUI extends ServiceGUI implements DActionEven
 	@Override
 	public void event(String id) {
 		if(directory_loaded()) {
+			this.start_gui.get_base_gui().set_running(true);
+			this.start_gui.disable_all();
+			disable_all();
 			start_read_dvks();
 		}
+	}
+	
+	@Override
+	public void enable_all() {
+		this.run_btn.setEnabled(true);
+	}
+
+	@Override
+	public void disable_all() {
+		this.run_btn.setEnabled(false);
 	}
 }

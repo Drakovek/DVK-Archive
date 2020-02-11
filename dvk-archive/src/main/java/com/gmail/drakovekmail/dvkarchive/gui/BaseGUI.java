@@ -60,6 +60,11 @@ public class BaseGUI {
 	private int space_size;
 	
 	/**
+	 * Whether a process is currently running
+	 */
+	private boolean running;
+	
+	/**
 	 * Look and feel(theme) for the GUI
 	 */
 	private String theme;
@@ -75,6 +80,7 @@ public class BaseGUI {
 	public BaseGUI() {
 		load_preferences();
 		this.lang_handler = new LanguageHandler();
+		set_running(false);
 	}
 	
 	/**
@@ -417,5 +423,23 @@ public class BaseGUI {
 	 */
 	public String get_language_string(String key) {
 		return this.lang_handler.get_language_string(key);
+	}
+	
+	/**
+	 * Sets whether a process is currently running.
+	 * 
+	 * @param running Whether process is running
+	 */
+	public void set_running(boolean running) {
+		this.running = running;
+	}
+	
+	/**
+	 * Returns whether a process is currently running.
+	 * 
+	 * @return Whether a process is running
+	 */
+	public boolean is_running() {
+		return this.running;
 	}
 }

@@ -11,7 +11,7 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionListener;
  * @author Drakovek
  */
 public class DComboBox extends JComboBox<String> {
-	
+
 	/**
 	 * SerialVersionUID
 	 */
@@ -32,6 +32,6 @@ public class DComboBox extends JComboBox<String> {
 			String id) {
 		super(items);
 		this.setFont(base_gui.get_font());
-		this.addActionListener(new DActionListener(event, id));
+		this.addActionListener(new DActionListener(base_gui, event, id));
 	}	
 }

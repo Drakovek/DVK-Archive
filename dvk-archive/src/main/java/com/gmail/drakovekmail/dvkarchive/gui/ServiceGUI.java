@@ -7,7 +7,7 @@ import javax.swing.JPanel;
  * 
  * @author Drakovek
  */
-public class ServiceGUI extends JPanel {
+public abstract class ServiceGUI extends JPanel implements Disabler {
 	
 	/**
 	 * SerialVersionUID

@@ -30,7 +30,7 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
  * @author Drakovek
  *
  */
-public class StartGUI implements DActionEvent {
+public class StartGUI implements DActionEvent, Disabler {
 	
 	/**
 	 * Current directory for the StartGUI
@@ -56,6 +56,11 @@ public class StartGUI implements DActionEvent {
 	 * List for selecting services.
 	 */
 	private DList service_list;
+	
+	/**
+	 * File menu
+	 */
+	private DMenu file_menu;
 	
 	/**
 	 * BaseGUI for getting UI settings
@@ -142,16 +147,18 @@ public class StartGUI implements DActionEvent {
 		JSeparator sep = new JSeparator(SwingConstants.HORIZONTAL);
 		JPanel bottom_pnl = base_gui.get_y_stack(sep, 0, log_pnl, 1);
 		center_pnl.add(bottom_pnl);
-		this.frame.getContentPane().add(base_gui.get_spaced_panel(center_pnl), BorderLayout.CENTER);
+		this.frame.getContentPane().add(
+				base_gui.get_spaced_panel(center_pnl),
+				BorderLayout.CENTER);
 		//CREATE MENU BAR
 		JMenuBar menu_bar = new JMenuBar();
-		DMenu file_menu = new DMenu(base_gui, "file");
+		this.file_menu = new DMenu(base_gui, "file");
 		DMenuItem open_mit = new DMenuItem(base_gui, this, "open");
 		DMenuItem exit_mit = new DMenuItem(base_gui, this, "exit");
-		file_menu.add(open_mit);
-		file_menu.addSeparator();
-		file_menu.add(exit_mit);
-		menu_bar.add(file_menu);
+		this.file_menu.add(open_mit);
+		this.file_menu.addSeparator();
+		this.file_menu.add(exit_mit);
+		menu_bar.add(this.file_menu);
 		this.frame.setJMenuBar(menu_bar);
 		//PACK AND CREATE FRAME
 		reset_directory();
@@ -246,7 +253,7 @@ public class StartGUI implements DActionEvent {
 						this.service_pnl = new UnlinkedMediaGUI(this);
 						break;
 					default:
-						this.service_pnl = new ServiceGUI(this);
+						this.service_pnl = new UnlinkedMediaGUI(this);
 				}
 				this.content_pnl.add(this.service_pnl);
 				this.content_pnl.revalidate();
@@ -352,5 +359,21 @@ public class StartGUI implements DActionEvent {
 				change_service();
 				break;
 		}
+	}
+
+	@Override
+	public void enable_all() {
+		this.settings_bar.enable_all();
+		this.cat_box.setEnabled(true);
+		this.service_list.setEnabled(true);
+		this.file_menu.setEnabled(true);
+	}
+
+	@Override
+	public void disable_all() {
+		this.settings_bar.disable_all();
+		this.cat_box.setEnabled(false);
+		this.service_list.setEnabled(false);
+		this.file_menu.setEnabled(false);
 	}
 }

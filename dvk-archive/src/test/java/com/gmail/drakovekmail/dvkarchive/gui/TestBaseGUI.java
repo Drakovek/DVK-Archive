@@ -100,4 +100,17 @@ public class TestBaseGUI {
 		assertEquals("^File", base.get_language_string("file"));
 		assertEquals("", base.get_language_string("Nope"));
 	}
+	
+	/**
+	 * Tests the get_running and is_running methods.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_get_set_running() {
+		BaseGUI base = new BaseGUI();
+		base.set_running(true);
+		assertTrue(base.is_running());
+		base.set_running(false);
+		assertFalse(base.is_running());
+	}
 }

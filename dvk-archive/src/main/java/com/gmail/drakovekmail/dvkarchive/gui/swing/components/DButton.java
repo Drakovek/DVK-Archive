@@ -12,11 +12,11 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionListener;
  * @author Drakovek
  */
 public class DButton extends JButton {
-	
+
 	/**
 	 * SerialVersionUID
 	 */
-	private static final long serialVersionUID = 732391822296443001L;
+	private static final long serialVersionUID = 7738336973239492530L;
 
 	/**
 	 * Initializes the DButton object.
@@ -36,6 +36,6 @@ public class DButton extends JButton {
 		//SET FONT
 		this.setFont(base_gui.get_font());
 		//SET ACTION
-		this.addActionListener(new DActionListener(event, id));
+		this.addActionListener(new DActionListener(base_gui, event, id));
 	}
 }

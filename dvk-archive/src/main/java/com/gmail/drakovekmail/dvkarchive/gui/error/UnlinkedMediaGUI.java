@@ -71,6 +71,9 @@ public class UnlinkedMediaGUI extends SimpleServiceGUI {
 				this.start_gui.get_progress_bar()
 					.set_progress(false, false, 0, 0);
 				this.start_gui.append_console("finished", true);
+				this.start_gui.get_base_gui().set_running(false);
+				this.start_gui.enable_all();
+				enable_all();
 				break;
 		}
 	}

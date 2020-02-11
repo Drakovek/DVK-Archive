@@ -14,7 +14,7 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionListener;
 public class DMenuItem extends JMenuItem {
 	
 	/**
-	 * SerialVersionUID
+	 * SerialVerionUID
 	 */
 	private static final long serialVersionUID = 2820703107830083389L;
 
@@ -36,6 +36,6 @@ public class DMenuItem extends JMenuItem {
 		//SET FONT
 		this.setFont(base_gui.get_font());
 		//SET ACTION
-		this.addActionListener(new DActionListener(event, id));
+		this.addActionListener(new DActionListener(base_gui, event, id));
 	}
 }

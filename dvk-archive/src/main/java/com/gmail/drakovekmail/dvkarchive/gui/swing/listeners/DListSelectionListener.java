@@ -3,6 +3,8 @@ package com.gmail.drakovekmail.dvkarchive.gui.swing.listeners;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import com.gmail.drakovekmail.dvkarchive.gui.BaseGUI;
+
 /**
  * Deals with item in a list being selected.
  * 
@@ -10,6 +12,11 @@ import javax.swing.event.ListSelectionListener;
  */
 public class DListSelectionListener implements ListSelectionListener{
 
+	/**
+	 * BaseGUI for determining if process is running
+	 */
+	private BaseGUI base_gui;
+	
 	/**
 	 * DActionEvent to call when item is selected
 	 */
@@ -23,10 +30,12 @@ public class DListSelectionListener implements ListSelectionListener{
 	/**
 	 * Initializes DListSelectionListener.
 	 * 
+	 * @param base_gui BaseGUI for determining if process is running
 	 * @param event DActionEvent to call when item is selected
 	 * @param id ID of component calling the action
 	 */
-	public DListSelectionListener(DActionEvent event, String id) {
+	public DListSelectionListener(BaseGUI base_gui, DActionEvent event, String id) {
+		this.base_gui = base_gui;
 		this.event = event;
 		this.id = id;
 	}
@@ -36,7 +45,9 @@ public class DListSelectionListener implements ListSelectionListener{
 	 */
 	@Override
 	public void valueChanged(ListSelectionEvent arg0) {
-		this.event.event(this.id);
+		if(!this.base_gui.is_running()) {
+			this.event.event(this.id);
+		}
 	}
 
 }

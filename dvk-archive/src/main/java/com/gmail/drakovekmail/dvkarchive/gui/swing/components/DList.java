@@ -12,12 +12,12 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DListSelectionListe
  * @author Drakovek
  */
 public class DList extends JList<String> {
-
+	
 	/**
 	 * SerialVersionUID
 	 */
 	private static final long serialVersionUID = -5215736291266793942L;
-	
+
 	/**
 	 * Height of one cell in the DList
 	 */
@@ -38,7 +38,7 @@ public class DList extends JList<String> {
 		this.setLayoutOrientation(VERTICAL);
 		this.setFont(base_gui.get_font());
 		//SET ACTION LISTENER
-		this.addListSelectionListener(new DListSelectionListener(event, id));
+		this.addListSelectionListener(new DListSelectionListener(base_gui, event, id));
 	}
 	
 	/**

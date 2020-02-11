@@ -6,6 +6,7 @@ import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 import com.gmail.drakovekmail.dvkarchive.gui.BaseGUI;
+import com.gmail.drakovekmail.dvkarchive.gui.Disabler;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DButton;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DLabel;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
@@ -15,7 +16,7 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
  * 
  * @author Drakovek
  */
-public class SettingsBarGUI extends JPanel implements DActionEvent{
+public class SettingsBarGUI extends JPanel implements DActionEvent, Disabler {
 	
 	/**
 	 * SerialVersionUID
@@ -28,16 +29,22 @@ public class SettingsBarGUI extends JPanel implements DActionEvent{
 	private DLabel lbl;
 	
 	/**
+	 * Settings button for the settings bar.
+	 */
+	private DButton btn;
+	
+	/**
 	 * Creates the settings bar GUI object.
 	 * 
 	 * @param base_gui BaseGUI for UI settings
 	 */
 	public SettingsBarGUI(BaseGUI base_gui) {
 		//CREATE BUTTON AND LABEL
-		DButton btn = new DButton(base_gui, this, "settings");
+		this.btn = new DButton(base_gui, this, "settings");
 		this.lbl = new DLabel(base_gui, null, "no_dir_select");
 		//CREATE INTERNAL BAR
-		JPanel internal = base_gui.get_x_stack(this.lbl, 1, btn, 0);
+		JPanel internal = base_gui.get_x_stack(
+				this.lbl, 1, this.btn, 0);
 		//ADD SEPARATOR
 		JSeparator sep;
 		sep = new JSeparator(SwingConstants.HORIZONTAL);
@@ -64,5 +71,15 @@ public class SettingsBarGUI extends JPanel implements DActionEvent{
 	@Override
 	public void event(String id) {
 		System.out.println("Something happened.");
+	}
+
+	@Override
+	public void enable_all() {
+		this.btn.setEnabled(true);
+	}
+
+	@Override
+	public void disable_all() {
+		this.btn.setEnabled(false);
 	}
 }
