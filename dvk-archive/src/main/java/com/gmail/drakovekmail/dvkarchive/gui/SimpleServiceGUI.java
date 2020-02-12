@@ -52,6 +52,7 @@ public abstract class SimpleServiceGUI extends ServiceGUI implements DActionEven
 		//CREATE TITLE PANEL
 		DLabel title_lbl = new DLabel(base_gui, null, title);
 		title_lbl.setHorizontalAlignment(SwingConstants.CENTER);
+		title_lbl.set_font_large();
 		JSeparator sep = new JSeparator(SwingConstants.HORIZONTAL);
 		JPanel title_pnl = base_gui.get_y_stack(title_lbl, sep);
 		//CREATE DESCRIPTION PANEL

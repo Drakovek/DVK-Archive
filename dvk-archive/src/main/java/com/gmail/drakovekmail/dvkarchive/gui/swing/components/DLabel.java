@@ -1,6 +1,7 @@
 package com.gmail.drakovekmail.dvkarchive.gui.swing.components;
 
 import java.awt.Component;
+import java.awt.Font;
 
 import javax.swing.JLabel;
 import com.gmail.drakovekmail.dvkarchive.gui.BaseGUI;
@@ -16,7 +17,7 @@ public class DLabel extends JLabel {
 	/**
 	 * SerialVersionUID
 	 */
-	private static final long serialVersionUID = -6373707390656666673L;
+	private static final long serialVersionUID = -5073421630112310014L;
 	
 	/**
 	 * BaseGUI for getting UI settings
@@ -50,7 +51,20 @@ public class DLabel extends JLabel {
 	 * @param id Language ID
 	 */
 	public void set_text_id(String id) {
-		setText(LanguageHandler.get_text(this.base_gui.get_language_string(id)));
+		setText(LanguageHandler.get_text(
+				this.base_gui.get_language_string(id)));
+	}
+	
+	/**
+	 * Sets the font to be larger than default.
+	 */
+	public void set_font_large() {
+		Font font = this.base_gui.get_font();
+		int size = font.getSize();
+		size = (int)(size * 1.5);
+		Font new_font = new Font(font.getFamily(),
+				font.getStyle(), size);
+		this.setFont(new_font);
 	}
 	
 	/**

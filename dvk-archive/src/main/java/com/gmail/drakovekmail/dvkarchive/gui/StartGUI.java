@@ -9,6 +9,8 @@ import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
+
+import com.gmail.drakovekmail.dvkarchive.gui.artist.FurAffinityGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.error.UnlinkedMediaGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.settings.SettingsBarGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DButton;
@@ -150,7 +152,8 @@ public class StartGUI implements DActionEvent, Disabler {
 		this.content_pnl.setLayout(new GridLayout(1, 1));
 		JPanel center_pnl = new JPanel();
 		center_pnl.setLayout(new GridLayout(2, 1));
-		center_pnl.add(this.content_pnl);
+		center_pnl.add(base_gui.get_spaced_panel(
+				this.content_pnl, 1, 1, false, true, false, false));
 		JSeparator sep = new JSeparator(SwingConstants.HORIZONTAL);
 		JPanel bottom_pnl = base_gui.get_y_stack(sep, 0, log_pnl, 1);
 		center_pnl.add(bottom_pnl);
@@ -257,6 +260,9 @@ public class StartGUI implements DActionEvent, Disabler {
 				this.service_pnl = null;
 				this.base_gui.set_canceled(true);
 				switch(service) {
+					case "fur_affinity":
+						this.service_pnl = new FurAffinityGUI(this);
+						break;
 					case "unlinked_media":
 						this.service_pnl = new UnlinkedMediaGUI(this);
 						break;

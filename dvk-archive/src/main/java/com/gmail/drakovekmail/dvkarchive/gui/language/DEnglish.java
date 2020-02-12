@@ -39,12 +39,18 @@ public class DEnglish extends LanguageMap{
 		this.lang_keys.put("fur_affinity", "Fur Affinity");
 		this.lang_keys.put("inkbunny", "Inkbunny");
 		this.lang_keys.put("transfur", "Transfur");
+		this.lang_keys.put("username", "^Username:");
+		this.lang_keys.put("password", "^Password:");
+		this.lang_keys.put("captcha", "^Captcha:");
+		this.lang_keys.put("login", "^Login");
+		this.lang_keys.put("skip_login", "S^kip Login");
+		this.lang_keys.put("refresh_captcha", "^Refresh Captcha");
 		//ERROR FINDING
 		this.lang_keys.put("same_ids", "Same IDs");
 		this.lang_keys.put("missing_media", "Missing Media");
 		this.lang_keys.put("unlinked_media", "Unlinked Media");
 		//UNLINKED MEDIA
-		this.lang_keys.put("unlinked_title", "     Find Unlinked Media     ");
+		this.lang_keys.put("unlinked_title", "Find Unlinked Media");
 		this.lang_keys.put("unlinked_console", "[FINDING UNLINKED MEDIA]");
 		String desc = "Finds media files in DVK directories that ";
 		desc = desc + "do not have a corresponding DVK file.";
