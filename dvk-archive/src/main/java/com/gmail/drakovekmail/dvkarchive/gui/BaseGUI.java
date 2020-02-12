@@ -65,6 +65,11 @@ public class BaseGUI {
 	private boolean running;
 	
 	/**
+	 * Whether process has been canceled.
+	 */
+	private boolean canceled;
+	
+	/**
 	 * Look and feel(theme) for the GUI
 	 */
 	private String theme;
@@ -81,6 +86,7 @@ public class BaseGUI {
 		load_preferences();
 		this.lang_handler = new LanguageHandler();
 		set_running(false);
+		set_canceled(true);
 	}
 	
 	/**
@@ -441,5 +447,23 @@ public class BaseGUI {
 	 */
 	public boolean is_running() {
 		return this.running;
+	}
+	
+	/**
+	 * Sets whether the current process has been canceled.
+	 * 
+	 * @param canceled Whether process is canceled
+	 */
+	public void set_canceled(boolean canceled) {
+		this.canceled = canceled;
+	}
+	
+	/**
+	 * Returns whether the current process has been canceled.
+	 * 
+	 * @return Whether process is canceled
+	 */
+	public boolean is_canceled() {
+		return this.canceled;
 	}
 }

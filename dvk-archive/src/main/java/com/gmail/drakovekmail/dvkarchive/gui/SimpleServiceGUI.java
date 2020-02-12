@@ -90,6 +90,7 @@ public abstract class SimpleServiceGUI extends ServiceGUI implements DActionEven
 	public void event(String id) {
 		if(directory_loaded()) {
 			this.start_gui.get_base_gui().set_running(true);
+			this.start_gui.get_base_gui().set_canceled(false);
 			this.start_gui.disable_all();
 			disable_all();
 			start_read_dvks();

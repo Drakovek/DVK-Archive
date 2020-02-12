@@ -42,9 +42,15 @@ public class DvkHandler {
 		File[] dvk_dirs = get_directories(dirs);
 		int max = dvk_dirs.length;
 		for(int i = 0; i < max; i++) {
+			//SHOW PROGRESS
 			if(start_gui != null) {
 				start_gui.get_progress_bar().set_progress(false, true, i, max);
+				//BREAK IF CANCELLED
+				if(start_gui.get_base_gui().is_canceled()) {
+					break;
+				}
 			}
+			//ADD DIRECTORY
 			DvkDirectory dvkd = new DvkDirectory();
 			dvkd.read_dvks(dvk_dirs[i]);
 			this.dvks.addAll(dvkd.get_dvks());

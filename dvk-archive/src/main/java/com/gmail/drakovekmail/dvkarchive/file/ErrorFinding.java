@@ -26,12 +26,21 @@ public class ErrorFinding {
 			File[] directories,
 			StartGUI start_gui) {
 		//FIND ALL MEDIA FILES
-		File[] dirs = DvkHandler.get_directories(directories);
+		File[] dirs = new File[0];
+		if(start_gui == null || !start_gui.get_base_gui().is_canceled()) {
+			dirs = DvkHandler.get_directories(directories);
+		}
 		ArrayList<File> missing = new ArrayList<>();
 		for(File dir: dirs) {
 			File[] files = dir.listFiles();
 			Arrays.sort(files);
 			for(File file: files) {
+				//BREAK IF CANCELLED
+				if(start_gui != null 
+						&& start_gui.get_base_gui()
+							.is_canceled()) {
+					break;
+				}
 				//CHECK IF FILE IS MISSING
 				if(!file.isDirectory()
 						&& !file.getName().endsWith(".dvk")

@@ -113,4 +113,17 @@ public class TestBaseGUI {
 		base.set_running(false);
 		assertFalse(base.is_running());
 	}
+	
+	/**
+	 * Tests the set_canceled and is_canceled methods.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_get_set_canceled() {
+		BaseGUI base = new BaseGUI();
+		base.set_canceled(true);
+		assertTrue(base.is_canceled());
+		base.set_canceled(false);
+		assertFalse(base.is_canceled());
+	}
 }

@@ -19,6 +19,8 @@ public class DEnglish extends LanguageMap{
 		this.lang_keys.put("category", "Ca^tegory");
 		this.lang_keys.put("service", "S^ervice");
 		this.lang_keys.put("cancel", "^Cancel");
+		this.lang_keys.put("canceling", "Cancelling...");
+		this.lang_keys.put("clear", "^Clear");
 		this.lang_keys.put("console_log", "Console Log");
 		this.lang_keys.put("run", "^Run");
 		this.lang_keys.put("file", "^File");

@@ -45,7 +45,7 @@ public class DActionListener implements ActionListener{
 	 */
 	@Override
 	public void actionPerformed(ActionEvent arg) {
-		if(!this.base_gui.is_running()) {
+		if(this.base_gui == null|| !this.base_gui.is_running()) {
 			this.event.event(this.id);
 		}
 	}

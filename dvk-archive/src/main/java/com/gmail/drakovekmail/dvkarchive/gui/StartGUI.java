@@ -63,6 +63,12 @@ public class StartGUI implements DActionEvent, Disabler {
 	private DMenu file_menu;
 	
 	/**
+	 * Button used for canceling processes
+	 * Also clears the console log
+	 */
+	private DButton cancel_btn;
+	
+	/**
 	 * BaseGUI for getting UI settings
 	 */
 	private BaseGUI base_gui;
@@ -127,9 +133,10 @@ public class StartGUI implements DActionEvent, Disabler {
 		JPanel side_pnl = this.base_gui.get_spaced_panel(prog_pnl, 0, 1, true, true, true, false);
 		this.frame.getContentPane().add(side_pnl, BorderLayout.WEST);
 		//CREATE PROGRESS BAR
-		DButton cancel_btn = new DButton(base_gui, this, "cancel");
+		this.cancel_btn = new DButton(base_gui, this, "clear");
+		this.cancel_btn.always_allow_action();
 		this.progress_bar = new DProgressBar(base_gui);
-		JPanel bar_pnl = base_gui.get_x_stack(this.progress_bar, 1, cancel_btn, 0);
+		JPanel bar_pnl = base_gui.get_x_stack(this.progress_bar, 1, this.cancel_btn, 0);
 		//CREATE CONSOLE LOG
 		DLabel console_lbl = new DLabel(base_gui, null, "console_log");
 		console_lbl.setHorizontalAlignment(SwingConstants.CENTER);
@@ -248,12 +255,14 @@ public class StartGUI implements DActionEvent, Disabler {
 				//CHANGE SERVICE GUI
 				this.content_pnl.removeAll();
 				this.service_pnl = null;
+				this.base_gui.set_canceled(true);
 				switch(service) {
 					case "unlinked_media":
 						this.service_pnl = new UnlinkedMediaGUI(this);
 						break;
 					default:
 						this.service_pnl = new UnlinkedMediaGUI(this);
+						break;
 				}
 				this.content_pnl.add(this.service_pnl);
 				this.content_pnl.revalidate();
@@ -342,6 +351,22 @@ public class StartGUI implements DActionEvent, Disabler {
 			set_directory(fc.getSelectedFile());
 		}
 	}
+	
+	/**
+	 * Runs when the cancel/clear button is pressed.
+	 * When process is running, cancels the process.
+	 * Otherwise, clears the console log.
+	 */
+	public void cancel_clear() {
+		if(this.base_gui.is_running()) {
+			this.progress_bar.set_progress(true, false, 0, 0);
+			this.base_gui.set_canceled(true);
+			append_console("canceling", true);
+		}
+		else {
+			this.console.setText("");
+		}
+	}
 
 	@Override
 	public void event(String id) {
@@ -358,6 +383,9 @@ public class StartGUI implements DActionEvent, Disabler {
 			case "service":
 				change_service();
 				break;
+			case "clear":
+				cancel_clear();
+				break;
 		}
 	}
 
@@ -367,6 +395,7 @@ public class StartGUI implements DActionEvent, Disabler {
 		this.cat_box.setEnabled(true);
 		this.service_list.setEnabled(true);
 		this.file_menu.setEnabled(true);
+		this.cancel_btn.set_text_id("clear");
 	}
 
 	@Override
@@ -375,5 +404,6 @@ public class StartGUI implements DActionEvent, Disabler {
 		this.cat_box.setEnabled(false);
 		this.service_list.setEnabled(false);
 		this.file_menu.setEnabled(false);
+		this.cancel_btn.set_text_id("cancel");
 	}
 }
