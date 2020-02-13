@@ -1,6 +1,7 @@
 package com.gmail.drakovekmail.dvkarchive.file;
 
 import java.io.File;
+import java.io.Serializable;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,7 +15,13 @@ import com.gmail.drakovekmail.dvkarchive.processing.StringProcessing;
  * 
  * @author Drakovek
  */
-public class Dvk {
+public class Dvk implements Serializable {
+	
+	/**
+	 * SerialversionUID
+	 */
+	private static final long serialVersionUID = -3671753710612154210L;
+
 	/**
 	 * File object for the Dvk
 	 */
@@ -170,7 +177,7 @@ public class Dvk {
 				file.put("secondary_file", get_secondary_file().getName());
 			}
 			json.put("file", file);
-			InOut.write_file(get_dvk_file(), json.toString());
+			InOut.write_file(get_dvk_file(), json.toString(4));
 		}
 	}
 	

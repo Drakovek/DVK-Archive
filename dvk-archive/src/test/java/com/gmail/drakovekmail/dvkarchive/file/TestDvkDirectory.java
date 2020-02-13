@@ -1,8 +1,12 @@
 package com.gmail.drakovekmail.dvkarchive.file;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.io.FileUtils;
 import org.json.JSONObject;
 import org.junit.After;
@@ -95,5 +99,54 @@ public class TestDvkDirectory {
 		assertEquals(2, dir.get_dvks().size());
 		assertEquals("Title 1", dir.get_dvks().get(0).get_title());
 		assertEquals("Title 2", dir.get_dvks().get(1).get_title());
+	}
+	
+	/**
+	 * Tests contains_dvk_file method.
+	 */
+	@Test
+	public void test_contains_dvk_file() {
+		DvkDirectory dir = new DvkDirectory();
+		dir.read_dvks(this.test_dir);
+		File file1 = new File(this.test_dir, "dvk1.dvk");
+		File file2 = new File(this.test_dir, "dvk702.dvk");
+		assertTrue(dir.contains_dvk_file(file1));
+		assertFalse(dir.contains_dvk_file(file2));
+	}
+	
+	/**
+	 * Tests the update_directory method.
+	 */
+	@Test
+	public void test_update_directory()	{
+		DvkDirectory dir = new DvkDirectory();
+		dir.read_dvks(this.test_dir);
+		dir.read_dvks(this.test_dir);
+		assertEquals(2, dir.get_dvks().size());
+		//MODIFY FILES
+		long modified = dir.get_dvks().get(0).get_dvk_file().lastModified();
+		File file = new File(this.test_dir, "dvk1.dvk");
+		file.delete();
+		Dvk dvk = new Dvk();
+		dvk.set_dvk_file(new File(this.test_dir, "dvk2.dvk"));
+		dvk.set_id("id456");
+		dvk.set_title("New Title");
+		dvk.set_artist("Artist");
+		dvk.set_page_url("/page/url");
+		dvk.set_media_file("dvk1.png");
+		dvk.write_dvk();
+		dvk.set_dvk_file(new File(this.test_dir, "dvkNew.dvk"));
+		dvk.set_id("NEW123");
+		dvk.set_title("Thing");
+		dvk.write_dvk();
+		//CHECK MODIFIED
+		try {
+			TimeUnit.MILLISECONDS.sleep(1000);
+		}
+		catch (InterruptedException e) {}
+		dir.update_directory(modified);
+		assertEquals(2, dir.get_dvks().size());
+		assertEquals("New Title", dir.get_dvks().get(0).get_title());
+		assertEquals("Thing", dir.get_dvks().get(1).get_title());
 	}
 }
