@@ -30,32 +30,45 @@ public class DvkHandler {
 	 * Includes sub-directories.
 	 * 
 	 * @param dirs Directories in which to search for files
+	 * @param prefs FilePrefs for getting index directory
 	 * @param start_gui Used for displaying progress.
+	 * @param use_index Whether to load from index files
+	 * @param check_new Whether to update list when loading from index
+	 * @param save_index Whether to save index files
 	 */
-	public void read_dvks(final File[] dirs, StartGUI start_gui) {
+	public void read_dvks(
+			final File[] dirs,
+			FilePrefs prefs,
+			StartGUI start_gui,
+			boolean use_index,
+			boolean check_new,
+			boolean save_index) {
 		if(start_gui != null) {
 			start_gui.append_console("", false);
 			start_gui.append_console("reading_dvks", true);
 			start_gui.get_progress_bar().set_progress(true, false, 0, 0);
 		}
 		this.dvks = new ArrayList<>();
+		DvkIndexing index = new DvkIndexing(prefs.get_index_dir());
 		File[] dvk_dirs = get_directories(dirs);
 		int max = dvk_dirs.length;
 		for(int i = 0; i < max; i++) {
 			//SHOW PROGRESS
 			if(start_gui != null) {
-				start_gui.get_progress_bar().set_progress(false, true, i, max);
+				start_gui.get_progress_bar().set_progress(
+						false, true, i, max);
 				//BREAK IF CANCELLED
 				if(start_gui.get_base_gui().is_canceled()) {
 					break;
 				}
 			}
 			//ADD DIRECTORY
-			DvkDirectory dvkd = new DvkDirectory();
-			dvkd.read_dvks(dvk_dirs[i]);
+			DvkDirectory dvkd = index.get_dvk_directory(
+					dvk_dirs[i], use_index, check_new, save_index);
 			this.dvks.addAll(dvkd.get_dvks());
 			dvkd = null;
 		}
+		index.write_index_list();
 	}
 	
 	/**

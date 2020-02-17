@@ -1,7 +1,10 @@
 package com.gmail.drakovekmail.dvkarchive.gui.error;
 
 import java.io.File;
+
+import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
 import com.gmail.drakovekmail.dvkarchive.file.ErrorFinding;
+import com.gmail.drakovekmail.dvkarchive.file.FilePrefs;
 import com.gmail.drakovekmail.dvkarchive.gui.SimpleServiceGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.work.DSwingWorker;
@@ -45,6 +48,18 @@ public class UnlinkedMediaGUI extends SimpleServiceGUI {
 		this.start_gui.append_console("unlinked_console", true);
 		File[] dirs = {this.start_gui.get_directory()};
 		ErrorFinding.get_unlinked_media(this.dvk_handler, dirs, this.start_gui);
+	}
+	
+	/**
+	 * Reads all dvks in base_gui's selected directory.
+	 */
+	protected void read_dvks() {
+		this.dvk_handler = new DvkHandler();
+		File[] dirs = {this.start_gui.get_directory()};
+		FilePrefs prefs = this.start_gui.get_file_prefs();
+		boolean index = prefs.use_index();
+		this.dvk_handler.read_dvks(
+				dirs, prefs, this.start_gui, index, true, index);
 	}
 
 	@Override

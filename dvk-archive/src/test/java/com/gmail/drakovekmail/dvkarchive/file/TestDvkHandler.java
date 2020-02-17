@@ -3,6 +3,8 @@ package com.gmail.drakovekmail.dvkarchive.file;
 import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.junit.After;
@@ -131,15 +133,23 @@ public class TestDvkHandler {
 	 */
 	@Test
 	public void test_read_dvks() {
+		//CREATE INDEX DIRECTORY
+		File index_dir = new File(this.test_dir, "indexing");
+		if(!index_dir.isDirectory()) {
+			index_dir.mkdir();
+		}
+		FilePrefs prefs = new FilePrefs();
+		prefs.set_index_dir(index_dir);
 		//TEST INVALID DIRECTORIES
 		DvkHandler handler = new DvkHandler();
-		handler.read_dvks(null, null);
+		handler.read_dvks(
+				null, prefs, null, false, false, false);
 		assertEquals(0, handler.get_size());
-		handler.read_dvks(null, null);
 		assertEquals(0, handler.get_size());
 		//LOAD FROM MAIN TEST DIRECTORY
 		File[] dirs = {this.test_dir};
-		handler.read_dvks(dirs, null);
+		handler.read_dvks(
+				dirs, prefs, null, false, false, false);
 		assertEquals(5, handler.get_size());
 		assertEquals("Page 1", handler.get_dvk(0).get_title());
 		assertEquals("Page 1.05", handler.get_dvk(1).get_title());
@@ -150,8 +160,17 @@ public class TestDvkHandler {
 		dirs = new File[2];
 		dirs[0] = this.f1;
 		dirs[1] = this.f2;
-		handler.read_dvks(dirs, null);
+		handler.read_dvks(
+				dirs, prefs, null, false, false, true);
 		assertEquals(3, handler.get_size());
+		//CHECK SAVED INDEX
+		File[] files = index_dir.listFiles();
+		Arrays.sort(files);
+		assertEquals(4, files.length);
+		assertEquals("1.ser", files[0].getName());
+		assertEquals("2.ser", files[1].getName());
+		assertEquals("3.ser", files[2].getName());
+		assertEquals("indexes.json", files[3].getName());	
 	}
 	
 	/**
@@ -159,10 +178,12 @@ public class TestDvkHandler {
 	 */
 	@Test
 	public void test_get_size() {
+		FilePrefs prefs = new FilePrefs();
 		DvkHandler handler = new DvkHandler();
 		assertEquals(0, handler.get_size());
 		File[] dirs = {this.test_dir};
-		handler.read_dvks(dirs, null);
+		handler.read_dvks(
+				dirs, prefs, null, false, false, false);
 		assertEquals(5, handler.get_size());
 	}
 	
@@ -224,9 +245,10 @@ public class TestDvkHandler {
 	 */
 	@Test
 	public void test_sort_title() {
+		FilePrefs prefs = new FilePrefs();
 		DvkHandler handler = new DvkHandler();
 		File[] dirs = {this.test_dir};
-		handler.read_dvks(dirs, null);
+		handler.read_dvks(dirs, prefs, null, false, false, false);
 		//TEST STANDARD TITLE SORT
 		handler.sort_dvks_title(false, false);
 		assertEquals(5, handler.get_size());
@@ -258,9 +280,11 @@ public class TestDvkHandler {
 	 */
 	@Test
 	public void test_sort_time() {
+		FilePrefs prefs = new FilePrefs();
 		DvkHandler handler = new DvkHandler();
 		File[] dirs = {this.test_dir};
-		handler.read_dvks(dirs, null);
+		handler.read_dvks(
+				dirs, prefs, null, false, false, false);
 		//TEST STANDARD TIME SORT
 		handler.sort_dvks_time(false, false);
 		assertEquals(5, handler.get_size());

@@ -155,7 +155,7 @@ public class DvkIndexing {
 	 * @param directory Index directory
 	 */
 	public void set_index_directory(File directory) {
-		if(directory != null && directory.isDirectory()) {
+		if(directory != null) {
 			this.index_directory = directory;
 			read_index_list();
 		}
@@ -255,13 +255,17 @@ public class DvkIndexing {
 	 * Does not delete the index list JSON file.
 	 */
 	public void clean_index_directory() {
-		File[] files = get_index_directory().listFiles();
-		for(File file: files) {
-			if(!file.getName().equals(INDEX_LIST)
-					&& index_of_index(file) == -1) {
-				file.delete();
+		try
+		{
+			File[] files = get_index_directory().listFiles();
+			for(File file: files) {
+				if(file.getName().endsWith(".ser")
+						&& index_of_index(file) == -1) {
+					file.delete();
+				}
 			}
 		}
+		catch(NullPointerException e) {}
 	}
 	
 	/**

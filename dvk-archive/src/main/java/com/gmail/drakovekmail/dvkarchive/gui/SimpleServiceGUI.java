@@ -1,7 +1,6 @@
 package com.gmail.drakovekmail.dvkarchive.gui;
 
 import java.awt.GridLayout;
-import java.io.File;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
@@ -76,15 +75,6 @@ public abstract class SimpleServiceGUI extends ServiceGUI implements DActionEven
 	private void start_read_dvks() {
 		this.sw = new DSwingWorker(this, "read_dvks");
 		this.sw.execute();
-	}
-	
-	/**
-	 * Reads all dvks in base_gui's selected directory.
-	 */
-	protected void read_dvks() {
-		this.dvk_handler = new DvkHandler();
-		File[] dirs = {this.start_gui.get_directory()};
-		this.dvk_handler.read_dvks(dirs, this.start_gui);
 	}
 	
 	@Override

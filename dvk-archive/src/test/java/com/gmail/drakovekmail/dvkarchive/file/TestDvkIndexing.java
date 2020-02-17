@@ -141,8 +141,8 @@ public class TestDvkIndexing {
 		assertEquals(this.test_dir, index.get_index_directory());
 		index.set_index_directory(null);
 		assertEquals(this.test_dir, index.get_index_directory());
-		index.set_index_directory(new File("kjsdlkfj"));
-		assertEquals(this.test_dir, index.get_index_directory());
+		index.set_index_directory(new File("ahhhh"));
+		assertEquals("ahhhh", index.get_index_directory().getName());
 	}
 	
 	/**
@@ -179,6 +179,13 @@ public class TestDvkIndexing {
 		json.put("file_type", "kjsdk");
 		InOut.write_file(file1, json.toString(4));
 		index = new DvkIndexing(this.index_dir);
+		index.read_index_list();
+		assertEquals(0, index.get_index_list().size());
+		//READ FROM NON-EXISTANT DIRECTORIES
+		index = new DvkIndexing(null);
+		index.read_index_list();
+		assertEquals(0, index.get_index_list().size());
+		index = new DvkIndexing(new File(this.test_dir, "kljsd"));
 		index.read_index_list();
 		assertEquals(0, index.get_index_list().size());
 	}
@@ -246,11 +253,13 @@ public class TestDvkIndexing {
 		File file1 = new File(this.index_dir, "file1.ser");
 		File file2 = new File(this.index_dir, "file2.ser");
 		File file3 = new File(this.index_dir, "file3.ser");
+		File file4 = new File(this.index_dir, "file4.bleh");
 		File json = new File(this.index_dir, DvkIndexing.INDEX_LIST);
 		try {
 			file1.createNewFile();
 			file2.createNewFile();
 			file3.createNewFile();
+			file4.createNewFile();
 			json.createNewFile();
 		}
 		catch(IOException e) {
@@ -258,13 +267,13 @@ public class TestDvkIndexing {
 		}
 		//BEFORE DELETING
 		File[] files = this.index_dir.listFiles();
-		assertEquals(4, files.length);
+		assertEquals(5, files.length);
 		//ADD FILES THEN CLEAN DIRECTORY
 		index.add_to_index_list(file1, this.index_dir);
 		index.clean_index_directory();
 		files = this.index_dir.listFiles();
 		//CHECK REMAINING FILES
-		assertEquals(2, files.length);
+		assertEquals(3, files.length);
 		boolean match = false;
 		for(int i = 0; i < 3; i++) {
 			if(files[i].getName().equals("file1.ser")) {

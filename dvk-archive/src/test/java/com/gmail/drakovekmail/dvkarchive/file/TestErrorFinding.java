@@ -104,9 +104,11 @@ public class TestErrorFinding {
 	 */
 	@Test
 	public void test_get_unlinked_media() {
+		FilePrefs prefs = new FilePrefs();
 		DvkHandler handler = new DvkHandler();
 		File[] dirs = {this.test_dir};
-		handler.read_dvks(dirs, null);
+		handler.read_dvks(
+				dirs, prefs, null, false, false, false);
 		ArrayList<File> unlinked;
 		unlinked = ErrorFinding.get_unlinked_media(handler, dirs, null);
 		assertEquals(2, unlinked.size());

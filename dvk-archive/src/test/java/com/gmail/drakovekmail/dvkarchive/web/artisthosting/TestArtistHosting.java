@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
 import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
+import com.gmail.drakovekmail.dvkarchive.file.FilePrefs;
 
 /**
  * Unit tests for the ArtistHosting class.
@@ -77,9 +78,10 @@ public class TestArtistHosting {
 		dvk.set_dvk_file(new File(this.test_dir, "dvk4.dvk"));
 		dvk.write_dvk();
 		//TEST GETTING ARTISTS
+		FilePrefs prefs = new FilePrefs();
 		DvkHandler handler = new DvkHandler();
 		File[] dirs = {this.test_dir};
-		handler.read_dvks(dirs, null);
+		handler.read_dvks(dirs, prefs, null, false, false, false);
 		ArrayList<Dvk> dvks;
 		dvks = ArtistHosting.get_artists(handler, "url.com");
 		assertEquals(2, dvks.size());

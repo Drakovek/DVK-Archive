@@ -10,6 +10,7 @@ import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 
+import com.gmail.drakovekmail.dvkarchive.file.FilePrefs;
 import com.gmail.drakovekmail.dvkarchive.gui.artist.FurAffinityGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.error.UnlinkedMediaGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.settings.SettingsBarGUI;
@@ -76,6 +77,11 @@ public class StartGUI implements DActionEvent, Disabler {
 	private BaseGUI base_gui;
 	
 	/**
+	 * FilePrefs for getting file settings
+	 */
+	private FilePrefs file_prefs;
+	
+	/**
 	 * DTextArea used as the console log
 	 */
 	private DTextArea console;
@@ -110,6 +116,13 @@ public class StartGUI implements DActionEvent, Disabler {
 		//INITIALIZE INSTANCE VARIABLES
 		this.base_gui = base_gui;
 		this.base_gui.set_font("", 14, true);
+		this.file_prefs = new FilePrefs();
+		File file = new File("/tmp/dvkindex");
+		if(!file.isDirectory()) {
+			file.mkdirs();
+		}
+		this.file_prefs.set_index_dir(new File(file, "dvkindex"));
+		this.file_prefs.set_use_index(true);
 		this.current_service = new String();
 		this.frame = new DFrame(this.base_gui, "dvk_archive");
 		//CREATE SETTINGS BAR
@@ -132,39 +145,40 @@ public class StartGUI implements DActionEvent, Disabler {
 		JPanel serve_pnl = this.base_gui.get_y_stack(serve_lbl, 0, serve_scr, 1);
 		//CREATE SIDE PANEL
 		JPanel prog_pnl = this.base_gui.get_y_stack(cat_pnl, 0, serve_pnl, 1);
-		JPanel side_pnl = this.base_gui.get_spaced_panel(prog_pnl, 0, 1, true, true, true, false);
+		JPanel side_pnl = this.base_gui.get_spaced_panel(
+				prog_pnl, 0, 1, true, true, true, false);
 		this.frame.getContentPane().add(side_pnl, BorderLayout.WEST);
 		//CREATE PROGRESS BAR
-		this.cancel_btn = new DButton(base_gui, this, "clear");
+		this.cancel_btn = new DButton(this.base_gui, this, "clear");
 		this.cancel_btn.always_allow_action();
-		this.progress_bar = new DProgressBar(base_gui);
-		JPanel bar_pnl = base_gui.get_x_stack(this.progress_bar, 1, this.cancel_btn, 0);
+		this.progress_bar = new DProgressBar(this.base_gui);
+		JPanel bar_pnl = this.base_gui.get_x_stack(this.progress_bar, 1, this.cancel_btn, 0);
 		//CREATE CONSOLE LOG
-		DLabel console_lbl = new DLabel(base_gui, null, "console_log");
+		DLabel console_lbl = new DLabel(this.base_gui, null, "console_log");
 		console_lbl.setHorizontalAlignment(SwingConstants.CENTER);
 		JPanel console_pnl = new JPanel();
-		this.console = new DTextArea(base_gui);
+		this.console = new DTextArea(this.base_gui);
 		DScrollPane console_scr = new DScrollPane(this.console);
-		console_pnl = base_gui.get_y_stack(console_lbl, 0, console_scr, 1);
-		JPanel log_pnl = base_gui.get_y_stack(console_pnl, 1, bar_pnl, 0);
+		console_pnl = this.base_gui.get_y_stack(console_lbl, 0, console_scr, 1);
+		JPanel log_pnl = this.base_gui.get_y_stack(console_pnl, 1, bar_pnl, 0);
 		//CREATE CENTER PANEL
 		this.content_pnl = new JPanel();
 		this.content_pnl.setLayout(new GridLayout(1, 1));
 		JPanel center_pnl = new JPanel();
 		center_pnl.setLayout(new GridLayout(2, 1));
-		center_pnl.add(base_gui.get_spaced_panel(
+		center_pnl.add(this.base_gui.get_spaced_panel(
 				this.content_pnl, 1, 1, false, true, false, false));
 		JSeparator sep = new JSeparator(SwingConstants.HORIZONTAL);
-		JPanel bottom_pnl = base_gui.get_y_stack(sep, 0, log_pnl, 1);
+		JPanel bottom_pnl = this.base_gui.get_y_stack(sep, 0, log_pnl, 1);
 		center_pnl.add(bottom_pnl);
 		this.frame.getContentPane().add(
-				base_gui.get_spaced_panel(center_pnl),
+				this.base_gui.get_spaced_panel(center_pnl),
 				BorderLayout.CENTER);
 		//CREATE MENU BAR
 		JMenuBar menu_bar = new JMenuBar();
-		this.file_menu = new DMenu(base_gui, "file");
-		DMenuItem open_mit = new DMenuItem(base_gui, this, "open");
-		DMenuItem exit_mit = new DMenuItem(base_gui, this, "exit");
+		this.file_menu = new DMenu(this.base_gui, "file");
+		DMenuItem open_mit = new DMenuItem(this.base_gui, this, "open");
+		DMenuItem exit_mit = new DMenuItem(this.base_gui, this, "exit");
 		this.file_menu.add(open_mit);
 		this.file_menu.addSeparator();
 		this.file_menu.add(exit_mit);
@@ -341,6 +355,15 @@ public class StartGUI implements DActionEvent, Disabler {
 	 */
 	public BaseGUI get_base_gui() {
 		return this.base_gui;
+	}
+	
+	/**
+	 * Returns the FilePrefs object for this object.
+	 * 
+	 * @return FilePrefs
+	 */
+	public FilePrefs get_file_prefs() {
+		return this.file_prefs;
 	}
 	
 	/**
