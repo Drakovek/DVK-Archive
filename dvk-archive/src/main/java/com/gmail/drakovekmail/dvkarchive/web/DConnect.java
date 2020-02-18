@@ -10,8 +10,12 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.logging.LogFactory;
+
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.CookieManager;
+import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
 import com.gargoylesoftware.htmlunit.UnexpectedPage;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;
@@ -25,27 +29,63 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 public class DConnect {
 	
 	/**
-	 * WebClient for accessing web pages.
+	 * WebClient for accessing web pages
 	 */
 	private WebClient web_client;
 	
 	/**
-	 * Currently loaded web page;
+	 * Currently loaded web page
 	 */
 	private HtmlPage page;
 	
 	/**
-	 * Initializes the DConnect class by opening a WebClient.
+	 * Whether to use CSS styling when loading pages
 	 */
-	public DConnect() {
+	private boolean css;
+	
+	/**
+	 * Whether to load Javascript when loading pages
+	 */
+	private boolean javascript;
+	
+	/**
+	 * Initializes the DConnect class by opening a WebClient.
+	 * 
+	 * @param css Whether to use CSS styling when loading pages
+	 * @param javascript Whether to load Javascript when loading pages
+	 */
+	public DConnect(boolean css, boolean javascript) {
+		//Turn off HtmlUnit warnings
+		LogFactory.getFactory().setAttribute("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
+		java.util.logging.Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(java.util.logging.Level.OFF);
+	    java.util.logging.Logger.getLogger("org.apache.http").setLevel(java.util.logging.Level.OFF);
+		initialize_client(css, javascript);
+	}
+	
+	/**
+	 * Initializes and opens the web_client.
+	 * Uses given CSS and Javascript settings.
+	 * 
+	 * @param use_css Whether to use CSS styling when loading pages
+	 * @param use_javascript Whether to load Javascript when loading pages
+	 */
+	public void initialize_client(boolean use_css, boolean use_javascript) {
+		this.css = use_css;
+		this.javascript = use_javascript;
 		initialize_client();
 	}
 	
 	/**
-	 * Initializes and opens the web_client
+	 * Initializes and opens the web_client.
 	 */
 	public void initialize_client() {
 		this.web_client = new WebClient(BrowserVersion.BEST_SUPPORTED);
+		this.web_client.getOptions().setCssEnabled(this.css);
+		this.web_client.getOptions().setJavaScriptEnabled(this.javascript);
+		this.web_client.getOptions().setThrowExceptionOnScriptError(false);
+		this.web_client.setJavaScriptTimeout(10000);
+		this.web_client.setAjaxController(new NicelyResynchronizingAjaxController());
+		this.web_client.getOptions().setTimeout(10000);
 	}
 	
 	/**
@@ -231,5 +271,39 @@ public class DConnect {
 			baos = null;
 			fos = null;
 		}
+	}
+	
+	/**
+	 * Removes the HTML header and footer tags from a given element.
+	 * 
+	 * @param html HTML element
+	 * @return Element with header and footer tags removed
+	 */
+	public static String remove_header_footer(String html) {
+		String str = html.replace("\n", "");
+		str = str.replace("\r", "");
+		//REMOVE HEADER
+		int start;
+		if(str.startsWith("<")) {
+			start = str.indexOf('>');
+			str = str.substring(start + 1);
+		}
+		//REMOVE FOOTER
+		int end;
+		if(str.endsWith(">")) {
+			end = str.lastIndexOf('<');
+			if(end != -1) {
+				str = str.substring(0, end);
+			}
+		}
+		//REMOVE FRONT SPACE
+		while(str.startsWith(" ")) {
+			str = str.substring(1);
+		}
+		//REMOVE END SPACE
+		while(str.endsWith(" ")) {
+			str = str.substring(0, str.length() - 1);
+		}
+		return str;
 	}
 }

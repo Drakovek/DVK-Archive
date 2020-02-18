@@ -34,7 +34,7 @@ public class TestDConnect {
 	 */
 	@Before
 	public void set_up() {
-		this.connect = new DConnect();
+		this.connect = new DConnect(false, false);
 		String user_dir = System.getProperty("user.dir");
 		this.test_dir = new File(user_dir, "connect_dir");
 		if(!this.test_dir.isDirectory()) {
@@ -80,6 +80,7 @@ public class TestDConnect {
 		}
 		//TEST AJAX WAITING
 		url = "http://pythonscraping.com/pages/javascript/ajaxDemo.html";
+		this.connect.initialize_client(false, true);
 		this.connect.load_page(url, "//button[@id='loadedButton']");
 		if(this.connect.get_page() != null) {
 			de = this.connect.get_page().getFirstByXPath("//button[@id='loadedButton']");
@@ -124,5 +125,23 @@ public class TestDConnect {
 		DConnect.basic_download(url, file);
 		assertTrue(file.exists());
 		assertEquals(39785L, file.length());
+	}
+	
+	/**
+	 * Tests the remove_header_footer method.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_remove_header_footer() {
+		assertEquals("", DConnect.remove_header_footer(""));
+		assertEquals("", DConnect.remove_header_footer("  \n\r  "));
+		assertEquals("ble>", DConnect.remove_header_footer("ble>"));
+		assertEquals("<ble", DConnect.remove_header_footer("<ble"));
+		assertEquals("", DConnect.remove_header_footer("<p>"));
+		assertEquals("", DConnect.remove_header_footer("<head><foot>"));
+		assertEquals("test", DConnect.remove_header_footer("<p>  test"));
+		assertEquals("test", DConnect.remove_header_footer("test </p>"));
+		assertEquals("Things", DConnect.remove_header_footer("<head> Things  \n\n </foot>"));
+		assertEquals("<p>bleh</p>", DConnect.remove_header_footer("<div><p>bleh</p></div>"));
 	}
 }
