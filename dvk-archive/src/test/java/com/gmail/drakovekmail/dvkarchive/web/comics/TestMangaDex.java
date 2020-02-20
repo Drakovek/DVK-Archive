@@ -1,6 +1,8 @@
 package com.gmail.drakovekmail.dvkarchive.web.comics;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,6 +14,7 @@ import com.gmail.drakovekmail.dvkarchive.file.Dvk;
 import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
 import com.gmail.drakovekmail.dvkarchive.file.FilePrefs;
 import com.gmail.drakovekmail.dvkarchive.web.DConnect;
+import com.gmail.drakovekmail.dvkarchive.web.DConnectSelenium;
 
 /**
  * Unit tests for the MangaDex class.
@@ -229,6 +232,7 @@ public class TestMangaDex {
 	/**
 	 * Tests the get_start_chapter method.
 	 */
+	@Test
 	public void test_get_start_chapter() {
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
@@ -265,5 +269,93 @@ public class TestMangaDex {
 		dvk_handler.read_dvks(dirs, prefs, null, false, false, false);
 		chapter = MangaDex.get_start_chapter(dvk_handler, cps, false);
 		assertEquals(0, chapter);
+	}
+	
+	/**
+	 * Tests the get_dvks method.
+	 */
+	@Test
+	public void test_get_dvks() {
+		DConnectSelenium s_connect = null;
+		try {
+			//CREATE DVK
+			Dvk dvk = new Dvk();
+			dvk.set_id("MDX770791-3");
+			dvk.set_title("Randomphilia | Ch. 74 | Pg. 3");
+			dvk.set_artist("Artist");
+			dvk.set_page_url("https://mangadex.org/chapter/770791/3");
+			dvk.set_dvk_file(new File(this.test_dir, "dvk.dvk"));
+			dvk.set_media_file("test.png");
+			dvk.write_dvk();
+			//GET DVKS
+			File[] dirs = {this.test_dir};
+			FilePrefs prefs = new FilePrefs();
+			DvkHandler handler = new DvkHandler();
+			handler.read_dvks(dirs, prefs, null, false, false, false);
+			s_connect = new DConnectSelenium(true);
+			Dvk title = MangaDex.get_title_info(this.connect, "34326");
+			ArrayList<Dvk> cps = MangaDex.get_chapters(
+					this.connect, title, "French", 1);
+			ArrayList<Dvk> dvks = MangaDex.get_dvks(
+					s_connect, handler, 
+					this.test_dir, cps, false, false);
+			//CHECK PAGE 1
+			String value;
+			assertEquals(9, dvks.size());
+			assertEquals("MDX770792-4", dvks.get(8).get_id());
+			value = "Randomphilia | Ch. 75 | Pg. 4";
+			assertEquals(value, dvks.get(8).get_title());
+			assertEquals(2, dvks.get(8).get_artists().length);
+			assertEquals("Biru no Fukuro", dvks.get(8).get_artists()[0]);
+			assertEquals(9, dvks.get(8).get_web_tags().length);
+			assertEquals("2019/12/21|15:03", dvks.get(8).get_time());
+			assertEquals("MangaDex:34326", dvks.get(8).get_web_tags()[0]);
+			assertEquals("Shounen", dvks.get(8).get_web_tags()[1]);
+			value = "and anything is possible.";
+			assertTrue(dvks.get(8).get_description().contains(value));
+			value = "https://mangadex.org/chapter/770792/4";
+			assertEquals(value, dvks.get(8).get_page_url());
+			value = "https://s2.mangadex.org/data/"
+					+ "2d60025d419442a4d56d58a7bbcdc6db/M4.jpg";
+			assertEquals(value, dvks.get(8).get_direct_url());
+			value = "Randomphilia - Ch 75 - Pg 4_MDX770792-4.dvk";
+			File file = new File(this.test_dir, value);
+			assertEquals(file, dvks.get(8).get_dvk_file());
+			value = "Randomphilia - Ch 75 - Pg 4_MDX770792-4.jpg";
+			file = new File(this.test_dir, value);
+			assertEquals(file, dvks.get(8).get_media_file());
+			//CHECK PAGE 2
+			assertEquals("MDX770791-1", dvks.get(0).get_id());
+			value = "Randomphilia | Ch. 74 | Pg. 1";
+			assertEquals(value, dvks.get(0).get_title());
+			value = "https://mangadex.org/chapter/770791/1";
+			assertEquals(value, dvks.get(0).get_page_url());
+			value = "https://s2.mangadex.org/data/"
+					+ "dedabbdba2b1b69f76f299ee748402f8/k1.jpg";
+			assertEquals(value, dvks.get(0).get_direct_url());
+			value = "Randomphilia - Ch 74 - Pg 1_MDX770791-1.dvk";
+			file = new File(this.test_dir, value);
+			assertEquals(file, dvks.get(0).get_dvk_file());
+			value = "Randomphilia - Ch 74 - Pg 1_MDX770791-1.jpg";
+			file = new File(this.test_dir, value);
+			assertEquals(file, dvks.get(0).get_media_file());
+			//CHECK INVALID
+			dvks = MangaDex.get_dvks(
+					s_connect,
+					handler,
+					new File("jslkdjf"),
+					new ArrayList<>(), false, false);
+			assertEquals(0, dvks.size());
+			dvks = MangaDex.get_dvks(
+					s_connect, handler,
+					null,
+					new ArrayList<>(), false, false);
+			assertEquals(0, dvks.size());
+		}
+		finally {
+			if(s_connect != null) {
+				s_connect.close_driver();
+			}
+		}
 	}
 }

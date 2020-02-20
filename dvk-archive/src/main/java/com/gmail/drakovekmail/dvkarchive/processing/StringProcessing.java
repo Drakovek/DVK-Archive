@@ -194,4 +194,19 @@ public class StringProcessing {
 		}
 		return tr.toString();
 	}
+	
+	/**
+	 * Returns the extension for a given filename.
+	 * If extension does not exist, returns empty.
+	 * 
+	 * @param filename Given filename.
+	 * @return Extension for filename
+	 */
+	public static String get_extension(String filename) {
+		int index = filename.lastIndexOf('.');
+		if(index == -1 || filename.length() - index > 6) {
+			return new String();
+		}
+		return filename.substring(index);
+	}
 }

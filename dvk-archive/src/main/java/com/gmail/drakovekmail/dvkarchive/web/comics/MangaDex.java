@@ -1,5 +1,6 @@
 package com.gmail.drakovekmail.dvkarchive.web.comics;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -7,7 +8,9 @@ import com.gargoylesoftware.htmlunit.html.DomAttr;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
 import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
+import com.gmail.drakovekmail.dvkarchive.processing.StringProcessing;
 import com.gmail.drakovekmail.dvkarchive.web.DConnect;
+import com.gmail.drakovekmail.dvkarchive.web.DConnectSelenium;
 
 /**
  * Class for downloading media from MangaDex.
@@ -280,5 +283,105 @@ public class MangaDex {
 			}
 		}
 		return chapter - 1;
+	}
+	
+	/**
+	 * Returns a list of Dvks for MangaDex media.
+	 * 
+	 * @param connect Object for connecting to MangaDex
+	 * @param dvk_handler Used to check for already downloaded media
+	 * @param directory Directory to save to, if necessary
+	 * @param chapters MangaDex chapters to download from
+	 * @param check_all Whether to check all chapters
+	 * @param save Whether to save Dvk objects to disk
+	 * @return List of Dvks for MangaDex media
+	 */
+	public static ArrayList<Dvk> get_dvks(
+			DConnectSelenium connect,
+			DvkHandler dvk_handler,
+			File directory,
+			ArrayList<Dvk> chapters,
+			boolean check_all,
+			boolean save) {
+		//TEST IF PARAMETERS ARE VALID
+		if(dvk_handler == null
+				|| directory == null
+				|| !directory.isDirectory()) {
+			return new ArrayList<>();
+		}
+		int c = get_start_chapter(dvk_handler, chapters, check_all);
+		ArrayList<Dvk> dvks = new ArrayList<>();
+		for(; c > -1; c--) {
+			int page = 1;
+			while(true) {
+				//SET KNOWN INFO
+				Dvk dvk = new Dvk();
+				dvk.set_id("MDX" + chapters.get(c).get_id()
+						+ "-" + Integer.toString(page));
+				dvk.set_title(chapters.get(c).get_title()
+						+ " | Pg. " + Integer.toString(page));
+				dvk.set_artists(chapters.get(c).get_artists());
+				dvk.set_time(chapters.get(c).get_time());
+				dvk.set_web_tags(chapters.get(c).get_web_tags());
+				dvk.set_description(chapters.get(c).get_description());
+				dvk.set_page_url(chapters.get(c).get_page_url()
+						+ "/" + Integer.toString(page));
+				//CHECK IF ALREADY DOWNLOADED
+				boolean contains = false;
+				int size = dvk_handler.get_size();
+				for(int i = 0; i < size; i++) {
+					String url = dvk_handler.get_dvk(i).get_page_url();
+					if(url.contains("/mangadex.")
+							&& url.endsWith(chapters.get(c).get_id()
+									+ "/" + Integer.toString(page))) {
+						contains = true;
+						break;
+					}
+				}
+				//SKIP IF ALREADY DOWNLOADED
+				if(!contains) {
+					//LOAD PAGE
+					String xpath = "//img[@class='noselect nodrag cursor-pointer']";
+					connect.load_page(dvk.get_page_url(), xpath);
+					try {
+						TimeUnit.MILLISECONDS.sleep(2000);
+					} catch (InterruptedException e) {}
+					if(connect.get_page() == null) {
+						break;
+					}
+					//CHECK IF IN RIGHT CHAPTER
+					xpath = "//span[@class='chapter-title']/@data-chapter-id";
+					DomAttr da;
+					da = connect.get_page().getFirstByXPath(xpath);
+					if(da == null
+							|| !da.getNodeValue().equals(chapters.get(c).get_id())) {
+						break;
+					}
+					//GET IMAGE URL
+					xpath = "//div[@data-page='" + Integer.toString(page)
+						+ "']//img[@class='noselect nodrag cursor-pointer']/@src";
+					da = connect.get_page().getFirstByXPath(xpath);
+					if(da == null) {
+						break;
+					}
+					dvk.set_direct_url(da.getNodeValue());
+					//SET FILE
+					String filename = dvk.get_filename();
+					dvk.set_dvk_file(new File(directory, filename + ".dvk"));
+					String extension = StringProcessing.get_extension(
+							dvk.get_direct_url());
+					dvk.set_media_file(filename + extension);
+					//SAVE, IF SPECIFIED
+					if(save) {
+						dvk.write_media();
+					}
+					//APPEND DVK
+					dvks.add(dvk);
+				}
+				//NEXT PAGE
+				page++;
+			}
+		}
+		return dvks;
 	}
 }

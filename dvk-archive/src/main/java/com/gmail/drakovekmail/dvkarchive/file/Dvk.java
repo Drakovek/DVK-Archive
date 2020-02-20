@@ -9,6 +9,7 @@ import org.json.JSONObject;
 import com.gmail.drakovekmail.dvkarchive.processing.ArrayProcessing;
 import com.gmail.drakovekmail.dvkarchive.processing.HtmlProcessing;
 import com.gmail.drakovekmail.dvkarchive.processing.StringProcessing;
+import com.gmail.drakovekmail.dvkarchive.web.DConnect;
 
 /**
  * Class for handling a single DVK file.
@@ -178,6 +179,35 @@ public class Dvk implements Serializable {
 			}
 			json.put("file", file);
 			InOut.write_file(get_dvk_file(), json.toString(4));
+		}
+	}
+	
+	/**
+	 * Writes the Dvk object, as well as downloading associated media.
+	 * Downloads from direct_url and secondary_url.
+	 * Writes to media_file and secondary_file.
+	 */
+	public void write_media() {
+		write_dvk();
+		if(get_dvk_file().exists()) {
+			DConnect connect = new DConnect(false, false);
+			connect.download(get_direct_url(), get_media_file());
+			//CHECK IF MEDIA DOWNLOADED
+			if(get_media_file().exists()) {
+				//DOWNLOAD SECONDARY FILE, IF AVAILABLE
+				if(get_secondary_url() != null) {
+					connect.download(get_secondary_url(), get_secondary_file());
+					//DELETE FILES IF DOWNLOAD FAILED
+					if(!get_secondary_file().exists()) {
+						get_dvk_file().delete();
+						get_media_file().delete();
+					}
+				}
+			}
+			else {
+				//IF DOWNLOAD FAILED, DELETE DVK
+				get_dvk_file().delete();
+			}
 		}
 	}
 	
