@@ -1,17 +1,16 @@
 package com.gmail.drakovekmail.dvkarchive.web.comics;
 
 import static org.junit.Assert.assertEquals;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
+import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
+import com.gmail.drakovekmail.dvkarchive.file.FilePrefs;
 import com.gmail.drakovekmail.dvkarchive.web.DConnect;
 
 /**
@@ -225,5 +224,46 @@ public class TestMangaDex {
 		//TITLE 1, NON-EXISTANT LANGUAGE
 		dvks = MangaDex.get_chapters(this.connect, dvk, "JAKJSKDJK", 1);
 		assertEquals(0, dvks.size());
+	}
+
+	/**
+	 * Tests the get_start_chapter method.
+	 */
+	public void test_get_start_chapter() {
+		File[] dirs = {this.test_dir};
+		FilePrefs prefs = new FilePrefs();
+		DvkHandler dvk_handler = new DvkHandler();
+		dvk_handler.read_dvks(dirs, prefs, null, false, false, false);
+		Dvk title = MangaDex.get_title_info(this.connect, "34326");
+		ArrayList<Dvk> cps = MangaDex.get_chapters(this.connect, title, "French", 1);
+		//WITH NO EXISTING FILES
+		int chapter = MangaDex.get_start_chapter(dvk_handler, cps, false);
+		assertEquals(74, chapter);
+		//CREATE DVK
+		Dvk dvk = new Dvk();
+		dvk.set_id("MDX688478-5");
+		dvk.set_title("Randomphilia | Ch. 70 | Pg. 5");
+		dvk.set_page_url("https://mangadex.cc/chapter/688478/1");
+		dvk.set_artist("Artist");
+		dvk.set_dvk_file(new File(this.test_dir, "dvk.dvk"));
+		dvk.set_media_file("media.jpg");
+		dvk.write_dvk();
+		//CHECK START CHAPTER WITH EXISTING FILES
+		dvk_handler.read_dvks(dirs, prefs, null, false, false, false);
+		chapter = MangaDex.get_start_chapter(dvk_handler, cps, false);
+		assertEquals(5, chapter);
+		chapter = MangaDex.get_start_chapter(dvk_handler, cps, true);
+		assertEquals(74, chapter);
+		//CREATE NEW DVK
+		dvk.set_id("MDX688478-5");
+		dvk.set_title("Randomphilia | Ch. 75 | Pg. 1");
+		dvk.set_page_url("https://mangadex.org/chapter/770792");
+		dvk.set_dvk_file(new File(this.test_dir, "dvk2.dvk"));
+		dvk.set_media_file("media.jpg");
+		dvk.write_dvk();
+		//CHECK START CHAPTER WITH LATEST CHAPTER DOWNLOADED
+		dvk_handler.read_dvks(dirs, prefs, null, false, false, false);
+		chapter = MangaDex.get_start_chapter(dvk_handler, cps, false);
+		assertEquals(0, chapter);
 	}
 }

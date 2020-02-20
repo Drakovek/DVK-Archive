@@ -2,6 +2,7 @@ package com.gmail.drakovekmail.dvkarchive.web;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -18,17 +19,17 @@ import com.gargoylesoftware.htmlunit.html.DomElement;
  * @author Drakovek
  */
 public class TestDConnect {
-	
+
 	/**
 	 * DConnect object for running web tests.
 	 */
 	private DConnect connect;
-	
+
 	/**
 	 * Directory for holding test files.
 	 */
 	private File test_dir;
-	
+
 	/**
 	 * Sets up objects for testing.
 	 */
@@ -55,6 +56,25 @@ public class TestDConnect {
 	}
 	
 	/**
+	 * Tests the load_from_string method.
+	 */
+	@Test
+	public void test_load_from_string() {
+		//TEST INVALID STRINGS
+		this.connect.load_from_string(null);
+		assertEquals(null, this.connect.get_page());
+		this.connect.load_from_string("");
+		assertEquals(null, this.connect.get_page());
+		//TEST HTML
+		DomElement de;
+		String html = "<html><h1>Text!</h1></html>";
+		this.connect.load_from_string(html);
+		assertNotEquals(null, this.connect.get_page());
+		de = this.connect.get_page().getFirstByXPath("//h1");
+		assertEquals("Text!", de.asText());
+	}
+	
+	/**
 	 * Tests the load_page and get_page methods.
 	 */
 	@Test
@@ -69,26 +89,18 @@ public class TestDConnect {
 		//TEST VALID URL
 		url = "http://pythonscraping.com/exercises/exercise1.html";
 		this.connect.load_page(url, null);
-		if(this.connect.get_page() != null) {
-			de = this.connect.get_page().getFirstByXPath("//h1");
-			assertEquals("An Interesting Title", de.asText());
-			de = this.connect.get_page().getFirstByXPath("//title");
-			assertEquals("A Useful Page", de.asText());
-		}
-		else {
-			assertTrue(false);
-		}
+		assertNotEquals(null, this.connect.get_page());
+		de = this.connect.get_page().getFirstByXPath("//h1");
+		assertEquals("An Interesting Title", de.asText());
+		de = this.connect.get_page().getFirstByXPath("//title");
+		assertEquals("A Useful Page", de.asText());
 		//TEST AJAX WAITING
 		url = "http://pythonscraping.com/pages/javascript/ajaxDemo.html";
 		this.connect.initialize_client(false, true);
 		this.connect.load_page(url, "//button[@id='loadedButton']");
-		if(this.connect.get_page() != null) {
-			de = this.connect.get_page().getFirstByXPath("//button[@id='loadedButton']");
-			assertEquals("A button to click!", de.asText());
-		}
-		else {
-			assertTrue(false);
-		}
+		assertNotEquals(null, this.connect.get_page());
+		de = this.connect.get_page().getFirstByXPath("//button[@id='loadedButton']");
+		assertEquals("A button to click!", de.asText());
 	}
 	
 	/**

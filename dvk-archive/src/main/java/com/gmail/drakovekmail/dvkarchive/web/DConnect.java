@@ -10,16 +10,16 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.commons.logging.LogFactory;
-
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.CookieManager;
 import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
+import com.gargoylesoftware.htmlunit.StringWebResponse;
 import com.gargoylesoftware.htmlunit.UnexpectedPage;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gargoylesoftware.htmlunit.html.parser.HTMLParser;
 
 /**
  * Class containing methods for dealing with web content.
@@ -89,6 +89,30 @@ public class DConnect {
 	}
 	
 	/**
+	 * Loads a given HTML String as HtmlPage.
+	 * 
+	 * @param html Given HTML formatted String
+	 */
+	public void load_from_string(String html) {
+		if(html == null || html.length() == 0) {
+			this.page = null;
+		}
+		else {
+			try {
+				HTMLParser parser;
+				parser = this.web_client.getPageCreator().getHtmlParser();
+				URL url = new URL("https://www.notreal.com");
+				StringWebResponse r = new StringWebResponse(html, url);
+				this.page = parser.parseHtml(
+						r, this.web_client.getCurrentWindow());
+			}
+			catch (Exception e) {
+				this.page = null;
+			}
+		}
+	}
+	
+	/**
 	 * Loads a given URL to a HtmlPage object.
 	 * 
 	 * @param url Given URL
@@ -118,7 +142,7 @@ public class DConnect {
 	 * @param element Element to wait for in XPATH format
 	 * @return Whether the element appeared. False if timed out.
 	 */
-	private boolean wait_for_element(String element) {
+	public boolean wait_for_element(String element) {
 		if(element != null) {
 			int timeout = 11;
 			boolean exists = false;

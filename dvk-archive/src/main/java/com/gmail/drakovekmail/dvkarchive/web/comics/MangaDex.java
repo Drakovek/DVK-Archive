@@ -3,10 +3,10 @@ package com.gmail.drakovekmail.dvkarchive.web.comics;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
 import com.gargoylesoftware.htmlunit.html.DomAttr;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
+import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
 import com.gmail.drakovekmail.dvkarchive.web.DConnect;
 
 /**
@@ -247,5 +247,38 @@ public class MangaDex {
 					connect, base_dvk, language, page + 1));
 		}
 		return dvks;
+	}
+	
+	/**
+	 * Returns which MangaDex chapter to start downloading from.
+	 * Based on what chapters have already been downloaded.
+	 * 
+	 * @param dvk_handler DvkHandler for checking downloaded chapters
+	 * @param chapters Dvks for MangaDex chapters, as from get_chapters
+	 * @param check_all Whether to check all chapters.
+	 * 					If true, returns last chapter index.
+	 * @return Index of chapter to start downloading from
+	 */
+	public static int get_start_chapter(
+			DvkHandler dvk_handler,
+			ArrayList<Dvk> chapters,
+			boolean check_all) {
+		if(check_all) {
+			return chapters.size() - 1;
+		}
+		int chapter;
+		boolean contains = false;
+		int size = dvk_handler.get_size();
+		for(chapter = 0; !contains && chapter < chapters.size(); chapter++) {
+			String cid = chapters.get(chapter).get_id();
+			for(int k = 0; k < size; k++) {
+				String hid = get_chapter_id(dvk_handler.get_dvk(k).get_page_url());
+				if(hid.length() > 0 && hid.equals(cid)) {
+					contains = true;
+					break;
+				}
+			}
+		}
+		return chapter - 1;
 	}
 }
