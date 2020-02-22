@@ -23,7 +23,6 @@ public class ArtistHosting {
 		if(handler == null) {
 			return new ArrayList<>();
 		}
-		handler.sort_dvks_title(true, false);
 		ArrayList<Dvk> dvks = new ArrayList<>();
 		ArrayList<String> artists = new ArrayList<>();
 		int size = handler.get_size();

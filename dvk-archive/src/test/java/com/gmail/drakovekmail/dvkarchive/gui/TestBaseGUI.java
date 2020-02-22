@@ -61,6 +61,21 @@ public class TestBaseGUI {
 	}
 	
 	/**
+	 * Tests the get_space_size method.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_get_space_size() {
+		BaseGUI base = new BaseGUI();
+		base.set_font(null, 10, true);
+		assertEquals(5, base.get_space_size());
+		base.set_font("Dialog", 24, true);
+		assertEquals(12, base.get_space_size());
+		base.set_font("Dialog", 6, true);
+		assertEquals(3, base.get_space_size());
+	}
+	
+	/**
 	 * Tests the set_use_aaa and use_aa methods.
 	 */
 	@Test

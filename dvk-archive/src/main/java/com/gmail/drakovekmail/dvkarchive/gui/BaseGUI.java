@@ -146,6 +146,15 @@ public class BaseGUI {
 	}
 	
 	/**
+	 * Returns the default UI space size.
+	 * 
+	 * @return Space Size
+	 */
+	public int get_space_size() {
+		return this.space_size;
+	}
+	
+	/**
 	 * Sets whether fonts should be anti-aliased.
 	 * 
 	 * @param aa Whether to use anti-aliasing

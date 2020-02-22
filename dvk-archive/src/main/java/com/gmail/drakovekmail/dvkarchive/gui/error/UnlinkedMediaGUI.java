@@ -92,4 +92,7 @@ public class UnlinkedMediaGUI extends SimpleServiceGUI {
 				break;
 		}
 	}
+
+	@Override
+	public void directory_opened() {}
 }

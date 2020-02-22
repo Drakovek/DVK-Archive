@@ -1,25 +1,32 @@
 package com.gmail.drakovekmail.dvkarchive.gui.artist;
 
 import java.awt.GridLayout;
-
+import java.io.File;
+import java.util.ArrayList;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
+import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
+import com.gmail.drakovekmail.dvkarchive.file.FilePrefs;
 import com.gmail.drakovekmail.dvkarchive.gui.BaseGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.ServiceGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.language.LanguageHandler;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DButton;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DLabel;
+import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DList;
+import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DScrollPane;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DTextField;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
+import com.gmail.drakovekmail.dvkarchive.gui.work.DSwingWorker;
+import com.gmail.drakovekmail.dvkarchive.gui.work.DWorker;
 
 /**
  * GUI for downloading files from artist-hosting websites.
  * 
  * @author Drakovek
  */
-public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEvent {
+public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEvent, DWorker {
 	
 	/**
 	 * SerialVersionUID
@@ -32,6 +39,41 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	private String name;
 	
 	/**
+	 * DSwingWorker for running threads
+	 */
+	private DSwingWorker sw;
+	
+	/**
+	 * DVK handler for loading existing DVK files.
+	 */
+	protected DvkHandler dvk_handler;
+	
+	/**
+	 * List for holding artists/titles.
+	 */
+	private DList lst;
+	
+	/**
+	 * Button for checking all pages
+	 */
+	private DButton all_btn;
+	
+	/**
+	 * Button for checking new pages
+	 */
+	private DButton new_btn;
+	
+	/**
+	 * Button for downloading a single title
+	 */
+	private DButton single_btn;
+	
+	/**
+	 * Refreshes the artist/title list
+	 */
+	private DButton refresh_btn;
+	
+	/**
 	 * Initializes the ArtistHostingGUI object.
 	 * 
 	 * @param start_gui Parent of ArtistHostingGUI
@@ -42,6 +84,12 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		this.name = start_gui.get_base_gui()
 				.get_language_string(name_id);
 		this.setLayout(new GridLayout(1, 1));
+		//INITIALIZE COMPONENTS
+		BaseGUI base_gui = start_gui.get_base_gui();
+		this.all_btn = new DButton(base_gui, this, "check_all");
+		this.new_btn = new DButton(base_gui, this, "check_new");
+		this.single_btn = new DButton(base_gui, this, "download_single");
+		this.refresh_btn = new DButton(base_gui, this, "refresh");
 	}
 	
 	/**
@@ -83,12 +131,124 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		this.repaint();
 	}
 	
+	/**
+	 * Creates the main artist hosting GUI.
+	 */
+	public void create_main_gui() {
+		BaseGUI base_gui = this.start_gui.get_base_gui();
+		//CREATE BUTTON PANEL
+		JPanel btn_pnl = new JPanel();
+		btn_pnl.setLayout(new GridLayout(
+				3, 1, 0, base_gui.get_space_size()));
+		btn_pnl.add(this.all_btn);
+		btn_pnl.add(this.new_btn);
+		btn_pnl.add(this.single_btn);
+		//CREATE SIDE PANEL
+		this.lst = new DList(base_gui, this, "list", true);
+		DScrollPane scr = new DScrollPane(this.lst);
+		DLabel art_lbl = new DLabel(base_gui, this.lst, "artists");
+		art_lbl.setHorizontalAlignment(SwingConstants.CENTER);
+		JPanel art_pnl = base_gui.get_y_stack(art_lbl, 0, scr, 1);
+		JPanel side_panel = base_gui.get_y_stack(
+				art_pnl, 1, this.refresh_btn, 0);
+		//CREATE SPLIT PANEL
+		JPanel split_pnl = new JPanel();
+		split_pnl.setLayout(
+				new GridLayout(1, 2, base_gui.get_space_size(), 0));
+		split_pnl.add(btn_pnl);
+		split_pnl.add(side_panel);
+		//CREATE TOP PANEL
+		DLabel lbl = new DLabel(base_gui, null, "artists");
+		lbl.setText(this.name);
+		lbl.set_font_large();
+		lbl.setHorizontalAlignment(SwingConstants.CENTER);
+		JSeparator sep;
+		sep = new JSeparator(SwingConstants.HORIZONTAL);
+		JPanel top_pnl = base_gui.get_y_stack(lbl, sep);
+		//UPDATE MAIN PANEL
+		this.removeAll();
+		this.add(base_gui.get_y_stack(
+				top_pnl, 0, split_pnl, 1));
+		this.revalidate();
+		this.repaint();
+	}
+	
+	/**
+	 * Sets the main list to show the given ArrayList.
+	 * Adds additional item for selecting all items.
+	 * 
+	 * @param list List to display
+	 */
+	public void set_list(ArrayList<String> list) {
+		String[] array = new String[list.size() + 1];
+		array[0] = this.start_gui.get_base_gui(
+				).get_language_string("select_all");
+		for(int i = 0; i < list.size(); i++) {
+			array[i + 1] = list.get(i);
+		}
+		this.lst.setListData(array);
+	}
+	
+	/**
+	 * Gets list of artists and updates the main list accordingly.
+	 */
+	public abstract void get_artists();
+	
+	/**
+	 * Starts SwingWorker to read Dvk objects.
+	 */
+	private void start_read_dvks() {
+		//DISABLE ITEMS
+		this.start_gui.get_base_gui().set_running(true);
+		this.start_gui.get_base_gui().set_canceled(false);
+		this.start_gui.disable_all();
+		disable_all();
+		//START PROCESS
+		this.sw = new DSwingWorker(this, "read_dvks");
+		this.sw.execute();
+	}
+	
+	/**
+	 * Reads all dvks in base_gui's selected directory.
+	 */
+	protected void read_dvks() {
+		this.dvk_handler = new DvkHandler();
+		File[] dirs = {this.start_gui.get_directory()};
+		FilePrefs prefs = this.start_gui.get_file_prefs();
+		boolean index = prefs.use_index();
+		this.dvk_handler.read_dvks(
+				dirs, prefs, this.start_gui, index, true, index);
+		//SORT DVKS
+		if(!this.start_gui.get_base_gui().is_canceled()) {
+			this.start_gui.append_console("sorting_dvks", true);
+			this.start_gui.get_progress_bar()
+				.set_progress(true, false, 0, 0);
+			sort_dvks();
+		}
+		get_artists();
+	}
+	
+	/**
+	 * Sorts the DVKs in the DvkHandler.
+	 */
+	public abstract void sort_dvks();
+	
 	@Override
 	public void enable_all() {
+		this.new_btn.setEnabled(true);
+		this.all_btn.setEnabled(true);
+		this.single_btn.setEnabled(true);
+		this.refresh_btn.setEnabled(true);
+		this.lst.setEnabled(true);
 	}
 
 	@Override
 	public void disable_all() {
+		this.new_btn.setEnabled(false);
+		this.all_btn.setEnabled(false);
+		this.single_btn.setEnabled(false);
+		this.refresh_btn.setEnabled(false);
+		this.lst.setEnabled(false);
 	}
 	
 	@Override
@@ -98,7 +258,41 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 				System.out.println("login");
 				break;
 			case "skip_login":
-				System.out.println("skip");
+				create_main_gui();
+				start_read_dvks();
+				break;
+			case "refresh":
+				start_read_dvks();
+				break;
+		}
+	}
+	
+	@Override
+	public void run(String id) {
+		switch(id) {
+			case "read_dvks":
+				this.start_gui.get_progress_bar()
+					.set_progress(true, false, 0, 0);
+				read_dvks();
+				break;
+		}
+	}
+
+	@Override
+	public void done(String id) {
+		switch(id) {
+			case "read_dvks":
+				this.start_gui.get_progress_bar()
+					.set_progress(false, false, 0, 0);
+				if(this.start_gui.get_base_gui().is_canceled()) {
+					this.start_gui.append_console("canceled", true);
+				}
+				else {
+					this.start_gui.append_console("finished", true);
+				}
+				this.start_gui.get_base_gui().set_running(false);
+				this.start_gui.enable_all();
+				enable_all();
 				break;
 		}
 	}

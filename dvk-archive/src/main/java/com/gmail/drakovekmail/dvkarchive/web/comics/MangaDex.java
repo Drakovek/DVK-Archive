@@ -384,4 +384,54 @@ public class MangaDex {
 		}
 		return dvks;
 	}
+	
+	/**
+	 * Returns MangaDex title ID from array of tags.
+	 * If there is no MangaDex title tag, returns empty.
+	 * 
+	 * @param tags String array of tags
+	 * @return MangaDex title ID
+	 */
+	public static String get_id_from_tags(String[] tags) {
+		String id = new String();
+		for(String tag: tags) {
+			if(tag.toLowerCase().startsWith("mangadex:")) {
+				return tag.substring(tag.indexOf(':') + 1);
+			}
+		}
+		return id;
+	}
+	
+	/**
+	 * Returns a list of Dvks representing downloaded MangaDex titles.
+	 * Dvks include title, MangaDex ID, and file location.
+	 * 
+	 * @param dvk_handler DvkHandler for getting downloaded files.
+	 * @return List of MangaDex Dvks
+	 */
+	public static ArrayList<Dvk> get_downloaded_titles(DvkHandler dvk_handler) {
+		int size = dvk_handler.get_size();
+		ArrayList<String> ids = new ArrayList<>();
+		ArrayList<Dvk> dvks = new ArrayList<>();
+		for(int i = 0; i < size; i++) {
+			Dvk dvk = dvk_handler.get_dvk(i);
+			if(dvk.get_page_url().toLowerCase().contains("mangadex.")) {
+				String id = get_id_from_tags(dvk.get_web_tags());
+				if(id.length() > 0 && !ids.contains(id)) {
+					String title = dvk.get_title();
+					int end = title.indexOf('|');
+					if(end == -1) {
+						end = title.length();
+					}
+					dvk = new Dvk();
+					dvk.set_title(title.substring(0, end));
+					dvk.set_id(id);
+					dvk.set_dvk_file(dvk_handler.get_dvk(i).get_dvk_file());
+					ids.add(id);
+					dvks.add(dvk);
+				}
+			}
+		}
+		return dvks;
+	}
 }

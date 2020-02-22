@@ -12,6 +12,7 @@ import javax.swing.SwingConstants;
 
 import com.gmail.drakovekmail.dvkarchive.file.FilePrefs;
 import com.gmail.drakovekmail.dvkarchive.gui.artist.FurAffinityGUI;
+import com.gmail.drakovekmail.dvkarchive.gui.comics.MangaDexGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.error.UnlinkedMediaGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.settings.SettingsBarGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DButton;
@@ -117,11 +118,12 @@ public class StartGUI implements DActionEvent, Disabler {
 		this.base_gui = base_gui;
 		this.base_gui.set_font("", 14, true);
 		this.file_prefs = new FilePrefs();
-		File file = new File("/tmp/dvkindex");
+		File file = new File(System.getProperty("user.home"));
+		file = new File(file, "dvk_index");
 		if(!file.isDirectory()) {
 			file.mkdirs();
 		}
-		this.file_prefs.set_index_dir(new File(file, "dvkindex"));
+		this.file_prefs.set_index_dir(file);
 		this.file_prefs.set_use_index(true);
 		this.current_service = new String();
 		this.frame = new DFrame(this.base_gui, "dvk_archive");
@@ -201,9 +203,10 @@ public class StartGUI implements DActionEvent, Disabler {
 	 * @return String array of service categories
 	 */
 	public String[] get_categories(boolean use_language) {
-		String[] categories = new String[2];
+		String[] categories = new String[3];
 		categories[0] = "artist_hosting";
-		categories[1] = "error_finding";
+		categories[1] = "comics";
+		categories[2] = "error_finding";
 		//CHANGE TO LANGUAGE VALUES
 		if(use_language) {
 			for(int i = 0; i < categories.length; i++) {
@@ -229,6 +232,10 @@ public class StartGUI implements DActionEvent, Disabler {
 				services[1] = "fur_affinity";
 				services[2] = "inkbunny";
 				services[3] = "transfur";
+				break;
+			case "comics":
+				services = new String[1];
+				services[0] = "mangadex";
 				break;
 			case "error_finding":
 				services = new String[3];
@@ -276,6 +283,9 @@ public class StartGUI implements DActionEvent, Disabler {
 				switch(service) {
 					case "fur_affinity":
 						this.service_pnl = new FurAffinityGUI(this);
+						break;
+					case "mangadex":
+						this.service_pnl = new MangaDexGUI(this);
 						break;
 					case "unlinked_media":
 						this.service_pnl = new UnlinkedMediaGUI(this);
@@ -378,6 +388,7 @@ public class StartGUI implements DActionEvent, Disabler {
 		int value = fc.showOpenDialog(this.frame);
 		if(value == JFileChooser.APPROVE_OPTION) {
 			set_directory(fc.getSelectedFile());
+			this.service_pnl.directory_opened();
 		}
 	}
 	

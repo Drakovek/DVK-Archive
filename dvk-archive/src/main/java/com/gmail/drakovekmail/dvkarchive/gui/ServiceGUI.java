@@ -26,6 +26,7 @@ public abstract class ServiceGUI extends JPanel implements Disabler {
 	 */
 	public ServiceGUI(StartGUI start_gui) {
 		this.start_gui = start_gui;
+		this.start_gui.get_base_gui().set_canceled(true);
 	}
 	
 	/**
@@ -36,4 +37,10 @@ public abstract class ServiceGUI extends JPanel implements Disabler {
 	public boolean directory_loaded() {
 		return this.start_gui.get_directory() != null;
 	}
+	
+	/**
+	 * Called on when directory opened in the Start GUI.
+	 */
+	public abstract void directory_opened();
+	
 }

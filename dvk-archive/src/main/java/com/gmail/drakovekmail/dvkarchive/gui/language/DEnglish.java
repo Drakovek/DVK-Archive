@@ -27,13 +27,17 @@ public class DEnglish extends LanguageMap{
 		this.lang_keys.put("open", "^Open");
 		this.lang_keys.put("exit", "^Exit");
 		this.lang_keys.put("finished", "[FINISHED]");
+		this.lang_keys.put("canceled", "[CANCELED]");
 		this.lang_keys.put("reading_dvks", "Reading DVK Files...");
+		this.lang_keys.put("sorting_dvks", "Sorting DVK Objects...");
+		this.lang_keys.put("select_all", "[SELECT_ALL]");
 		//SETTINGS
 		this.lang_keys.put("no_dir_select", "(No Directories Selected)");
 		this.lang_keys.put("settings", "^Settings");
 		//PROGRAM CATEGORIES
 		this.lang_keys.put("artist_hosting", "Artist Hosting");
 		this.lang_keys.put("error_finding", "Error Finding");
+		this.lang_keys.put("comics", "Comics");
 		//ARTIST HOSTING
 		this.lang_keys.put("deviantart", "DeviantArt");
 		this.lang_keys.put("fur_affinity", "Fur Affinity");
@@ -45,10 +49,17 @@ public class DEnglish extends LanguageMap{
 		this.lang_keys.put("login", "^Login");
 		this.lang_keys.put("skip_login", "S^kip Login");
 		this.lang_keys.put("refresh_captcha", "^Refresh Captcha");
+		this.lang_keys.put("check_all", "Check A^ll");
+		this.lang_keys.put("check_new", "Check ^New");
+		this.lang_keys.put("download_single", "^Download Single");
+		this.lang_keys.put("refresh", "^Refresh");
+		this.lang_keys.put("artists", "^Artists");
 		//ERROR FINDING
 		this.lang_keys.put("same_ids", "Same IDs");
 		this.lang_keys.put("missing_media", "Missing Media");
 		this.lang_keys.put("unlinked_media", "Unlinked Media");
+		//COMICS
+		this.lang_keys.put("mangadex", "MangaDex");
 		//UNLINKED MEDIA
 		this.lang_keys.put("unlinked_title", "Find Unlinked Media");
 		this.lang_keys.put("unlinked_console", "[FINDING UNLINKED MEDIA]");

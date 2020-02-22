@@ -73,6 +73,10 @@ public abstract class SimpleServiceGUI extends ServiceGUI implements DActionEven
 	 * Starts SwingWorker to read Dvk objects.
 	 */
 	private void start_read_dvks() {
+		this.start_gui.get_base_gui().set_running(true);
+		this.start_gui.get_base_gui().set_canceled(false);
+		this.start_gui.disable_all();
+		disable_all();
 		this.sw = new DSwingWorker(this, "read_dvks");
 		this.sw.execute();
 	}
@@ -80,10 +84,6 @@ public abstract class SimpleServiceGUI extends ServiceGUI implements DActionEven
 	@Override
 	public void event(String id) {
 		if(directory_loaded()) {
-			this.start_gui.get_base_gui().set_running(true);
-			this.start_gui.get_base_gui().set_canceled(false);
-			this.start_gui.disable_all();
-			disable_all();
 			start_read_dvks();
 		}
 	}

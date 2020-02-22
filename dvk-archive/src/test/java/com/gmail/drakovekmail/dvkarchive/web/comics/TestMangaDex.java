@@ -358,4 +358,117 @@ public class TestMangaDex {
 			}
 		}
 	}
+	
+	/**
+	 * Tests the get_id_from_tags method.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_get_id_from_tags() {
+		String[] tags = new String[3];
+		tags[0] = "bleh";
+		tags[1] = "eh";
+		tags[2] = "no";
+		assertEquals("", MangaDex.get_id_from_tags(tags));
+		tags[0] = "MangaDex:";
+		assertEquals("", MangaDex.get_id_from_tags(tags));
+		tags[0] = "MangaDex:137";
+		assertEquals("137", MangaDex.get_id_from_tags(tags));
+		tags[0] = "blah";
+		tags[1] = "Mangadex:2345";
+		assertEquals("2345", MangaDex.get_id_from_tags(tags));
+		tags[1] = "no";
+		tags[2] = "mangadex:bleh";
+		assertEquals("bleh", MangaDex.get_id_from_tags(tags));
+	}
+	
+	/**
+	 * Tests the get_downloaded_titles method.
+	 */
+	@Test
+	public void test_get_downloaded_titles() {
+		//DVK 1 - MANGADEX:123
+		Dvk dvk = new Dvk();
+		dvk.set_dvk_file(new File(this.test_dir, "dvk1.dvk"));
+		dvk.set_id("id");
+		dvk.set_title("Title");
+		dvk.set_artist("artist");
+		dvk.set_page_url("www.mangadex.org/thing");
+		dvk.set_media_file("file");
+		String[] tags = new String[2];
+		tags[0] = "mangadex:123";
+		tags[1] = "blah";
+		dvk.set_web_tags(tags);
+		dvk.write_dvk();
+		//DVK 2 - REPEAT MANGADEX TAG
+		dvk.set_dvk_file(new File(this.test_dir, "dvk2.dvk"));
+		dvk.set_media_file("file");
+		dvk.write_dvk();
+		//DVK 3 - NEW MANGADEX TAG
+		dvk.set_title("Other | ch 1 | pg2");
+		dvk.set_dvk_file(new File(this.test_dir, "dvk3.dvk"));
+		dvk.set_media_file("file");
+		tags[0] = "blah";
+		tags[1] = "MangaDex:702";
+		dvk.set_web_tags(tags);
+		dvk.write_dvk();
+		//DVK 4 - NEW MANGADEX TAG - INVALID PAGE URL
+		dvk.set_dvk_file(new File(this.test_dir, "dvk4.dvk"));
+		dvk.set_media_file("file");
+		dvk.set_page_url("something.com");
+		tags[1] = "MangaDex:137";
+		dvk.set_web_tags(tags);
+		dvk.write_dvk();
+		//DVK SUB - NEW MANGADEX TAG
+		File file = new File(this.test_dir, "sub");
+		if(!file.isDirectory()) {
+			file.mkdir();
+		}
+		dvk.set_page_url("https://mangadex.cc/other");
+		dvk.set_dvk_file(new File(file, "dvk-sub.dvk"));
+		dvk.set_media_file("file");
+		tags[1] = "Mangadex:29";
+		dvk.set_web_tags(tags);
+		dvk.write_dvk();
+		//CHECK LOADED PROPERLY
+		File[] dirs = {this.test_dir};
+		FilePrefs prefs = new FilePrefs();
+		DvkHandler handler = new DvkHandler();
+		handler.read_dvks(dirs, prefs, null, false, false, false);
+		ArrayList<Dvk> dvks = MangaDex.get_downloaded_titles(handler);
+		assertEquals(5, handler.get_size());
+		assertEquals(3, dvks.size());
+		//CHECK DVK 1
+		boolean check = false;
+		for(Dvk cur_dvk: dvks) {
+			file = cur_dvk.get_dvk_file();
+			if(file.getParentFile().equals(this.test_dir) && file.getName().equals("dvk1.dvk")) {
+				check = cur_dvk.get_id().equals("123");
+				assertEquals("Title", cur_dvk.get_title());
+				break;
+			}
+		}
+		assertTrue(check);
+		//CHECK DVK3
+		check = false;
+		for(Dvk cur_dvk: dvks) {
+			file = cur_dvk.get_dvk_file();
+			if(file.getParentFile().equals(this.test_dir) && file.getName().equals("dvk3.dvk")) {
+				check = cur_dvk.get_id().equals("702");
+				assertEquals("Other ", cur_dvk.get_title());
+				break;
+			}
+		}
+		assertTrue(check);
+		//CHECK DVK SUB
+		check = false;
+		for(Dvk cur_dvk: dvks) {
+			file = cur_dvk.get_dvk_file();
+			if(!file.getParentFile().equals(this.test_dir)) {
+				check = cur_dvk.get_id().equals("29");
+				break;
+			}
+		}
+		assertTrue(check);
+	}
 }

@@ -1,6 +1,11 @@
 package com.gmail.drakovekmail.dvkarchive.gui.artist;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.prefs.Preferences;
+import com.gmail.drakovekmail.dvkarchive.file.Dvk;
 import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
+import com.gmail.drakovekmail.dvkarchive.web.artisthosting.ArtistHosting;
 
 /**
  * GUI for downloading files from FurAffinity.net
@@ -12,8 +17,18 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 	/**
 	 * SerialVersionUID
 	 */
-	private static final long serialVersionUID = 8096375680530307994L;
+	private static final long serialVersionUID = -6101647561781599187L;
 
+	/**
+	 * Key for Fur Affinity directory in preferences
+	 */
+	private static final String DIRECTORY = "directory";
+	
+	/**
+	 * List of Dvks with Fur Affinity artist and directory info
+	 */
+	private ArrayList<Dvk> dirs;
+	
 	/**
 	 * Initializes the FurAffinityGUI object.
 	 * 
@@ -22,5 +37,53 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 	public FurAffinityGUI(StartGUI start_gui) {
 		super(start_gui, "fur_affinity");
 		create_login_gui();
+		load_directory();
+	}
+	
+	/**
+	 * Loads the Fur Affinity directory from preferences.
+	 */
+	public void load_directory() {
+		Preferences prefs = Preferences.userNodeForPackage(FurAffinityGUI.class);
+		File file = new File(prefs.get(DIRECTORY, ""));
+		save_directory(file);
+	}
+
+	/**
+	 * Saves a given directory to preferences.
+	 * 
+	 * @param directory Given directory
+	 */
+	public void save_directory(File directory) {
+		Preferences prefs = Preferences.userNodeForPackage(FurAffinityGUI.class);
+		if(directory != null && directory.isDirectory()) {
+			prefs.put(DIRECTORY, directory.getAbsolutePath());
+			this.start_gui.set_directory(directory);
+		}
+		else {
+			prefs.put(DIRECTORY, "");
+			this.start_gui.reset_directory();
+		}
+	}
+	
+	@Override
+	public void directory_opened() {
+		save_directory(this.start_gui.get_directory());
+	}
+	
+	@Override
+	public void get_artists() {
+		this.dirs = ArtistHosting.get_artists(
+				this.dvk_handler, "furaffinity.net");
+		ArrayList<String> artists = new ArrayList<>();
+		for(int i = 0; i < this.dirs.size(); i++) {
+			artists.add(this.dirs.get(i).get_artists()[0]);
+		}
+		this.set_list(artists);
+	}
+
+	@Override
+	public void sort_dvks() {
+		this.dvk_handler.sort_dvks_title(true, false);
 	}
 }
