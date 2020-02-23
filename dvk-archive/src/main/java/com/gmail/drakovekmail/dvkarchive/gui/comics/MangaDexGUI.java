@@ -27,11 +27,6 @@ public class MangaDexGUI extends ArtistHostingGUI {
 	private static final String DIRECTORY = "directory";
 	
 	/**
-	 * List of Dvks with MangaDex title and directory info
-	 */
-	private ArrayList<Dvk> titles;
-	
-	/**
 	 * Initializes the MangaDexGUI object.
 	 * 
 	 * @param start_gui Parent of MangaDexGUI
@@ -75,10 +70,10 @@ public class MangaDexGUI extends ArtistHostingGUI {
 	
 	@Override
 	public void get_artists() {
-		this.titles = MangaDex.get_downloaded_titles(this.dvk_handler);
+		this.dvks = MangaDex.get_downloaded_titles(this.dvk_handler);
 		ArrayList<String> list = new ArrayList<>();
-		for(int i = 0; i < this.titles.size(); i++) {
-			list.add(this.titles.get(i).get_title());
+		for(int i = 0; i < this.dvks.size(); i++) {
+			list.add(this.dvks.get(i).get_title());
 		}
 		set_list(list);
 	}
@@ -86,5 +81,10 @@ public class MangaDexGUI extends ArtistHostingGUI {
 	@Override
 	public void sort_dvks() {
 		this.dvk_handler.sort_dvks_title(false, false);
+	}
+
+	@Override
+	public void get_pages(Dvk dvk, boolean check_all) {
+		this.start_gui.append_console(dvk.get_title(), false);
 	}
 }

@@ -8,15 +8,13 @@ import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DButton;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DLabel;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
-import com.gmail.drakovekmail.dvkarchive.gui.work.DSwingWorker;
-import com.gmail.drakovekmail.dvkarchive.gui.work.DWorker;
 
 /**
  * Framework for a simple ServiceGUI with only one runnable task.
  * 
  * @author Drakovek
  */
-public abstract class SimpleServiceGUI extends ServiceGUI implements DActionEvent, DWorker {
+public abstract class SimpleServiceGUI extends ServiceGUI implements DActionEvent {
 
 	/**
 	 * SerialVersionUID
@@ -27,11 +25,6 @@ public abstract class SimpleServiceGUI extends ServiceGUI implements DActionEven
 	 * DvkHandler for reading Dvk objects
 	 */
 	protected DvkHandler dvk_handler;
-	
-	/**
-	 * SwingWorker for running processes
-	 */
-	protected DSwingWorker sw;
 	
 	/**
 	 * Main button for running services
@@ -69,22 +62,10 @@ public abstract class SimpleServiceGUI extends ServiceGUI implements DActionEven
 		this.add(service_pnl);
 	}
 	
-	/**
-	 * Starts SwingWorker to read Dvk objects.
-	 */
-	private void start_read_dvks() {
-		this.start_gui.get_base_gui().set_running(true);
-		this.start_gui.get_base_gui().set_canceled(false);
-		this.start_gui.disable_all();
-		disable_all();
-		this.sw = new DSwingWorker(this, "read_dvks");
-		this.sw.execute();
-	}
-	
 	@Override
 	public void event(String id) {
 		if(directory_loaded()) {
-			start_read_dvks();
+			start_process("run", true);
 		}
 	}
 	

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
+import com.gmail.drakovekmail.dvkarchive.file.Dvk;
 import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
 import com.gmail.drakovekmail.dvkarchive.file.FilePrefs;
 import com.gmail.drakovekmail.dvkarchive.gui.BaseGUI;
@@ -18,35 +19,33 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DList;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DScrollPane;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DTextField;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
-import com.gmail.drakovekmail.dvkarchive.gui.work.DSwingWorker;
-import com.gmail.drakovekmail.dvkarchive.gui.work.DWorker;
 
 /**
  * GUI for downloading files from artist-hosting websites.
  * 
  * @author Drakovek
  */
-public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEvent, DWorker {
+public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEvent {
 	
 	/**
 	 * SerialVersionUID
 	 */
-	private static final long serialVersionUID = -2549451539358120744L;
-	
+	private static final long serialVersionUID = 7605219333024907810L;
+
 	/**
 	 * Name of the current artist-hosting service.
 	 */
 	private String name;
 	
 	/**
-	 * DSwingWorker for running threads
-	 */
-	private DSwingWorker sw;
-	
-	/**
 	 * DVK handler for loading existing DVK files.
 	 */
 	protected DvkHandler dvk_handler;
+	
+	/**
+	 * Dvks with title/artist and directory info.
+	 */
+	protected ArrayList<Dvk> dvks;
 	
 	/**
 	 * List for holding artists/titles.
@@ -81,6 +80,7 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	 */
 	public ArtistHostingGUI(StartGUI start_gui, String name_id) {
 		super(start_gui);
+		this.dvks = new ArrayList<>();
 		this.name = start_gui.get_base_gui()
 				.get_language_string(name_id);
 		this.setLayout(new GridLayout(1, 1));
@@ -195,20 +195,6 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	public abstract void get_artists();
 	
 	/**
-	 * Starts SwingWorker to read Dvk objects.
-	 */
-	private void start_read_dvks() {
-		//DISABLE ITEMS
-		this.start_gui.get_base_gui().set_running(true);
-		this.start_gui.get_base_gui().set_canceled(false);
-		this.start_gui.disable_all();
-		disable_all();
-		//START PROCESS
-		this.sw = new DSwingWorker(this, "read_dvks");
-		this.sw.execute();
-	}
-	
-	/**
 	 * Reads all dvks in base_gui's selected directory.
 	 */
 	protected void read_dvks() {
@@ -227,6 +213,51 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		}
 		get_artists();
 	}
+	
+	/**
+	 * Returns list of indexes for the dvks selected in main list.
+	 * 
+	 * @return Int array of indexes
+	 */
+	private int[] get_selected() {
+		int[] sel = this.lst.getSelectedIndices();
+		//IF ALL SELECTED, RETURN ALL
+		if(sel.length > 0 && sel[0] == 0) {
+			sel = new int[this.dvks.size()];
+			for(int i = 0; i < sel.length; i++) {
+				sel[i] = i;
+			}
+		}
+		else {
+			//SHIFT INDEXES
+			for(int i = 0; i < sel.length; i++) {
+				sel[i] = sel[i] - 1;
+			}
+		}
+		return sel;
+	}
+	
+	/**
+	 * Runs the get_pages method for all selected artists/titles.
+	 * 
+	 * @param check_all Whether to check all pages
+	 */
+	private void page_runner(boolean check_all) {
+		int[] sel = get_selected();
+		for(int i = 0; i < sel.length; i++) {
+			if(!this.start_gui.get_base_gui().is_canceled()) {
+				get_pages(this.dvks.get(sel[i]), check_all);
+			}
+		}
+	}
+
+	/**
+	 * Gets pages for a given artist/title.
+	 * 
+	 * @param dvk Dvk with title/artist and directory info.
+	 * @param check_all Whether to check all pages
+	 */
+	public abstract void get_pages(Dvk dvk, boolean check_all);
 	
 	/**
 	 * Sorts the DVKs in the DvkHandler.
@@ -259,10 +290,16 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 				break;
 			case "skip_login":
 				create_main_gui();
-				start_read_dvks();
+				start_process("read_dvks", true);
 				break;
 			case "refresh":
-				start_read_dvks();
+				start_process("read_dvks", true);
+				break;
+			case "check_new":
+				start_process("check_new", false);
+				break;
+			case "check_all":
+				start_process("check_all", false);
 				break;
 		}
 	}
@@ -270,6 +307,12 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	@Override
 	public void run(String id) {
 		switch(id) {
+			case "check_new":
+				page_runner(false);
+				break;
+			case "check_all":
+				page_runner(true);
+				break;
 			case "read_dvks":
 				this.start_gui.get_progress_bar()
 					.set_progress(true, false, 0, 0);
@@ -281,6 +324,8 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	@Override
 	public void done(String id) {
 		switch(id) {
+			case "check_new":
+			case "check_all":
 			case "read_dvks":
 				this.start_gui.get_progress_bar()
 					.set_progress(false, false, 0, 0);

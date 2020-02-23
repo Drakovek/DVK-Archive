@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -105,12 +107,11 @@ public class TestErrorFinding {
 	@Test
 	public void test_get_unlinked_media() {
 		FilePrefs prefs = new FilePrefs();
-		DvkHandler handler = new DvkHandler();
+		prefs.set_use_index(false);
 		File[] dirs = {this.test_dir};
-		handler.read_dvks(
-				dirs, prefs, null, false, false, false);
 		ArrayList<File> unlinked;
-		unlinked = ErrorFinding.get_unlinked_media(handler, dirs, null);
+		unlinked = ErrorFinding.get_unlinked_media(prefs, dirs, null);
+		Arrays.sort(dirs);
 		assertEquals(2, unlinked.size());
 		assertEquals("u3.jpg", unlinked.get(0).getName());
 		assertEquals("u2.jpg", unlinked.get(1).getName());

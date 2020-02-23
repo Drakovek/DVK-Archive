@@ -3,6 +3,7 @@ package com.gmail.drakovekmail.dvkarchive.gui.artist;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.prefs.Preferences;
+
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
 import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
 import com.gmail.drakovekmail.dvkarchive.web.artisthosting.ArtistHosting;
@@ -23,11 +24,6 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 	 * Key for Fur Affinity directory in preferences
 	 */
 	private static final String DIRECTORY = "directory";
-	
-	/**
-	 * List of Dvks with Fur Affinity artist and directory info
-	 */
-	private ArrayList<Dvk> dirs;
 	
 	/**
 	 * Initializes the FurAffinityGUI object.
@@ -73,17 +69,22 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 	
 	@Override
 	public void get_artists() {
-		this.dirs = ArtistHosting.get_artists(
+		this.dvks = ArtistHosting.get_artists(
 				this.dvk_handler, "furaffinity.net");
-		ArrayList<String> artists = new ArrayList<>();
-		for(int i = 0; i < this.dirs.size(); i++) {
-			artists.add(this.dirs.get(i).get_artists()[0]);
+		ArrayList<String> list = new ArrayList<>();
+		for(int i = 0; i < this.dvks.size(); i++) {
+			list.add(this.dvks.get(i).get_artists()[0]);
 		}
-		this.set_list(artists);
+		this.set_list(list);
 	}
 
 	@Override
 	public void sort_dvks() {
 		this.dvk_handler.sort_dvks_title(true, false);
+	}
+
+	@Override
+	public void get_pages(Dvk dvk, boolean check_all) {
+		this.start_gui.append_console(dvk.get_artists()[0], false);
 	}
 }

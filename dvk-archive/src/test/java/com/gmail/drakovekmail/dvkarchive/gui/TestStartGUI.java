@@ -2,9 +2,7 @@ package com.gmail.drakovekmail.dvkarchive.gui;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
 import java.io.File;
-
 import org.junit.Test;
 import com.gmail.drakovekmail.dvkarchive.gui.language.LanguageHandler;
 
@@ -35,7 +33,7 @@ public class TestStartGUI {
 		assertEquals("error_finding", categories[2]);
 		//TEST CATEGORY LANGUAGE STRINGS
 		categories = gui.get_categories(true);
-		assertEquals(2, categories.length);
+		assertEquals(3, categories.length);
 		assertEquals("Artist Hosting", categories[0]);
 		assertEquals("Comics", categories[1]);
 		assertEquals("Error Finding", categories[2]);
