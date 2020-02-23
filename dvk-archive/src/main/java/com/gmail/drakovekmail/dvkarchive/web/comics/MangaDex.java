@@ -95,6 +95,9 @@ public class MangaDex {
 		String xpath = "//span[@class='mx-1']";
 		connect.load_page(url, xpath);
 		try {
+			TimeUnit.MILLISECONDS.sleep(1000);
+		} catch (InterruptedException e) {}
+		try {
 			//GET TITLE
 			DomElement de = connect.get_page().getFirstByXPath(xpath);
 			dvk.set_title(de.asText());

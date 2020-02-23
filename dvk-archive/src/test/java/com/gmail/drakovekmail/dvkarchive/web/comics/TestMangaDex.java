@@ -238,16 +238,36 @@ public class TestMangaDex {
 		FilePrefs prefs = new FilePrefs();
 		DvkHandler dvk_handler = new DvkHandler();
 		dvk_handler.read_dvks(dirs, prefs, null, false, false, false);
-		Dvk title = MangaDex.get_title_info(this.connect, "34326");
-		ArrayList<Dvk> cps = MangaDex.get_chapters(this.connect, title, "French", 1);
+		//CREATE TEST CHAPTER DVKS
+		ArrayList<Dvk> cps = new ArrayList<>();
+		Dvk dvk = new Dvk();
+		dvk.set_title("Randomphilia | Ch. 75");
+		dvk.set_id("770792");
+		cps.add(dvk);
+		dvk = new Dvk();
+		dvk.set_title("Randomphilia | Ch. 74");
+		dvk.set_id("770791");
+		cps.add(dvk);
+		dvk = new Dvk();
+		dvk.set_title("Randomphilia | Ch. 73");
+		dvk.set_id("761782");
+		cps.add(dvk);
+		dvk = new Dvk();
+		dvk.set_title("Randomphilia | Ch. 72");
+		dvk.set_id("761781");
+		cps.add(dvk);
+		dvk = new Dvk();
+		dvk.set_title("Randomphilia | Ch. 71");
+		dvk.set_id("688479");
+		cps.add(dvk);
 		//WITH NO EXISTING FILES
 		int chapter = MangaDex.get_start_chapter(dvk_handler, cps, false);
-		assertEquals(74, chapter);
+		assertEquals(4, chapter);
 		//CREATE DVK
-		Dvk dvk = new Dvk();
-		dvk.set_id("MDX688478-5");
-		dvk.set_title("Randomphilia | Ch. 70 | Pg. 5");
-		dvk.set_page_url("https://mangadex.cc/chapter/688478/1");
+		dvk = new Dvk();
+		dvk.set_id("MDX761782-2");
+		dvk.set_title("Randomphilia | Ch. 73 | Pg. 2");
+		dvk.set_page_url("https://mangadex.cc/chapter/761782/1");
 		dvk.set_artist("Artist");
 		dvk.set_dvk_file(new File(this.test_dir, "dvk.dvk"));
 		dvk.set_media_file("media.jpg");
@@ -255,9 +275,9 @@ public class TestMangaDex {
 		//CHECK START CHAPTER WITH EXISTING FILES
 		dvk_handler.read_dvks(dirs, prefs, null, false, false, false);
 		chapter = MangaDex.get_start_chapter(dvk_handler, cps, false);
-		assertEquals(5, chapter);
+		assertEquals(2, chapter);
 		chapter = MangaDex.get_start_chapter(dvk_handler, cps, true);
-		assertEquals(74, chapter);
+		assertEquals(4, chapter);
 		//CREATE NEW DVK
 		dvk.set_id("MDX688478-5");
 		dvk.set_title("Randomphilia | Ch. 75 | Pg. 1");
@@ -280,63 +300,80 @@ public class TestMangaDex {
 		try {
 			//CREATE DVK
 			Dvk dvk = new Dvk();
-			dvk.set_id("MDX770791-3");
-			dvk.set_title("Randomphilia | Ch. 74 | Pg. 3");
+			dvk.set_id("MDX770792-3");
+			dvk.set_title("Randomphilia | Ch. 75 | Pg. 3");
 			dvk.set_artist("Artist");
-			dvk.set_page_url("https://mangadex.org/chapter/770791/3");
+			dvk.set_page_url("https://mangadex.org/chapter/770792/3");
 			dvk.set_dvk_file(new File(this.test_dir, "dvk.dvk"));
 			dvk.set_media_file("test.png");
 			dvk.write_dvk();
+			//CREATE TEST CHAPTER DVKS
+			ArrayList<Dvk> cps = new ArrayList<>();
+			dvk = new Dvk();
+			dvk.set_id("770792");
+			dvk.set_title("Randomphilia | Ch. 75");
+			dvk.set_artist("Biru no Fukuro");
+			String[] tags = {"Tag"};
+			dvk.set_web_tags(tags);
+			dvk.set_time("2019/12/21|15:03");
+			dvk.set_description("Desc");
+			dvk.set_page_url("https://mangadex.org/chapter/770792");
+			cps.add(dvk);
+			dvk = new Dvk();
+			dvk.set_id("770791");
+			dvk.set_title("Randomphilia | Ch. 74");
+			dvk.set_page_url("https://mangadex.org/chapter/770791");
+			cps.add(dvk);
+			dvk = new Dvk();
+			dvk.set_id("761782");
+			dvk.set_title("Randomphilia | Ch. 73");
+			dvk.set_page_url("https://mangadex.org/chapter/761782");
+			cps.add(dvk);
 			//GET DVKS
 			File[] dirs = {this.test_dir};
 			FilePrefs prefs = new FilePrefs();
 			DvkHandler handler = new DvkHandler();
 			handler.read_dvks(dirs, prefs, null, false, false, false);
 			s_connect = new DConnectSelenium(true);
-			Dvk title = MangaDex.get_title_info(this.connect, "34326");
-			ArrayList<Dvk> cps = MangaDex.get_chapters(
-					this.connect, title, "French", 1);
 			ArrayList<Dvk> dvks = MangaDex.get_dvks(
 					s_connect, handler, 
 					this.test_dir, cps, false, false);
 			//CHECK PAGE 1
 			String value;
-			assertEquals(9, dvks.size());
-			assertEquals("MDX770792-4", dvks.get(8).get_id());
+			assertEquals(3, dvks.size());
+			assertEquals("MDX770792-4", dvks.get(2).get_id());
 			value = "Randomphilia | Ch. 75 | Pg. 4";
-			assertEquals(value, dvks.get(8).get_title());
-			assertEquals(2, dvks.get(8).get_artists().length);
-			assertEquals("Biru no Fukuro", dvks.get(8).get_artists()[0]);
-			assertEquals(9, dvks.get(8).get_web_tags().length);
-			assertEquals("2019/12/21|15:03", dvks.get(8).get_time());
-			assertEquals("MangaDex:34326", dvks.get(8).get_web_tags()[0]);
-			assertEquals("Shounen", dvks.get(8).get_web_tags()[1]);
-			value = "and anything is possible.";
-			assertTrue(dvks.get(8).get_description().contains(value));
+			assertEquals(value, dvks.get(2).get_title());
+			assertEquals(1, dvks.get(2).get_artists().length);
+			assertEquals("Biru no Fukuro", dvks.get(2).get_artists()[0]);
+			assertEquals(1, dvks.get(2).get_web_tags().length);
+			assertEquals("Tag", dvks.get(2).get_web_tags()[0]);
+			assertEquals("2019/12/21|15:03", dvks.get(2).get_time());
+			assertEquals("Desc", dvks.get(2).get_description());
 			value = "https://mangadex.org/chapter/770792/4";
-			assertEquals(value, dvks.get(8).get_page_url());
+			assertEquals(value, dvks.get(2).get_page_url());
 			value = "https://s2.mangadex.org/data/"
 					+ "2d60025d419442a4d56d58a7bbcdc6db/M4.jpg";
-			assertEquals(value, dvks.get(8).get_direct_url());
+			assertEquals(value, dvks.get(2).get_direct_url());
 			value = "Randomphilia - Ch 75 - Pg 4_MDX770792-4.dvk";
 			File file = new File(this.test_dir, value);
-			assertEquals(file, dvks.get(8).get_dvk_file());
+			assertEquals(file, dvks.get(2).get_dvk_file());
 			value = "Randomphilia - Ch 75 - Pg 4_MDX770792-4.jpg";
 			file = new File(this.test_dir, value);
-			assertEquals(file, dvks.get(8).get_media_file());
+			assertEquals(file, dvks.get(2).get_media_file());
 			//CHECK PAGE 2
-			assertEquals("MDX770791-1", dvks.get(0).get_id());
-			value = "Randomphilia | Ch. 74 | Pg. 1";
+			assertEquals("MDX770792-1", dvks.get(0).get_id());
+			value = "Randomphilia | Ch. 75 | Pg. 1";
 			assertEquals(value, dvks.get(0).get_title());
-			value = "https://mangadex.org/chapter/770791/1";
+			value = "https://mangadex.org/chapter/770792/1";
 			assertEquals(value, dvks.get(0).get_page_url());
 			value = "https://s2.mangadex.org/data/"
-					+ "dedabbdba2b1b69f76f299ee748402f8/k1.jpg";
+					+ "2d60025d419442a4d56d58a7bbcdc6db/M1.jpg";
 			assertEquals(value, dvks.get(0).get_direct_url());
-			value = "Randomphilia - Ch 74 - Pg 1_MDX770791-1.dvk";
+			value = "Randomphilia - Ch 75 - Pg 1_MDX770792-1.dvk";
 			file = new File(this.test_dir, value);
 			assertEquals(file, dvks.get(0).get_dvk_file());
-			value = "Randomphilia - Ch 74 - Pg 1_MDX770791-1.jpg";
+			value = "Randomphilia - Ch 75 - Pg 1_MDX770792-1.jpg";
 			file = new File(this.test_dir, value);
 			assertEquals(file, dvks.get(0).get_media_file());
 			//CHECK INVALID
