@@ -18,6 +18,7 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DLabel;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DList;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DScrollPane;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DTextField;
+import com.gmail.drakovekmail.dvkarchive.gui.swing.compound.DTextDialog;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
 
 /**
@@ -30,7 +31,7 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	/**
 	 * SerialVersionUID
 	 */
-	private static final long serialVersionUID = 7605219333024907810L;
+	private static final long serialVersionUID = 7983767011765359870L;
 
 	/**
 	 * Name of the current artist-hosting service.
@@ -140,8 +141,8 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		JPanel btn_pnl = new JPanel();
 		btn_pnl.setLayout(new GridLayout(
 				3, 1, 0, base_gui.get_space_size()));
-		btn_pnl.add(this.all_btn);
 		btn_pnl.add(this.new_btn);
+		btn_pnl.add(this.all_btn);
 		btn_pnl.add(this.single_btn);
 		//CREATE SIDE PANEL
 		this.lst = new DList(base_gui, this, "list", true);
@@ -242,13 +243,24 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	 * 
 	 * @param check_all Whether to check all pages
 	 */
-	private void page_runner(boolean check_all) {
+	private void run_get_pages(boolean check_all) {
+		set_up();
 		int[] sel = get_selected();
 		for(int i = 0; i < sel.length; i++) {
 			if(!this.start_gui.get_base_gui().is_canceled()) {
 				get_pages(this.dvks.get(sel[i]), check_all);
 			}
 		}
+	}
+	
+	/**
+	 * Runs the download_page method for a given URL.
+	 * 
+	 * @param url Page URL
+	 */
+	private void run_download_single(String url) {
+		set_up();
+		download_page(url);
 	}
 
 	/**
@@ -258,6 +270,23 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	 * @param check_all Whether to check all pages
 	 */
 	public abstract void get_pages(Dvk dvk, boolean check_all);
+	
+	/**
+	 * Downloads from a single page URL.
+	 * 
+	 * @param url Page URL
+	 */
+	public abstract void download_page(String url);
+	
+	/**
+	 * Sets up objects for the artist hosting GUI.
+	 */
+	public abstract void set_up();
+	
+	/**
+	 * Closes objects for the artist hosting GUI when process is finished.
+	 */
+	public abstract void tear_down();
 	
 	/**
 	 * Sorts the DVKs in the DvkHandler.
@@ -301,6 +330,20 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 			case "check_all":
 				start_process("check_all", false);
 				break;
+			case "download_single":
+				if(this.directory_loaded()) {
+					String[] messages = {"enter_page_url"};
+					DTextDialog dialog = new DTextDialog();
+					String url = dialog.open(
+							this.start_gui.get_base_gui(),
+							this.start_gui.get_frame(),
+							"download_single",
+							messages);
+					if(url != null) {
+						start_process(url, false);
+					}
+				}
+				break;
 		}
 	}
 	
@@ -308,37 +351,36 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	public void run(String id) {
 		switch(id) {
 			case "check_new":
-				page_runner(false);
+				run_get_pages(false);
 				break;
 			case "check_all":
-				page_runner(true);
+				run_get_pages(true);
 				break;
 			case "read_dvks":
 				this.start_gui.get_progress_bar()
 					.set_progress(true, false, 0, 0);
 				read_dvks();
 				break;
+			default:
+				run_download_single(id);
+				break;
 		}
 	}
 
 	@Override
 	public void done(String id) {
-		switch(id) {
-			case "check_new":
-			case "check_all":
-			case "read_dvks":
-				this.start_gui.get_progress_bar()
-					.set_progress(false, false, 0, 0);
-				if(this.start_gui.get_base_gui().is_canceled()) {
-					this.start_gui.append_console("canceled", true);
-				}
-				else {
-					this.start_gui.append_console("finished", true);
-				}
-				this.start_gui.get_base_gui().set_running(false);
-				this.start_gui.enable_all();
-				enable_all();
-				break;
+		if(!id.equals("read_dvks")) {
+			tear_down();
 		}
+		this.start_gui.get_progress_bar().set_progress(false, false, 0, 0);
+		if(this.start_gui.get_base_gui().is_canceled()) {
+			this.start_gui.append_console("canceled", true);
+		}
+		else {
+			this.start_gui.append_console("finished", true);
+		}
+		this.start_gui.get_base_gui().set_running(false);
+		this.start_gui.enable_all();
+		enable_all();
 	}
 }

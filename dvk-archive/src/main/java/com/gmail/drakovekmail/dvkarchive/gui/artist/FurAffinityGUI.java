@@ -87,4 +87,23 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 	public void get_pages(Dvk dvk, boolean check_all) {
 		this.start_gui.append_console(dvk.get_artists()[0], false);
 	}
+
+	@Override
+	public void download_page(String url) {
+		if(url != null) {
+			System.out.println(url);
+		}
+	}
+
+	@Override
+	public void set_up() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void tear_down() {
+		// TODO Auto-generated method stub
+		
+	}
 }

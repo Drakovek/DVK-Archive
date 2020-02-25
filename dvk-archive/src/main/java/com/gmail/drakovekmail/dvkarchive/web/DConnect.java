@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.LogFactory;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
@@ -17,6 +18,7 @@ import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
 import com.gargoylesoftware.htmlunit.StringWebResponse;
 import com.gargoylesoftware.htmlunit.UnexpectedPage;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.WebWindow;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.parser.HTMLParser;
@@ -99,6 +101,15 @@ public class DConnect {
 		}
 		else {
 			try {
+				List<WebWindow> windows = this.web_client.getWebWindows();
+				for(WebWindow window: windows) {
+					window.getJobManager().removeAllJobs();
+					window.getJobManager().shutdown();
+					window = null;
+				}
+				close_client();
+				System.gc();
+				initialize_client();
 				HTMLParser parser;
 				parser = this.web_client.getPageCreator().getHtmlParser();
 				URL url = new URL("https://www.notreal.com");
@@ -120,7 +131,12 @@ public class DConnect {
 	 */
 	public void load_page(String url, String element) {
 		CookieManager cookies = this.web_client.getCookieManager();
-		this.web_client.getCurrentWindow().getJobManager().removeAllJobs();
+		List<WebWindow> windows = this.web_client.getWebWindows();
+		for(WebWindow window: windows) {
+			window.getJobManager().removeAllJobs();
+			window.getJobManager().shutdown();
+			window = null;
+		}
 		close_client();
 		System.gc();
 		initialize_client();

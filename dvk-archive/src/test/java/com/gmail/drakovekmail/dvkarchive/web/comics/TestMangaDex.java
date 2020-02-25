@@ -180,7 +180,7 @@ public class TestMangaDex {
 		String[] tags = {"tag", "other"};
 		dvk.set_web_tags(tags);
 		ArrayList<Dvk> dvks;
-		dvks = MangaDex.get_chapters(this.connect, dvk, "English", 1);
+		dvks = MangaDex.get_chapters(this.connect, dvk, null, "English", 1);
 		assertEquals(69, dvks.size());
 		//TITLE 1, CHAPTER 1
 		assertEquals(2, dvks.get(0).get_web_tags().length);
@@ -212,7 +212,7 @@ public class TestMangaDex {
 		assertEquals("2018/01/18|16:44", dvks.get(68).get_time());
 		assertEquals("1949", dvks.get(68).get_id());
 		//TITLE 1, SEPARATE LANGUAGE
-		dvks = MangaDex.get_chapters(this.connect, dvk, "Italian", 1);
+		dvks = MangaDex.get_chapters(this.connect, dvk, null, "Italian", 1);
 		assertEquals(26, dvks.size());
 		value = "JoJo's Bizarre Adventure Part 2 | "
 				+ "Vol. 3 Ch. 26 - La maledizione delle fedi";
@@ -225,7 +225,7 @@ public class TestMangaDex {
 		assertEquals(value, dvks.get(0).get_page_url());
 		assertEquals("676740", dvks.get(0).get_id());
 		//TITLE 1, NON-EXISTANT LANGUAGE
-		dvks = MangaDex.get_chapters(this.connect, dvk, "JAKJSKDJK", 1);
+		dvks = MangaDex.get_chapters(this.connect, dvk, null, "JAKJSKDJK", 1);
 		assertEquals(0, dvks.size());
 	}
 
@@ -336,7 +336,7 @@ public class TestMangaDex {
 			handler.read_dvks(dirs, prefs, null, false, false, false);
 			s_connect = new DConnectSelenium(true);
 			ArrayList<Dvk> dvks = MangaDex.get_dvks(
-					s_connect, handler, 
+					s_connect, handler, null,
 					this.test_dir, cps, false, false);
 			//CHECK PAGE 1
 			String value;
@@ -380,12 +380,13 @@ public class TestMangaDex {
 			dvks = MangaDex.get_dvks(
 					s_connect,
 					handler,
+					null,
 					new File("jslkdjf"),
 					new ArrayList<>(), false, false);
 			assertEquals(0, dvks.size());
 			dvks = MangaDex.get_dvks(
 					s_connect, handler,
-					null,
+					null, null,
 					new ArrayList<>(), false, false);
 			assertEquals(0, dvks.size());
 		}

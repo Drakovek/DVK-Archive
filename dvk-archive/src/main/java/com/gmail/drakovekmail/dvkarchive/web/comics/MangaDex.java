@@ -8,6 +8,7 @@ import com.gargoylesoftware.htmlunit.html.DomAttr;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
 import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
+import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
 import com.gmail.drakovekmail.dvkarchive.processing.StringProcessing;
 import com.gmail.drakovekmail.dvkarchive.web.DConnect;
 import com.gmail.drakovekmail.dvkarchive.web.DConnectSelenium;
@@ -95,7 +96,7 @@ public class MangaDex {
 		String xpath = "//span[@class='mx-1']";
 		connect.load_page(url, xpath);
 		try {
-			TimeUnit.MILLISECONDS.sleep(1000);
+			TimeUnit.MILLISECONDS.sleep(2000);
 		} catch (InterruptedException e) {}
 		try {
 			//GET TITLE
@@ -168,6 +169,7 @@ public class MangaDex {
 	 * 
 	 * @param connect DConnect object for web connection.
 	 * @param base_dvk Dvk containing title info, as from get_title_info
+	 * @param start_gui StartGUI for showing progress
 	 * @param language Language of chapters to include
 	 * @param page Page of chapter list to start scanning from
 	 * @return ArrayList of Dvk objects containing chapter info
@@ -175,6 +177,7 @@ public class MangaDex {
 	public static ArrayList<Dvk> get_chapters(
 			DConnect connect,
 			Dvk base_dvk,
+			StartGUI start_gui,
 			String language,
 			int page) {
 		//LOAD TITLE PAGE
@@ -188,7 +191,7 @@ public class MangaDex {
 			return new ArrayList<>();
 		}
 		try {
-			TimeUnit.MILLISECONDS.sleep(1000);
+			TimeUnit.MILLISECONDS.sleep(2000);
 		} catch (InterruptedException e1) {}
 		//GET CHAPTER LINKS
 		DomElement de;
@@ -248,9 +251,10 @@ public class MangaDex {
 		//SEE WHETHER TO CHECK FURTHER CHAPTER LISTS
 		xpath = "//a[@class='text-truncate']";
 		ds = connect.get_page().getByXPath(xpath);
-		if(ds.size() > 0) {
+		
+		if(ds.size() > 0 && (start_gui == null || !start_gui.get_base_gui().is_canceled())) {
 			dvks.addAll(get_chapters(
-					connect, base_dvk, language, page + 1));
+					connect, base_dvk, start_gui, language, page + 1));
 		}
 		return dvks;
 	}
@@ -293,6 +297,7 @@ public class MangaDex {
 	 * 
 	 * @param connect Object for connecting to MangaDex
 	 * @param dvk_handler Used to check for already downloaded media
+	 * @param start_gui StartGui for showing progress
 	 * @param directory Directory to save to, if necessary
 	 * @param chapters MangaDex chapters to download from
 	 * @param check_all Whether to check all chapters
@@ -302,6 +307,7 @@ public class MangaDex {
 	public static ArrayList<Dvk> get_dvks(
 			DConnectSelenium connect,
 			DvkHandler dvk_handler,
+			StartGUI start_gui,
 			File directory,
 			ArrayList<Dvk> chapters,
 			boolean check_all,
@@ -312,11 +318,19 @@ public class MangaDex {
 				|| !directory.isDirectory()) {
 			return new ArrayList<>();
 		}
-		int c = get_start_chapter(dvk_handler, chapters, check_all);
+		int start = get_start_chapter(dvk_handler, chapters, check_all);
 		ArrayList<Dvk> dvks = new ArrayList<>();
-		for(; c > -1; c--) {
+		for(int c = start; c > -1; c--) {
+			if(start_gui != null) {
+				start_gui.get_progress_bar().set_progress(false, true, start - c, start + 1);
+				start_gui.append_console(chapters.get(c).get_title(), false);
+			}
+			int total;
 			int page = 1;
-			while(true) {
+			for(total = 100000; page <= total; page++) {
+				if(start_gui != null && start_gui.get_base_gui().is_canceled()) {
+					break;
+				}
 				//SET KNOWN INFO
 				Dvk dvk = new Dvk();
 				dvk.set_id("MDX" + chapters.get(c).get_id()
@@ -344,7 +358,8 @@ public class MangaDex {
 				//SKIP IF ALREADY DOWNLOADED
 				if(!contains) {
 					//LOAD PAGE
-					String xpath = "//img[@class='noselect nodrag cursor-pointer']";
+					String xpath = "//div[@data-page='" + Integer.toString(page)
+						+ "']//img[@class='noselect nodrag cursor-pointer']";
 					connect.load_page(dvk.get_page_url(), xpath);
 					try {
 						TimeUnit.MILLISECONDS.sleep(2000);
@@ -352,6 +367,7 @@ public class MangaDex {
 					if(connect.get_page() == null) {
 						break;
 					}
+					System.out.println("Got Here!");
 					//CHECK IF IN RIGHT CHAPTER
 					xpath = "//span[@class='chapter-title']/@data-chapter-id";
 					DomAttr da;
@@ -360,6 +376,17 @@ public class MangaDex {
 							|| !da.getNodeValue().equals(chapters.get(c).get_id())) {
 						break;
 					}
+					//GET TOTAL PAGES
+					xpath = "//div[@id='content']/@data-total-pages";
+					da = connect.get_page().getFirstByXPath(xpath);
+					try {
+						int v = Integer.parseInt(da.getNodeValue());
+						total = v;
+					}
+					catch(Exception f) {
+						break;
+					}
+					System.out.println("Total: " + Integer.toString(total));
 					//GET IMAGE URL
 					xpath = "//div[@data-page='" + Integer.toString(page)
 						+ "']//img[@class='noselect nodrag cursor-pointer']/@src";
@@ -383,6 +410,10 @@ public class MangaDex {
 				}
 				//NEXT PAGE
 				page++;
+			}
+			if(page <= total) {
+				System.out.println("Broke chapter");
+				break;
 			}
 		}
 		return dvks;

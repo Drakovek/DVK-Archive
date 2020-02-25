@@ -19,6 +19,7 @@ public class DEnglish extends LanguageMap{
 		this.lang_keys.put("category", "Ca^tegory");
 		this.lang_keys.put("service", "S^ervice");
 		this.lang_keys.put("cancel", "^Cancel");
+		this.lang_keys.put("ok", "^OK");
 		this.lang_keys.put("canceling", "Cancelling...");
 		this.lang_keys.put("clear", "^Clear");
 		this.lang_keys.put("console_log", "Console Log");
@@ -54,12 +55,18 @@ public class DEnglish extends LanguageMap{
 		this.lang_keys.put("download_single", "^Download Single");
 		this.lang_keys.put("refresh", "^Refresh");
 		this.lang_keys.put("artists", "^Artists");
+		this.lang_keys.put("enter_page_url", "Enter Page URL:");
 		//ERROR FINDING
 		this.lang_keys.put("same_ids", "Same IDs");
 		this.lang_keys.put("missing_media", "Missing Media");
 		this.lang_keys.put("unlinked_media", "Unlinked Media");
 		//COMICS
 		this.lang_keys.put("mangadex", "MangaDex");
+		//MANGADEX
+		this.lang_keys.put("running_mangadex", "[RUNNING MANGADEX]");
+		this.lang_keys.put("getting_title", "Getting Title");
+		this.lang_keys.put("getting_chapters", "Getting Chapters...");
+		this.lang_keys.put("downloading_pages", "Downloading Pages...");
 		//UNLINKED MEDIA
 		this.lang_keys.put("unlinked_title", "Find Unlinked Media");
 		this.lang_keys.put("unlinked_console", "[FINDING UNLINKED MEDIA]");

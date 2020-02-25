@@ -368,6 +368,15 @@ public class StartGUI implements DActionEvent, Disabler {
 	}
 	
 	/**
+	 * Returns the main frame of StartGUI object.
+	 * 
+	 * @return DFrame
+	 */
+	public DFrame get_frame() {
+		return this.frame;
+	}
+	
+	/**
 	 * Returns the FilePrefs object for this object.
 	 * 
 	 * @return FilePrefs

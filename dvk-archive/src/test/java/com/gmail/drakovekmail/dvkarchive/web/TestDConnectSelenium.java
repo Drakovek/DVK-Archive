@@ -80,5 +80,9 @@ public class TestDConnectSelenium {
 		assertNotEquals(null, this.connect.get_page());
 		de = this.connect.get_page().getFirstByXPath("//button[@id='loadedButton']");
 		assertEquals("A button to click!", de.asText());
+		//TEST INVALID ELEMENT
+		url = "http://pythonscraping.com/exercises/exercise1.html";
+		this.connect.load_page(url, "//a[href='non-existant']");
+		assertEquals(null, this.connect.get_page());
 	}
 }
