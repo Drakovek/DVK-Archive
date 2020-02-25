@@ -184,11 +184,15 @@ public class MangaDex {
 		ArrayList<Dvk> dvks = new ArrayList<>();
 		String url = base_dvk.get_page_url() 
 				+ "/chapters/" + Integer.toString(page);
-		String xpath = "//span[@class='mx-1']";
+		String xpath = "//a[@class='text-truncate']";
 		connect.load_page(url, xpath);
 		//CHECK PAGE LOADED
 		if(connect.get_page() == null) {
-			return new ArrayList<>();
+			if(start_gui != null) {
+				start_gui.get_base_gui().set_canceled(true);
+				start_gui.append_console("mangadex_failed", true);
+			}
+			return null;
 		}
 		try {
 			TimeUnit.MILLISECONDS.sleep(2000);
@@ -249,12 +253,19 @@ public class MangaDex {
 			catch(Exception e) {}
 		}
 		//SEE WHETHER TO CHECK FURTHER CHAPTER LISTS
-		xpath = "//a[@class='text-truncate']";
+		xpath = "//a[@class='page-link'][contains(@href,'chapters/" + Integer.toString(page + 1) + "/')]";
 		ds = connect.get_page().getByXPath(xpath);
-		
 		if(ds.size() > 0 && (start_gui == null || !start_gui.get_base_gui().is_canceled())) {
-			dvks.addAll(get_chapters(
-					connect, base_dvk, start_gui, language, page + 1));
+			ArrayList<Dvk> next = get_chapters(connect, base_dvk, start_gui, language, page + 1);
+			if(next != null) {
+				dvks.addAll(next);
+			}
+			else if(page > 1) {
+				return null;
+			}
+			else {
+				return new ArrayList<>();
+			}
 		}
 		return dvks;
 	}
@@ -367,7 +378,6 @@ public class MangaDex {
 					if(connect.get_page() == null) {
 						break;
 					}
-					System.out.println("Got Here!");
 					//CHECK IF IN RIGHT CHAPTER
 					xpath = "//span[@class='chapter-title']/@data-chapter-id";
 					DomAttr da;
@@ -386,7 +396,6 @@ public class MangaDex {
 					catch(Exception f) {
 						break;
 					}
-					System.out.println("Total: " + Integer.toString(total));
 					//GET IMAGE URL
 					xpath = "//div[@data-page='" + Integer.toString(page)
 						+ "']//img[@class='noselect nodrag cursor-pointer']/@src";
@@ -408,11 +417,8 @@ public class MangaDex {
 					//APPEND DVK
 					dvks.add(dvk);
 				}
-				//NEXT PAGE
-				page++;
 			}
 			if(page <= total) {
-				System.out.println("Broke chapter");
 				break;
 			}
 		}

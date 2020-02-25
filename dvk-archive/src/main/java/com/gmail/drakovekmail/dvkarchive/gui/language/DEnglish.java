@@ -67,6 +67,7 @@ public class DEnglish extends LanguageMap{
 		this.lang_keys.put("getting_title", "Getting Title");
 		this.lang_keys.put("getting_chapters", "Getting Chapters...");
 		this.lang_keys.put("downloading_pages", "Downloading Pages...");
+		this.lang_keys.put("mangadex_failed", "MangaDex Failed");
 		//UNLINKED MEDIA
 		this.lang_keys.put("unlinked_title", "Find Unlinked Media");
 		this.lang_keys.put("unlinked_console", "[FINDING UNLINKED MEDIA]");
