@@ -51,6 +51,11 @@ public abstract class ServiceGUI extends JPanel implements Disabler, DWorker {
 	public abstract void directory_opened();
 	
 	/**
+	 * Closes any objects no longer needed.
+	 */
+	public abstract void close();
+	
+	/**
 	 * Starts a process thread while disabling UI.
 	 * 
 	 * @param id ID of the process

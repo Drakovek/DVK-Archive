@@ -24,6 +24,7 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DMenu;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DMenuItem;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DProgressBar;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DScrollPane;
+import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DScrollablePanel;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DTextArea;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
 
@@ -100,7 +101,7 @@ public class StartGUI implements DActionEvent, Disabler {
 	/**
 	 * Panel for holding service_pnl
 	 */
-	private JPanel content_pnl;
+	private DScrollablePanel content_pnl;
 	
 	/**
 	 * Panel containing GUI elements for the current service
@@ -119,11 +120,17 @@ public class StartGUI implements DActionEvent, Disabler {
 		this.base_gui.set_font("", 14, true);
 		this.file_prefs = new FilePrefs();
 		File file = new File(System.getProperty("user.home"));
-		file = new File(file, "dvk_index");
-		if(!file.isDirectory()) {
-			file.mkdirs();
+		file = new File(file, "dvk");
+		File sub = new File(file, "index");
+		if(!sub.isDirectory()) {
+			sub.mkdirs();
 		}
-		this.file_prefs.set_index_dir(file);
+		this.file_prefs.set_index_dir(sub);
+		sub = new File(file, "captcha");
+		if(!sub.isDirectory()) {
+			sub.mkdirs();
+		}
+		this.file_prefs.set_captcha_dir(sub);
 		this.file_prefs.set_use_index(true);
 		this.current_service = new String();
 		this.frame = new DFrame(this.base_gui, "dvk_archive");
@@ -164,12 +171,12 @@ public class StartGUI implements DActionEvent, Disabler {
 		console_pnl = this.base_gui.get_y_stack(console_lbl, 0, console_scr, 1);
 		JPanel log_pnl = this.base_gui.get_y_stack(console_pnl, 1, bar_pnl, 0);
 		//CREATE CENTER PANEL
-		this.content_pnl = new JPanel();
-		this.content_pnl.setLayout(new GridLayout(1, 1));
+		this.content_pnl = new DScrollablePanel();
+		DScrollPane c_scr = new DScrollPane(this.content_pnl);
 		JPanel center_pnl = new JPanel();
 		center_pnl.setLayout(new GridLayout(2, 1));
 		center_pnl.add(this.base_gui.get_spaced_panel(
-				this.content_pnl, 1, 1, false, true, false, false));
+				c_scr, 1, 1, false, true, false, false));
 		JSeparator sep = new JSeparator(SwingConstants.HORIZONTAL);
 		JPanel bottom_pnl = this.base_gui.get_y_stack(sep, 0, log_pnl, 1);
 		center_pnl.add(bottom_pnl);
@@ -277,7 +284,9 @@ public class StartGUI implements DActionEvent, Disabler {
 			String service = get_services(cat, false)[selected];
 			if(!this.current_service.equals(service)) {
 				//CHANGE SERVICE GUI
-				this.content_pnl.removeAll();
+				if(this.service_pnl != null) {
+					this.service_pnl.close();
+				}
 				this.service_pnl = null;
 				this.base_gui.set_canceled(true);
 				switch(service) {
@@ -294,9 +303,8 @@ public class StartGUI implements DActionEvent, Disabler {
 						this.service_pnl = new UnlinkedMediaGUI(this);
 						break;
 				}
-				this.content_pnl.add(this.service_pnl);
-				this.content_pnl.revalidate();
-				this.content_pnl.repaint();
+				JPanel spaced = this.base_gui.get_spaced_panel(this.service_pnl);
+				this.content_pnl.set_panel(spaced, true, false);
 				this.current_service = service;
 			}
 		}

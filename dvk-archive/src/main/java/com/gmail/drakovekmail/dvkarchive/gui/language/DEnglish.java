@@ -56,6 +56,8 @@ public class DEnglish extends LanguageMap{
 		this.lang_keys.put("refresh", "^Refresh");
 		this.lang_keys.put("artists", "^Artists");
 		this.lang_keys.put("enter_page_url", "Enter Page URL:");
+		this.lang_keys.put("loading_captcha", "Loading Captcha...");
+		this.lang_keys.put("captcha_failed", "Failed Loading Captcha");
 		//ERROR FINDING
 		this.lang_keys.put("same_ids", "Same IDs");
 		this.lang_keys.put("missing_media", "Missing Media");

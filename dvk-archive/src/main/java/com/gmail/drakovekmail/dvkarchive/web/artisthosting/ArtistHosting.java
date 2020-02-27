@@ -9,7 +9,7 @@ import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
  * 
  * @author Drakovek
  */
-public class ArtistHosting {
+public abstract class ArtistHosting {
 	
 	/**
 	 * Returns a list of Dvks of different artist's work from a given domain.

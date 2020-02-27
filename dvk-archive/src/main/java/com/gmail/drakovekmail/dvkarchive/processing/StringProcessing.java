@@ -203,10 +203,14 @@ public class StringProcessing {
 	 * @return Extension for filename
 	 */
 	public static String get_extension(String filename) {
-		int index = filename.lastIndexOf('.');
-		if(index == -1 || filename.length() - index > 6) {
+		int start = filename.lastIndexOf('.');
+		int end = filename.indexOf('?', start);
+		if(end == -1) {
+			end = filename.length();
+		}
+		if(start == -1 || end - start > 6) {
 			return new String();
 		}
-		return filename.substring(index);
+		return filename.substring(start, end);
 	}
 }

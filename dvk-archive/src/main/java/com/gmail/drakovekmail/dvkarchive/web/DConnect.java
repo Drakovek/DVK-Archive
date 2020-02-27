@@ -84,6 +84,7 @@ public class DConnect {
 		this.web_client = new WebClient(BrowserVersion.BEST_SUPPORTED);
 		this.web_client.getOptions().setCssEnabled(this.css);
 		this.web_client.getOptions().setJavaScriptEnabled(this.javascript);
+		this.web_client.getOptions().setThrowExceptionOnFailingStatusCode(false);
 		this.web_client.getOptions().setThrowExceptionOnScriptError(false);
 		this.web_client.setJavaScriptTimeout(10000);
 		this.web_client.setAjaxController(new NicelyResynchronizingAjaxController());
@@ -128,8 +129,22 @@ public class DConnect {
 	 * 
 	 * @param url Given URL
 	 * @param element XPath element to wait for
+	 * @param tries How many times to attempt loading page
 	 */
-	public void load_page(String url, String element) {
+	public void load_page(String url, String element, int tries) {
+		load_page(url, element);
+		for(int i = 0; this.get_page() == null && i < (tries - 1); i++) {
+			load_page(url, element);
+		}
+	}
+	
+	/**
+	 * Loads a given URL to a HtmlPage object.
+	 * 
+	 * @param url Given URL
+	 * @param element XPath element to wait for
+	 */
+	private void load_page(String url, String element) {
 		CookieManager cookies = this.web_client.getCookieManager();
 		List<WebWindow> windows = this.web_client.getWebWindows();
 		for(WebWindow window: windows) {
@@ -143,6 +158,7 @@ public class DConnect {
 		this.web_client.setCookieManager(cookies);
 		try {
 			this.page = this.web_client.getPage(url);
+			this.web_client.waitForBackgroundJavaScript(10000);
 			if(!wait_for_element(element)) {
 				this.page = null;
 			}

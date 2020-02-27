@@ -96,8 +96,22 @@ public class DConnectSelenium {
 	 * 
 	 * @param url Given URL
 	 * @param element XPath element to wait for
+	 * @param tries How many times to attempt loading page
 	 */
-	public void load_page(String url, String element) {
+	public void load_page(String url, String element, int tries) {
+		load_page(url, element);
+		for(int i = 0; this.get_page() == null && i < (tries - 1); i++) {
+			load_page(url, element);
+		}
+	}
+	
+	/**
+	 * Loads a given URL to a HtmlPage object.
+	 * 
+	 * @param url Given URL
+	 * @param element XPath element to wait for
+	 */
+	private void load_page(String url, String element) {
 		try {
 			this.driver.get(url);
 			if(element != null) {

@@ -81,14 +81,14 @@ public class TestDConnect {
 	public void test_load_get_page() {
 		DomElement de;
 		//TEST INVALID URL
-		this.connect.load_page(null, null);
+		this.connect.load_page(null, null, 1);
 		assertEquals(null, this.connect.get_page());
 		String url = "lkjslkdjflajs";
-		this.connect.load_page(url, null);
+		this.connect.load_page(url, null, 1);
 		assertEquals(null, this.connect.get_page());
 		//TEST VALID URL
 		url = "http://pythonscraping.com/exercises/exercise1.html";
-		this.connect.load_page(url, null);
+		this.connect.load_page(url, null, 2);
 		assertNotEquals(null, this.connect.get_page());
 		de = this.connect.get_page().getFirstByXPath("//h1");
 		assertEquals("An Interesting Title", de.asText());
@@ -97,13 +97,13 @@ public class TestDConnect {
 		//TEST AJAX WAITING
 		url = "http://pythonscraping.com/pages/javascript/ajaxDemo.html";
 		this.connect.initialize_client(false, true);
-		this.connect.load_page(url, "//button[@id='loadedButton']");
+		this.connect.load_page(url, "//button[@id='loadedButton']", 2);
 		assertNotEquals(null, this.connect.get_page());
 		de = this.connect.get_page().getFirstByXPath("//button[@id='loadedButton']");
 		assertEquals("A button to click!", de.asText());
 		//TEST INVALID ELEMENT
 		url = "http://pythonscraping.com/exercises/exercise1.html";
-		this.connect.load_page(url, "//a[href='non-existant']");
+		this.connect.load_page(url, "//a[href='non-existant']", 2);
 		assertEquals(null, this.connect.get_page());
 	}
 	

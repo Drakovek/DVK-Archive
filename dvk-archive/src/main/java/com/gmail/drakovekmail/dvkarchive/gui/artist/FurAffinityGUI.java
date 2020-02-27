@@ -7,6 +7,7 @@ import java.util.prefs.Preferences;
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
 import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
 import com.gmail.drakovekmail.dvkarchive.web.artisthosting.ArtistHosting;
+import com.gmail.drakovekmail.dvkarchive.web.artisthosting.FurAffinity;
 
 /**
  * GUI for downloading files from FurAffinity.net
@@ -18,12 +19,17 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 	/**
 	 * SerialVersionUID
 	 */
-	private static final long serialVersionUID = -6101647561781599187L;
+	private static final long serialVersionUID = -5888878483328311951L;
 
 	/**
 	 * Key for Fur Affinity directory in preferences
 	 */
 	private static final String DIRECTORY = "directory";
+	
+	/**
+	 * FurAffinity object for downloading from FurAffinity
+	 */
+	private FurAffinity fur;
 	
 	/**
 	 * Initializes the FurAffinityGUI object.
@@ -32,8 +38,9 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 	 */
 	public FurAffinityGUI(StartGUI start_gui) {
 		super(start_gui, "fur_affinity");
-		create_login_gui();
+		create_login_gui(true);
 		load_directory();
+		this.fur = new FurAffinity(this.start_gui.get_file_prefs());
 	}
 	
 	/**
@@ -96,14 +103,12 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 	}
 
 	@Override
-	public void set_up() {
-		// TODO Auto-generated method stub
-		
+	public void close() {
+		this.fur.close();
 	}
 
 	@Override
-	public void tear_down() {
-		// TODO Auto-generated method stub
-		
+	public File get_captcha() {
+		return this.fur.get_captcha();
 	}
 }

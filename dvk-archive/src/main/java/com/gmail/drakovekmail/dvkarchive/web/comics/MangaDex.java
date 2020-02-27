@@ -94,7 +94,8 @@ public class MangaDex {
 		Dvk dvk = new Dvk();
 		String url = "https://mangadex.org/title/" + id + "/";
 		String xpath = "//span[@class='mx-1']";
-		connect.load_page(url, xpath);
+		//TODO Get number of tries in preferences
+		connect.load_page(url, xpath, 2);
 		try {
 			TimeUnit.MILLISECONDS.sleep(2000);
 		} catch (InterruptedException e) {}
@@ -185,7 +186,8 @@ public class MangaDex {
 		String url = base_dvk.get_page_url() 
 				+ "/chapters/" + Integer.toString(page);
 		String xpath = "//a[@class='text-truncate']";
-		connect.load_page(url, xpath);
+		//TODO Get number of tries in preferences
+		connect.load_page(url, xpath, 2);
 		//CHECK PAGE LOADED
 		if(connect.get_page() == null) {
 			if(start_gui != null) {
@@ -371,7 +373,8 @@ public class MangaDex {
 					//LOAD PAGE
 					String xpath = "//div[@data-page='" + Integer.toString(page)
 						+ "']//img[@class='noselect nodrag cursor-pointer']";
-					connect.load_page(dvk.get_page_url(), xpath);
+					//TODO Get number of tries in preferences
+					connect.load_page(dvk.get_page_url(), xpath, 1);
 					try {
 						TimeUnit.MILLISECONDS.sleep(2000);
 					} catch (InterruptedException e) {}
@@ -418,7 +421,7 @@ public class MangaDex {
 					dvks.add(dvk);
 				}
 			}
-			if(page <= total) {
+			if(total != 100000 && page <= total) {
 				break;
 			}
 		}

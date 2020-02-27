@@ -102,5 +102,8 @@ public class TestStringProcessing {
 		assertEquals("", StringProcessing.get_extension("test.notextension"));
 		assertEquals(".png", StringProcessing.get_extension("blah.test.png"));
 		assertEquals("", StringProcessing.get_extension("kskdjfjskjd"));
+		assertEquals(".png", StringProcessing.get_extension("test.png?extra"));
+		assertEquals(".thing", StringProcessing.get_extension("test.thing?"));
+		assertEquals("", StringProcessing.get_extension("test.tolong?extra"));
 	}
 }

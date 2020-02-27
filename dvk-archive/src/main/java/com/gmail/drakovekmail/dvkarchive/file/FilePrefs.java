@@ -16,14 +16,24 @@ public class FilePrefs {
 	private static final String INDEX_DIR = "index_dir";
 	
 	/**
+	 * Key for the "captcha dir" setting
+	 */
+	private static final String CAPTCHA_DIR = "captcha_dir";
+	
+	/**
 	 * Key for the "use index" setting
 	 */
 	private static final String USE_INDEX = "use_index";
 	
 	/**
-	 * Directory in which to store DvkDirectory index files.
+	 * Directory in which to store DvkDirectory index files
 	 */
 	private File index_dir;
+	
+	/**
+	 * Directory in which to store downloaded CAPTCHA images
+	 */
+	private File captcha_dir;
 	
 	/**
 	 * Whether to load DvkDirectories from index files
@@ -45,6 +55,10 @@ public class FilePrefs {
 		//GET INDEX DIR
 		String path = prefs.get(INDEX_DIR, "");
 		set_index_dir(new File(path));
+		//GET CAPTCHA DIR
+		path = prefs.get(CAPTCHA_DIR, "");
+		set_captcha_dir(new File(path));
+		delete_captchas();
 		//GET USE INDEXVALUE
 		set_use_index(prefs.getBoolean(USE_INDEX, true));
 	}
@@ -56,6 +70,8 @@ public class FilePrefs {
 		Preferences prefs = Preferences.userNodeForPackage(FilePrefs.class);
 		//GET INDEX DIR
 		prefs.put(INDEX_DIR, get_index_dir().getAbsolutePath());
+		//GET CAPTCHA DIR
+		prefs.put(CAPTCHA_DIR, get_captcha_dir().getAbsolutePath());
 		//GET USE INDEXVALUE
 		prefs.putBoolean(USE_INDEX, use_index());
 	}
@@ -81,6 +97,42 @@ public class FilePrefs {
 	 */
 	public File get_index_dir() {
 		return this.index_dir;
+	}
+	
+	/**
+	 * Sets the CAPTCHA directory.
+	 * 
+	 * @param dir CAPTCHA directory
+	 */
+	public void set_captcha_dir(File dir) {
+		if(dir != null) {
+			this.captcha_dir = dir;
+		}
+		else {
+			this.captcha_dir = new File("");
+		}
+	}
+	
+	/**
+	 * Returns the CAPTCHA directory.
+	 * 
+	 * @return CAPTCHA directory
+	 */
+	public File get_captcha_dir() {
+		return this.captcha_dir;
+	}
+	
+	/**
+	 * Deletes all CAPTCHAs in the captcha directory.
+	 */
+	public void delete_captchas() {
+		if(this.get_captcha_dir().isDirectory())
+		{
+			File[] files = this.get_captcha_dir().listFiles();
+			for(File file: files) {
+				file.delete();
+			}
+		}
 	}
 	
 	/**

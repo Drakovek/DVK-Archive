@@ -82,6 +82,9 @@ public class MangaDexGUI extends ArtistHostingGUI {
 	
 	@Override
 	public void get_artists() {
+		close();
+		this.connect = new DConnect(false, false);
+		this.sel = new DConnectSelenium(true);
 		this.dvks = MangaDex.get_downloaded_titles(this.dvk_handler);
 		ArrayList<String> list = new ArrayList<>();
 		for(int i = 0; i < this.dvks.size(); i++) {
@@ -156,15 +159,18 @@ public class MangaDexGUI extends ArtistHostingGUI {
 	}
 
 	@Override
-	public void set_up() {
-		this.connect = new DConnect(false, false);
-		this.sel = new DConnectSelenium(true);
-		
+	public void close() {
+		if(this.connect != null) {
+			this.connect.close_client();
+		}
+		if(this.sel != null) {
+			this.sel.close_driver();
+		}
 	}
 
 	@Override
-	public void tear_down() {
-		this.connect.close_client();
-		this.sel.close_driver();
+	public File get_captcha() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
