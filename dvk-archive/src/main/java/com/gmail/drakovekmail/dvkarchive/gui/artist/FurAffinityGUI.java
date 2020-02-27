@@ -111,4 +111,10 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 	public File get_captcha() {
 		return this.fur.get_captcha();
 	}
+
+	@Override
+	public boolean login(String username, String password, String captcha) {
+		this.fur.login(username, password, captcha);
+		return this.fur.is_logged_in();
+	}
 }

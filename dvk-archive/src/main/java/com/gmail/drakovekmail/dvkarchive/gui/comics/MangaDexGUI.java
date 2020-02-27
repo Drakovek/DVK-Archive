@@ -173,4 +173,10 @@ public class MangaDexGUI extends ArtistHostingGUI {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public boolean login(String username, String password, String captcha) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

@@ -169,6 +169,15 @@ public class DConnect {
 	}
 	
 	/**
+	 * Sets main page of DConnect directly.
+	 * 
+	 * @param page HtmlPage
+	 */
+	public void set_page(HtmlPage page) {
+		this.page = page;
+	}
+	
+	/**
 	 * Waits for a given element to appear in the loaded HtmlPage.
 	 * 
 	 * @param element Element to wait for in XPATH format
