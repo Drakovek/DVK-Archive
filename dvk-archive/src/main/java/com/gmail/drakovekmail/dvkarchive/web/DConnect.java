@@ -51,6 +51,11 @@ public class DConnect {
 	private boolean javascript;
 	
 	/**
+	 * Time in seconds to wait before timing out of connection
+	 */
+	private int timeout;
+	
+	/**
 	 * Initializes the DConnect class by opening a WebClient.
 	 * 
 	 * @param css Whether to use CSS styling when loading pages
@@ -58,10 +63,26 @@ public class DConnect {
 	 */
 	public DConnect(boolean css, boolean javascript) {
 		//Turn off HtmlUnit warnings
-		LogFactory.getFactory().setAttribute("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
-		java.util.logging.Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(java.util.logging.Level.OFF);
-	    java.util.logging.Logger.getLogger("org.apache.http").setLevel(java.util.logging.Level.OFF);
+		LogFactory.getFactory().setAttribute(
+				"org.apache.commons.logging.Log",
+				"org.apache.commons.logging.impl.NoOpLog");
+		java.util.logging.Logger
+			.getLogger("com.gargoylesoftware.htmlunit")
+			.setLevel(java.util.logging.Level.OFF);
+	    java.util.logging.Logger
+	    	.getLogger("org.apache.http")
+	    	.setLevel(java.util.logging.Level.OFF);
 		initialize_client(css, javascript);
+		this.timeout = 10;
+	}
+	
+	/**
+	 * Sets the timeout period to given number of seconds.
+	 * 
+	 * @param seconds Seconds to wait before timing out
+	 */
+	public void set_timeout(int seconds) {
+		this.timeout = seconds;
 	}
 	
 	/**
@@ -71,7 +92,9 @@ public class DConnect {
 	 * @param use_css Whether to use CSS styling when loading pages
 	 * @param use_javascript Whether to load Javascript when loading pages
 	 */
-	public void initialize_client(boolean use_css, boolean use_javascript) {
+	public void initialize_client(
+			boolean use_css,
+			boolean use_javascript) {
 		this.css = use_css;
 		this.javascript = use_javascript;
 		initialize_client();
@@ -81,14 +104,21 @@ public class DConnect {
 	 * Initializes and opens the web_client.
 	 */
 	public void initialize_client() {
-		this.web_client = new WebClient(BrowserVersion.BEST_SUPPORTED);
-		this.web_client.getOptions().setCssEnabled(this.css);
-		this.web_client.getOptions().setJavaScriptEnabled(this.javascript);
-		this.web_client.getOptions().setThrowExceptionOnFailingStatusCode(false);
-		this.web_client.getOptions().setThrowExceptionOnScriptError(false);
-		this.web_client.setJavaScriptTimeout(10000);
-		this.web_client.setAjaxController(new NicelyResynchronizingAjaxController());
-		this.web_client.getOptions().setTimeout(10000);
+		this.web_client = new WebClient(
+				BrowserVersion.BEST_SUPPORTED);
+		this.web_client.getOptions()
+			.setCssEnabled(this.css);
+		this.web_client.getOptions()
+			.setJavaScriptEnabled(this.javascript);
+		this.web_client.getOptions()
+			.setThrowExceptionOnFailingStatusCode(false);
+		this.web_client.getOptions()
+			.setThrowExceptionOnScriptError(false);
+		this.web_client.setJavaScriptTimeout(this.timeout * 1000);
+		this.web_client.setAjaxController(
+				new NicelyResynchronizingAjaxController());
+		this.web_client.getOptions().setTimeout(
+				this.timeout * 1000);
 	}
 	
 	/**
@@ -102,7 +132,8 @@ public class DConnect {
 		}
 		else {
 			try {
-				List<WebWindow> windows = this.web_client.getWebWindows();
+				List<WebWindow> windows = this
+						.web_client.getWebWindows();
 				for(WebWindow window: windows) {
 					window.getJobManager().removeAllJobs();
 					window.getJobManager().shutdown();
@@ -112,9 +143,11 @@ public class DConnect {
 				System.gc();
 				initialize_client();
 				HTMLParser parser;
-				parser = this.web_client.getPageCreator().getHtmlParser();
+				parser = this.web_client
+						.getPageCreator().getHtmlParser();
 				URL url = new URL("https://www.notreal.com");
-				StringWebResponse r = new StringWebResponse(html, url);
+				StringWebResponse r;
+				r = new StringWebResponse(html, url);
 				this.page = parser.parseHtml(
 						r, this.web_client.getCurrentWindow());
 			}
@@ -158,7 +191,7 @@ public class DConnect {
 		this.web_client.setCookieManager(cookies);
 		try {
 			this.page = this.web_client.getPage(url);
-			this.web_client.waitForBackgroundJavaScript(10000);
+			this.web_client.waitForBackgroundJavaScript(this.timeout * 1000);
 			if(!wait_for_element(element)) {
 				this.page = null;
 			}
@@ -185,13 +218,13 @@ public class DConnect {
 	 */
 	public boolean wait_for_element(String element) {
 		if(element != null) {
-			int timeout = 11;
+			int secs = this.timeout;
 			boolean exists = false;
 			DomElement de;
-			while(!exists && timeout > -1) {
+			while(!exists && secs > -1) {
 				de = get_page().getFirstByXPath(element);
 				if(de == null) {
-					timeout--;
+					secs--;
 					try {
 						TimeUnit.MILLISECONDS.sleep(1000);
 					} catch (InterruptedException e) {}

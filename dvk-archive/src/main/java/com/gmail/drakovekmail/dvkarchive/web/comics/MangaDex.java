@@ -194,6 +194,9 @@ public class MangaDex {
 				start_gui.get_base_gui().set_canceled(true);
 				start_gui.append_console("mangadex_failed", true);
 			}
+			if(page == 1) {
+				return new ArrayList<>();
+			}
 			return null;
 		}
 		try {
