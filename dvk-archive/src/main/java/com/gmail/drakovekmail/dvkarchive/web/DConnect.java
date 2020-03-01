@@ -191,7 +191,6 @@ public class DConnect {
 		this.web_client.setCookieManager(cookies);
 		try {
 			this.page = this.web_client.getPage(url);
-			this.web_client.waitForBackgroundJavaScript(this.timeout * 1000);
 			if(!wait_for_element(element)) {
 				this.page = null;
 			}

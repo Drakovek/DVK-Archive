@@ -8,6 +8,9 @@ import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.gmail.drakovekmail.dvkarchive.web.DConnect;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -202,45 +205,51 @@ public class TestDvk {
 	 */
 	@Test
 	public void test_write_media() {
-		//CREATE INVALID DVK
-		Dvk dvk = new Dvk();
-		dvk.set_id("ID123");
-		dvk.set_title("Title");
-		dvk.set_artist("Artist");
-		dvk.set_dvk_file(new File(this.test_dir, "dvk.dvk"));
-		dvk.set_media_file("media.jpg");
-		dvk.set_direct_url("kjsdskjdf");
-		dvk.write_media();
-		assertFalse(dvk.get_dvk_file().exists());
-		assertFalse(dvk.get_media_file().exists());
-		//INVALID DIRECT URL
-		dvk.set_page_url("/bleh");
-		dvk.write_media();
-		assertFalse(dvk.get_dvk_file().exists());
-		assertFalse(dvk.get_media_file().exists());
-		//VALID MEDIA
-		dvk.set_direct_url("http://www.pythonscraping.com/img/gifts/img6.jpg");
-		dvk.write_media();
-		assertTrue(dvk.get_dvk_file().exists());
-		assertTrue(dvk.get_media_file().exists());
-		assertEquals(39785L, dvk.get_media_file().length());
-		dvk.get_dvk_file().delete();
-		dvk.get_media_file().delete();
-		//INVALID SECONDARY URL
-		dvk.set_secondary_file("second.jpg");
-		dvk.set_secondary_url("kjsakdfj");
-		dvk.write_media();
-		assertFalse(dvk.get_dvk_file().exists());
-		assertFalse(dvk.get_media_file().exists());
-		assertFalse(dvk.get_secondary_file().exists());
-		//VALID PRIMARY AND SECONDARY MEDIA
-		dvk.set_secondary_url("http://www.pythonscraping.com/img/gifts/img4.jpg");
-		dvk.write_media();
-		assertTrue(dvk.get_dvk_file().exists());
-		assertTrue(dvk.get_media_file().exists());
-		assertTrue(dvk.get_secondary_file().exists());
-		assertEquals(39785L, dvk.get_media_file().length());
-		assertEquals(85007L, dvk.get_secondary_file().length());
+		DConnect connect = new DConnect(false, false);
+		try {
+			//CREATE INVALID DVK
+			Dvk dvk = new Dvk();
+			dvk.set_id("ID123");
+			dvk.set_title("Title");
+			dvk.set_artist("Artist");
+			dvk.set_dvk_file(new File(this.test_dir, "dvk.dvk"));
+			dvk.set_media_file("media.jpg");
+			dvk.set_direct_url("kjsdskjdf");
+			dvk.write_media(connect);
+			assertFalse(dvk.get_dvk_file().exists());
+			assertFalse(dvk.get_media_file().exists());
+			//INVALID DIRECT URL
+			dvk.set_page_url("/bleh");
+			dvk.write_media(connect);
+			assertFalse(dvk.get_dvk_file().exists());
+			assertFalse(dvk.get_media_file().exists());
+			//VALID MEDIA
+			dvk.set_direct_url("http://www.pythonscraping.com/img/gifts/img6.jpg");
+			dvk.write_media(connect);
+			assertTrue(dvk.get_dvk_file().exists());
+			assertTrue(dvk.get_media_file().exists());
+			assertEquals(39785L, dvk.get_media_file().length());
+			dvk.get_dvk_file().delete();
+			dvk.get_media_file().delete();
+			//INVALID SECONDARY URL
+			dvk.set_secondary_file("second.jpg");
+			dvk.set_secondary_url("kjsakdfj");
+			dvk.write_media(connect);
+			assertFalse(dvk.get_dvk_file().exists());
+			assertFalse(dvk.get_media_file().exists());
+			assertFalse(dvk.get_secondary_file().exists());
+			//VALID PRIMARY AND SECONDARY MEDIA
+			dvk.set_secondary_url("http://www.pythonscraping.com/img/gifts/img4.jpg");
+			dvk.write_media(connect);
+			assertTrue(dvk.get_dvk_file().exists());
+			assertTrue(dvk.get_media_file().exists());
+			assertTrue(dvk.get_secondary_file().exists());
+			assertEquals(39785L, dvk.get_media_file().length());
+			assertEquals(85007L, dvk.get_secondary_file().length());
+		}
+		finally {
+			connect.close_client();
+		}
 	}
 	
 	/**

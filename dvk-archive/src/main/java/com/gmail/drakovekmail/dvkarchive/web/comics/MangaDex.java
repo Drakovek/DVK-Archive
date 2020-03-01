@@ -94,7 +94,6 @@ public class MangaDex {
 		Dvk dvk = new Dvk();
 		String url = "https://mangadex.org/title/" + id + "/";
 		String xpath = "//span[@class='mx-1']";
-		//TODO Get number of tries in preferences
 		connect.load_page(url, xpath, 2);
 		try {
 			TimeUnit.MILLISECONDS.sleep(2000);
@@ -186,7 +185,6 @@ public class MangaDex {
 		String url = base_dvk.get_page_url() 
 				+ "/chapters/" + Integer.toString(page);
 		String xpath = "//a[@class='text-truncate']";
-		//TODO Get number of tries in preferences
 		connect.load_page(url, xpath, 2);
 		//CHECK PAGE LOADED
 		if(connect.get_page() == null) {
@@ -334,6 +332,7 @@ public class MangaDex {
 				|| !directory.isDirectory()) {
 			return new ArrayList<>();
 		}
+		DConnect unit_connect = new DConnect(false, false);
 		int start = get_start_chapter(dvk_handler, chapters, check_all);
 		ArrayList<Dvk> dvks = new ArrayList<>();
 		for(int c = start; c > -1; c--) {
@@ -418,7 +417,7 @@ public class MangaDex {
 					dvk.set_media_file(filename + extension);
 					//SAVE, IF SPECIFIED
 					if(save) {
-						dvk.write_media();
+						dvk.write_media(unit_connect);
 					}
 					//APPEND DVK
 					dvks.add(dvk);
@@ -428,6 +427,7 @@ public class MangaDex {
 				break;
 			}
 		}
+		unit_connect.close_client();
 		return dvks;
 	}
 	

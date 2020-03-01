@@ -187,10 +187,9 @@ public class Dvk implements Serializable {
 	 * Downloads from direct_url and secondary_url.
 	 * Writes to media_file and secondary_file.
 	 */
-	public void write_media() {
+	public void write_media(DConnect connect) {
 		write_dvk();
 		if(get_dvk_file().exists()) {
-			DConnect connect = new DConnect(false, false);
 			connect.download(get_direct_url(), get_media_file());
 			//CHECK IF MEDIA DOWNLOADED
 			if(get_media_file().exists()) {

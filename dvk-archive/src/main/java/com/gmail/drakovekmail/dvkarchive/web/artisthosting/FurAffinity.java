@@ -9,8 +9,10 @@ import com.gargoylesoftware.htmlunit.html.DomAttr;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlInput;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gmail.drakovekmail.dvkarchive.file.Dvk;
 import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
 import com.gmail.drakovekmail.dvkarchive.file.FilePrefs;
+import com.gmail.drakovekmail.dvkarchive.processing.ArrayProcessing;
 import com.gmail.drakovekmail.dvkarchive.processing.StringProcessing;
 import com.gmail.drakovekmail.dvkarchive.web.DConnect;
 
@@ -191,6 +193,60 @@ public class FurAffinity extends ArtistHosting {
 	}
 	
 	/**
+	 * Returns a DVK formatted time from FurAffinity time.
+	 * 
+	 * @param time FurAffinity formatted publication time
+	 * @return DVK formated publication time
+	 */
+	public static String get_time(String time) {
+		try {
+			String time_mod = time.toLowerCase();
+			//GET MONTH
+			int month;
+			String[] months= {"jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"};
+			for(month = 0; month < 12 && !time_mod.contains(months[month]); month++);
+			month++;
+			//GET DAY
+			int end = time_mod.indexOf(',');
+			int start = time_mod.lastIndexOf(' ', end) + 1;
+			int day = Integer.parseInt(time_mod.substring(start, end));
+			//GET YEAR
+			start = time_mod.indexOf(',');
+			for(start++; time_mod.charAt(start) == ' '; start++);
+			end = time_mod.indexOf(' ', start);
+			int year = Integer.parseInt(time_mod.substring(start, end));
+			//GET HOUR
+			end = time_mod.indexOf(':');
+			start = time_mod.lastIndexOf(' ', end) + 1;
+			int hour = Integer.parseInt(time_mod.substring(start, end));
+			if(time_mod.contains("pm")) {
+				if(hour != 12) {
+					hour += 12;
+				}
+			}
+			else if(time_mod.contains("am")) {
+				if(hour == 12) {
+					hour = 0;
+				}
+			}
+			else {
+				hour = -1;
+			}
+			//GET MINUTE
+			start = end + 1;
+			end = time_mod.indexOf(' ', start);
+			int minute = Integer.parseInt(time_mod.substring(start, end));
+			//GET STRING
+			Dvk dvk = new Dvk();
+			dvk.set_time_int(year, month, day, hour, minute);
+			return dvk.get_time();
+		}
+		catch(Exception e) {
+			return "0000/00/00|00:00";
+		}
+	}
+	
+	/**
 	 * Returns a list of FurAffinity media page URLs
 	 * for a given artist.
 	 * 
@@ -279,6 +335,213 @@ public class FurAffinity extends ArtistHosting {
 			pages.addAll(next);
 		}
 		return pages;
+	}
+	
+	/**
+	 * Returns a Dvk for a given FurAffinity media page.
+	 * 
+	 * @param page_url URL of FurAffinity media page
+	 * @param directory Directory in which to save Dvk.
+	 * @param save Whether to save Dvk and media
+	 * @return Dvk of FurAffinity media page
+	 * 
+	 */
+	public Dvk get_dvk(String page_url, File directory, boolean save) {
+		Dvk dvk = new Dvk();
+		dvk.set_id(get_page_id(page_url));
+		dvk.set_page_url(page_url);
+		//LOAD PAGE
+		String xpath = "//div[contains(@class,'submission-title')]//h2";
+		this.connect.load_page(page_url, xpath, 2);
+		if(this.connect.get_page() == null) {
+			return new Dvk();
+		}
+		try {
+			//GET TITLE
+			xpath = "//div[contains(@class,'submission-title')]//h2";
+			DomElement de = this.connect.get_page().getFirstByXPath(xpath);
+			dvk.set_title(de.asText());
+			//GET ARTIST
+			xpath = "//div[contains(@class,'submission')][contains(@class,'container')]//a";
+			List<DomElement> ds = this.connect.get_page().getByXPath(xpath);
+			for(DomElement el: ds) {
+				if(el.asText().length() > 0) {
+					dvk.set_artist(el.asText());
+					break;
+				}
+			}
+			//GET DATE
+			DomAttr da;
+			xpath = "//div[@class='submission-id-sub-container']//span[@class='popup_date']|//td[@class='alt1 stats-container']//span[@class='popup_date']";
+			de = this.connect.get_page().getFirstByXPath(xpath);
+			String time = get_time(de.asText());
+			if(time.equals("0000/00/00|00:00")) {
+				xpath = "//div[contains(@class,'-container')]//span[@class='popup_date']/@title";
+				da = this.connect.get_page().getFirstByXPath(xpath);
+				time = get_time(da.getNodeValue());
+			}
+			dvk.set_time(time);
+			if(dvk.get_time().equals("0000/00/00|00:00")) {
+				this.connect.set_page(null);
+			}
+			//GET DIRECT URL
+			xpath = "//div[@class='download fullsize']//a[contains(@href,'facdn.net')]/@href|//table[@class='maintable']//a[contains(@href,'facdn.net')]/@href";
+			da = this.connect.get_page().getFirstByXPath(xpath);
+			dvk.set_direct_url("https:" + da.getNodeValue());
+			String m_ext = StringProcessing.get_extension(dvk.get_direct_url());
+			//GET SECONDARY URL
+			xpath = "//img[@id='submissionImg']/@src";
+			da = this.connect.get_page().getFirstByXPath(xpath);
+			dvk.set_secondary_url("https:" + da.getNodeValue());
+			String s_ext = StringProcessing.get_extension(dvk.get_secondary_url());
+			if(m_ext.equals(s_ext)) {
+				dvk.set_secondary_url(null);
+			}
+			//GET DESCRIPTION
+			xpath = "//div[contains(@class,'submission-description')]|//table[@class='maintable']//td[@class='alt1'][@style='padding:8px'][@valign='top'][@align='left']";
+			de = this.connect.get_page().getFirstByXPath(xpath);
+			dvk.set_description(DConnect.remove_header_footer(de.asXml()));
+			//GET RATING
+			String rating = null;
+			ArrayList<String> tags = new ArrayList<>();
+			xpath = "//span[contains(@class,'rating-box')]";
+			de = this.connect.get_page().getFirstByXPath(xpath);
+			if(de == null) {
+				xpath = "//td[@class='alt1 stats-container']//img[contains(@alt,'rating')]/@alt";
+				da = this.connect.get_page().getFirstByXPath(xpath);
+				rating = da.getNodeValue().toLowerCase();
+			}
+			else {
+				rating = de.asText().toLowerCase();
+			}
+			if(rating.contains("general")) {
+				tags.add("Rating:General");
+			}
+			else if(rating.contains("mature")) {
+				tags.add("Rating:Mature");
+			}
+			else if(rating.contains("adult")) {
+				tags.add("Rating:Adult");
+			}
+			else {
+				this.connect.set_page(null);
+			}
+			//GET CATEGORY TAGS
+			String tag;
+			try {
+				//CURRENT DESIGN
+				//GET CATEGORY
+				xpath = "//span[@class='category-name']";
+				de = this.connect.get_page().getFirstByXPath(xpath);
+				tag = de.asText();
+				tags.add("Category:" + tag);
+				//GET THEME
+				xpath = "//span[@class='type-name']";
+				de = this.connect.get_page().getFirstByXPath(xpath);
+				tag = de.asText();
+				tags.add("Type:" + tag);
+				//GET SPECIES
+				xpath = "//div[strong='Species']/strong[@class='highlight']/following-sibling::span";
+				de = this.connect.get_page().getFirstByXPath(xpath);
+				tag = de.asText();
+				tags.add("Species:" + tag);
+				//GET GENDER
+				xpath = "//div[strong='Gender']/strong[@class='highlight']/following-sibling::span";
+				de = this.connect.get_page().getFirstByXPath(xpath);
+				tag = de.asText();
+				tags.add("Gender:" + tag);
+			}
+			catch(Exception f) {
+				//CLASSIC DESIGN
+				xpath = "//td[@class='alt1 stats-container']";
+				de = this.connect.get_page().getFirstByXPath(xpath);
+				String container = de.asXml();
+				//GET CATEGORY
+				int start = container.indexOf("Category:");
+				start = container.indexOf('>', start) + 1;
+				int end = container.indexOf('<', start);
+				tag = container.substring(start, end).replace("\n", "").replace("\r", "");
+				tag = StringProcessing.remove_whitespace(tag);
+				tags.add("Category:" + tag);
+				//GET TYPE
+				start = container.indexOf("Theme:");
+				start = container.indexOf('>', start) + 1;
+				end = container.indexOf('<', start);
+				tag = container.substring(start, end).replace("\n", "").replace("\r", "");
+				tag = StringProcessing.remove_whitespace(tag);
+				tags.add("Type:" + tag);
+				//GET SPECIES
+				start = container.indexOf("Species:");
+				if(start != -1) {
+					start = container.indexOf('>', start) + 1;
+					end = container.indexOf('<', start);
+					tag = container.substring(start, end).replace("\n", "").replace("\r", "");
+					tag = StringProcessing.remove_whitespace(tag);
+					tags.add("Species:" + tag);
+				}
+				else {
+					tags.add("Species:Unspecified / Any");
+				}
+				//GET GENDER
+				start = container.indexOf("Gender:");
+				if(start != -1) {
+					start = container.indexOf('>', start) + 1;
+					end = container.indexOf('<', start);
+					tag = container.substring(start, end).replace("\n", "").replace("\r", "");
+					tag = StringProcessing.remove_whitespace(tag);
+					tags.add("Gender:" + tag);
+				}
+				else {
+					tags.add("Gender:Any");
+				}
+			}
+			//GET GALLERY
+			xpath = "//div[@class='submission-content']//a[contains(@href,'/gallery/')]|//div[@class='minigallery-container']//a[contains(@href,'/gallery/')]";
+			de = this.connect.get_page().getFirstByXPath(xpath);
+			if(de != null) {
+				tags.add("Gallery:Main");
+			}
+			else {
+				xpath = "//div[@class='submission-content']//a[contains(@href,'/scraps/')]|//div[@class='minigallery-container']//a[contains(@href,'/scraps/')]";
+				de = this.connect.get_page().getFirstByXPath(xpath);
+				tags.add("Gallery:Scraps");
+				if(de == null) {
+					this.connect.set_page(null);
+				}
+			}
+			//GET FOLDERS
+			xpath = "//a[@class='dotted'][contains(@href,'/folder/')]";
+			ds = this.connect.get_page().getByXPath(xpath);
+			for(int i = 0; i < ds.size(); i++) {
+				tags.add(ds.get(i).asText());
+			}
+			//GET TAGS
+			xpath = "//section[@class='tags-row']//a[contains(@href,'/search/')]|//div[@id='keywords']//a[contains(@href,'/search/')]";
+			ds = this.connect.get_page().getByXPath(xpath);
+			for(int i = 0; i < ds.size(); i++) {
+				tags.add(ds.get(i).asText());
+			}
+			dvk.set_web_tags(ArrayProcessing.list_to_array(tags));
+			//SET MEDIA FILES
+			String filename = dvk.get_filename();
+			dvk.set_dvk_file(new File(directory, filename + ".dvk"));
+			dvk.set_media_file(filename + m_ext);
+			if(dvk.get_secondary_url() != null) {
+				dvk.set_secondary_file(filename + s_ext);
+			}
+			//SAVE DVK
+			if(save) {
+				dvk.write_media(this.connect);
+				if(!dvk.get_dvk_file().exists()) {
+					System.out.println("Failed writing file");
+				}
+			}
+			return dvk;
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+			return new Dvk();
+		}
 	}
 	
 	/**
