@@ -86,6 +86,7 @@ public class DConnectSelenium {
 				this.driver = new EdgeDriver();
 			}
 			catch(Exception e) {
+				//TODO Inform user to get selenium driver
 				System.out.println("Failed loading Selenium driver.");
 			}
 		}

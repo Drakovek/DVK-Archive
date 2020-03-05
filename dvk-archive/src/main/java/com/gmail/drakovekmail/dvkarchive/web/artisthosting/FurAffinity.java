@@ -12,6 +12,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
 import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
 import com.gmail.drakovekmail.dvkarchive.file.FilePrefs;
+import com.gmail.drakovekmail.dvkarchive.file.InOut;
 import com.gmail.drakovekmail.dvkarchive.processing.ArrayProcessing;
 import com.gmail.drakovekmail.dvkarchive.processing.StringProcessing;
 import com.gmail.drakovekmail.dvkarchive.web.DConnect;
@@ -460,7 +461,6 @@ public class FurAffinity extends ArtistHosting {
 	 * @param directory Directory in which to save Dvk.
 	 * @param save Whether to save Dvk and media
 	 * @return Dvk of FurAffinity media page
-	 * 
 	 */
 	public Dvk get_dvk(
 			String page_url,
@@ -494,7 +494,7 @@ public class FurAffinity extends ArtistHosting {
 					break;
 				}
 			}
-			//GET DATE
+			//GET TIME
 			xpath = "//div[@class='submission-id-sub-container']"
 					+ "//span[@class='popup_date']"
 					+ "|//td[@class='alt1 stats-container']"
@@ -683,6 +683,92 @@ public class FurAffinity extends ArtistHosting {
 			if(save) {
 				dvk.write_media(this.connect);
 				if(!dvk.get_dvk_file().exists()) {
+					return new Dvk();
+				}
+			}
+			return dvk;
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+			return new Dvk();
+		}
+	}
+	
+	/**
+	 * Returns a Dvk for a given FurAffinity journal page.
+	 * 
+	 * @param page_url URL of FurAffinity journal page
+	 * @param directory Directory in which to save Dvk.
+	 * @param save Whether to save Dvk and media
+	 * @return Dvk of FurAffinity media page
+	 */
+	public Dvk get_journal_dvk(
+			String page_url,
+			File directory,
+			boolean save) {
+		Dvk dvk = new Dvk();
+		dvk.set_id(get_page_id(page_url));
+		dvk.set_page_url(page_url);
+		//LOAD PAGE
+		String xpath = "//h2[@class='journal-title']"
+				+ "|//td[@class='journal-title-box']"
+				+ "//div[@class='no_overflow']";
+		this.connect.load_page(page_url, xpath, 2);
+		if(this.connect.get_page() == null) {
+			return new Dvk();
+		}
+		try {
+			//GET TITLE
+			DomElement de = this.connect.get_page()
+					.getFirstByXPath(xpath);
+			dvk.set_title(
+					StringProcessing.remove_whitespace(de.asText()));
+			//GET ARTIST
+			xpath = "//div[@id='user-profile']"
+					+ "//div[@class='userpage-flex-item username']"
+					+ "//h2//span|//td[@class='journal-title-box']"
+					+ "//a[contains(@href,'/user/')]";
+			de = this.connect.get_page().getFirstByXPath(xpath);
+			String artist = de.asText();
+			if(artist.startsWith("~")) {
+				artist = artist.substring(1);
+			}
+			dvk.set_artist(artist);
+			//GET TIME
+			xpath = "//div[@class='section-header']"
+					+ "//span[@class='popup_date']"
+					+ "|//td[@class='journal-title-box']"
+					+ "//span[@class='popup_date']";
+			de = this.connect.get_page().getFirstByXPath(xpath);
+			String time = get_time(de.asText());
+			if(time.equals("0000/00/00|00:00")) {
+				time = get_time(de.getAttribute("title"));
+			}
+			dvk.set_time(time);
+			if(dvk.get_time().equals("0000/00/00|00:00")) {
+				this.connect.set_page(null);
+			}
+			//GET JOURNAL BODY
+			xpath = "//div[@class='journal-content']"
+					+ "|//div[@class='journal-body']";
+			de = this.connect.get_page().getFirstByXPath(xpath);
+			dvk.set_description(
+					DConnect.remove_header_footer(de.asXml()));
+			//SET FILE
+			String filename = dvk.get_filename();
+			dvk.set_dvk_file(
+					new File(directory, filename + ".dvk"));
+			dvk.set_media_file(filename + ".html");
+			//SAVE FILE
+			if(save) {
+				dvk.write_dvk();
+				if(!dvk.get_dvk_file().exists()) {
+					return new Dvk();
+				}
+				InOut.write_file(dvk.get_media_file(),
+						dvk.get_description());
+				if(!dvk.get_media_file().exists()) {
+					dvk.get_dvk_file().delete();
 					return new Dvk();
 				}
 			}

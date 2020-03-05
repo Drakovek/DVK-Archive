@@ -276,6 +276,7 @@ public class TestFurAffinity {
 		test_get_pages();
 		test_get_journal_pages();
 		test_get_dvk();
+		test_get_journal_dvk();
 	}
 	
 	/**
@@ -479,5 +480,97 @@ public class TestFurAffinity {
 					dvk.get_media_file().getParentFile());
 			assertEquals(null, dvk.get_secondary_file());
 		}
+	}
+	
+	/**
+	 * Tests the get_journal_dvk method.
+	 */
+	@Test
+	public void test_get_journal_dvk() {
+		//FIRST DVK
+		String url = "https://www.furaffinity.net/journal/8594821/";
+		Dvk dvk = this.fur.get_journal_dvk(url, this.test_dir, false);
+		assertEquals("FAF8594821-J", dvk.get_id());
+		assertEquals("100+ watcher special", dvk.get_title());
+		assertEquals(1, dvk.get_artists().length);
+		assertEquals("MrSparta", dvk.get_artists()[0]);
+		assertEquals("2018/01/24|16:50", dvk.get_time());
+		String value = "https://www.furaffinity.net/journal/8594821/";
+		assertEquals(value, dvk.get_page_url());
+		assertEquals(null, dvk.get_direct_url());
+		assertEquals(null, dvk.get_secondary_url());
+		value = "This actually isn't that special, but thanks. Also, "
+				+ "one of my stories broke 1000 views earlier this week. "
+				+ "Good times.  <br/>  <br/>  So what do you guys actually "
+				+ "want to see from me? I'm mostly just trying fetishes "
+				+ "to see which get a lot of views, and working from there."
+				+ "   <br/>  <br/>  Also I have a patreon that I assure you "
+				+ "has the highest quality.";
+		assertEquals(value, dvk.get_description());
+		assertTrue(dvk.get_web_tags() == null);
+		assertEquals("100 watcher special_FAF8594821-J.dvk",
+				dvk.get_dvk_file().getName());
+		assertEquals(this.test_dir,
+				dvk.get_dvk_file().getParentFile());
+		assertEquals("100 watcher special_FAF8594821-J.html",
+				dvk.get_media_file().getName());
+		assertEquals(this.test_dir,
+				dvk.get_media_file().getParentFile());
+		assertEquals(null, dvk.get_secondary_file());
+		//SECOND DVK
+		url = "https://www.furaffinity.net/journal/4743500/";
+		dvk = this.fur.get_journal_dvk(url, this.test_dir, false);
+		assertEquals("FAF4743500-J", dvk.get_id());
+		assertEquals("CLOSED $35 quick color pinups - 4 spots",
+				dvk.get_title());
+		assertEquals(1, dvk.get_artists().length);
+		assertEquals("angrboda", dvk.get_artists()[0]);
+		assertEquals("2013/06/15|20:59", dvk.get_time());
+		value = "https://www.furaffinity.net/journal/4743500/";
+		assertEquals(value, dvk.get_page_url());
+		assertEquals(null, dvk.get_direct_url());
+		assertEquals(null, dvk.get_secondary_url());
+		value = "Edit - closed, thanks everyone. Sorry the spots "
+				+ "went so fast!  <br/>  <br/>  <hr class=\""
+				+ "bbcode bbcode_hr\"/>  <br/>  <br/>  Just "
+				+ "finished up a bunch of big stuff, taking 4 "
+				+ "little ones to unwind. Same rules as always:  "
+				+ "<br/>  <br/>  Examples here:  <br/>  <a href=\""
+				+ "http://www.furaffinity.net/view/10852541/\" "
+				+ "title=\"http://www.furaffinity.net/view/10852541"
+				+ "/\" class=\"auto_link\">    http://www.furaffinity"
+				+ ".net/view/10852541/  </a>  <br/>  <a href=\""
+				+ "http://www.furaffinity.net/view/10546296/\" "
+				+ "title=\"http://www.furaffinity.net/view/10546296/"
+				+ "\" class=\"auto_link\">    http://www.furaffinity"
+				+ ".net/view/10546296/  </a>  <br/>  <br/>  1 character,"
+				+ " no background, simple colors. No proofs given, "
+				+ "final files delivered via note. As always, regular "
+				+ "TOS applies. Minor changes can be made if necessary."
+				+ "  <br/>  <br/>  Can be general to adult (please "
+				+ "specify if your request seems ambiguous)  <br/>  "
+				+ "<br/>  Please give a link to a visual ref or a good "
+				+ "written descrip, as well as the type of pose you're "
+				+ "looking for.  <br/>  <br/>  These will be pay on "
+				+ "delivery; I will note you when your pic is complete "
+				+ "and give you my payment info, and you will receive "
+				+ "the file after payment clears.  <br/>  <br/>  1)   "
+				+ "<a href=\"/user/rusvul\" class=\"linkusername\">    "
+				+ "rusvul  </a>  <br/>  2)   <a href=\"/user/stormkern\" "
+				+ "class=\"linkusername\">    stormkern  </a>  <br/>  3)"
+				+ "   <a href=\"/user/aryte\" class=\"linkusername\"> "
+				+ "   aryte  </a>  <br/>  4)   <a href=\"/user/avios\" "
+				+ "class=\"linkusername\">    avios  </a>";
+		assertEquals(value, dvk.get_description());
+		assertTrue(dvk.get_web_tags() == null);
+		assertEquals("CLOSED 35 quick color pinups - 4 spots_FAF4743500-J.dvk",
+				dvk.get_dvk_file().getName());
+		assertEquals(this.test_dir,
+				dvk.get_dvk_file().getParentFile());
+		assertEquals("CLOSED 35 quick color pinups - 4 spots_FAF4743500-J.html",
+				dvk.get_media_file().getName());
+		assertEquals(this.test_dir,
+				dvk.get_media_file().getParentFile());
+		assertEquals(null, dvk.get_secondary_file());
 	}
 }
