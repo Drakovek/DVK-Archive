@@ -186,6 +186,8 @@ public class Dvk implements Serializable {
 	 * Writes the Dvk object, as well as downloading associated media.
 	 * Downloads from direct_url and secondary_url.
 	 * Writes to media_file and secondary_file.
+	 * 
+	 * @param connect DConnect object for downloading media
 	 */
 	public void write_media(DConnect connect) {
 		write_dvk();

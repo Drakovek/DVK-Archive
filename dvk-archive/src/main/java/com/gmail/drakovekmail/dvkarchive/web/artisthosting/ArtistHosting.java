@@ -58,10 +58,11 @@ public abstract class ArtistHosting implements DActionEvent {
 	/**
 	 * Gets user info.
 	 * 
+	 * @param title Title of the dialog
 	 * @param captcha File for captcha. If null, no CAPTCHA
 	 * @return [0] - Username, [1] - Password, [2] - CAPTCHA
 	 */
-	public String[] get_user_info(File captcha) {
+	public String[] get_user_info(String title, File captcha) {
 		BaseGUI base_gui = new BaseGUI();
 		//CAPTCHA
 		JLabel img_lbl = new JLabel();
@@ -92,7 +93,7 @@ public abstract class ArtistHosting implements DActionEvent {
 		else {
 			full_pnl = base_gui.get_spaced_panel(btm_pnl);
 		}
-		this.dialog = new DDialog(null, full_pnl, "Login");
+		this.dialog = new DDialog(null, full_pnl, title);
 		this.dialog.setVisible(true);
 		this.dialog = null;
 		String[] info = new String[3];

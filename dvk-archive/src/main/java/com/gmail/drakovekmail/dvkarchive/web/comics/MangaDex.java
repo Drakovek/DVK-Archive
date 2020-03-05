@@ -375,7 +375,6 @@ public class MangaDex {
 					//LOAD PAGE
 					String xpath = "//div[@data-page='" + Integer.toString(page)
 						+ "']//img[@class='noselect nodrag cursor-pointer']";
-					//TODO Get number of tries in preferences
 					connect.load_page(dvk.get_page_url(), xpath, 1);
 					try {
 						TimeUnit.MILLISECONDS.sleep(2000);

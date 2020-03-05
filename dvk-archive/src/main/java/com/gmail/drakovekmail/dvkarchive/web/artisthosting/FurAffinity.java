@@ -68,8 +68,10 @@ public class FurAffinity extends ArtistHosting {
 		if(this.connect.get_page() != null) {
 			//GET CAPTCHA URL
 			xpath = "//img[@id='captcha_img']/@src";
-			DomAttr da = this.connect.get_page().getFirstByXPath(xpath);
-			String url = "https://www.furaffinity.net" + da.getNodeValue();
+			DomAttr da = this.connect.get_page()
+					.getFirstByXPath(xpath);
+			String url = "https://www.furaffinity.net"
+					+ da.getNodeValue();
 			//GET FILENAME
 			File file;
 			int num = 0;
@@ -93,25 +95,33 @@ public class FurAffinity extends ArtistHosting {
 	 * @param password Password
 	 * @param captcha Captcha
 	 */
-	public void login(String username, String password, String captcha) {
-		if(this.connect != null && this.connect.get_page() != null) {
+	public void login(
+			String username,
+			String password,
+			String captcha) {
+		if(this.connect != null
+				&& this.connect.get_page() != null) {
 			HtmlInput pass;
 			try {
 				//INPUT USERNAME
 				String xpath = "//input[@id='login']";
-				HtmlInput user = this.connect.get_page().getFirstByXPath(xpath);
+				HtmlInput user = this.connect.get_page()
+						.getFirstByXPath(xpath);
 				user.setValueAttribute(username);
 				//INPUT PASSWORD
 				xpath = "//input[@type='password']";
-				pass = this.connect.get_page().getFirstByXPath(xpath);
+				pass = this.connect.get_page()
+						.getFirstByXPath(xpath);
 				pass.setValueAttribute(password);
 				//INPUT CAPTCHA
 				xpath = "//input[@id='captcha']";
-				HtmlInput cap = this.connect.get_page().getFirstByXPath(xpath);
+				HtmlInput cap = this.connect.get_page()
+						.getFirstByXPath(xpath);
 				cap.setValueAttribute(captcha);
 				//SUBMIT INFO
 				xpath = "//input[@type='submit']";
-				HtmlInput submit = this.connect.get_page().getFirstByXPath(xpath);
+				HtmlInput submit = this.connect.get_page()
+						.getFirstByXPath(xpath);
 				this.connect.set_page((HtmlPage)submit.click());
 			} catch (IOException e) {
 				this.connect.initialize_client();
@@ -203,22 +213,28 @@ public class FurAffinity extends ArtistHosting {
 			String time_mod = time.toLowerCase();
 			//GET MONTH
 			int month;
-			String[] months= {"jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"};
-			for(month = 0; month < 12 && !time_mod.contains(months[month]); month++);
+			String[] months = {"jan", "feb", "mar", "apr",
+					"may", "jun", "jul", "aug",
+					"sep", "oct", "nov", "dec"};
+			for(month = 0; month < 12
+					&& !time_mod.contains(months[month]); month++);
 			month++;
 			//GET DAY
 			int end = time_mod.indexOf(',');
 			int start = time_mod.lastIndexOf(' ', end) + 1;
-			int day = Integer.parseInt(time_mod.substring(start, end));
+			int day = Integer.parseInt(
+					time_mod.substring(start, end));
 			//GET YEAR
 			start = time_mod.indexOf(',');
 			for(start++; time_mod.charAt(start) == ' '; start++);
 			end = time_mod.indexOf(' ', start);
-			int year = Integer.parseInt(time_mod.substring(start, end));
+			int year = Integer.parseInt(
+					time_mod.substring(start, end));
 			//GET HOUR
 			end = time_mod.indexOf(':');
 			start = time_mod.lastIndexOf(' ', end) + 1;
-			int hour = Integer.parseInt(time_mod.substring(start, end));
+			int hour = Integer.parseInt(
+					time_mod.substring(start, end));
 			if(time_mod.contains("pm")) {
 				if(hour != 12) {
 					hour += 12;
@@ -235,7 +251,8 @@ public class FurAffinity extends ArtistHosting {
 			//GET MINUTE
 			start = end + 1;
 			end = time_mod.indexOf(' ', start);
-			int minute = Integer.parseInt(time_mod.substring(start, end));
+			int minute = Integer.parseInt(
+					time_mod.substring(start, end));
 			//GET STRING
 			Dvk dvk = new Dvk();
 			dvk.set_time_int(year, month, day, hour, minute);
@@ -267,7 +284,8 @@ public class FurAffinity extends ArtistHosting {
 			boolean check_login,
 			int page) {
 		//GET URL
-		StringBuilder url = new StringBuilder("https://www.furaffinity.net/");
+		StringBuilder url = new StringBuilder();
+		url.append("https://www.furaffinity.net/");
 		if(scraps) {
 			url.append("scraps/");
 		}
@@ -300,10 +318,12 @@ public class FurAffinity extends ArtistHosting {
 		int size = dvk_handler.get_size();
 		for(int i = 0; i < ds.size(); i++) {
 			boolean contains = false;
-			String link = "https://www.furaffinity.net" + ds.get(i).getNodeValue();
+			String link = "https://www.furaffinity.net"
+					+ ds.get(i).getNodeValue();
 			String id = get_page_id(link);
 			for(int k = 0; k < size; k++) {
-				if(get_page_id(dvk_handler.get_dvk(k).get_page_url()).equals(id)) {
+				if(get_page_id(dvk_handler.get_dvk(k)
+						.get_page_url()).equals(id)) {
 					check_next = false;
 					contains = true;
 					break;
@@ -315,17 +335,113 @@ public class FurAffinity extends ArtistHosting {
 		}
 		//GET NEXT PAGES
 		DomElement de;
-		xpath = "//button[@class='button standard'][@type='submit']";
+		xpath = "//button[@class='button standard']"
+				+ "[@type='submit']";
 		de = this.connect.get_page().getFirstByXPath(xpath);
 		if(de != null && !de.asText().equals("Next")) {
 			de = null;
 		}
 		if(de == null) {
-			xpath = "//a[@class='button-link right'][contains(@href,'/gallery/')]";
+			xpath = "//a[@class='button-link right']"
+					+ "[contains(@href,'/gallery/')]";
+			de = this.connect.get_page()
+					.getFirstByXPath(xpath);
+		}
+		if(de != null && (check_all || check_next)) {
+			ArrayList<String> next = get_pages(
+					artist, scraps, dvk_handler,
+					check_all, check_login, page + 1);
+			if(next == null) {
+				if(page == 1) {
+					return new ArrayList<>();
+				}
+				return null;
+			}
+			pages.addAll(next);
+		}
+		return pages;
+	}
+	
+	/**
+	 * Returns a list of FurAffinity journal page URLs
+	 * for a given artist.
+	 * 
+	 * @param artist Fur Affinity artist (in URL form)
+	 * @param dvk_handler Used to check for already downloaded files
+	 * @param check_all Whether to check all gallery pages
+	 * @param check_login Whether to check if still logged in
+	 * @param page Gallery page to scan
+	 * @return List of FurAffinity media page URLs
+	 */
+	public ArrayList<String> get_journal_pages(
+			String artist,
+			DvkHandler dvk_handler,
+			boolean check_all,
+			boolean check_login,
+			int page) {
+		//GET URL
+		String url = "https://www.furaffinity.net/journals/"
+				+ artist
+				+ "/"
+				+ Integer.toString(page) + "/";
+		//LOAD PAGE
+		String xpath = "//section[contains(@id,'jid')]"
+				+ "//a[contains(@href,'/journal/')]"
+				+ "|//table[contains(@id,'jid')]"
+				+ "//a[contains(@href,'/journal/')]";
+		this.connect.load_page(url.toString(), xpath, 2);
+		try {
+			TimeUnit.MILLISECONDS.sleep(1000);
+		} catch (InterruptedException e) {}
+		if(this.connect.get_page() == null
+				|| (check_login && !is_logged_in())) {
+			if(page == 1) {
+				return new ArrayList<>();
+			}
+			return null;
+		}
+		//GET PAGES
+		ArrayList<String> pages = new ArrayList<>();
+		List<DomElement> ds;
+		ds = this.connect.get_page().getByXPath(xpath);
+		boolean check_next = true;
+		int size = dvk_handler.get_size();
+		for(int i = 0; i < ds.size(); i++) {
+			String link = ds.get(i).asText().toLowerCase();
+			if(link.contains("read more")
+					|| link.contains("view journal")) {
+				boolean contains = false;
+				link = "https://www.furaffinity.net"
+						+ ds.get(i).getAttribute("href");
+				String id = get_page_id(link);
+				for(int k = 0; k < size; k++) {
+					if(get_page_id(dvk_handler.get_dvk(k)
+							.get_page_url()).equals(id)) {
+						check_next = false;
+						contains = true;
+						break;
+					}
+				}
+				if(!contains) {
+					pages.add(link);
+				}
+			}
+		}
+		//GET NEXT PAGES
+		DomElement de;
+		xpath = "//button[@class='button standard']";
+		de = this.connect.get_page().getFirstByXPath(xpath);
+		if(de != null && !de.asText().equals("Older")) {
+			de = null;
+		}
+		if(de == null) {
+			xpath = "//a[@class='button older']";
 			de = this.connect.get_page().getFirstByXPath(xpath);
 		}
 		if(de != null && (check_all || check_next)) {
-			ArrayList<String> next = get_pages(artist, scraps, dvk_handler, check_all, check_login, page + 1);
+			ArrayList<String> next = get_journal_pages(
+					artist, dvk_handler, check_all,
+					check_login, page + 1);
 			if(next == null) {
 				if(page == 1) {
 					return new ArrayList<>();
@@ -346,24 +462,32 @@ public class FurAffinity extends ArtistHosting {
 	 * @return Dvk of FurAffinity media page
 	 * 
 	 */
-	public Dvk get_dvk(String page_url, File directory, boolean save) {
+	public Dvk get_dvk(
+			String page_url,
+			File directory,
+			boolean save) {
 		Dvk dvk = new Dvk();
 		dvk.set_id(get_page_id(page_url));
 		dvk.set_page_url(page_url);
 		//LOAD PAGE
-		String xpath = "//div[contains(@class,'submission-title')]//h2";
+		String xpath = "//div[contains(@class,"
+				+ "'submission-title')]//h2";
 		this.connect.load_page(page_url, xpath, 2);
 		if(this.connect.get_page() == null) {
 			return new Dvk();
 		}
 		try {
 			//GET TITLE
-			xpath = "//div[contains(@class,'submission-title')]//h2";
-			DomElement de = this.connect.get_page().getFirstByXPath(xpath);
+			xpath = "//div[contains"
+					+ "(@class,'submission-title')]//h2";
+			DomElement de = this.connect.
+					get_page().getFirstByXPath(xpath);
 			dvk.set_title(de.asText());
 			//GET ARTIST
-			xpath = "//div[contains(@class,'submission')][contains(@class,'container')]//a";
-			List<DomElement> ds = this.connect.get_page().getByXPath(xpath);
+			xpath = "//div[contains(@class,'submission')]"
+					+ "[contains(@class,'container')]//a";
+			List<DomElement> ds = this.connect
+					.get_page().getByXPath(xpath);
 			for(DomElement el: ds) {
 				if(el.asText().length() > 0) {
 					dvk.set_artist(el.asText());
@@ -371,34 +495,43 @@ public class FurAffinity extends ArtistHosting {
 				}
 			}
 			//GET DATE
-			DomAttr da;
-			xpath = "//div[@class='submission-id-sub-container']//span[@class='popup_date']|//td[@class='alt1 stats-container']//span[@class='popup_date']";
+			xpath = "//div[@class='submission-id-sub-container']"
+					+ "//span[@class='popup_date']"
+					+ "|//td[@class='alt1 stats-container']"
+					+ "//span[@class='popup_date']";
 			de = this.connect.get_page().getFirstByXPath(xpath);
 			String time = get_time(de.asText());
 			if(time.equals("0000/00/00|00:00")) {
-				xpath = "//div[contains(@class,'-container')]//span[@class='popup_date']/@title";
-				da = this.connect.get_page().getFirstByXPath(xpath);
-				time = get_time(da.getNodeValue());
+				time = get_time(de.getAttribute("title"));
 			}
 			dvk.set_time(time);
 			if(dvk.get_time().equals("0000/00/00|00:00")) {
 				this.connect.set_page(null);
 			}
 			//GET DIRECT URL
-			xpath = "//div[@class='download fullsize']//a[contains(@href,'facdn.net')]/@href|//table[@class='maintable']//a[contains(@href,'facdn.net')]/@href";
+			DomAttr da;
+			xpath = "//div[@class='download fullsize']"
+					+ "//a[contains(@href,'facdn.net')]/@href"
+					+ "|//table[@class='maintable']"
+					+ "//a[contains(@href,'facdn.net')]/@href";
 			da = this.connect.get_page().getFirstByXPath(xpath);
 			dvk.set_direct_url("https:" + da.getNodeValue());
-			String m_ext = StringProcessing.get_extension(dvk.get_direct_url());
+			String m_ext = StringProcessing.get_extension(
+					dvk.get_direct_url());
 			//GET SECONDARY URL
 			xpath = "//img[@id='submissionImg']/@src";
 			da = this.connect.get_page().getFirstByXPath(xpath);
 			dvk.set_secondary_url("https:" + da.getNodeValue());
-			String s_ext = StringProcessing.get_extension(dvk.get_secondary_url());
+			String s_ext = StringProcessing.get_extension(
+					dvk.get_secondary_url());
 			if(m_ext.equals(s_ext)) {
 				dvk.set_secondary_url(null);
 			}
 			//GET DESCRIPTION
-			xpath = "//div[contains(@class,'submission-description')]|//table[@class='maintable']//td[@class='alt1'][@style='padding:8px'][@valign='top'][@align='left']";
+			xpath = "//div[contains(@class,'submission-description')]"
+					+ "|//table[@class='maintable']//td[@class='alt1']"
+					+ "[@style='padding:8px'][@valign='top']"
+					+ "[@align='left']";
 			de = this.connect.get_page().getFirstByXPath(xpath);
 			dvk.set_description(DConnect.remove_header_footer(de.asXml()));
 			//GET RATING
@@ -407,7 +540,8 @@ public class FurAffinity extends ArtistHosting {
 			xpath = "//span[contains(@class,'rating-box')]";
 			de = this.connect.get_page().getFirstByXPath(xpath);
 			if(de == null) {
-				xpath = "//td[@class='alt1 stats-container']//img[contains(@alt,'rating')]/@alt";
+				xpath = "//td[@class='alt1 stats-container']"
+						+ "//img[contains(@alt,'rating')]/@alt";
 				da = this.connect.get_page().getFirstByXPath(xpath);
 				rating = da.getNodeValue().toLowerCase();
 			}
@@ -441,12 +575,14 @@ public class FurAffinity extends ArtistHosting {
 				tag = de.asText();
 				tags.add("Type:" + tag);
 				//GET SPECIES
-				xpath = "//div[strong='Species']/strong[@class='highlight']/following-sibling::span";
+				xpath = "//div[strong='Species']/strong"
+						+ "[@class='highlight']/following-sibling::span";
 				de = this.connect.get_page().getFirstByXPath(xpath);
 				tag = de.asText();
 				tags.add("Species:" + tag);
 				//GET GENDER
-				xpath = "//div[strong='Gender']/strong[@class='highlight']/following-sibling::span";
+				xpath = "//div[strong='Gender']/strong"
+						+ "[@class='highlight']/following-sibling::span";
 				de = this.connect.get_page().getFirstByXPath(xpath);
 				tag = de.asText();
 				tags.add("Gender:" + tag);
@@ -460,14 +596,16 @@ public class FurAffinity extends ArtistHosting {
 				int start = container.indexOf("Category:");
 				start = container.indexOf('>', start) + 1;
 				int end = container.indexOf('<', start);
-				tag = container.substring(start, end).replace("\n", "").replace("\r", "");
+				tag = container.substring(start, end)
+						.replace("\n", "").replace("\r", "");
 				tag = StringProcessing.remove_whitespace(tag);
 				tags.add("Category:" + tag);
 				//GET TYPE
 				start = container.indexOf("Theme:");
 				start = container.indexOf('>', start) + 1;
 				end = container.indexOf('<', start);
-				tag = container.substring(start, end).replace("\n", "").replace("\r", "");
+				tag = container.substring(start, end)
+						.replace("\n", "").replace("\r", "");
 				tag = StringProcessing.remove_whitespace(tag);
 				tags.add("Type:" + tag);
 				//GET SPECIES
@@ -475,7 +613,8 @@ public class FurAffinity extends ArtistHosting {
 				if(start != -1) {
 					start = container.indexOf('>', start) + 1;
 					end = container.indexOf('<', start);
-					tag = container.substring(start, end).replace("\n", "").replace("\r", "");
+					tag = container.substring(start, end)
+							.replace("\n", "").replace("\r", "");
 					tag = StringProcessing.remove_whitespace(tag);
 					tags.add("Species:" + tag);
 				}
@@ -487,7 +626,8 @@ public class FurAffinity extends ArtistHosting {
 				if(start != -1) {
 					start = container.indexOf('>', start) + 1;
 					end = container.indexOf('<', start);
-					tag = container.substring(start, end).replace("\n", "").replace("\r", "");
+					tag = container.substring(start, end)
+							.replace("\n", "").replace("\r", "");
 					tag = StringProcessing.remove_whitespace(tag);
 					tags.add("Gender:" + tag);
 				}
@@ -496,13 +636,19 @@ public class FurAffinity extends ArtistHosting {
 				}
 			}
 			//GET GALLERY
-			xpath = "//div[@class='submission-content']//a[contains(@href,'/gallery/')]|//div[@class='minigallery-container']//a[contains(@href,'/gallery/')]";
+			xpath = "//div[@class='submission-content']"
+					+ "//a[contains(@href,'/gallery/')]"
+					+ "|//div[@class='minigallery-container']"
+					+ "//a[contains(@href,'/gallery/')]";
 			de = this.connect.get_page().getFirstByXPath(xpath);
 			if(de != null) {
 				tags.add("Gallery:Main");
 			}
 			else {
-				xpath = "//div[@class='submission-content']//a[contains(@href,'/scraps/')]|//div[@class='minigallery-container']//a[contains(@href,'/scraps/')]";
+				xpath = "//div[@class='submission-content']"
+						+ "//a[contains(@href,'/scraps/')]"
+						+ "|//div[@class='minigallery-container']"
+						+ "//a[contains(@href,'/scraps/')]";
 				de = this.connect.get_page().getFirstByXPath(xpath);
 				tags.add("Gallery:Scraps");
 				if(de == null) {
@@ -516,7 +662,10 @@ public class FurAffinity extends ArtistHosting {
 				tags.add(ds.get(i).asText());
 			}
 			//GET TAGS
-			xpath = "//section[@class='tags-row']//a[contains(@href,'/search/')]|//div[@id='keywords']//a[contains(@href,'/search/')]";
+			xpath = "//section[@class='tags-row']"
+					+ "//a[contains(@href,'/search/')]"
+					+ "|//div[@id='keywords']"
+					+ "//a[contains(@href,'/search/')]";
 			ds = this.connect.get_page().getByXPath(xpath);
 			for(int i = 0; i < ds.size(); i++) {
 				tags.add(ds.get(i).asText());
@@ -524,7 +673,8 @@ public class FurAffinity extends ArtistHosting {
 			dvk.set_web_tags(ArrayProcessing.list_to_array(tags));
 			//SET MEDIA FILES
 			String filename = dvk.get_filename();
-			dvk.set_dvk_file(new File(directory, filename + ".dvk"));
+			dvk.set_dvk_file(
+					new File(directory, filename + ".dvk"));
 			dvk.set_media_file(filename + m_ext);
 			if(dvk.get_secondary_url() != null) {
 				dvk.set_secondary_file(filename + s_ext);
@@ -533,7 +683,7 @@ public class FurAffinity extends ArtistHosting {
 			if(save) {
 				dvk.write_media(this.connect);
 				if(!dvk.get_dvk_file().exists()) {
-					System.out.println("Failed writing file");
+					return new Dvk();
 				}
 			}
 			return dvk;

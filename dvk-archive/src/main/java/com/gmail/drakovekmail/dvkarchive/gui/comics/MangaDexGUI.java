@@ -170,13 +170,11 @@ public class MangaDexGUI extends ArtistHostingGUI {
 
 	@Override
 	public File get_captcha() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public boolean login(String username, String password, String captcha) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 }

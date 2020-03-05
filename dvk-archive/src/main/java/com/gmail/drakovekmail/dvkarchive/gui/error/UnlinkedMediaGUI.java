@@ -66,7 +66,5 @@ public class UnlinkedMediaGUI extends SimpleServiceGUI {
 	public void directory_opened() {}
 
 	@Override
-	public void close() {
-		// TODO Auto-generated method stub
-	}
+	public void close() {}
 }

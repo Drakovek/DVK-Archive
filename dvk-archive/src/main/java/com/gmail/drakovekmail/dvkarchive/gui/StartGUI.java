@@ -116,6 +116,7 @@ public class StartGUI implements DActionEvent, Disabler {
 	 */
 	public StartGUI(BaseGUI base_gui, boolean show_gui) {
 		//INITIALIZE INSTANCE VARIABLES
+		//TODO Replace default preferences to user preferences
 		this.base_gui = base_gui;
 		this.base_gui.set_font("", 14, true);
 		this.file_prefs = new FilePrefs();

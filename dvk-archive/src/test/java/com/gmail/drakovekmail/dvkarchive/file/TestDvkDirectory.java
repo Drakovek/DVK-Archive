@@ -124,6 +124,10 @@ public class TestDvkDirectory {
 		dir.read_dvks(this.test_dir);
 		assertEquals(2, dir.get_dvks().size());
 		//MODIFY FILES
+		try {
+			TimeUnit.MILLISECONDS.sleep(1000);
+		}
+		catch (InterruptedException e) {}
 		long modified = dir.get_dvks().get(0).get_dvk_file().lastModified();
 		File file = new File(this.test_dir, "dvk1.dvk");
 		file.delete();
@@ -140,10 +144,6 @@ public class TestDvkDirectory {
 		dvk.set_title("Thing");
 		dvk.write_dvk();
 		//CHECK MODIFIED
-		try {
-			TimeUnit.MILLISECONDS.sleep(1000);
-		}
-		catch (InterruptedException e) {}
 		dir.update_directory(modified);
 		assertEquals(2, dir.get_dvks().size());
 		assertEquals("New Title", dir.get_dvks().get(0).get_title());
