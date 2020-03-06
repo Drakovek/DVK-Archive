@@ -13,6 +13,7 @@ import com.gmail.drakovekmail.dvkarchive.file.Dvk;
 import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
 import com.gmail.drakovekmail.dvkarchive.file.FilePrefs;
 import com.gmail.drakovekmail.dvkarchive.file.InOut;
+import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
 import com.gmail.drakovekmail.dvkarchive.processing.ArrayProcessing;
 import com.gmail.drakovekmail.dvkarchive.processing.StringProcessing;
 import com.gmail.drakovekmail.dvkarchive.web.DConnect;
@@ -47,7 +48,7 @@ public class FurAffinity extends ArtistHosting {
 	/**
 	 * Initializes the main DConnect object.
 	 */
-	public void initialize_connect() {
+	private void initialize_connect() {
 		this.connect = new DConnect(false, true);
 		this.connect.set_timeout(4);
 	}
@@ -165,9 +166,10 @@ public class FurAffinity extends ArtistHosting {
 	 * Can be either media page or journal page.
 	 * 
 	 * @param url URL of Fur Affinity page
+	 * @param use_ends Whether to use the end caps for Dvk ID
 	 * @return ID for page
 	 */
-	public static String get_page_id(String url) {
+	public static String get_page_id(String url, boolean use_ends) {
 		if(!url.contains("furaffinity.net")) {
 			return new String();
 		}
@@ -195,9 +197,12 @@ public class FurAffinity extends ArtistHosting {
 			end = url.length();
 		}
 		//CREATE ID
-		StringBuilder id = new StringBuilder("FAF");
+		StringBuilder id = new StringBuilder();
+		if(use_ends) {
+			id.append("FAF");
+		}
 		id.append(url.substring(start, end));
-		if(journal) {
+		if(journal && use_ends) {
 			id.append("-J");
 		}
 		return id.toString();
@@ -268,6 +273,7 @@ public class FurAffinity extends ArtistHosting {
 	 * Returns a list of FurAffinity media page URLs
 	 * for a given artist.
 	 * 
+	 * @param start_gui Used for canceling and showing progress
 	 * @param artist Fur Affinity artist (in URL form)
 	 * @param scraps Whether to check the scraps folder
 	 * 				 If false, checks the gallery folder
@@ -278,6 +284,7 @@ public class FurAffinity extends ArtistHosting {
 	 * @return List of FurAffinity media page URLs
 	 */
 	public ArrayList<String> get_pages(
+			StartGUI start_gui,
 			String artist,
 			boolean scraps,
 			DvkHandler dvk_handler,
@@ -298,8 +305,17 @@ public class FurAffinity extends ArtistHosting {
 		url.append(page);
 		url.append('/');
 		//LOAD PAGE
+		if(this.connect == null) {
+			initialize_connect();
+		}
 		String xpath = "//figure//u//a[contains(@href,'/view/')]";
-		this.connect.load_page(url.toString(), xpath, 2);
+		if(start_gui != null
+				&& start_gui.get_base_gui().is_canceled()) {
+			this.connect.set_page(null);
+		}
+		else {
+			this.connect.load_page(url.toString(), xpath, 2);
+		}
 		try {
 			TimeUnit.MILLISECONDS.sleep(1000);
 		} catch (InterruptedException e) {}
@@ -321,10 +337,11 @@ public class FurAffinity extends ArtistHosting {
 			boolean contains = false;
 			String link = "https://www.furaffinity.net"
 					+ ds.get(i).getNodeValue();
-			String id = get_page_id(link);
+			String id = get_page_id(link, true);
 			for(int k = 0; k < size; k++) {
-				if(get_page_id(dvk_handler.get_dvk(k)
-						.get_page_url()).equals(id)) {
+				if(get_page_id(
+						dvk_handler.get_dvk(k).get_page_url(),
+						true).equals(id)) {
 					check_next = false;
 					contains = true;
 					break;
@@ -350,10 +367,17 @@ public class FurAffinity extends ArtistHosting {
 		}
 		if(de != null && (check_all || check_next)) {
 			ArrayList<String> next = get_pages(
-					artist, scraps, dvk_handler,
-					check_all, check_login, page + 1);
+					start_gui, artist, scraps,
+					dvk_handler, check_all, check_login,
+					page + 1);
 			if(next == null) {
 				if(page == 1) {
+					if(start_gui != null) {
+						start_gui.append_console(
+								"fur_affinity_failed",
+								true);
+						start_gui.get_base_gui().set_canceled(true);
+					}
 					return new ArrayList<>();
 				}
 				return null;
@@ -367,6 +391,7 @@ public class FurAffinity extends ArtistHosting {
 	 * Returns a list of FurAffinity journal page URLs
 	 * for a given artist.
 	 * 
+	 * @param start_gui Used for canceling and showing progress
 	 * @param artist Fur Affinity artist (in URL form)
 	 * @param dvk_handler Used to check for already downloaded files
 	 * @param check_all Whether to check all gallery pages
@@ -375,6 +400,7 @@ public class FurAffinity extends ArtistHosting {
 	 * @return List of FurAffinity media page URLs
 	 */
 	public ArrayList<String> get_journal_pages(
+			StartGUI start_gui,
 			String artist,
 			DvkHandler dvk_handler,
 			boolean check_all,
@@ -386,11 +412,19 @@ public class FurAffinity extends ArtistHosting {
 				+ "/"
 				+ Integer.toString(page) + "/";
 		//LOAD PAGE
+		if(this.connect == null) {
+			initialize_connect();
+		}
 		String xpath = "//section[contains(@id,'jid')]"
 				+ "//a[contains(@href,'/journal/')]"
 				+ "|//table[contains(@id,'jid')]"
 				+ "//a[contains(@href,'/journal/')]";
-		this.connect.load_page(url.toString(), xpath, 2);
+		if(start_gui != null && start_gui.get_base_gui().is_canceled()) {
+			this.connect.set_page(null);
+		}
+		else {
+			this.connect.load_page(url.toString(), xpath, 2);
+		}
 		try {
 			TimeUnit.MILLISECONDS.sleep(1000);
 		} catch (InterruptedException e) {}
@@ -414,10 +448,11 @@ public class FurAffinity extends ArtistHosting {
 				boolean contains = false;
 				link = "https://www.furaffinity.net"
 						+ ds.get(i).getAttribute("href");
-				String id = get_page_id(link);
+				String id = get_page_id(link, true);
 				for(int k = 0; k < size; k++) {
-					if(get_page_id(dvk_handler.get_dvk(k)
-							.get_page_url()).equals(id)) {
+					if(get_page_id(
+							dvk_handler.get_dvk(k).get_page_url(),
+							true).equals(id)) {
 						check_next = false;
 						contains = true;
 						break;
@@ -441,10 +476,16 @@ public class FurAffinity extends ArtistHosting {
 		}
 		if(de != null && (check_all || check_next)) {
 			ArrayList<String> next = get_journal_pages(
-					artist, dvk_handler, check_all,
-					check_login, page + 1);
+					start_gui, artist, dvk_handler,
+					check_all, check_login, page + 1);
 			if(next == null) {
 				if(page == 1) {
+					if(start_gui != null) {
+						start_gui.append_console(
+								"fur_affinity_failed",
+								true);
+						start_gui.get_base_gui().set_canceled(true);
+					}
 					return new ArrayList<>();
 				}
 				return null;
@@ -467,12 +508,20 @@ public class FurAffinity extends ArtistHosting {
 			File directory,
 			boolean save) {
 		Dvk dvk = new Dvk();
-		dvk.set_id(get_page_id(page_url));
-		dvk.set_page_url(page_url);
+		dvk.set_id(get_page_id(page_url, true));
+		String url = "https://www.furaffinity.net/view/"
+				+ get_page_id(page_url, false) + "/";
+		dvk.set_page_url(url);
 		//LOAD PAGE
+		if(this.connect == null) {
+			initialize_connect();
+		}
 		String xpath = "//div[contains(@class,"
 				+ "'submission-title')]//h2";
-		this.connect.load_page(page_url, xpath, 2);
+		this.connect.load_page(url, xpath, 2);
+		try {
+			TimeUnit.MILLISECONDS.sleep(1000);
+		} catch (InterruptedException e1) {}
 		if(this.connect.get_page() == null) {
 			return new Dvk();
 		}
@@ -683,7 +732,7 @@ public class FurAffinity extends ArtistHosting {
 			if(save) {
 				dvk.write_media(this.connect);
 				if(!dvk.get_dvk_file().exists()) {
-					return new Dvk();
+					dvk.write_dvk();
 				}
 			}
 			return dvk;
@@ -707,13 +756,21 @@ public class FurAffinity extends ArtistHosting {
 			File directory,
 			boolean save) {
 		Dvk dvk = new Dvk();
-		dvk.set_id(get_page_id(page_url));
-		dvk.set_page_url(page_url);
+		dvk.set_id(get_page_id(page_url, true));
+		String url = "https://www.furaffinity.net/journal/"
+				+ get_page_id(page_url, false) + "/";
+		dvk.set_page_url(url);
 		//LOAD PAGE
+		if(this.connect == null) {
+			initialize_connect();
+		}
 		String xpath = "//h2[@class='journal-title']"
 				+ "|//td[@class='journal-title-box']"
 				+ "//div[@class='no_overflow']";
-		this.connect.load_page(page_url, xpath, 2);
+		this.connect.load_page(url, xpath, 2);
+		try {
+			TimeUnit.MILLISECONDS.sleep(1000);
+		} catch (InterruptedException e1) {}
 		if(this.connect.get_page() == null) {
 			return new Dvk();
 		}

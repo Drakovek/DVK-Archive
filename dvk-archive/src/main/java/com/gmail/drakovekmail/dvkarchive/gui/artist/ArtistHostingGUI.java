@@ -45,7 +45,7 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	/**
 	 * Whether login was skipped.
 	 */
-	private boolean skipped;
+	protected boolean skipped;
 	
 	/**
 	 * DVK handler for loading existing DVK files.

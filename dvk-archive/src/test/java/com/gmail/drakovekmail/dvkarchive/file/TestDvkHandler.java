@@ -174,6 +174,22 @@ public class TestDvkHandler {
 	}
 	
 	/**
+	 * Tests the add_dvk method.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_add_dvk() {
+		DvkHandler dvk_handler;
+		dvk_handler = new DvkHandler();
+		assertEquals(0, dvk_handler.get_size());
+		Dvk dvk = new Dvk();
+		dvk.set_title("Title!");
+		dvk_handler.add_dvk(dvk);
+		assertEquals(1, dvk_handler.get_size());
+		assertEquals("Title!", dvk_handler.get_dvk(0).get_title());
+	}
+	
+	/**
 	 * Tests the get_size method.
 	 */
 	@Test

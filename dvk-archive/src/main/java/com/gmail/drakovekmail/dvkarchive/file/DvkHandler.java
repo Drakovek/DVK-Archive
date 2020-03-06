@@ -72,6 +72,15 @@ public class DvkHandler {
 	}
 	
 	/**
+	 * Adds a given Dvk to the list of Dvk objects.
+	 * 
+	 * @param dvk Given Dvk object
+	 */
+	public void add_dvk(Dvk dvk) {
+		this.dvks.add(dvk);
+	}
+	
+	/**
 	 * Returns the number of Dvk objects loaded.
 	 * 
 	 * @return Size of dvks list

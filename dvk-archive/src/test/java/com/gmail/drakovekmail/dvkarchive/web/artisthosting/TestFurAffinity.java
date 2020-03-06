@@ -46,7 +46,6 @@ public class TestFurAffinity {
 		FilePrefs prefs = new FilePrefs();
 		prefs.set_captcha_dir(this.test_dir);
 		this.fur = new FurAffinity(prefs);
-		this.fur.initialize_connect();
 	}
 	
 	/**
@@ -82,25 +81,35 @@ public class TestFurAffinity {
 	@SuppressWarnings("static-method")
 	public void test_get_page_id() {
 		String url = "https://www.different.net/view/13982138/";
-		assertEquals("", FurAffinity.get_page_id(url));
+		assertEquals("", FurAffinity.get_page_id(url, true));
+		assertEquals("", FurAffinity.get_page_id(url, false));
 		url = "https://www.furaffinity.net/bleh/13982138/";
-		assertEquals("", FurAffinity.get_page_id(url));
+		assertEquals("", FurAffinity.get_page_id(url, true));
+		assertEquals("", FurAffinity.get_page_id(url, false));
 		url = "https://www.furaffinity.net/view/13982138";
-		assertEquals("FAF13982138", FurAffinity.get_page_id(url));
+		assertEquals("FAF13982138", FurAffinity.get_page_id(url, true));
+		assertEquals("13982138", FurAffinity.get_page_id(url, false));
 		url = "furaffinity.net/view/22840286/";
-		assertEquals("FAF22840286", FurAffinity.get_page_id(url));
+		assertEquals("FAF22840286", FurAffinity.get_page_id(url, true));
+		assertEquals("22840286", FurAffinity.get_page_id(url, false));
 		url = "https://www.furaffinity.net/journal/8610682";
-		assertEquals("FAF8610682-J", FurAffinity.get_page_id(url));
+		assertEquals("FAF8610682-J", FurAffinity.get_page_id(url, true));
+		assertEquals("8610682", FurAffinity.get_page_id(url, false));
 		url = "furaffinity.net/journal/8594821/";
-		assertEquals("FAF8594821-J", FurAffinity.get_page_id(url));
+		assertEquals("FAF8594821-J", FurAffinity.get_page_id(url, true));
+		assertEquals("8594821", FurAffinity.get_page_id(url, false));
 		url = "https://www.furaffinity.net/view/bleh";
-		assertEquals("FAFbleh", FurAffinity.get_page_id(url));
+		assertEquals("FAFbleh", FurAffinity.get_page_id(url, true));
+		assertEquals("bleh", FurAffinity.get_page_id(url, false));
 		url = "https://www.furaffinity.net/journal/bleh";
-		assertEquals("FAFbleh-J", FurAffinity.get_page_id(url));
+		assertEquals("FAFbleh-J", FurAffinity.get_page_id(url, true));
+		assertEquals("bleh", FurAffinity.get_page_id(url, false));
 		url = "https://www.furaffinity.net/view/";
-		assertEquals("FAF", FurAffinity.get_page_id(url));
+		assertEquals("FAF", FurAffinity.get_page_id(url, true));
+		assertEquals("", FurAffinity.get_page_id(url, false));
 		url = "https://www.furaffinity.net/journal/";
-		assertEquals("FAF-J", FurAffinity.get_page_id(url));
+		assertEquals("FAF-J", FurAffinity.get_page_id(url, true));
+		assertEquals("", FurAffinity.get_page_id(url, false));
 	}
 	
 	/**
@@ -172,18 +181,18 @@ public class TestFurAffinity {
 		handler.read_dvks(dirs, prefs, null, false, false, false);
 		//TEST SMALL SAMPLE
 		ArrayList<String> links = this.fur.get_pages(
-				"drakovek", false, handler, true, false, 1);
+				null, "drakovek", false, handler, true, false, 1);
 		assertEquals(1, links.size());
 		url = "https://www.furaffinity.net/view/32521285/";
 		assertEquals(url, links.get(0));
 		links = this.fur.get_pages(
-				"drakovek", true, handler, false, false, 1);
+				null, "drakovek", true, handler, false, false, 1);
 		assertEquals(1, links.size());
 		url = "https://www.furaffinity.net/view/31071186/";
 		assertEquals(url, links.get(0));
 		//TEST ALREADY DOWNLOADED
 		links = this.fur.get_pages(
-				"mrsparta", false, handler, false, false, 1);
+				null, "mrsparta", false, handler, false, false, 1);
 		assertTrue(links.size() > 94);
 		int index = -1;
 		url = "https://www.furaffinity.net/view/13982138/";
@@ -204,7 +213,8 @@ public class TestFurAffinity {
 		//TEST LOGIN
 		if(!this.fur.is_logged_in()) { 
 			links = this.fur.get_pages(
-					"mrsparta", false, handler, false, true, 1);
+					null, "mrsparta", false,
+					handler, false, true, 1);
 			assertEquals(0, links.size());
 		}
 	}
@@ -230,13 +240,13 @@ public class TestFurAffinity {
 		handler.read_dvks(dirs, prefs, null, false, false, false);
 		//TEST SMALL SAMPLE
 		ArrayList<String> links = this.fur.get_journal_pages(
-				"mrsparta", handler, true, false, 1);
+				null, "mrsparta", handler, true, false, 1);
 		assertTrue(links.size() > 3);
 		url = "https://www.furaffinity.net/journal/8594821/";
 		assertEquals(url, links.get(links.size() - 1));
 		//TEST ALREADY DOWNLOADED
 		links = this.fur.get_journal_pages(
-				"angrboda", handler, false, false, 1);
+				null, "angrboda", handler, false, false, 1);
 		assertTrue(links.size() > 48);
 		int index = -1;
 		url = "https://www.furaffinity.net/journal/4030490/";
@@ -257,7 +267,7 @@ public class TestFurAffinity {
 		//TEST LOGIN
 		if(!this.fur.is_logged_in()) {
 			links = this.fur.get_journal_pages(
-					"mrsparta", handler, false, true, 1);
+					null, "mrsparta", handler, false, true, 1);
 			assertEquals(0, links.size());
 		}
 	}
@@ -285,7 +295,7 @@ public class TestFurAffinity {
 	@Test
 	public void test_get_dvk() {
 		//FIRST DVK
-		String url = "https://www.furaffinity.net/view/32521285/";
+		String url = "http://www.furaffinity.net/view/32521285/";
 		Dvk dvk = this.fur.get_dvk(url, this.test_dir, false);
 		assertEquals("FAF32521285", dvk.get_id());
 		assertEquals("Robin the Bobcat", dvk.get_title());
@@ -324,7 +334,7 @@ public class TestFurAffinity {
 				dvk.get_media_file().getParentFile());
 		assertEquals(null, dvk.get_secondary_file());
 		//SECOND DVK
-		url = "https://www.furaffinity.net/view/15301779/";
+		url = "furaffinity.net/view/15301779";
 		dvk = this.fur.get_dvk(url, this.test_dir, false);
 		assertEquals("FAF15301779", dvk.get_id());
 		assertEquals("Affinity Ch. 1", dvk.get_title());
@@ -373,7 +383,7 @@ public class TestFurAffinity {
 		assertEquals(this.test_dir,
 				dvk.get_secondary_file().getParentFile());
 		//SECOND DVK
-		url = "https://www.furaffinity.net/view/29756524/";
+		url = "www.furaffinity.net/view/29756524/";
 		dvk = this.fur.get_dvk(url, this.test_dir, false);
 		assertEquals("FAF29756524", dvk.get_id());
 		value = "[Changed fanart] Are you going to "
@@ -437,7 +447,7 @@ public class TestFurAffinity {
 			assertEquals(null, dvk.get_secondary_url());
 			value = "Commission for   <a href=\"/user/shaytalis"
 					+ "\" class=\"iconusername\">    <img src="
-					+ "\"//a.facdn.net/20200305/shaytalis.gif\" "
+					+ "\"//a.facdn.net/20200306/shaytalis.gif\" "
 					+ "align=\"middle\" title=\"shaytalis\" "
 					+ "alt=\"shaytalis\"/>    &#160;shaytalis  "
 					+ "</a>   of his character Selina, "
@@ -488,7 +498,7 @@ public class TestFurAffinity {
 	@Test
 	public void test_get_journal_dvk() {
 		//FIRST DVK
-		String url = "https://www.furaffinity.net/journal/8594821/";
+		String url = "www.furaffinity.net/journal/8594821";
 		Dvk dvk = this.fur.get_journal_dvk(url, this.test_dir, false);
 		assertEquals("FAF8594821-J", dvk.get_id());
 		assertEquals("100+ watcher special", dvk.get_title());

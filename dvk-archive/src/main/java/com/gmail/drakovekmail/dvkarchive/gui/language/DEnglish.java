@@ -61,6 +61,9 @@ public class DEnglish extends LanguageMap{
 		this.lang_keys.put("attempt_login", "Attempting Login...");
 		this.lang_keys.put("login_failed", "Login Failed");
 		this.lang_keys.put("login_success", "Login Successful!");
+		this.lang_keys.put("getting_gallery", "Getting Gallery Pages...");
+		this.lang_keys.put("getting_scraps", "Getting Scrap Pages...");
+		this.lang_keys.put("getting_journals", "Getting Journal Pages...");
 		//ERROR FINDING
 		this.lang_keys.put("same_ids", "Same IDs");
 		this.lang_keys.put("missing_media", "Missing Media");
@@ -73,6 +76,9 @@ public class DEnglish extends LanguageMap{
 		this.lang_keys.put("getting_chapters", "Getting Chapters...");
 		this.lang_keys.put("downloading_pages", "Downloading Pages...");
 		this.lang_keys.put("mangadex_failed", "MangaDex Failed");
+		//FURAFFINITY
+		this.lang_keys.put("running_furaffinity", "[RUNNING FUR AFFINITY]");
+		this.lang_keys.put("fur_affinity_failed", "Fur Affinity Failed");
 		//UNLINKED MEDIA
 		this.lang_keys.put("unlinked_title", "Find Unlinked Media");
 		this.lang_keys.put("unlinked_console", "[FINDING UNLINKED MEDIA]");

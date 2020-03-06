@@ -18,6 +18,8 @@ import com.gmail.drakovekmail.dvkarchive.web.DConnect;
  */
 public class Dvk implements Serializable {
 	
+	//TODO Add feature to check file type.
+	
 	/**
 	 * SerialversionUID
 	 */

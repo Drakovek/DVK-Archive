@@ -37,6 +37,8 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
  */
 public class StartGUI implements DActionEvent, Disabler {
 	
+	//TODO update process text
+	
 	/**
 	 * Current directory for the StartGUI
 	 */
@@ -168,6 +170,7 @@ public class StartGUI implements DActionEvent, Disabler {
 		console_lbl.setHorizontalAlignment(SwingConstants.CENTER);
 		JPanel console_pnl = new JPanel();
 		this.console = new DTextArea(this.base_gui);
+		this.console.setLineWrap(false);
 		DScrollPane console_scr = new DScrollPane(this.console);
 		console_pnl = this.base_gui.get_y_stack(console_lbl, 0, console_scr, 1);
 		JPanel log_pnl = this.base_gui.get_y_stack(console_pnl, 1, bar_pnl, 0);
