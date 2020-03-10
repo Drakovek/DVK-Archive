@@ -16,7 +16,7 @@ public class DScrollablePanel extends JPanel implements Scrollable {
 	/**
 	 * SerialVersionUID
 	 */
-	private static final long serialVersionUID = 3369146791600449991L;
+	private static final long serialVersionUID = 5617041171275271755L;
 
 	/**
 	 * Whether to limit the width to the container's width
@@ -47,17 +47,24 @@ public class DScrollablePanel extends JPanel implements Scrollable {
 	 * Adds a panel to the scrollable panel.
 	 * 
 	 * @param panel Given panel to show
-	 * @param fit_width Whether to limit the width to the container's width.
-	 * @param fit_height Whether to limit the height to the container's height.
 	 */
-	public void set_panel(JPanel panel, boolean fit_width, boolean fit_height) {
-		this.fit_width = fit_width;
-		this.fit_height = fit_height;
+	public void set_panel(JPanel panel) {
 		this.pvps = panel.getPreferredSize();
 		this.removeAll();
 		this.add(panel);
 		this.revalidate();
 		this.repaint();
+	}
+	
+	/**
+	 * Sets how to limit the internal panel size.
+	 * 
+	 * @param fit_width	Whether to limit the width to the container's width.
+	 * @param fit_height Whether to limit the height to the container's height.
+	 */
+	public void set_fit(boolean fit_width, boolean fit_height) {
+		this.fit_width = fit_width;
+		this.fit_height = fit_height;
 	}
 	
 	@Override

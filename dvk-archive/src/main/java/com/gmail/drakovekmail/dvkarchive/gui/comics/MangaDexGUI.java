@@ -17,7 +17,7 @@ import com.gmail.drakovekmail.dvkarchive.web.comics.MangaDex;
  * @author Drakovek
  */
 public class MangaDexGUI extends ArtistHostingGUI {
-	
+
 	/**
 	 * SerialVersionUID
 	 */
@@ -45,8 +45,13 @@ public class MangaDexGUI extends ArtistHostingGUI {
 	 */
 	public MangaDexGUI(StartGUI start_gui) {
 		super(start_gui, "mangadex");
-		create_main_gui();
 		load_directory();
+	}
+	
+	@Override
+	public void create_initial_gui() {
+		create_main_gui();
+		this.set_list(new ArrayList<>());
 	}
 	
 	/**
@@ -100,7 +105,7 @@ public class MangaDexGUI extends ArtistHostingGUI {
 
 	@Override
 	public void get_pages(Dvk dvk, boolean check_all) {
-		this.start_gui.get_progress_bar().set_progress(
+		this.start_gui.get_main_pbar().set_progress(
 				true, false, 0, 0);
 		File dir = dvk.get_dvk_file().getParentFile();
 		Dvk title = MangaDex.get_title_info(
@@ -117,9 +122,7 @@ public class MangaDexGUI extends ArtistHostingGUI {
 	public void download_page(String url) {
 		String id = MangaDex.get_title_id(url);
 		if(id.length() > 0) {
-			this.start_gui.get_progress_bar().set_progress(true, false, 0, 0);
-			this.start_gui.append_console("", false);
-			this.start_gui.append_console("running_mangadex", true);
+			this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
 			Dvk title = MangaDex.get_title_info(this.connect, id);
 			this.start_gui.append_console(
 					this.start_gui.get_base_gui().get_language_string("getting_title")
@@ -143,7 +146,7 @@ public class MangaDexGUI extends ArtistHostingGUI {
 	 */
 	private void download_title(Dvk title, File directory, boolean check_all) {
 		//TODO CHANGE ENGLISH DEFAULT
-		this.start_gui.get_progress_bar().set_progress(true, false, 0, 0);
+		this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
 		this.start_gui.append_console("getting_chapters", true);
 		ArrayList<Dvk> chapters = MangaDex.get_chapters(
 				this.connect, title, this.start_gui, "English", 1);
@@ -176,5 +179,11 @@ public class MangaDexGUI extends ArtistHostingGUI {
 	@Override
 	public boolean login(String username, String password, String captcha) {
 		return false;
+	}
+
+	@Override
+	public void print_start() {
+		this.start_gui.append_console("", false);
+		this.start_gui.append_console("running_mangadex", true);
 	}
 }

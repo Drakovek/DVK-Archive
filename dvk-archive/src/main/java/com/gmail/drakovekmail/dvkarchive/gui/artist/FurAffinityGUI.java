@@ -40,8 +40,15 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 	 */
 	public FurAffinityGUI(StartGUI start_gui) {
 		super(start_gui, "fur_affinity");
-		create_login_gui(true);
 		load_directory();
+	}
+	
+	@Override
+	public void create_initial_gui() {
+		create_login_gui(true);
+		if(this.fur != null) {
+			this.fur.close();
+		}
 		this.fur = new FurAffinity(this.start_gui.get_file_prefs());
 	}
 	
@@ -73,6 +80,10 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 		}
 	}
 	
+	//TODO ALLOW ADDING ARTIST
+	
+	//TODO RELOAD ARTISTS AFTER CREATING NEW FOLDER
+	
 	@Override
 	public void directory_opened() {
 		save_directory(this.start_gui.get_directory());
@@ -96,10 +107,13 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 	
 	@Override
 	public void get_pages(Dvk dvk, boolean check_all) {
-		this.start_gui.get_progress_bar().set_progress(
+		this.start_gui.get_main_pbar().set_progress(
 				true, false, 0, 0);
 		File dir = dvk.get_dvk_file().getParentFile();
-		this.start_gui.append_console(dvk.get_artists()[0], false);
+		this.start_gui.append_console(
+				this.start_gui.get_base_gui()
+					.get_language_string("getting_artist")
+				+ " - " + dvk.get_artists()[0], false);
 		//GET GALLERY PAGES
 		this.start_gui.append_console("getting_gallery", true);
 		ArrayList<String> pages;
@@ -119,10 +133,11 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 				this.start_gui, artist, this.dvk_handler,
 				check_all, !this.skipped, 1));
 		//DOWNLOAD PAGES
+		this.start_gui.append_console("downloading_pages", true);
 		for(int i = pages.size() - 1;
 				!this.start_gui.get_base_gui().is_canceled() && i > -1;
 				i--) {
-			this.start_gui.get_progress_bar().set_progress(
+			this.start_gui.get_main_pbar().set_progress(
 					false, true, pages.size() - (i + 1), pages.size());
 			download_page(pages.get(i), dir);
 		}
@@ -131,14 +146,12 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 
 	@Override
 	public void download_page(String url) {
-		this.start_gui.get_progress_bar().set_progress(
+		this.start_gui.get_main_pbar().set_progress(
 				true, false, 0, 0);
 		//CHECK URL IS VALID
 		if(url != null
 				&& FurAffinity.get_page_id(url, false).length() > 0) {
 			//DOWNLOAD PAGE
-			this.start_gui.append_console(
-					"running_furaffinity", true);
 			Dvk dvk = download_page(
 					url, this.start_gui.get_directory());
 			if(dvk != null) {
@@ -222,5 +235,12 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 	public boolean login(String username, String password, String captcha) {
 		this.fur.login(username, password, captcha);
 		return this.fur.is_logged_in();
+	}
+
+	@Override
+	public void print_start() {
+		this.start_gui.append_console("", false);
+		this.start_gui.append_console(
+				"running_furaffinity", true);
 	}
 }

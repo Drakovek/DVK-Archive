@@ -36,9 +36,7 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
  *
  */
 public class StartGUI implements DActionEvent, Disabler {
-	
-	//TODO update process text
-	
+
 	/**
 	 * Current directory for the StartGUI
 	 */
@@ -91,9 +89,19 @@ public class StartGUI implements DActionEvent, Disabler {
 	private DTextArea console;
 	
 	/**
+	 * ScrollPane that holds the console log
+	 */
+	DScrollPane console_scr;
+	
+	/**
 	 * Main progress bar for the GUI
 	 */
-	private DProgressBar progress_bar;
+	private DProgressBar main_pbar;
+	
+	/**
+	 * Secondary progress bar for the GUI
+	 */
+	private DProgressBar sec_pbar;
 	
 	/**
 	 * ID of the currently selected service
@@ -163,17 +171,25 @@ public class StartGUI implements DActionEvent, Disabler {
 		//CREATE PROGRESS BAR
 		this.cancel_btn = new DButton(this.base_gui, this, "clear");
 		this.cancel_btn.always_allow_action();
-		this.progress_bar = new DProgressBar(this.base_gui);
-		JPanel bar_pnl = this.base_gui.get_x_stack(this.progress_bar, 1, this.cancel_btn, 0);
+		this.main_pbar = new DProgressBar(this.base_gui);
+		this.sec_pbar = new DProgressBar(this.base_gui);
+		JPanel bar_pnl = new JPanel();
+		bar_pnl.setLayout(new GridLayout(1, 2, this.base_gui.get_space_size(), 0));
+		bar_pnl.add(this.sec_pbar);
+		bar_pnl.add(this.main_pbar);
+		JPanel cancel_pnl = this.base_gui.get_x_stack(
+				bar_pnl, 1, this.cancel_btn, 0);
 		//CREATE CONSOLE LOG
 		DLabel console_lbl = new DLabel(this.base_gui, null, "console_log");
 		console_lbl.setHorizontalAlignment(SwingConstants.CENTER);
 		JPanel console_pnl = new JPanel();
 		this.console = new DTextArea(this.base_gui);
 		this.console.setLineWrap(false);
-		DScrollPane console_scr = new DScrollPane(this.console);
-		console_pnl = this.base_gui.get_y_stack(console_lbl, 0, console_scr, 1);
-		JPanel log_pnl = this.base_gui.get_y_stack(console_pnl, 1, bar_pnl, 0);
+		this.console_scr = new DScrollPane(this.console);
+		console_pnl = this.base_gui.get_y_stack(
+				console_lbl, 0, this.console_scr, 1);
+		JPanel log_pnl = this.base_gui.get_y_stack(
+				console_pnl, 1, cancel_pnl, 0);
 		//CREATE CENTER PANEL
 		this.content_pnl = new DScrollablePanel();
 		DScrollPane c_scr = new DScrollPane(this.content_pnl);
@@ -198,6 +214,7 @@ public class StartGUI implements DActionEvent, Disabler {
 		menu_bar.add(this.file_menu);
 		this.frame.setJMenuBar(menu_bar);
 		//PACK AND CREATE FRAME
+		this.service_list.setSelectedIndex(0);
 		reset_directory();
 		this.frame.pack();
 		this.frame.setLocationRelativeTo(null);
@@ -238,11 +255,8 @@ public class StartGUI implements DActionEvent, Disabler {
 		String[] services = new String[0];
 		switch(category) {
 			case "artist_hosting":
-				services = new String[4];
-				services[0] = "deviantart";
-				services[1] = "fur_affinity";
-				services[2] = "inkbunny";
-				services[3] = "transfur";
+				services = new String[1];
+				services[0] = "fur_affinity";
 				break;
 			case "comics":
 				services = new String[1];
@@ -308,7 +322,7 @@ public class StartGUI implements DActionEvent, Disabler {
 						break;
 				}
 				JPanel spaced = this.base_gui.get_spaced_panel(this.service_pnl);
-				this.content_pnl.set_panel(spaced, true, false);
+				this.content_pnl.set_panel(spaced);
 				this.current_service = service;
 			}
 		}
@@ -322,15 +336,34 @@ public class StartGUI implements DActionEvent, Disabler {
 	 */
 	public void append_console(String text, boolean is_id) {
 		this.console.append_text(text, is_id);
+		this.console_scr.bottom_left();
 	}
 	
 	/**
-	 * Returns the GUI's progress bar.
+	 * Returns the main scroll panel for service GUIs.
 	 * 
-	 * @return Progress bar
+	 * @return Service GUI scroll panel
 	 */
-	public DProgressBar get_progress_bar() {
-		return this.progress_bar;
+	public DScrollablePanel get_scroll_panel() {
+		return this.content_pnl;
+	}
+	
+	/**
+	 * Returns the GUI's main progress bar.
+	 * 
+	 * @return Main Progress bar
+	 */
+	public DProgressBar get_main_pbar() {
+		return this.main_pbar;
+	}
+	
+	/**
+	 * Returns the GUI's secondary progress bar.
+	 * 
+	 * @return Secondary Progress bar
+	 */
+	public DProgressBar get_secondary_pbar() {
+		return this.sec_pbar;
 	}
 
 	/**
@@ -420,7 +453,7 @@ public class StartGUI implements DActionEvent, Disabler {
 	 */
 	public void cancel_clear() {
 		if(this.base_gui.is_running()) {
-			this.progress_bar.set_progress(true, false, 0, 0);
+			this.main_pbar.set_progress(true, false, 0, 0);
 			this.base_gui.set_canceled(true);
 			append_console("canceling", true);
 		}

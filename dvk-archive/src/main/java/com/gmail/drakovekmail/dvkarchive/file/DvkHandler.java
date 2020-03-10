@@ -46,7 +46,7 @@ public class DvkHandler {
 		if(start_gui != null) {
 			start_gui.append_console("", false);
 			start_gui.append_console("reading_dvks", true);
-			start_gui.get_progress_bar().set_progress(true, false, 0, 0);
+			start_gui.get_main_pbar().set_progress(true, false, 0, 0);
 		}
 		this.dvks = new ArrayList<>();
 		DvkIndexing index = new DvkIndexing(prefs.get_index_dir());
@@ -55,7 +55,7 @@ public class DvkHandler {
 		for(int i = 0; i < max; i++) {
 			//SHOW PROGRESS
 			if(start_gui != null) {
-				start_gui.get_progress_bar().set_progress(
+				start_gui.get_main_pbar().set_progress(
 						false, true, i, max);
 				//BREAK IF CANCELLED
 				if(start_gui.get_base_gui().is_canceled()) {

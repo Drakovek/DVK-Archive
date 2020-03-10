@@ -31,7 +31,7 @@ public class UnlinkedMediaGUI extends SimpleServiceGUI {
 	 * Displays results in the start GUI.
 	 */
 	public void get_unlinked() {
-		this.start_gui.get_progress_bar().set_progress(true, false, 0, 0);
+		this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
 		this.start_gui.append_console("", false);
 		this.start_gui.append_console("unlinked_console", true);
 		File[] dirs = {this.start_gui.get_directory()};
@@ -49,7 +49,7 @@ public class UnlinkedMediaGUI extends SimpleServiceGUI {
 
 	@Override
 	public void done(String id) {
-		this.start_gui.get_progress_bar()
+		this.start_gui.get_main_pbar()
 			.set_progress(false, false, 0, 0);
 		if(this.start_gui.get_base_gui().is_canceled()) {
 			this.start_gui.append_console("canceled", true);

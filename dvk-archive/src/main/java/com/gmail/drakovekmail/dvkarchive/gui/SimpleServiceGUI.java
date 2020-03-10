@@ -40,6 +40,7 @@ public abstract class SimpleServiceGUI extends ServiceGUI implements DActionEven
 	 */
 	public SimpleServiceGUI(StartGUI start_gui, String title, String desc) {
 		super(start_gui);
+		this.start_gui.get_scroll_panel().set_fit(true, true);
 		BaseGUI base_gui = this.start_gui.get_base_gui();
 		//CREATE TITLE PANEL
 		DLabel title_lbl = new DLabel(base_gui, null, title);

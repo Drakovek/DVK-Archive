@@ -31,7 +31,7 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
  * @author Drakovek
  */
 public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEvent {
-
+	
 	/**
 	 * SerialVersionUID
 	 */
@@ -140,6 +140,8 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		this.cap_btn = new DButton(base_gui, this, "refresh_captcha");
 		this.login_btn = new DButton(base_gui, this, "login");
 		this.skip_btn = new DButton(base_gui, this, "skip_login");
+		//CREATE GUI
+		create_initial_gui();
 	}
 	
 	/**
@@ -148,6 +150,7 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	 * @param use_captcha Whether to include CAPTCHA dialog in the GUI
 	 */
 	protected void create_login_gui(boolean use_captcha) {
+		this.start_gui.get_scroll_panel().set_fit(true, false);
 		BaseGUI base_gui = this.start_gui.get_base_gui();
 		this.u_txt = new DTextField(base_gui);
 		this.p_txt = new DPasswordField(base_gui);
@@ -203,10 +206,16 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	}
 	
 	/**
+	 * Creates the initial GUI.
+	 * Also called to reset when process is canceled.
+	 */
+	public abstract void create_initial_gui();
+	
+	/**
 	 * Refreshes the Displayed CAPTCHA image.
 	 */
 	private void refresh_captcha() {
-		this.start_gui.get_progress_bar().set_progress(true, false, 0, 0);
+		this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
 		this.start_gui.append_console("", false);
 		this.start_gui.append_console("loading_captcha", true);
 		File captcha = get_captcha();
@@ -224,7 +233,7 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	 * Starts the process of logging in to website.
 	 */
 	private void start_login() {
-		this.start_gui.get_progress_bar().set_progress(true, false, 0, 0);
+		this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
 		this.start_gui.append_console("attempt_login", true);
 		boolean login = login(
 				this.u_txt.getText(),
@@ -261,11 +270,15 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	 * Creates the main artist hosting GUI.
 	 */
 	public void create_main_gui() {
+		this.start_gui.get_scroll_panel().set_fit(true, true);
 		BaseGUI base_gui = this.start_gui.get_base_gui();
 		//CREATE BUTTON PANEL
 		JPanel btn_pnl = new JPanel();
 		btn_pnl.setLayout(new GridLayout(
 				3, 1, 0, base_gui.get_space_size()));
+		this.new_btn.setEnabled(false);
+		this.all_btn.setEnabled(false);
+		this.single_btn.setEnabled(false);
 		btn_pnl.add(this.new_btn);
 		btn_pnl.add(this.all_btn);
 		btn_pnl.add(this.single_btn);
@@ -332,7 +345,7 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		//SORT DVKS
 		if(!this.start_gui.get_base_gui().is_canceled()) {
 			this.start_gui.append_console("sorting_dvks", true);
-			this.start_gui.get_progress_bar()
+			this.start_gui.get_main_pbar()
 				.set_progress(true, false, 0, 0);
 			sort_dvks();
 		}
@@ -368,8 +381,11 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	 * @param check_all Whether to check all pages
 	 */
 	private void run_get_pages(boolean check_all) {
+		print_start();
 		int[] sel = get_selected();
 		for(int i = 0; i < sel.length; i++) {
+			this.start_gui.get_secondary_pbar().set_progress(
+					false, true, i, sel.length);
 			if(!this.start_gui.get_base_gui().is_canceled()) {
 				get_pages(this.dvks.get(sel[i]), check_all);
 			}
@@ -382,8 +398,14 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	 * @param url Page URL
 	 */
 	private void run_download_single(String url) {
+		print_start();
 		download_page(url);
 	}
+	
+	/**
+	 * Prints message that indicates process has started.
+	 */
+	public abstract void print_start();
 
 	/**
 	 * Gets pages for a given artist/title.
@@ -407,9 +429,12 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	
 	@Override
 	public void enable_all() {
-		this.new_btn.setEnabled(true);
-		this.all_btn.setEnabled(true);
-		this.single_btn.setEnabled(true);
+		if(! this.start_gui.get_base_gui()
+				.is_canceled()) {
+			this.new_btn.setEnabled(true);
+			this.all_btn.setEnabled(true);
+			this.single_btn.setEnabled(true);
+		}
 		this.refresh_btn.setEnabled(true);
 		this.lst.setEnabled(true);
 		this.cap_btn.setEnabled(true);
@@ -484,8 +509,6 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 				run_get_pages(true);
 				break;
 			case "read_dvks":
-				this.start_gui.get_progress_bar()
-					.set_progress(true, false, 0, 0);
 				read_dvks();
 				break;
 			default:
@@ -496,9 +519,11 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 
 	@Override
 	public void done(String id) {
-		this.start_gui.get_progress_bar().set_progress(false, false, 0, 0);
+		this.start_gui.get_main_pbar().set_progress(false, false, 0, 0);
+		this.start_gui.get_secondary_pbar().set_progress(false, false, 0, 0);
 		if(this.start_gui.get_base_gui().is_canceled()) {
 			this.start_gui.append_console("canceled", true);
+			create_initial_gui();
 		}
 		else {
 			this.start_gui.append_console("finished", true);

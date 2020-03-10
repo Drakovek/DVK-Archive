@@ -41,7 +41,7 @@ public class ErrorFinding {
 			//UPDATE PROGRESS
 			if(start_gui != null) {
 				
-				start_gui.get_progress_bar()
+				start_gui.get_main_pbar()
 					.set_progress(false, true, i, dirs.length);
 			}
 			//LOAD DIRECTORY

@@ -20,6 +20,8 @@ import com.gmail.drakovekmail.dvkarchive.web.DConnectSelenium;
  */
 public class MangaDex {
 	
+	//TODO ONLY CHECK NEWEST CHAPTERS IF ASKED
+	
 	/**
 	 * Returns the title id for a given MangaDex title URL
 	 * Returns empty if not a valid title URL.
@@ -337,7 +339,7 @@ public class MangaDex {
 		ArrayList<Dvk> dvks = new ArrayList<>();
 		for(int c = start; c > -1; c--) {
 			if(start_gui != null) {
-				start_gui.get_progress_bar().set_progress(false, true, start - c, start + 1);
+				start_gui.get_main_pbar().set_progress(false, true, start - c, start + 1);
 				start_gui.append_console(chapters.get(c).get_title(), false);
 			}
 			int total;

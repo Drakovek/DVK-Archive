@@ -25,6 +25,8 @@ import com.gmail.drakovekmail.dvkarchive.web.DConnect;
  */
 public class FurAffinity extends ArtistHosting {
 	
+	//TODO CHECK DOESN'T RUN THROUGH ALL PAGES WHEN NOT NECESSARY
+	
 	/**
 	 * DConnect object for connecting to FurAffinity
 	 */
@@ -361,7 +363,9 @@ public class FurAffinity extends ArtistHosting {
 		}
 		if(de == null) {
 			xpath = "//a[@class='button-link right']"
-					+ "[contains(@href,'/gallery/')]";
+					+ "[contains(@href,'/gallery/')]"
+					+ "|//a[@class='button-link right']"
+					+ "[contains(@href,'/scraps/')]";
 			de = this.connect.get_page()
 					.getFirstByXPath(xpath);
 		}
@@ -570,11 +574,13 @@ public class FurAffinity extends ArtistHosting {
 			//GET SECONDARY URL
 			xpath = "//img[@id='submissionImg']/@src";
 			da = this.connect.get_page().getFirstByXPath(xpath);
+			if(da != null) {
 			dvk.set_secondary_url("https:" + da.getNodeValue());
-			String s_ext = StringProcessing.get_extension(
-					dvk.get_secondary_url());
-			if(m_ext.equals(s_ext)) {
-				dvk.set_secondary_url(null);
+				String s_ext = StringProcessing.get_extension(
+						dvk.get_secondary_url());
+				if(m_ext.equals(s_ext)) {
+					dvk.set_secondary_url(null);
+				}
 			}
 			//GET DESCRIPTION
 			xpath = "//div[contains(@class,'submission-description')]"
@@ -726,6 +732,8 @@ public class FurAffinity extends ArtistHosting {
 					new File(directory, filename + ".dvk"));
 			dvk.set_media_file(filename + m_ext);
 			if(dvk.get_secondary_url() != null) {
+				String s_ext = StringProcessing.get_extension(
+						dvk.get_secondary_url());
 				dvk.set_secondary_file(filename + s_ext);
 			}
 			//SAVE DVK
