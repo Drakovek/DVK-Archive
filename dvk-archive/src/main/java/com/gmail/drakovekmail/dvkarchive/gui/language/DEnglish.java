@@ -27,6 +27,8 @@ public class DEnglish extends LanguageMap{
 		this.lang_keys.put("file", "^File");
 		this.lang_keys.put("open", "^Open");
 		this.lang_keys.put("exit", "^Exit");
+		this.lang_keys.put("yes", "^Yes");
+		this.lang_keys.put("no", "^No");
 		this.lang_keys.put("finished", "[FINISHED]");
 		this.lang_keys.put("canceled", "[CANCELED]");
 		this.lang_keys.put("reading_dvks", "Reading DVK Files...");
@@ -66,6 +68,7 @@ public class DEnglish extends LanguageMap{
 		this.lang_keys.put("getting_journals", "Getting Journal Pages...");
 		this.lang_keys.put("downloading_pages", "Downloading Pages...");
 		this.lang_keys.put("getting_artist", "Getting Artist");
+		this.lang_keys.put("invalid_url", "Invalid URL");
 		//ERROR FINDING
 		this.lang_keys.put("same_ids", "Same IDs");
 		this.lang_keys.put("missing_media", "Missing Media");
@@ -80,6 +83,8 @@ public class DEnglish extends LanguageMap{
 		//FURAFFINITY
 		this.lang_keys.put("running_furaffinity", "[RUNNING FUR AFFINITY]");
 		this.lang_keys.put("fur_affinity_failed", "Fur Affinity Failed");
+		this.lang_keys.put("invalid_fur_url", "Not a valid Fur Affinity URL.");
+		this.lang_keys.put("use_fur_artist", "Use as Fur Affinity artist instead?");
 		//UNLINKED MEDIA
 		this.lang_keys.put("unlinked_title", "Find Unlinked Media");
 		this.lang_keys.put("unlinked_console", "[FINDING UNLINKED MEDIA]");

@@ -214,8 +214,8 @@ public class StartGUI implements DActionEvent, Disabler {
 		menu_bar.add(this.file_menu);
 		this.frame.setJMenuBar(menu_bar);
 		//PACK AND CREATE FRAME
-		this.service_list.setSelectedIndex(0);
 		reset_directory();
+		this.service_list.setSelectedIndex(0);
 		this.frame.pack();
 		this.frame.setLocationRelativeTo(null);
 		this.frame.setMinimumSize(this.frame.getSize());

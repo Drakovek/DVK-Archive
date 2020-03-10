@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.prefs.Preferences;
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
 import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
+import com.gmail.drakovekmail.dvkarchive.gui.swing.compound.DButtonDialog;
 import com.gmail.drakovekmail.dvkarchive.processing.StringProcessing;
 import com.gmail.drakovekmail.dvkarchive.web.artisthosting.ArtistHosting;
 import com.gmail.drakovekmail.dvkarchive.web.artisthosting.FurAffinity;
@@ -79,20 +80,26 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 			this.start_gui.reset_directory();
 		}
 	}
-	
-	//TODO ALLOW ADDING ARTIST
-	
-	//TODO RELOAD ARTISTS AFTER CREATING NEW FOLDER
-	
+
 	@Override
 	public void directory_opened() {
 		save_directory(this.start_gui.get_directory());
+		if(!this.start_gui.get_base_gui().is_canceled()) {
+			start_process("read_dvks", true);
+		}
 	}
 	
 	@Override
 	public void get_artists() {
 		this.dvks = ArtistHosting.get_artists(
 				this.dvk_handler, "furaffinity.net");
+		set_artists();
+	}
+	
+	/**
+	 * Sets the artist list based on loaded artist Dvks.
+	 */
+	public void set_artists() {
 		ArrayList<String> list = new ArrayList<>();
 		for(int i = 0; i < this.dvks.size(); i++) {
 			list.add(this.dvks.get(i).get_artists()[0]);
@@ -149,8 +156,7 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 		this.start_gui.get_main_pbar().set_progress(
 				true, false, 0, 0);
 		//CHECK URL IS VALID
-		if(url != null
-				&& FurAffinity.get_page_id(url, false).length() > 0) {
+		if(FurAffinity.get_page_id(url, false).length() > 0) {
 			//DOWNLOAD PAGE
 			Dvk dvk = download_page(
 					url, this.start_gui.get_directory());
@@ -162,23 +168,45 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 								dvk.get_artists()[0]));
 				if(!dir.exists()) {
 					dir.mkdir();
+					//ADD TO ARTIST LIST
+					Dvk art_dvk = new Dvk();
+					art_dvk.set_artist(dvk.get_artists()[0]);
+					art_dvk.set_dvk_file(new File(dir, "dvk.dvk"));
+					this.dvks.add(0, art_dvk);
+					set_artists();
 				}
 				//MOVE TO ARTIST FOLDER
 				try {
-					Files.move(
-							dvk.get_media_file(),
-							new File(dir,
-									dvk.get_media_file().getName()));
+					File new_file;
+					new_file = new File(dir, dvk.get_media_file().getName());
+					Files.move(dvk.get_media_file(), new_file);
 					if(dvk.get_secondary_file() != null) {
-						Files.move(
-								dvk.get_secondary_file(),
-								new File(dir,
-										dvk.get_secondary_file().getName()));
+						new_file = new File(dir, dvk.get_secondary_file().getName());
+						Files.move(dvk.get_secondary_file(), new_file);
 					}
-					Files.move(
-							dvk.get_dvk_file(),
-							new File(dir, dvk.get_dvk_file().getName()));
+					new_file = new File(dir, dvk.get_dvk_file().getName());
+					Files.move(dvk.get_dvk_file(), new_file);
 				} catch (IOException e) {}
+			}
+		}
+		else {
+			//ASK TO ADD AS ARTIST
+			String[] labels = {"invalid_fur_url", "use_fur_artist"};
+			String[] buttons = {"yes", "no"};
+			DButtonDialog dbd = new DButtonDialog();
+			String result = dbd.open(this.start_gui.get_base_gui(), this.start_gui.get_frame(), "invalid_url", labels, buttons);
+			if(result.equals("yes")) {
+				//CREATE ARTIST FOLDER
+				File dir = new File(this.start_gui.get_directory(), url);
+				if(!dir.exists()) {
+					dir.mkdir();
+				}
+				//ADD TO ARTIST LIST
+				Dvk art_dvk = new Dvk();
+				art_dvk.set_artist(url);
+				art_dvk.set_dvk_file(new File(dir, "dvk.dvk"));
+				this.dvks.add(0, art_dvk);
+				set_artists();
 			}
 		}
 	}

@@ -301,7 +301,7 @@ public class TestFurAffinity {
 		assertEquals("Robin the Bobcat", dvk.get_title());
 		assertEquals(1, dvk.get_artists().length);
 		assertEquals("Drakovek", dvk.get_artists()[0]);
-		assertEquals("2019/08/03|18:21", dvk.get_time());
+		assertEquals("2019/08/03|17:21", dvk.get_time());
 		String value = "https://www.furaffinity.net/view/32521285/";
 		assertEquals(value, dvk.get_page_url());
 		value = "https://d.facdn.net/art/drakovek/1564867315/"
@@ -340,7 +340,7 @@ public class TestFurAffinity {
 		assertEquals("Affinity Ch. 1", dvk.get_title());
 		assertEquals(1, dvk.get_artists().length);
 		assertEquals("MrSparta", dvk.get_artists()[0]);
-		assertEquals("2014/12/24|03:11", dvk.get_time());
+		assertEquals("2014/12/24|02:11", dvk.get_time());
 		value = "https://www.furaffinity.net/view/15301779/";
 		assertEquals(value, dvk.get_page_url());
 		value = "https://d.facdn.net/art/mrsparta/stories/"
@@ -391,7 +391,7 @@ public class TestFurAffinity {
 		assertEquals(value, dvk.get_title());
 		assertEquals(1, dvk.get_artists().length);
 		assertEquals("Tavaer", dvk.get_artists()[0]);
-		assertEquals("2018/12/16|01:02", dvk.get_time());
+		assertEquals("2018/12/16|00:02", dvk.get_time());
 		value = "https://www.furaffinity.net/view/29756524/";
 		assertEquals(value, dvk.get_page_url());
 		value = "https://d.facdn.net/art/tavaer/"

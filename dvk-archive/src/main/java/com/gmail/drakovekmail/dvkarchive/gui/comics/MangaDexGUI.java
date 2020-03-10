@@ -83,6 +83,7 @@ public class MangaDexGUI extends ArtistHostingGUI {
 	@Override
 	public void directory_opened() {
 		save_directory(this.start_gui.get_directory());
+		start_process("read_dvks", true);
 	}
 	
 	@Override
