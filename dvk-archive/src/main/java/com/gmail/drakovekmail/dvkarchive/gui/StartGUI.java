@@ -3,16 +3,16 @@ package com.gmail.drakovekmail.dvkarchive.gui;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.io.File;
-
 import javax.swing.JFileChooser;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
-
 import com.gmail.drakovekmail.dvkarchive.file.FilePrefs;
 import com.gmail.drakovekmail.dvkarchive.gui.artist.FurAffinityGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.comics.MangaDexGUI;
+import com.gmail.drakovekmail.dvkarchive.gui.error.MissingMediaGUI;
+import com.gmail.drakovekmail.dvkarchive.gui.error.SameIDsGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.error.UnlinkedMediaGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.settings.SettingsBarGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DButton;
@@ -317,8 +317,11 @@ public class StartGUI implements DActionEvent, Disabler {
 					case "unlinked_media":
 						this.service_pnl = new UnlinkedMediaGUI(this);
 						break;
-					default:
-						this.service_pnl = new UnlinkedMediaGUI(this);
+					case "same_ids":
+						this.service_pnl = new SameIDsGUI(this);
+						break;
+					case "missing_media":
+						this.service_pnl = new MissingMediaGUI(this);
 						break;
 				}
 				JPanel spaced = this.base_gui.get_spaced_panel(this.service_pnl);

@@ -91,5 +91,16 @@ public class DEnglish extends LanguageMap{
 		String desc = "Finds media files in DVK directories that ";
 		desc = desc + "do not have a corresponding DVK file.";
 		this.lang_keys.put("unlinked_desc", desc);
+		//SAME IDS
+		this.lang_keys.put("same_ids_title", "Find Same IDs");
+		this.lang_keys.put("same_ids_console", "[FINDING SAME IDS]");
+		desc = "Finds DVK files that share identical DVK IDs.";
+		this.lang_keys.put("same_ids_desc", desc);
+		//MISSING MEDIA
+		this.lang_keys.put("missing_media_title", "Find Missing Media DVKs");
+		this.lang_keys.put("missing_media_console","[FINDING MISSING MEDIA DVKS]");
+		desc = "Finds DVK files that are missing their associated media "
+				+ "files, whether primary or secondary.";
+		this.lang_keys.put("missing_media_desc", desc);
 	}
 }

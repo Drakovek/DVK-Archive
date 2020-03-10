@@ -1,48 +1,54 @@
 package com.gmail.drakovekmail.dvkarchive.gui.error;
 
 import java.io.File;
+
+import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
 import com.gmail.drakovekmail.dvkarchive.file.ErrorFinding;
+import com.gmail.drakovekmail.dvkarchive.file.FilePrefs;
 import com.gmail.drakovekmail.dvkarchive.gui.SimpleServiceGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
 
 /**
- * GUI for getting unlinked media.
+ * GUI for finding DVK files with the same ID.
  * 
  * @author Drakovek
  */
-public class UnlinkedMediaGUI extends SimpleServiceGUI {
+public class SameIDsGUI extends SimpleServiceGUI {
 
 	/**
 	 * SerialVersionUID
 	 */
-	private static final long serialVersionUID = 7675526073648299168L;
+	private static final long serialVersionUID = 4030206997720178512L;
 
 	/**
-	 * Initializes the UnlinkedMediaGUI object.
+	 * Initializes the SameIDsGUI object.
 	 * 
-	 * @param start_gui Parent of the UnlinkedMediaGUI
+	 * @param start_gui Parent of the SameIDsGUI
 	 */
-	public UnlinkedMediaGUI(StartGUI start_gui) {
-		super(start_gui, "unlinked_title", "unlinked_desc");
+	public SameIDsGUI(StartGUI start_gui) {
+		super(start_gui, "same_ids_title", "same_ids_desc");
 	}
-
+	
 	/**
-	 * Runs process to get unlinked media.
+	 * Runs process to get DVKs with same IDs.
 	 * Displays results in the start GUI.
 	 */
-	private void get_unlinked() {
+	private void get_same_ids() {
 		this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
-		this.start_gui.append_console("", false);
-		this.start_gui.append_console("unlinked_console", true);
 		File[] dirs = {this.start_gui.get_directory()};
-		ErrorFinding.get_unlinked_media(this.start_gui.get_file_prefs(), dirs, this.start_gui);
+		FilePrefs prefs = this.start_gui.get_file_prefs();
+		DvkHandler handler = new DvkHandler();
+		handler.read_dvks(dirs, prefs, this.start_gui, prefs.use_index(), true, prefs.use_index());
+		this.start_gui.append_console("", false);
+		this.start_gui.append_console("same_ids_console", true);
+		ErrorFinding.get_same_ids(handler, this.start_gui);
 	}
-
+	
 	@Override
 	public void run(String id) {
 		switch(id) {
 			case "run":
-				get_unlinked();
+				get_same_ids();
 				break;
 		}
 	}
@@ -67,4 +73,5 @@ public class UnlinkedMediaGUI extends SimpleServiceGUI {
 
 	@Override
 	public void close() {}
+
 }

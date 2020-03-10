@@ -79,6 +79,17 @@ public class TestErrorFinding {
 			dvk3.set_dvk_file(new File(d3, "dvk3.dvk"));
 			dvk3.set_media_file("dvk3.jpg");
 			dvk3.write_dvk();
+			//CREATE DVK3
+			Dvk dvk4 = new Dvk();
+			dvk4.set_id("ID1");
+			dvk4.set_title("Dvk4");
+			dvk4.set_artist("Artist");
+			dvk4.set_page_url("page");
+			dvk4.set_dvk_file(new File(d3, "dvk4.dvk"));
+			dvk4.set_media_file("dvk4.jpg");
+			dvk4.set_secondary_file("dvk4.txt");
+			dvk4.get_media_file().createNewFile();
+			dvk4.write_dvk();
 			//CREATE UNLINKED FILES
 			File u1 = new File(this.test_dir, "u1.png");
 			u1.createNewFile();
@@ -111,9 +122,56 @@ public class TestErrorFinding {
 		File[] dirs = {this.test_dir};
 		ArrayList<File> unlinked;
 		unlinked = ErrorFinding.get_unlinked_media(prefs, dirs, null);
-		Arrays.sort(dirs);
 		assertEquals(2, unlinked.size());
-		assertEquals("u3.jpg", unlinked.get(0).getName());
-		assertEquals("u2.jpg", unlinked.get(1).getName());
+		String[] names = new String[2];
+		names[0] = unlinked.get(0).getName();
+		names[1] = unlinked.get(1).getName();
+		Arrays.sort(names);
+		assertEquals("u2.jpg", names[0]);
+		assertEquals("u3.jpg", names[1]);
+	}
+	
+	/**
+	 * Tests the get_missing_media_dvks method.
+	 */
+	@Test
+	public void test_get_missing_media_dvks() {
+		File[] dirs = {this.test_dir};
+		FilePrefs prefs = new FilePrefs();
+		DvkHandler dvk_handler = new DvkHandler();
+		dvk_handler.read_dvks(dirs, prefs, null, false, false, false);
+		assertEquals(4, dvk_handler.get_size());
+		ArrayList<File> missing;
+		missing = ErrorFinding.get_missing_media_dvks(dvk_handler, null);
+		assertEquals(2, missing.size());
+		String[] names = new String[2];
+		names[0] = missing.get(0).getName();
+		names[1] = missing.get(1).getName();
+		Arrays.sort(names);
+		assertEquals("dvk3.dvk", names[0]);
+		assertEquals("dvk4.dvk", names[1]);
+	}
+	
+	/**
+	 * Tests the get_same_ids method.
+	 */
+	@Test
+	public void test_get_same_ids() {
+		File[] dirs = {this.test_dir};
+		FilePrefs prefs = new FilePrefs();
+		DvkHandler dvk_handler = new DvkHandler();
+		dvk_handler.read_dvks(dirs, prefs, null, false, false, false);
+		assertEquals(4, dvk_handler.get_size());
+		ArrayList<File> same;
+		same = ErrorFinding.get_same_ids(dvk_handler, null);
+		assertEquals(3, same.size());
+		String[] names = new String[3];
+		names[0] = same.get(0).getName();
+		names[1] = same.get(1).getName();
+		names[2] = same.get(2).getName();
+		Arrays.sort(names);
+		assertEquals("dvk1.dvk", names[0]);
+		assertEquals("dvk2.dvk", names[1]);
+		assertEquals("dvk4.dvk", names[2]);
 	}
 }
