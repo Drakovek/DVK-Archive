@@ -39,8 +39,9 @@ public class DEnglish extends LanguageMap{
 		this.lang_keys.put("settings", "^Settings");
 		//PROGRAM CATEGORIES
 		this.lang_keys.put("artist_hosting", "Artist Hosting");
-		this.lang_keys.put("error_finding", "Error Finding");
 		this.lang_keys.put("comics", "Comics");
+		this.lang_keys.put("error_finding", "Error Finding");
+		this.lang_keys.put("reformatting", "Reformatting");
 		//ARTIST HOSTING
 		this.lang_keys.put("deviantart", "DeviantArt");
 		this.lang_keys.put("fur_affinity", "Fur Affinity");
@@ -69,12 +70,15 @@ public class DEnglish extends LanguageMap{
 		this.lang_keys.put("downloading_pages", "Downloading Pages...");
 		this.lang_keys.put("getting_artist", "Getting Artist");
 		this.lang_keys.put("invalid_url", "Invalid URL");
+		//COMICS
+		this.lang_keys.put("mangadex", "MangaDex");
 		//ERROR FINDING
 		this.lang_keys.put("same_ids", "Same IDs");
 		this.lang_keys.put("missing_media", "Missing Media");
 		this.lang_keys.put("unlinked_media", "Unlinked Media");
-		//COMICS
-		this.lang_keys.put("mangadex", "MangaDex");
+		//REFORMATTING
+		this.lang_keys.put("reformat_dvks", "Reformat DVKs");
+		this.lang_keys.put("rename_files", "Rename Files");
 		//MANGADEX
 		this.lang_keys.put("running_mangadex", "[RUNNING MANGADEX]");
 		this.lang_keys.put("getting_title", "Getting Title");
@@ -102,5 +106,15 @@ public class DEnglish extends LanguageMap{
 		desc = "Finds DVK files that are missing their associated media "
 				+ "files, whether primary or secondary.";
 		this.lang_keys.put("missing_media_desc", desc);
+		//RENAME FILES
+		this.lang_keys.put("rename_title", "Rename Files");
+		this.lang_keys.put("rename_console", "[RENAMING FILES]");
+		desc = "Renames DVK files and their associated media.";
+		this.lang_keys.put("rename_desc", desc);
+		//RENAME DVKS
+		this.lang_keys.put("reformat_title", "Reformat DVKs");
+		this.lang_keys.put("reformat_console", "[REFORMATTING DVKS]");
+		desc = "Reformats all DVK files to follow the current formatting standard.";
+		this.lang_keys.put("reformat_desc", desc);
 	}
 }

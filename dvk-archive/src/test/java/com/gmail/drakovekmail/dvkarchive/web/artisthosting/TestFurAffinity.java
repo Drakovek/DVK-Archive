@@ -438,7 +438,7 @@ public class TestFurAffinity {
 					dvk.get_title());
 			assertEquals(1, dvk.get_artists().length);
 			assertEquals("bubbeh", dvk.get_artists()[0]);
-			assertEquals("2017/03/04|23:36", dvk.get_time());
+			assertEquals("2017/03/04|22:36", dvk.get_time());
 			value = "https://www.furaffinity.net/view/22799324/";
 			assertEquals(value, dvk.get_page_url());
 			value = "https://d.facdn.net/art/bubbeh/1488685035/"
@@ -447,7 +447,7 @@ public class TestFurAffinity {
 			assertEquals(null, dvk.get_secondary_url());
 			value = "Commission for   <a href=\"/user/shaytalis"
 					+ "\" class=\"iconusername\">    <img src="
-					+ "\"//a.facdn.net/20200306/shaytalis.gif\" "
+					+ "\"//a.facdn.net/20200311/shaytalis.gif\" "
 					+ "align=\"middle\" title=\"shaytalis\" "
 					+ "alt=\"shaytalis\"/>    &#160;shaytalis  "
 					+ "</a>   of his character Selina, "
@@ -504,7 +504,7 @@ public class TestFurAffinity {
 		assertEquals("100+ watcher special", dvk.get_title());
 		assertEquals(1, dvk.get_artists().length);
 		assertEquals("MrSparta", dvk.get_artists()[0]);
-		assertEquals("2018/01/24|16:50", dvk.get_time());
+		assertEquals("2018/01/24|15:50", dvk.get_time());
 		String value = "https://www.furaffinity.net/journal/8594821/";
 		assertEquals(value, dvk.get_page_url());
 		assertEquals(null, dvk.get_direct_url());
@@ -535,7 +535,7 @@ public class TestFurAffinity {
 				dvk.get_title());
 		assertEquals(1, dvk.get_artists().length);
 		assertEquals("angrboda", dvk.get_artists()[0]);
-		assertEquals("2013/06/15|20:59", dvk.get_time());
+		assertEquals("2013/06/15|19:59", dvk.get_time());
 		value = "https://www.furaffinity.net/journal/4743500/";
 		assertEquals(value, dvk.get_page_url());
 		assertEquals(null, dvk.get_direct_url());

@@ -4,7 +4,6 @@ import java.awt.GridLayout;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
-import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DButton;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DLabel;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
@@ -20,11 +19,6 @@ public abstract class SimpleServiceGUI extends ServiceGUI implements DActionEven
 	 * SerialVersionUID
 	 */
 	private static final long serialVersionUID = 7833809474544376938L;
-
-	/**
-	 * DvkHandler for reading Dvk objects
-	 */
-	protected DvkHandler dvk_handler;
 	
 	/**
 	 * Main button for running services
@@ -61,6 +55,35 @@ public abstract class SimpleServiceGUI extends ServiceGUI implements DActionEven
 				button_pnl, 0, 0, false, false, false, false);
 		this.setLayout(new GridLayout(1, 1));
 		this.add(service_pnl);
+	}
+	
+	/**
+	 * Runs the main service process.
+	 */
+	public abstract void run_process();
+	
+	@Override
+	public void run(String id) {
+		switch(id) {
+			case "run":
+				run_process();
+				break;
+		}
+	}
+	
+	@Override
+	public void done(String id) {
+		this.start_gui.get_main_pbar()
+			.set_progress(false, false, 0, 0);
+		if(this.start_gui.get_base_gui().is_canceled()) {
+			this.start_gui.append_console("canceled", true);
+		}
+		else {
+			this.start_gui.append_console("finished", true);
+		}
+		this.start_gui.get_base_gui().set_running(false);
+		this.start_gui.enable_all();
+		enable_all();
 	}
 	
 	@Override

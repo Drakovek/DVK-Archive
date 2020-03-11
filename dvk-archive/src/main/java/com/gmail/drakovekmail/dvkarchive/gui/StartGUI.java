@@ -14,6 +14,8 @@ import com.gmail.drakovekmail.dvkarchive.gui.comics.MangaDexGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.error.MissingMediaGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.error.SameIDsGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.error.UnlinkedMediaGUI;
+import com.gmail.drakovekmail.dvkarchive.gui.reformat.ReformatDvksGUI;
+import com.gmail.drakovekmail.dvkarchive.gui.reformat.RenameFilesGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.settings.SettingsBarGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DButton;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DComboBox;
@@ -231,10 +233,11 @@ public class StartGUI implements DActionEvent, Disabler {
 	 * @return String array of service categories
 	 */
 	public String[] get_categories(boolean use_language) {
-		String[] categories = new String[3];
+		String[] categories = new String[4];
 		categories[0] = "artist_hosting";
 		categories[1] = "comics";
 		categories[2] = "error_finding";
+		categories[3] = "reformatting";
 		//CHANGE TO LANGUAGE VALUES
 		if(use_language) {
 			for(int i = 0; i < categories.length; i++) {
@@ -267,6 +270,11 @@ public class StartGUI implements DActionEvent, Disabler {
 				services[0] = "same_ids";
 				services[1] = "missing_media";
 				services[2] = "unlinked_media";
+				break;
+			case "reformatting":
+				services = new String[2];
+				services[0] = "reformat_dvks";
+				services[1] = "rename_files";
 				break;
 		}
 		//CHANGE TO LANGUAGE VALUES
@@ -322,6 +330,12 @@ public class StartGUI implements DActionEvent, Disabler {
 						break;
 					case "missing_media":
 						this.service_pnl = new MissingMediaGUI(this);
+						break;
+					case "reformat_dvks":
+						this.service_pnl = new ReformatDvksGUI(this);
+						break;
+					case "rename_files":
+						this.service_pnl = new RenameFilesGUI(this);
 						break;
 				}
 				JPanel spaced = this.base_gui.get_spaced_panel(this.service_pnl);

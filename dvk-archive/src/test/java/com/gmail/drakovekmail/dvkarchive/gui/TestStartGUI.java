@@ -27,16 +27,18 @@ public class TestStartGUI {
 		//TEST CATEGORY IDS
 		StartGUI gui = new StartGUI(base_gui, false);
 		String[] categories = gui.get_categories(false);
-		assertEquals(3, categories.length);
+		assertEquals(4, categories.length);
 		assertEquals("artist_hosting", categories[0]);
 		assertEquals("comics", categories[1]);
 		assertEquals("error_finding", categories[2]);
+		assertEquals("reformatting", categories[3]);
 		//TEST CATEGORY LANGUAGE STRINGS
 		categories = gui.get_categories(true);
-		assertEquals(3, categories.length);
+		assertEquals(4, categories.length);
 		assertEquals("Artist Hosting", categories[0]);
 		assertEquals("Comics", categories[1]);
 		assertEquals("Error Finding", categories[2]);
+		assertEquals("Reformatting", categories[3]);
 		base_gui = null;
 	}
 	

@@ -536,4 +536,36 @@ public class TestDvk {
 		dvk.set_title("");
 		assertEquals("0_ID123", dvk.get_filename());
 	}
+	
+	/**
+	 * Tests the rename_files method.
+	 */
+	@Test
+	public void test_rename_files() {
+		//CREATE DVK
+		Dvk dvk = new Dvk();
+		dvk.set_id("ID1234");
+		dvk.set_title("Title");
+		dvk.set_artist("Artist");
+		dvk.set_page_url("/page/");
+		dvk.set_dvk_file(new File(this.test_dir, "dvk.dvk"));
+		dvk.set_media_file("dvk.png");
+		dvk.set_secondary_file("dvk.txt");
+		try {
+			dvk.get_media_file().createNewFile();
+			dvk.get_secondary_file().createNewFile();
+		} catch (IOException e) {}
+		dvk.write_dvk();
+		assertTrue(dvk.get_dvk_file().exists());
+		assertTrue(dvk.get_media_file().exists());
+		assertTrue(dvk.get_secondary_file().exists());
+		//RENAME FILES
+		dvk.rename_files("New");
+		assertEquals("New.dvk", dvk.get_dvk_file().getName());
+		assertEquals("New.png", dvk.get_media_file().getName());
+		assertEquals("New.txt", dvk.get_secondary_file().getName());
+		assertTrue(dvk.get_dvk_file().exists());
+		assertTrue(dvk.get_media_file().exists());
+		assertTrue(dvk.get_secondary_file().exists());
+	}
 }

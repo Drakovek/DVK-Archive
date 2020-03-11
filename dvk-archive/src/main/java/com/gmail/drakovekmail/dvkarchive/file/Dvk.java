@@ -1,6 +1,7 @@
 package com.gmail.drakovekmail.dvkarchive.file;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 
 import org.json.JSONArray;
@@ -10,6 +11,7 @@ import com.gmail.drakovekmail.dvkarchive.processing.ArrayProcessing;
 import com.gmail.drakovekmail.dvkarchive.processing.HtmlProcessing;
 import com.gmail.drakovekmail.dvkarchive.processing.StringProcessing;
 import com.gmail.drakovekmail.dvkarchive.web.DConnect;
+import com.google.common.io.Files;
 
 /**
  * Class for handling a single DVK file.
@@ -647,5 +649,44 @@ public class Dvk implements Serializable {
 		}
 		String t = StringProcessing.get_filename(get_title());
 		return t + '_' + get_id();
+	}
+	
+	/**
+	 * Renames the DVK file and its associated media files.
+	 * Retains all media file extensions.
+	 * 
+	 * @param filename Filename to use when renaming
+	 */
+	public void rename_files(String filename) {
+		//RENAME DVK
+		get_dvk_file().delete();
+		File file = get_dvk_file().getParentFile();
+		set_dvk_file(new File(file, filename + ".dvk"));
+		//RENAME MEDIA FILE
+		if(get_media_file() != null) {
+			file = get_media_file();
+			String ext = StringProcessing.get_extension(file.getName());
+			try {
+				set_media_file("xXTeMpXx" + get_id() + ext);
+				Files.move(file, get_media_file());
+				file = get_media_file();
+				set_media_file(filename + ext);
+				Files.move(file, get_media_file());
+			} catch (IOException e) {}
+		}
+		//RENAME SECONDARY FILE
+		if(get_secondary_file() != null) {
+			file = get_secondary_file();
+			String ext = StringProcessing.get_extension(file.getName());
+			try {
+				set_secondary_file("xXTeMpXx" + get_id() + ext);
+				Files.move(file, get_secondary_file());
+				file = get_secondary_file();
+				set_secondary_file(filename + ext);
+				Files.move(file, get_secondary_file());
+			} catch (IOException e) {}
+		}
+		//WRITE DVK FILE
+		write_dvk();
 	}
 }

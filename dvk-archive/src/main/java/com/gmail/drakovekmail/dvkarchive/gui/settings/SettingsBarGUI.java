@@ -70,7 +70,7 @@ public class SettingsBarGUI extends JPanel implements DActionEvent, Disabler {
 
 	@Override
 	public void event(String id) {
-		System.out.println("Something happened.");
+		//TODO ADD SETTINGS GUI
 	}
 
 	@Override
