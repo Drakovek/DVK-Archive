@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 
+import org.apache.tika.Tika;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,7 +21,27 @@ import com.google.common.io.Files;
  */
 public class Dvk implements Serializable {
 	
-	//TODO Add feature to check file type.
+	/**
+	 * Array of Tika data types and associated extensions. 
+	 */
+	private static final String[][] FILE_TYPES = {
+			{"image/jpeg", ".jpg"},
+			{"image/png", ".png"},
+			{"image/gif", ".gif"},
+			{"image/vnd.adobe.photoshop", ".psd"},
+			{"image/bmp", ".bmp"},
+			{"text/html", ".html"},
+			{"text/plain", ".txt"},
+			{"application/pdf", ".pdf"},
+			{"application/rtf", ".rtf"},
+			{"application/msword", ".doc"},
+			{"application/vnd.openxmlformats-officedocument.wordprocessingml.document", ".docx"},
+			{"application/x-shockwave-flash", ".swf"},{"video/quicktime", ".mov"},
+			{"video/x-ms-wmv", ".wmv"},
+			{"video/x-msvideo", ".avi"},
+			{"video/mp4", ".mp4"},
+			{"video/webm", ".webm"},
+			{"audio/mpeg", ".mp3"}};
 	
 	/**
 	 * SerialversionUID
@@ -214,6 +235,8 @@ public class Dvk implements Serializable {
 				get_dvk_file().delete();
 			}
 		}
+		//UPDATE EXTENSIONS
+		update_extensions();
 	}
 	
 	/**
@@ -688,5 +711,73 @@ public class Dvk implements Serializable {
 		}
 		//WRITE DVK FILE
 		write_dvk();
+	}
+
+	/**
+	 * Updates the Dvks associated media extensions
+	 * to fit with their true data type.
+	 */
+	public void update_extensions() {
+		Tika tika = new Tika();
+		//MAIN MEDIA FILE
+		if(get_media_file() != null
+				&& get_media_file().exists()) {
+			//GET MEDIA EXTENSION
+			String filename = get_media_file().getName();
+			String ext = StringProcessing.get_extension(filename);
+			filename = filename.substring(0,
+					filename.length() - ext.length());
+			try {
+				//DETERMINE ACTUAL FILE TYPE
+				String type = tika.detect(get_media_file());
+				type = type.toLowerCase();
+				for(int i = 0; i < FILE_TYPES.length; i++) {
+					if(FILE_TYPES[i][0].equals(type)) {
+						ext = FILE_TYPES[i][1];
+						break;
+					}
+				}
+			} catch (IOException e) {}
+			//RENAME FILE
+			if(!get_media_file().getName().endsWith(ext)) {
+				File file = get_media_file();
+				try {
+					set_media_file(filename + ext);
+					Files.move(file, get_media_file());
+				} catch (IOException e) {}
+			}
+		}
+		//SECONDARY MEDIA FILE
+		if(get_secondary_file() != null
+				&& get_secondary_file().exists()) {
+			//GET MEDIA EXTENSION
+			String filename = get_secondary_file().getName();
+			String ext = StringProcessing.get_extension(filename);
+			filename = filename.substring(0,
+					filename.length() - ext.length());
+			try {
+				//DETERMINE ACTUAL FILE TYPE
+				String type = tika.detect(get_secondary_file());
+				type = type.toLowerCase();
+				for(int i = 0; i < FILE_TYPES.length; i++) {
+					if(FILE_TYPES[i][0].equals(type)) {
+						ext = FILE_TYPES[i][1];
+						break;
+					}
+				}
+			} catch (IOException e) {}
+			//RENAME FILE
+			if(!get_secondary_file().getName().endsWith(ext)) {
+				File file = get_secondary_file();
+				try {
+					set_secondary_file(filename + ext);
+					Files.move(file, get_secondary_file());
+				} catch (IOException e) {}
+			}
+		}
+		//WRITE DVK
+		if(get_dvk_file() != null && get_dvk_file().exists()) {
+			write_dvk();
+		}
 	}
 }

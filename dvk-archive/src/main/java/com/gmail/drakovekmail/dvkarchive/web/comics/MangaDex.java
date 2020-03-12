@@ -19,9 +19,7 @@ import com.gmail.drakovekmail.dvkarchive.web.DConnectSelenium;
  * @author Drakovek
  */
 public class MangaDex {
-	
-	//TODO ONLY CHECK NEWEST CHAPTERS IF ASKED
-	
+
 	/**
 	 * Returns the title id for a given MangaDex title URL
 	 * Returns empty if not a valid title URL.

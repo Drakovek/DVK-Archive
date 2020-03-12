@@ -45,6 +45,11 @@
     	<artifactId>selenium-java</artifactId>
     	<version>3.141.59</version>
     </dependency>
+    <dependency>
+    	<groupId>org.apache.tika</groupId>
+    	<artifactId>tika-core</artifactId>
+    	<version>1.23</version>
+    </dependency>
   </dependencies>
 
   <build>

@@ -24,9 +24,7 @@ import com.gmail.drakovekmail.dvkarchive.web.DConnect;
  * @author Drakovek
  */
 public class FurAffinity extends ArtistHosting {
-	
-	//TODO CHECK DOESN'T RUN THROUGH ALL PAGES WHEN NOT NECESSARY
-	
+
 	/**
 	 * DConnect object for connecting to FurAffinity
 	 */

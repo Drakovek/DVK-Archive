@@ -31,9 +31,10 @@ public class Reformat {
 					break;
 				}
 			}
-			//RENAME FILES
+			//REFORMAT DVKS
 			Dvk dvk = dvk_handler.get_dvk(i);
 			dvk.write_dvk();
+			dvk.update_extensions();
 		}
 	}
 	
@@ -60,6 +61,7 @@ public class Reformat {
 			//RENAME FILES
 			Dvk dvk = dvk_handler.get_dvk(i);
 			dvk.rename_files(dvk.get_filename());
+			dvk.update_extensions();
 		}
 	}
 }

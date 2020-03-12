@@ -447,7 +447,7 @@ public class TestFurAffinity {
 			assertEquals(null, dvk.get_secondary_url());
 			value = "Commission for   <a href=\"/user/shaytalis"
 					+ "\" class=\"iconusername\">    <img src="
-					+ "\"//a.facdn.net/20200311/shaytalis.gif\" "
+					+ "\"//a.facdn.net/20200312/shaytalis.gif\" "
 					+ "align=\"middle\" title=\"shaytalis\" "
 					+ "alt=\"shaytalis\"/>    &#160;shaytalis  "
 					+ "</a>   of his character Selina, "

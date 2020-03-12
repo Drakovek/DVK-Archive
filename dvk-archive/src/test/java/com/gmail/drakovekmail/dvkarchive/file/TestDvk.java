@@ -213,7 +213,7 @@ public class TestDvk {
 			dvk.set_title("Title");
 			dvk.set_artist("Artist");
 			dvk.set_dvk_file(new File(this.test_dir, "dvk.dvk"));
-			dvk.set_media_file("media.jpg");
+			dvk.set_media_file("media.png");
 			dvk.set_direct_url("kjsdskjdf");
 			dvk.write_media(connect);
 			assertFalse(dvk.get_dvk_file().exists());
@@ -228,11 +228,12 @@ public class TestDvk {
 			dvk.write_media(connect);
 			assertTrue(dvk.get_dvk_file().exists());
 			assertTrue(dvk.get_media_file().exists());
+			assertEquals("media.jpg", dvk.get_media_file().getName());
 			assertEquals(39785L, dvk.get_media_file().length());
 			dvk.get_dvk_file().delete();
 			dvk.get_media_file().delete();
 			//INVALID SECONDARY URL
-			dvk.set_secondary_file("second.jpg");
+			dvk.set_secondary_file("second.txt");
 			dvk.set_secondary_url("kjsakdfj");
 			dvk.write_media(connect);
 			assertFalse(dvk.get_dvk_file().exists());
@@ -244,6 +245,8 @@ public class TestDvk {
 			assertTrue(dvk.get_dvk_file().exists());
 			assertTrue(dvk.get_media_file().exists());
 			assertTrue(dvk.get_secondary_file().exists());
+			assertEquals("media.jpg", dvk.get_media_file().getName());
+			assertEquals("second.jpg", dvk.get_secondary_file().getName());
 			assertEquals(39785L, dvk.get_media_file().length());
 			assertEquals(85007L, dvk.get_secondary_file().length());
 		}
@@ -543,12 +546,13 @@ public class TestDvk {
 	@Test
 	public void test_rename_files() {
 		//CREATE DVK
+		File file = new File(this.test_dir, "dvk.dvk");
 		Dvk dvk = new Dvk();
 		dvk.set_id("ID1234");
 		dvk.set_title("Title");
 		dvk.set_artist("Artist");
 		dvk.set_page_url("/page/");
-		dvk.set_dvk_file(new File(this.test_dir, "dvk.dvk"));
+		dvk.set_dvk_file(file);
 		dvk.set_media_file("dvk.png");
 		dvk.set_secondary_file("dvk.txt");
 		try {
@@ -561,11 +565,60 @@ public class TestDvk {
 		assertTrue(dvk.get_secondary_file().exists());
 		//RENAME FILES
 		dvk.rename_files("New");
+		file = dvk.get_dvk_file();
+		dvk = new Dvk(file);
 		assertEquals("New.dvk", dvk.get_dvk_file().getName());
 		assertEquals("New.png", dvk.get_media_file().getName());
 		assertEquals("New.txt", dvk.get_secondary_file().getName());
 		assertTrue(dvk.get_dvk_file().exists());
 		assertTrue(dvk.get_media_file().exists());
 		assertTrue(dvk.get_secondary_file().exists());
+	}
+	
+	/**
+	 * Tests the update_extensions method.
+	 */
+	@Test
+	public void test_update_extensions() {
+		//CREATE DVK
+		File file = new File(this.test_dir, "dvk.dvk");
+		Dvk dvk = new Dvk();
+		dvk.set_id("ID123");
+		dvk.set_title("Title");
+		dvk.set_artist("Artist");
+		dvk.set_page_url("/page");
+		dvk.set_direct_url(
+				"http://www.pythonscraping.com/img/gifts/img6.jpg");
+		dvk.set_dvk_file(file);
+		dvk.set_media_file("file.pdf");
+		dvk.write_dvk();
+		DConnect.basic_download(
+				dvk.get_direct_url(),
+				dvk.get_media_file());
+		assertTrue(dvk.get_dvk_file().exists());
+		assertTrue(dvk.get_media_file().exists());
+		assertEquals("file.pdf",
+				dvk.get_media_file().getName());
+		//CHECK UPDATING FILE TYPE
+		dvk.update_extensions();
+		dvk = new Dvk(file);
+		assertTrue(dvk.get_dvk_file().exists());
+		assertTrue(dvk.get_media_file().exists());
+		assertEquals("file.jpg",
+				dvk.get_media_file().getName());
+		//CHECK INVALID FILE
+		dvk.set_media_file("blah.file");
+		try {
+			dvk.get_media_file().createNewFile();
+		} catch (IOException e) {}
+		assertTrue(dvk.get_media_file().exists());
+		assertEquals("blah.file",
+				dvk.get_media_file().getName());
+		dvk.update_extensions();
+		dvk = new Dvk(file);
+		assertTrue(dvk.get_dvk_file().exists());
+		assertTrue(dvk.get_media_file().exists());
+		assertEquals("blah.file",
+				dvk.get_media_file().getName());
 	}
 }
