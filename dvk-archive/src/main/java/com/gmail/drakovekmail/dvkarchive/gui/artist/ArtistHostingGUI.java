@@ -152,7 +152,7 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	protected void create_login_gui(boolean use_captcha) {
 		this.start_gui.get_scroll_panel().set_fit(true, false);
 		BaseGUI base_gui = this.start_gui.get_base_gui();
-		this.u_txt = new DTextField(base_gui);
+		this.u_txt = new DTextField(base_gui, this, "nothing");
 		this.p_txt = new DPasswordField(base_gui);
 		DLabel u_lbl = new DLabel(base_gui, this.u_txt, "username");
 		DLabel p_lbl = new DLabel(base_gui, this.p_txt, "password");
@@ -175,7 +175,7 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		JSeparator sep = new JSeparator(SwingConstants.HORIZONTAL);
 		JPanel top_pnl = base_gui.get_y_stack(login_lbl, sep);
 		//CREATE CAPTCHA PANEL
-		this.c_txt = new DTextField(base_gui);
+		this.c_txt = new DTextField(base_gui, this, "nothing");
 		DLabel c_lbl = new DLabel(base_gui, this.c_txt, "captcha");
 		this.image_lbl = new JLabel();
 		this.image_lbl.setHorizontalAlignment(

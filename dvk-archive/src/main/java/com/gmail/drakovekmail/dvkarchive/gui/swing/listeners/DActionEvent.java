@@ -12,4 +12,5 @@ public interface DActionEvent {
 	 * @param id ID of component that called the event.
 	 */
 	public void event(String id);
+
 }

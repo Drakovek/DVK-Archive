@@ -7,6 +7,7 @@ import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 import com.gmail.drakovekmail.dvkarchive.gui.BaseGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.Disabler;
+import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DButton;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DLabel;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
@@ -34,12 +35,20 @@ public class SettingsBarGUI extends JPanel implements DActionEvent, Disabler {
 	private DButton btn;
 	
 	/**
+	 * SettingsGUI to use when settings button pressed
+	 */
+	private SettingsGUI settings_gui;
+	
+	/**
 	 * Creates the settings bar GUI object.
 	 * 
-	 * @param base_gui BaseGUI for UI settings
+	 * @param start_gui Parent of the settings bar
 	 */
-	public SettingsBarGUI(BaseGUI base_gui) {
+	public SettingsBarGUI(StartGUI start_gui) {
+		this.settings_gui = new SettingsGUI(start_gui);
 		//CREATE BUTTON AND LABEL
+		BaseGUI base_gui;
+		base_gui = start_gui.get_base_gui();
 		this.btn = new DButton(base_gui, this, "settings");
 		this.lbl = new DLabel(base_gui, null, "no_dir_select");
 		//CREATE INTERNAL BAR
@@ -70,7 +79,7 @@ public class SettingsBarGUI extends JPanel implements DActionEvent, Disabler {
 
 	@Override
 	public void event(String id) {
-		//TODO ADD SETTINGS GUI
+		this.settings_gui.open();
 	}
 
 	@Override

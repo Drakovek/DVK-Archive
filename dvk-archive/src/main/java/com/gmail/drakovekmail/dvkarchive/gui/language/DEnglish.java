@@ -37,6 +37,17 @@ public class DEnglish extends LanguageMap{
 		//SETTINGS
 		this.lang_keys.put("no_dir_select", "(No Directories Selected)");
 		this.lang_keys.put("settings", "^Settings");
+		this.lang_keys.put("save", "^Save");
+		this.lang_keys.put("font", "^Font");
+		this.lang_keys.put("size", "Si^ze");
+		this.lang_keys.put("bold", "^Bold");
+		this.lang_keys.put("aa", "^Anti-Aliasing");
+		String text = "0123456789?!.\n\n"
+				+ "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG.\n\n"
+				+ "the quick brown fox jumps over the lazy dog";
+		this.lang_keys.put("preview_text", text);
+		this.lang_keys.put("language", "^Language");
+		this.lang_keys.put("theme", "^Theme");
 		//PROGRAM CATEGORIES
 		this.lang_keys.put("artist_hosting", "Artist Hosting");
 		this.lang_keys.put("comics", "Comics");

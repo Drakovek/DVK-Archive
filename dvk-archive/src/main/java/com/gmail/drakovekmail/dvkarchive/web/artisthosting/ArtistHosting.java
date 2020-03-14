@@ -68,12 +68,12 @@ public abstract class ArtistHosting implements DActionEvent {
 		JLabel img_lbl = new JLabel();
 		img_lbl.setHorizontalAlignment(SwingConstants.HORIZONTAL);
 		img_lbl.setVerticalAlignment(SwingConstants.HORIZONTAL);
-		DTextField cap_txt = new DTextField(base_gui);
+		DTextField cap_txt = new DTextField(base_gui, this, "nothing");
 		DLabel cap_lbl = new DLabel(base_gui, cap_txt, "captcha");
 		JPanel cap_pnl = base_gui.get_x_stack(cap_lbl, 0, cap_txt, 1);
 		JPanel full_cap_pnl = base_gui.get_y_stack(img_lbl, cap_pnl);
 		//TEXT PANELS
-		DTextField usr_txt = new DTextField(base_gui);
+		DTextField usr_txt = new DTextField(base_gui, this, "nothing");
 		DLabel usr_lbl = new DLabel(base_gui, usr_txt, "username");
 		JPanel usr_pnl = base_gui.get_x_stack(usr_lbl, 0, usr_txt, 1);
 		DPasswordField pass_txt = new DPasswordField(base_gui);

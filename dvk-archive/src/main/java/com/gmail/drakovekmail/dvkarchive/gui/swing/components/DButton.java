@@ -13,6 +13,8 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionListener;
  */
 public class DButton extends JButton {
 	
+	//TODO ADD INSETS
+	
 	/**
 	 * SerialVersionUID
 	 */

@@ -14,6 +14,8 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DFrame;
  */
 public class DDialog extends JDialog {
 	
+	//TODO ADD EVENT FOR CLOSING DIALOG
+	
 	/**
 	 * SerialVersionUID
 	 */

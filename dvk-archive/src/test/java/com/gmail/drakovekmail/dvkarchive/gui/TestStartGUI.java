@@ -54,18 +54,16 @@ public class TestStartGUI {
 		language = base_gui.get_language_handler();
 		language.set_language("English");
 		//TEST ARTIST HOSTING
-		StartGUI gui = new StartGUI(base_gui, false);
 		String[] services;
-		services = gui.get_services("artist_hosting", false);
+		services = StartGUI.get_services("artist_hosting");
 		assertEquals(1, services.length);
 		assertEquals("fur_affinity", services[0]);
 		//TEST ERROR FINDING
-		services = gui.get_services("error_finding", true);
+		services = StartGUI.get_services("error_finding");
 		assertEquals(3, services.length);
-		assertEquals("Same IDs", services[0]);
-		assertEquals("Missing Media", services[1]);
-		assertEquals("Unlinked Media", services[2]);
-		gui = null;
+		assertEquals("same_ids", services[0]);
+		assertEquals("missing_media", services[1]);
+		assertEquals("unlinked_media", services[2]);
 	}
 	
 	/**

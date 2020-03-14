@@ -9,6 +9,7 @@ import java.util.prefs.Preferences;
 
 import javax.swing.Box;
 import javax.swing.JPanel;
+import javax.swing.UIManager;
 
 import com.gmail.drakovekmail.dvkarchive.gui.language.LanguageHandler;
 
@@ -116,6 +117,10 @@ public class BaseGUI {
 		set_font(family, size, bold);
 		//SET THEME
 		set_theme(prefs.get(THEME, "Metal"));
+		try {
+			UIManager.setLookAndFeel(get_theme());
+		}
+		catch(Exception e) {}
 		//SET ANTIALIASING
 		set_use_aa(prefs.getBoolean(AA, true));
 	}
@@ -125,7 +130,7 @@ public class BaseGUI {
 	 * 
 	 * @param family Font family
 	 * @param size Font size
-	 * @param is_bold Wheter the font is bold
+	 * @param is_bold Whether the font is bold
 	 */
 	public void set_font(String family, int size, boolean is_bold) {
 		int font_type = Font.PLAIN;

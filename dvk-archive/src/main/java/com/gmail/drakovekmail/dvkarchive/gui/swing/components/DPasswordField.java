@@ -11,6 +11,9 @@ import com.gmail.drakovekmail.dvkarchive.gui.BaseGUI;
  */
 public class DPasswordField extends JPasswordField{
 	
+	//TODO ADD INSETS
+	//TODO ADD ACTION
+
 	/**
 	 * SerialVersionUID
 	 */

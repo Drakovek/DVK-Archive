@@ -130,7 +130,6 @@ public class StartGUI implements DActionEvent, Disabler {
 		//INITIALIZE INSTANCE VARIABLES
 		//TODO Replace default preferences to user preferences
 		this.base_gui = base_gui;
-		this.base_gui.set_font("", 14, true);
 		this.file_prefs = new FilePrefs();
 		File file = new File(System.getProperty("user.home"));
 		file = new File(file, "dvk");
@@ -148,7 +147,7 @@ public class StartGUI implements DActionEvent, Disabler {
 		this.current_service = new String();
 		this.frame = new DFrame(this.base_gui, "dvk_archive");
 		//CREATE SETTINGS BAR
-		this.settings_bar = new SettingsBarGUI(this.base_gui);
+		this.settings_bar = new SettingsBarGUI(this);
 		this.frame.getContentPane().add(this.settings_bar,
 				BorderLayout.SOUTH);
 		//CREATE CATEGORY PANEL
@@ -254,7 +253,7 @@ public class StartGUI implements DActionEvent, Disabler {
 	 * @param use_language Whether to use language strings instead of IDs.
 	 * @return String array of available services
 	 */
-	public String[] get_services(String category, boolean use_language) {
+	public static String[] get_services(String category) {
 		String[] services = new String[0];
 		switch(category) {
 			case "artist_hosting":
@@ -278,11 +277,6 @@ public class StartGUI implements DActionEvent, Disabler {
 				break;
 		}
 		//CHANGE TO LANGUAGE VALUES
-		if(use_language) {
-			for(int i = 0; i < services.length; i++) {
-				services[i] = this.base_gui.get_language_string(services[i]);
-			}
-		}
 		return services;
 	}
 	
@@ -293,8 +287,8 @@ public class StartGUI implements DActionEvent, Disabler {
 		String cat;
 		int index = this.cat_box.getSelectedIndex();
 		cat = get_categories(false)[index];
-		String[] services = get_services(cat, true);
-		this.service_list.setListData(services);
+		String[] services = get_services(cat);
+		this.service_list.set_list(services, true);
 	}
 	
 	/**
@@ -307,7 +301,7 @@ public class StartGUI implements DActionEvent, Disabler {
 			String cat;
 			int index = this.cat_box.getSelectedIndex();
 			cat = get_categories(false)[index];
-			String service = get_services(cat, false)[selected];
+			String service = get_services(cat)[selected];
 			if(!this.current_service.equals(service)) {
 				//CHANGE SERVICE GUI
 				if(this.service_pnl != null) {

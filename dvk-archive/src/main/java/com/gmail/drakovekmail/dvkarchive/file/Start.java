@@ -11,13 +11,29 @@ import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
 public class Start {
 	
 	/**
-	 * Starts the DVK Archive program by initializing the GUI.
+	 * Starts the DVK Archive
 	 * 
-	 * @param args Not Used
+	 * @param args Not used
+	 */
+	public static void main(String[] args) {
+		start();
+	}
+	
+	/**
+	 * Starts the DVK Archive program by initializing the GUI.
 	 */
 	@SuppressWarnings("unused")
-	public static void main(String[] args) {
+	public static void start() {
 		BaseGUI base_gui = new BaseGUI();
+		//SET ANTIALIASING
+		if(base_gui.use_aa()) {
+			System.setProperty("awt.useSystemAAFontSettings", "on");
+			System.setProperty("swing.aatext", "true");
+		}
+		else {
+			System.setProperty("awt.useSystemAAFontSettings", "off");
+			System.setProperty("swing.aatext", "false");
+		}
 		new StartGUI(base_gui, true);
 	}
 }

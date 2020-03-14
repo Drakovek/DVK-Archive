@@ -77,6 +77,18 @@ public class TestLanguageHandler {
 	}
 	
 	/**
+	 * Tests the get_languages method.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_get_languages() {
+		String[] langs;
+		langs = LanguageHandler.get_languages();
+		assertEquals(1, langs.length);
+		assertEquals("English", langs[0]);
+	}
+	
+	/**
 	 * Tests the get_language_string method.
 	 */
 	@Test

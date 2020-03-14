@@ -45,7 +45,7 @@ public class DListSelectionListener implements ListSelectionListener{
 	 */
 	@Override
 	public void valueChanged(ListSelectionEvent arg0) {
-		if(!this.base_gui.is_running()) {
+		if(this.base_gui == null || !this.base_gui.is_running()) {
 			this.event.event(this.id);
 		}
 	}

@@ -25,7 +25,7 @@ public class TestBaseGUI {
 	public void test_save_load_preferences() {
 		//SAVE PREFERENCES
 		BaseGUI base = new BaseGUI();
-		base.set_font("Dialog", 25, true);
+		base.set_font("Dialog", 16, true);
 		base.set_theme("Nimbus");
 		base.set_use_aa(false);
 		base.save_preferences();
@@ -35,7 +35,7 @@ public class TestBaseGUI {
 		base.load_preferences();
 		Font font = base.get_font();
 		assertEquals("Dialog", font.getFamily());
-		assertEquals(25, font.getSize());
+		assertEquals(16, font.getSize());
 		assertTrue(font.isBold());
 		assertEquals("Nimbus", base.get_theme());
 		assertFalse(base.use_aa());

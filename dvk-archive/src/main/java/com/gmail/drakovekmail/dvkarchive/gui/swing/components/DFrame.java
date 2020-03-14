@@ -13,6 +13,8 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DCloseListener;
  */
 public class DFrame extends JFrame implements DActionEvent {
 	
+	//ADD SIZE LIMITS
+	
 	/**
 	 * SerialVersionUID
 	 */

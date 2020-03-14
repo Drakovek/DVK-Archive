@@ -90,6 +90,17 @@ public class LanguageHandler {
 	}
 	
 	/**
+	 * Returns a list of available language options.
+	 * 
+	 * @return List of languages
+	 */
+	public static String[] get_languages() {
+		//ADD MORE LANGUAGES, IF AVAILABLE
+		String[] langs = {"English"};
+		return langs;
+	}
+	
+	/**
 	 * Returns the name of the UI's language.
 	 * 
 	 * @return UI Language
