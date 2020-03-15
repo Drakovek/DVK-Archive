@@ -308,7 +308,7 @@ public class FurAffinity extends ArtistHosting {
 		if(this.connect == null) {
 			initialize_connect();
 		}
-		String xpath = "//figure//u//a[contains(@href,'/view/')]";
+		String xpath = "//a[contains(@href,'/journals/" + artist + "')]";
 		if(start_gui != null
 				&& start_gui.get_base_gui().is_canceled()) {
 			this.connect.set_page(null);
