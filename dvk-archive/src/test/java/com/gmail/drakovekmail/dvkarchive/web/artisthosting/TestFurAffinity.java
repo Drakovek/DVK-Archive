@@ -431,59 +431,48 @@ public class TestFurAffinity {
 		assertEquals(null, dvk.get_secondary_file());
 		if(this.fur.is_logged_in()) {
 			//MATURE DVK
-			url = "https://www.furaffinity.net/view/22799324/";
+			url = "www.furaffinity.net/view/13634433/";
 			dvk = this.fur.get_dvk(url, this.test_dir, false);
-			assertEquals("FAF22799324", dvk.get_id());
-			assertEquals("Look what I can do PG 1&2",
+			assertEquals("FAF13634433", dvk.get_id());
+			assertEquals("spiritual feedback - 3",
 					dvk.get_title());
 			assertEquals(1, dvk.get_artists().length);
-			assertEquals("bubbeh", dvk.get_artists()[0]);
-			assertEquals("2017/03/04|22:36", dvk.get_time());
-			value = "https://www.furaffinity.net/view/22799324/";
+			assertEquals("angrboda", dvk.get_artists()[0]);
+			assertEquals("2014/06/03|20:51", dvk.get_time());
+			value = "https://www.furaffinity.net/view/13634433/";
 			assertEquals(value, dvk.get_page_url());
-			value = "https://d.facdn.net/art/bubbeh/1488685035/"
-					+ "1488684974.bubbeh_selinapg2.jpg";
+			value = "https://d.facdn.net/art/angrboda/1401843083"
+					+ "/1401843083.angrboda_cougars_small_3.jpg";
 			assertEquals(value, dvk.get_direct_url());
 			assertEquals(null, dvk.get_secondary_url());
-			value = "Commission for   <a href=\"/user/shaytalis"
-					+ "\" class=\"iconusername\">    <img src="
-					+ "\"//a.facdn.net/20200312/shaytalis.gif\" "
-					+ "align=\"middle\" title=\"shaytalis\" "
-					+ "alt=\"shaytalis\"/>    &#160;shaytalis  "
-					+ "</a>   of his character Selina, "
-					+ "such a cute little pup";
+			value = "comm 3/3 from last year for   <a href="
+					+ "\"/user/talent\" class=\"linkusername"
+					+ "\">    talent  </a>  , who wrote the "
+					+ "text.";
 			assertEquals(value, dvk.get_description());
-			assertEquals(19, dvk.get_web_tags().length);
-			assertEquals("Rating:Mature", dvk.get_web_tags()[0]);
-			assertEquals("Category:Artwork (Digital)",
-					dvk.get_web_tags()[1]);
+			assertEquals(15, dvk.get_web_tags().length);
+			assertEquals("Rating:Adult", dvk.get_web_tags()[0]);
+			assertEquals("Category:All", dvk.get_web_tags()[1]);
 			assertEquals("Type:Transformation",
 					dvk.get_web_tags()[2]);
-			assertEquals("Species:Dog", dvk.get_web_tags()[3]);
-			assertEquals("Gender:Female", dvk.get_web_tags()[4]);
+			assertEquals("Species:Cougar", dvk.get_web_tags()[3]);
+			assertEquals("Gender:Multiple characters", dvk.get_web_tags()[4]);
 			assertEquals("Gallery:Main", dvk.get_web_tags()[5]);
-			assertEquals("female", dvk.get_web_tags()[6]);
-			assertEquals("dog", dvk.get_web_tags()[7]);
-			assertEquals("transformation",
-					dvk.get_web_tags()[8]);
-			assertEquals("tf", dvk.get_web_tags()[9]);
-			assertEquals("border", dvk.get_web_tags()[10]);
-			assertEquals("collie", dvk.get_web_tags()[11]);
-			assertEquals("magic", dvk.get_web_tags()[12]);
-			assertEquals("wand", dvk.get_web_tags()[13]);
-			assertEquals("loss", dvk.get_web_tags()[14]);
-			assertEquals("of", dvk.get_web_tags()[15]);
-			assertEquals("self", dvk.get_web_tags()[16]);
-			assertEquals("short", dvk.get_web_tags()[17]);
-			assertEquals("skirt", dvk.get_web_tags()[18]);
-			value = "Look what I can do "
-					+ "PG 1-2_FAF22799324.dvk";
+			assertEquals("tf", dvk.get_web_tags()[6]);
+			assertEquals("transformation", dvk.get_web_tags()[7]);
+			assertEquals("tg", dvk.get_web_tags()[8]);
+			assertEquals("transgender", dvk.get_web_tags()[9]);
+			assertEquals("cougar", dvk.get_web_tags()[10]);
+			assertEquals("mountain", dvk.get_web_tags()[11]);
+			assertEquals("lion", dvk.get_web_tags()[12]);
+			assertEquals("sequence", dvk.get_web_tags()[13]);
+			assertEquals("magic", dvk.get_web_tags()[14]);
+			value = "spiritual feedback - 3_FAF13634433.dvk";
 			assertEquals(value,
 					dvk.get_dvk_file().getName());
 			assertEquals(this.test_dir,
 					dvk.get_dvk_file().getParentFile());
-			value = "Look what I can do "
-					+ "PG 1-2_FAF22799324.jpg";
+			value = "spiritual feedback - 3_FAF13634433.jpg";
 			assertEquals(value,
 					dvk.get_media_file().getName());
 			assertEquals(this.test_dir,

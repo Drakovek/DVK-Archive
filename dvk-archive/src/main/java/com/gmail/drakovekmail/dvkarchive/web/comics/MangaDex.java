@@ -12,6 +12,7 @@ import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
 import com.gmail.drakovekmail.dvkarchive.processing.StringProcessing;
 import com.gmail.drakovekmail.dvkarchive.web.DConnect;
 import com.gmail.drakovekmail.dvkarchive.web.DConnectSelenium;
+import com.gmail.drakovekmail.dvkarchive.web.artisthosting.ArtistHosting;
 
 /**
  * Class for downloading media from MangaDex.
@@ -462,18 +463,33 @@ public class MangaDex {
 			Dvk dvk = dvk_handler.get_dvk(i);
 			if(dvk.get_page_url().toLowerCase().contains("mangadex.")) {
 				String id = get_id_from_tags(dvk.get_web_tags());
-				if(id.length() > 0 && !ids.contains(id)) {
-					String title = dvk.get_title();
-					int end = title.indexOf('|');
-					if(end == -1) {
-						end = title.length();
+				if(id.length() > 0) {
+					int index = ids.indexOf(id);
+					if(index == -1) {
+						String title = dvk.get_title();
+						int end = title.indexOf('|');
+						if(end == -1) {
+							end = title.length();
+						}
+						dvk = new Dvk();
+						dvk.set_title(title.substring(0, end));
+						dvk.set_id(id);
+						dvk.set_dvk_file(
+								dvk_handler.get_dvk(i).get_dvk_file().getParentFile());
+						ids.add(id);
+						dvks.add(dvk);
 					}
-					dvk = new Dvk();
-					dvk.set_title(title.substring(0, end));
-					dvk.set_id(id);
-					dvk.set_dvk_file(dvk_handler.get_dvk(i).get_dvk_file());
-					ids.add(id);
-					dvks.add(dvk);
+					else {
+						dvk = new Dvk();
+						dvk.set_title(dvks.get(index).get_title());
+						dvk.set_id(id);
+						File file = dvk_handler.get_dvk(i)
+								.get_dvk_file().getParentFile();
+						file = ArtistHosting.get_common_directory(
+								dvks.get(index).get_dvk_file(), file);
+						dvk.set_dvk_file(file);
+						dvks.set(index, dvk);
+					}
 				}
 			}
 		}

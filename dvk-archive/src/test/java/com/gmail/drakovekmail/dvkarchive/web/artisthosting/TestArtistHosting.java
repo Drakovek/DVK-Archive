@@ -1,7 +1,6 @@
 package com.gmail.drakovekmail.dvkarchive.web.artisthosting;
 
 import static org.junit.Assert.assertEquals;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -53,44 +52,103 @@ public class TestArtistHosting {
 	 */
 	@Test
 	public void test_get_artists() {
-		//FIRST ARTIST
+		//CREATE SUB-DIRECTORIES
+		File sub1 = new File(this.test_dir, "sub1");
+		if(!sub1.isDirectory()) {
+			sub1.mkdir();
+		}
+		File sub2 = new File(this.test_dir, "sub2");
+		if(!sub2.isDirectory()) {
+			sub2.mkdir();
+		}
+		//CREATE DVKS - ARTIST 1
 		Dvk dvk = new Dvk();
 		dvk.set_id("ID123");
-		dvk.set_title("Valid");
-		dvk.set_artist("Artist");
-		dvk.set_page_url("www.url.com/whatever");
-		dvk.set_dvk_file(new File(this.test_dir, "dvk1.dvk"));
-		dvk.set_media_file("blah.png");
+		dvk.set_title("dvk1");
+		dvk.set_artist("artist1");
+		dvk.set_page_url("www.website.com/view/1");
+		dvk.set_dvk_file(new File(sub1, "dvk1.dvk"));
+		dvk.set_media_file("dvk1.png");
 		dvk.write_dvk();
-		//SAME ARTIST
-		dvk.set_title("Duplicate");
-		dvk.set_dvk_file(new File(this.test_dir, "dvk2.dvk"));
+		dvk.set_title("dvk2");
+		dvk.set_dvk_file(new File(sub2, "dvk2.dvk"));
+		dvk.set_media_file("dvk2.jpg");
 		dvk.write_dvk();
-		//DIFFERENT ARTIST
-		dvk.set_title("Next");
-		dvk.set_artist("Other Artist");
+		//CREATE DVKS - ARTIST 2
+		dvk.set_title("dvk3");
+		dvk.set_artist("artist2");
 		dvk.set_dvk_file(new File(this.test_dir, "dvk3.dvk"));
+		dvk.set_media_file("dvk3.png");
 		dvk.write_dvk();
-		//DIFFERENT URL
-		dvk.set_title("Other");
-		dvk.set_artist("Thing");
-		dvk.set_page_url("www.otherwebsite.com/view");
-		dvk.set_dvk_file(new File(this.test_dir, "dvk4.dvk"));
+		dvk.set_title("dvk4");
+		dvk.set_dvk_file(new File(sub1, "dvk4.dvk"));
+		dvk.set_media_file("dvk4.txt");
 		dvk.write_dvk();
-		//TEST GETTING ARTISTS
+		dvk.set_title("dvk5");
+		dvk.set_dvk_file(new File(sub2, "dvk5.dvk"));
+		dvk.set_media_file("dvk5.jpg");
+		dvk.write_dvk();
+		//CREATE DVKS - ARTIST 3
+		dvk.set_title("dvk6");
+		dvk.set_artist("artist3");
+		dvk.set_dvk_file(new File(sub2, "dvk6.dvk"));
+		dvk.set_media_file("dvk6.txt");
+		dvk.write_dvk();
+		//CREATE DVKS - ARTIST 4
+		dvk.set_title("dvk7");
+		dvk.set_artist("artist4");
+		dvk.set_page_url("diferent/page");
+		dvk.set_dvk_file(new File(this.test_dir, "dvk7.dvk"));
+		dvk.set_media_file("dvk7.pdf");
+		dvk.write_dvk();
+		//CHECK GET ARTISTS
+		ArrayList<Dvk> dvks;
+		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
 		DvkHandler handler = new DvkHandler();
-		File[] dirs = {this.test_dir};
 		handler.read_dvks(dirs, prefs, null, false, false, false);
-		ArrayList<Dvk> dvks;
-		dvks = ArtistHosting.get_artists(handler, "url.com");
-		assertEquals(2, dvks.size());
-		assertEquals("Artist", dvks.get(0).get_artists()[0]);
-		assertEquals("Other Artist", dvks.get(1).get_artists()[0]);
-		dvks = ArtistHosting.get_artists(handler, "otherwebsite.com");
-		assertEquals(1, dvks.size());
-		assertEquals("Thing", dvks.get(0).get_artists()[0]);
-		assertEquals(0, ArtistHosting.get_artists(handler, "blah").size());
-		assertEquals(0, ArtistHosting.get_artists(null, "blah").size());
+		handler.sort_dvks_title(true, false);
+		assertEquals(7, handler.get_size());
+		dvks = ArtistHosting.get_artists(handler, "website.com");
+		assertEquals(3, dvks.size());
+		assertEquals("artist1", dvks.get(0).get_artists()[0]);
+		assertEquals(this.test_dir, dvks.get(0).get_dvk_file());
+		assertEquals("artist2", dvks.get(1).get_artists()[0]);
+		assertEquals(this.test_dir, dvks.get(1).get_dvk_file());
+		assertEquals("artist3", dvks.get(2).get_artists()[0]);
+		assertEquals(sub2, dvks.get(2).get_dvk_file());
+	}
+	
+	/**
+	 * Tests the get_common_directory method.
+	 */
+	@Test
+	public void test_get_common_directory() {
+		//CREATE SUB-DIRECTORIES
+		File sub1 = new File(this.test_dir, "sub1");
+		if(!sub1.isDirectory()) {
+			sub1.mkdir();
+		}
+		File sub2 = new File(this.test_dir, "sub2");
+		if(!sub2.isDirectory()) {
+			sub2.mkdir();
+		}
+		File supsub = new File(sub1, "supsub");
+		if(!supsub.isDirectory()) {
+			supsub.mkdir();
+		}
+		//CHECK INVALID
+		File file = ArtistHosting.get_common_directory(
+				sub2, new File("bleh"));
+		assertEquals(sub2, file);
+		//CHECK COMMON FILES
+		file = ArtistHosting.get_common_directory(sub1, sub1);
+		assertEquals(sub1, file);
+		file = ArtistHosting.get_common_directory(sub2, sub1);
+		assertEquals(this.test_dir, file);
+		file = ArtistHosting.get_common_directory(sub1, supsub);
+		assertEquals(sub1, file);
+		file = ArtistHosting.get_common_directory(sub2, supsub);
+		assertEquals(this.test_dir, file);
 	}
 }

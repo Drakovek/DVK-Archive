@@ -116,7 +116,7 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 	public void get_pages(Dvk dvk, boolean check_all) {
 		this.start_gui.get_main_pbar().set_progress(
 				true, false, 0, 0);
-		File dir = dvk.get_dvk_file().getParentFile();
+		File dir = dvk.get_dvk_file();
 		this.start_gui.append_console(
 				this.start_gui.get_base_gui()
 					.get_language_string("getting_artist")
@@ -171,7 +171,7 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 					//ADD TO ARTIST LIST
 					Dvk art_dvk = new Dvk();
 					art_dvk.set_artist(dvk.get_artists()[0]);
-					art_dvk.set_dvk_file(new File(dir, "dvk.dvk"));
+					art_dvk.set_dvk_file(new File(dir, "dvk.dvk").getParentFile());
 					this.dvks.add(0, art_dvk);
 					set_artists();
 				}
@@ -204,7 +204,7 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 				//ADD TO ARTIST LIST
 				Dvk art_dvk = new Dvk();
 				art_dvk.set_artist(url);
-				art_dvk.set_dvk_file(new File(dir, "dvk.dvk"));
+				art_dvk.set_dvk_file(new File(dir, "dvk.dvk").getParentFile());
 				this.dvks.add(0, art_dvk);
 				set_artists();
 			}
@@ -235,7 +235,7 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 						url, directory, true);
 			}
 			//CANCEL IF DOWNLOAD FAILED
-			if(dvk != null && dvk.get_title() == null) {
+			if(dvk == null || dvk.get_title() == null) {
 				this.start_gui.get_base_gui().set_canceled(true);
 				this.start_gui.append_console(
 						"fur_affinity_failed", true);

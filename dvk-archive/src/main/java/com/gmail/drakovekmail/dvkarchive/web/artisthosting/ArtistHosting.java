@@ -47,12 +47,66 @@ public abstract class ArtistHosting implements DActionEvent {
 			Dvk dvk = handler.get_dvk(i);
 			String artist = dvk.get_artists()[0];
 			String url = dvk.get_page_url();
-			if(url.contains(domain) && !artists.contains(artist)) {
-				artists.add(artist);
-				dvks.add(dvk);
+			if(url.contains(domain)) {
+				int index = artists.indexOf(artist);
+				Dvk newdvk = new Dvk();
+				newdvk.set_artists(dvk.get_artists());
+				if(index != -1) {
+					//ADJUST DIRECTORY
+					newdvk.set_dvk_file(get_common_directory(
+							dvks.get(index).get_dvk_file(),
+							dvk.get_dvk_file().getParentFile()));
+					dvks.set(index, newdvk);
+				}
+				else {
+					//ADD NEW ARTIST
+					artists.add(artist);
+					newdvk.set_dvk_file(
+							dvk.get_dvk_file().getParentFile());
+					dvks.add(newdvk);
+				}
 			}
 		}
 		return dvks;
+	}
+	
+	/**
+	 * Gets the common directory of two given directories.
+	 * Directory of which both given directories are subdirectories.
+	 * 
+	 * @param dir1 Directory 1
+	 * @param dir2 Directory 2
+	 * @return Common directory
+	 */
+	public static File get_common_directory(
+			File dir1,
+			File dir2) {
+		if(dir1.equals(dir2)) {
+			return dir1;
+		}
+		//GET FIRST FILE PATH
+		File path = dir1;
+		ArrayList<File> path1 = new ArrayList<>();
+		while(path != null) {
+			path1.add(path);
+			path = path.getParentFile();
+		};
+		//GET SECOND FILE PATH
+		path = dir2;
+		ArrayList<File> path2 = new ArrayList<>();
+		while(path != null) {
+			path2.add(path);
+			path = path.getParentFile();
+		};
+		//GET COMMON FILE
+		for(int i = 0; i < path1.size(); i++) {
+			for(int k = 0; k < path2.size(); k++) {
+				if(path1.get(i).equals(path2.get(k))) {
+					return path1.get(i);
+				}
+			}
+		}
+		return dir1;
 	}
 	
 	/**
@@ -86,9 +140,11 @@ public abstract class ArtistHosting implements DActionEvent {
 		//FULL PANEL
 		JPanel full_pnl;
 		if(captcha != null) {
-			ImageIcon icon = new ImageIcon(captcha.getAbsolutePath());
+			ImageIcon icon = new ImageIcon(
+					captcha.getAbsolutePath());
 			img_lbl.setIcon(icon);
-			full_pnl = base_gui.get_spaced_panel(base_gui.get_y_stack(full_cap_pnl, btm_pnl));
+			full_pnl = base_gui.get_spaced_panel(
+					base_gui.get_y_stack(full_cap_pnl, btm_pnl));
 		}
 		else {
 			full_pnl = base_gui.get_spaced_panel(btm_pnl);

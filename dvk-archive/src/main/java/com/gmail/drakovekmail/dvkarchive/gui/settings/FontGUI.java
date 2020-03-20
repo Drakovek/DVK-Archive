@@ -15,7 +15,6 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DTextField;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DCheckEvent;
 
-//TODO SHORTEN THIS CRAP!
 //TODO SELECT CURRENT FONT
 
 /**
@@ -83,26 +82,35 @@ public class FontGUI extends JPanel implements DActionEvent, DCheckEvent {
 	public FontGUI(BaseGUI base_gui) {
 
 		//GET CURRENT FONT SETTINGS
-		this.fonts = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+		this.fonts = GraphicsEnvironment
+				.getLocalGraphicsEnvironment()
+				.getAvailableFontFamilyNames();
 		this.start_font = base_gui.get_font();
 		this.start_aa = base_gui.use_aa();
 		this.current_font = this.start_font;
 		this.current_aa = this.start_aa;
 		this.base_gui = base_gui;
 		//CREATE SIZE PANEL
-		this.size_txt = new DTextField(base_gui, this, "size");
-		this.size_txt.setText(Integer.toString(this.start_font.getSize()));
+		this.size_txt = new DTextField(
+				base_gui, this, "size");
+		this.size_txt.setText(
+				Integer.toString(this.start_font.getSize()));
 		this.size_txt.always_allow_action();
-		DLabel size_lbl = new DLabel(base_gui, this.size_txt, "size");
-		JPanel size_pnl = base_gui.get_x_stack(size_lbl, 0, this.size_txt, 1);
+		DLabel size_lbl = new DLabel(
+				base_gui, this.size_txt, "size");
+		JPanel size_pnl = base_gui.get_x_stack(
+				size_lbl, 0, this.size_txt, 1);
 		//CREATE BOTTOM PANEL
-		DCheckBox bold_chk = new DCheckBox(base_gui, this, "bold", this.start_font.isBold());
+		DCheckBox bold_chk = new DCheckBox(
+				base_gui, this, "bold", this.start_font.isBold());
 		bold_chk.always_allow_action();
 		JPanel mid_pnl = new JPanel();
-		mid_pnl.setLayout(new GridLayout(1, 2, base_gui.get_space_size(), 1));
+		mid_pnl.setLayout(
+				new GridLayout(1, 2, base_gui.get_space_size(), 1));
 		mid_pnl.add(bold_chk);
 		mid_pnl.add(size_pnl);
-		DCheckBox aa_chk = new DCheckBox(base_gui, this, "aa", this.start_aa);
+		DCheckBox aa_chk = new DCheckBox(
+				base_gui, this, "aa", this.start_aa);
 		aa_chk.always_allow_action();
 		JPanel btm_pnl = base_gui.get_y_stack(mid_pnl, aa_chk);
 		//CREATE FONT PANEL
@@ -114,9 +122,11 @@ public class FontGUI extends JPanel implements DActionEvent, DCheckEvent {
 		this.preview_txt = new DTextArea(base_gui);
 		this.preview_txt.setWrapStyleWord(true);
 		this.preview_txt.setLineWrap(true);
-		this.preview_txt.setText(base_gui.get_language_string("preview_text"));
+		this.preview_txt.setText(
+				base_gui.get_language_string("preview_text"));
 		DScrollPane preview_scr = new DScrollPane(this.preview_txt);
-		font_pnl.setLayout(new GridLayout(1, 2, base_gui.get_space_size(), 1));
+		font_pnl.setLayout(
+				new GridLayout(1, 2, base_gui.get_space_size(), 1));
 		font_pnl.add(font_scr);
 		font_pnl.add(preview_scr);
 		//CREATE MAIN LABEL
@@ -125,7 +135,9 @@ public class FontGUI extends JPanel implements DActionEvent, DCheckEvent {
 		//CREATE MAIN PANEL
 		setLayout(new BorderLayout());
 		add(btm_pnl, BorderLayout.SOUTH);
-		add(base_gui.get_spaced_panel(font_pnl, true, true, false, false), BorderLayout.CENTER);
+		add(base_gui.get_spaced_panel(
+				font_pnl, true, true, false, false),
+				BorderLayout.CENTER);
 		add(lbl, BorderLayout.NORTH);
 	}
 	

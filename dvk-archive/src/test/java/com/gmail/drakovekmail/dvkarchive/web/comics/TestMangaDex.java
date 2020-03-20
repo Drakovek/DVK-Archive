@@ -1,8 +1,6 @@
 package com.gmail.drakovekmail.dvkarchive.web.comics;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -425,88 +423,77 @@ public class TestMangaDex {
 	 */
 	@Test
 	public void test_get_downloaded_titles() {
-		//DVK 1 - MANGADEX:123
-		Dvk dvk = new Dvk();
-		dvk.set_dvk_file(new File(this.test_dir, "dvk1.dvk"));
-		dvk.set_id("id");
-		dvk.set_title("Title");
-		dvk.set_artist("artist");
-		dvk.set_page_url("www.mangadex.org/thing");
-		dvk.set_media_file("file");
-		String[] tags = new String[2];
-		tags[0] = "mangadex:123";
-		tags[1] = "blah";
-		dvk.set_web_tags(tags);
-		dvk.write_dvk();
-		//DVK 2 - REPEAT MANGADEX TAG
-		dvk.set_dvk_file(new File(this.test_dir, "dvk2.dvk"));
-		dvk.set_media_file("file");
-		dvk.write_dvk();
-		//DVK 3 - NEW MANGADEX TAG
-		dvk.set_title("Other | ch 1 | pg2");
-		dvk.set_dvk_file(new File(this.test_dir, "dvk3.dvk"));
-		dvk.set_media_file("file");
-		tags[0] = "blah";
-		tags[1] = "MangaDex:702";
-		dvk.set_web_tags(tags);
-		dvk.write_dvk();
-		//DVK 4 - NEW MANGADEX TAG - INVALID PAGE URL
-		dvk.set_dvk_file(new File(this.test_dir, "dvk4.dvk"));
-		dvk.set_media_file("file");
-		dvk.set_page_url("something.com");
-		tags[1] = "MangaDex:137";
-		dvk.set_web_tags(tags);
-		dvk.write_dvk();
-		//DVK SUB - NEW MANGADEX TAG
-		File file = new File(this.test_dir, "sub");
-		if(!file.isDirectory()) {
-			file.mkdir();
+		//CREATE SUB-DIRECTORIES
+		File sub1 = new File(this.test_dir, "sub1");
+		if(!sub1.isDirectory()) {
+			sub1.mkdir();
 		}
-		dvk.set_page_url("https://mangadex.cc/other");
-		dvk.set_dvk_file(new File(file, "dvk-sub.dvk"));
-		dvk.set_media_file("file");
-		tags[1] = "Mangadex:29";
+		File sub2 = new File(this.test_dir, "sub2");
+		if(!sub2.isDirectory()) {
+			sub2.mkdir();
+		}
+		//CREATE DVKS - TITLE 1
+		Dvk dvk = new Dvk();
+		dvk.set_id("ID123");
+		dvk.set_title("Title 1 | Chapter 2. | Page 3");
+		dvk.set_artist("artist");
+		String[] tags = {"blah", "mangadex:2468"};
 		dvk.set_web_tags(tags);
+		dvk.set_page_url("www.mangadex.com/thing");
+		dvk.set_dvk_file(new File(sub1, "dvk1.dvk"));
+		dvk.set_media_file("dvk1.png");
 		dvk.write_dvk();
-		//CHECK LOADED PROPERLY
+		dvk.set_title("Title 1 | thing");
+		dvk.set_dvk_file(new File(sub2, "dvk2.dvk"));
+		dvk.set_media_file("dvk2.jpg");
+		dvk.write_dvk();
+		//CREATE DVKS - TITLE 2
+		dvk.set_title("Title 2");
+		tags = new String[2];
+		tags[0] = "MangaDex:12345";
+		tags[1] = "thing";
+		dvk.set_web_tags(tags);
+		dvk.set_dvk_file(new File(this.test_dir, "dvk3.dvk"));
+		dvk.set_media_file("dvk3.png");
+		dvk.write_dvk();
+		dvk.set_dvk_file(new File(sub1, "dvk4.dvk"));
+		dvk.set_media_file("dvk4.txt");
+		dvk.write_dvk();
+		dvk.set_dvk_file(new File(sub2, "dvk5.dvk"));
+		dvk.set_media_file("dvk5.jpg");
+		dvk.write_dvk();
+		//CREATE DVKS - TITLE 3
+		dvk.set_title("Title 3 |  thing");
+		tags = new String[1];
+		tags[0] = "Mangadex:9876";
+		dvk.set_web_tags(tags);
+		dvk.set_dvk_file(new File(sub2, "dvk6.dvk"));
+		dvk.set_media_file("dvk6.txt");
+		dvk.write_dvk();
+		//CREATE DVKS - TITLE 4
+		dvk.set_title("Title 4 | Blah");
+		dvk.set_page_url("diferent/page");
+		dvk.set_dvk_file(new File(this.test_dir, "dvk7.dvk"));
+		dvk.set_media_file("dvk7.pdf");
+		dvk.write_dvk();
+		//CHECK GET ARTISTS
+		ArrayList<Dvk> dvks;
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
 		DvkHandler handler = new DvkHandler();
 		handler.read_dvks(dirs, prefs, null, false, false, false);
-		ArrayList<Dvk> dvks = MangaDex.get_downloaded_titles(handler);
-		assertEquals(5, handler.get_size());
+		handler.sort_dvks_title(true, false);
+		assertEquals(7, handler.get_size());
+		dvks = MangaDex.get_downloaded_titles(handler);
 		assertEquals(3, dvks.size());
-		//CHECK DVK 1
-		boolean check = false;
-		for(Dvk cur_dvk: dvks) {
-			file = cur_dvk.get_dvk_file();
-			if(file.getParentFile().equals(this.test_dir) && file.getName().equals("dvk1.dvk")) {
-				check = cur_dvk.get_id().equals("123");
-				assertEquals("Title", cur_dvk.get_title());
-				break;
-			}
-		}
-		assertTrue(check);
-		//CHECK DVK3
-		check = false;
-		for(Dvk cur_dvk: dvks) {
-			file = cur_dvk.get_dvk_file();
-			if(file.getParentFile().equals(this.test_dir) && file.getName().equals("dvk3.dvk")) {
-				check = cur_dvk.get_id().equals("702");
-				assertEquals("Other ", cur_dvk.get_title());
-				break;
-			}
-		}
-		assertTrue(check);
-		//CHECK DVK SUB
-		check = false;
-		for(Dvk cur_dvk: dvks) {
-			file = cur_dvk.get_dvk_file();
-			if(!file.getParentFile().equals(this.test_dir)) {
-				check = cur_dvk.get_id().equals("29");
-				break;
-			}
-		}
-		assertTrue(check);
+		assertEquals("Title 1 ", dvks.get(0).get_title());
+		assertEquals("2468", dvks.get(0).get_id());
+		assertEquals(this.test_dir, dvks.get(0).get_dvk_file());
+		assertEquals("Title 2", dvks.get(1).get_title());
+		assertEquals("12345", dvks.get(1).get_id());
+		assertEquals(this.test_dir, dvks.get(1).get_dvk_file());
+		assertEquals("Title 3 ", dvks.get(2).get_title());
+		assertEquals("9876", dvks.get(2).get_id());
+		assertEquals(sub2, dvks.get(2).get_dvk_file());
 	}
 }

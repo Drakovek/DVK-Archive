@@ -24,8 +24,6 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
  */
 public class SettingsGUI implements DActionEvent {
 	
-	//TODO SHORTEN THIS CRAP
-	
 	/**
 	 * The currently selected settings category
 	 */
@@ -108,8 +106,12 @@ public class SettingsGUI implements DActionEvent {
 		//CREATE FULL PANEL
 		JPanel full_pnl = new JPanel();
 		full_pnl.setLayout(new BorderLayout());
-		full_pnl.add(base_gui.get_spaced_panel(btm_pnl, 1, 0, true, false, false, false), BorderLayout.SOUTH);
-		full_pnl.add(base_gui.get_spaced_panel(side_pnl, 0, 1, false, false, false, true), BorderLayout.WEST);
+		full_pnl.add(base_gui.get_spaced_panel(
+				btm_pnl, 1, 0, true, false, false, false),
+				BorderLayout.SOUTH);
+		full_pnl.add(base_gui.get_spaced_panel(
+				side_pnl, 0, 1, false, false, false, true),
+				BorderLayout.WEST);
 		full_pnl.add(this.service_pnl, BorderLayout.CENTER);
 		this.main_pnl = base_gui.get_spaced_panel(full_pnl);
 	}
@@ -129,9 +131,12 @@ public class SettingsGUI implements DActionEvent {
 	 */
 	public void open() {
 		this.start_gui.get_base_gui().set_running(true);
-		String title = this.start_gui.get_base_gui().get_language_string("settings");
+		String title = this.start_gui.get_base_gui()
+				.get_language_string("settings");
 		title = LanguageHandler.get_text(title);
-		this.dialog = new DDialog(this.start_gui.get_frame(), this.main_pnl, title);
+		this.dialog = new DDialog(
+				this.start_gui.get_frame(),
+				this.main_pnl, title);
 		this.dialog.setVisible(true);
 		this.dialog = null;
 		this.start_gui.get_base_gui().set_running(false);
