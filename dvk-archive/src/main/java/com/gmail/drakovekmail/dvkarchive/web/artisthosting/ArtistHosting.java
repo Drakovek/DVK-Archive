@@ -48,22 +48,35 @@ public abstract class ArtistHosting implements DActionEvent {
 			String artist = dvk.get_artists()[0];
 			String url = dvk.get_page_url();
 			if(url.contains(domain)) {
-				int index = artists.indexOf(artist);
-				Dvk newdvk = new Dvk();
-				newdvk.set_artists(dvk.get_artists());
-				if(index != -1) {
-					//ADJUST DIRECTORY
-					newdvk.set_dvk_file(get_common_directory(
-							dvks.get(index).get_dvk_file(),
-							dvk.get_dvk_file().getParentFile()));
-					dvks.set(index, newdvk);
+				//CHECK IF SINGLE
+				boolean single = false;
+				String[] tags = dvk.get_web_tags();
+				if(tags != null) {
+					for(int k = 0; k < tags.length; k++) {
+						if(tags[k].toLowerCase().equals("dvk:single")) {
+							single = true;
+							break;
+						}
+					}
 				}
-				else {
-					//ADD NEW ARTIST
-					artists.add(artist);
-					newdvk.set_dvk_file(
-							dvk.get_dvk_file().getParentFile());
-					dvks.add(newdvk);
+				if(!single) {
+					int index = artists.indexOf(artist);
+					Dvk newdvk = new Dvk();
+					newdvk.set_artists(dvk.get_artists());
+					if(index != -1) {
+						//ADJUST DIRECTORY
+						newdvk.set_dvk_file(get_common_directory(
+								dvks.get(index).get_dvk_file(),
+								dvk.get_dvk_file().getParentFile()));
+						dvks.set(index, newdvk);
+					}
+					else {
+						//ADD NEW ARTIST
+						artists.add(artist);
+						newdvk.set_dvk_file(
+								dvk.get_dvk_file().getParentFile());
+						dvks.add(newdvk);
+					}
 				}
 			}
 		}

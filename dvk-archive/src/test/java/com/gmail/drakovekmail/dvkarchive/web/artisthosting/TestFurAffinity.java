@@ -296,7 +296,7 @@ public class TestFurAffinity {
 	public void test_get_dvk() {
 		//FIRST DVK
 		String url = "http://www.furaffinity.net/view/32521285/";
-		Dvk dvk = this.fur.get_dvk(url, this.test_dir, false);
+		Dvk dvk = this.fur.get_dvk(url, this.test_dir, false, false);
 		assertEquals("FAF32521285", dvk.get_id());
 		assertEquals("Robin the Bobcat", dvk.get_title());
 		assertEquals(1, dvk.get_artists().length);
@@ -335,7 +335,7 @@ public class TestFurAffinity {
 		assertEquals(null, dvk.get_secondary_file());
 		//SECOND DVK
 		url = "furaffinity.net/view/15301779";
-		dvk = this.fur.get_dvk(url, this.test_dir, false);
+		dvk = this.fur.get_dvk(url, this.test_dir, true, false);
 		assertEquals("FAF15301779", dvk.get_id());
 		assertEquals("Affinity Ch. 1", dvk.get_title());
 		assertEquals(1, dvk.get_artists().length);
@@ -353,7 +353,7 @@ public class TestFurAffinity {
 		value = "I'm trying something new. It's a strange "
 				+ "practice called \"character development\"";
 		assertEquals(value, dvk.get_description());
-		assertEquals(15, dvk.get_web_tags().length);
+		assertEquals(16, dvk.get_web_tags().length);
 		assertEquals("Rating:General", dvk.get_web_tags()[0]);
 		assertEquals("Category:Story", dvk.get_web_tags()[1]);
 		assertEquals("Type:All", dvk.get_web_tags()[2]);
@@ -370,6 +370,7 @@ public class TestFurAffinity {
 		assertEquals("genocide", dvk.get_web_tags()[12]);
 		assertEquals("of", dvk.get_web_tags()[13]);
 		assertEquals("digimon", dvk.get_web_tags()[14]);
+		assertEquals("DVK:Single", dvk.get_web_tags()[15]);
 		assertEquals("Affinity Ch 1_FAF15301779.dvk",
 				dvk.get_dvk_file().getName());
 		assertEquals(this.test_dir,
@@ -384,7 +385,7 @@ public class TestFurAffinity {
 				dvk.get_secondary_file().getParentFile());
 		//SECOND DVK
 		url = "www.furaffinity.net/view/29756524/";
-		dvk = this.fur.get_dvk(url, this.test_dir, false);
+		dvk = this.fur.get_dvk(url, this.test_dir, false, false);
 		assertEquals("FAF29756524", dvk.get_id());
 		value = "[Changed fanart] Are you going to "
 				+ "eat that Peach, human?";
@@ -432,7 +433,7 @@ public class TestFurAffinity {
 		if(this.fur.is_logged_in()) {
 			//MATURE DVK
 			url = "www.furaffinity.net/view/13634433/";
-			dvk = this.fur.get_dvk(url, this.test_dir, false);
+			dvk = this.fur.get_dvk(url, this.test_dir, false, false);
 			assertEquals("FAF13634433", dvk.get_id());
 			assertEquals("spiritual feedback - 3",
 					dvk.get_title());
@@ -488,7 +489,7 @@ public class TestFurAffinity {
 	public void test_get_journal_dvk() {
 		//FIRST DVK
 		String url = "www.furaffinity.net/journal/8594821";
-		Dvk dvk = this.fur.get_journal_dvk(url, this.test_dir, false);
+		Dvk dvk = this.fur.get_journal_dvk(url, this.test_dir, false, false);
 		assertEquals("FAF8594821-J", dvk.get_id());
 		assertEquals("100+ watcher special", dvk.get_title());
 		assertEquals(1, dvk.get_artists().length);
@@ -518,7 +519,7 @@ public class TestFurAffinity {
 		assertEquals(null, dvk.get_secondary_file());
 		//SECOND DVK
 		url = "https://www.furaffinity.net/journal/4743500/";
-		dvk = this.fur.get_journal_dvk(url, this.test_dir, false);
+		dvk = this.fur.get_journal_dvk(url, this.test_dir, true, false);
 		assertEquals("FAF4743500-J", dvk.get_id());
 		assertEquals("CLOSED $35 quick color pinups - 4 spots",
 				dvk.get_title());
@@ -561,7 +562,8 @@ public class TestFurAffinity {
 				+ "   aryte  </a>  <br/>  4)   <a href=\"/user/avios\" "
 				+ "class=\"linkusername\">    avios  </a>";
 		assertEquals(value, dvk.get_description());
-		assertTrue(dvk.get_web_tags() == null);
+		assertEquals(1, dvk.get_web_tags().length);
+		assertEquals("DVK:Single", dvk.get_web_tags()[0]);
 		assertEquals("CLOSED 35 quick color pinups - 4 spots_FAF4743500-J.dvk",
 				dvk.get_dvk_file().getName());
 		assertEquals(this.test_dir,

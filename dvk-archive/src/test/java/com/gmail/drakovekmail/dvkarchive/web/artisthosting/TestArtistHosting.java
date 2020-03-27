@@ -101,6 +101,15 @@ public class TestArtistHosting {
 		dvk.set_dvk_file(new File(this.test_dir, "dvk7.dvk"));
 		dvk.set_media_file("dvk7.pdf");
 		dvk.write_dvk();
+		//CREATE DVKS - ARTIST 5 - SINGLE
+		dvk.set_title("dvk8");
+		dvk.set_artist("artist5");
+		dvk.set_page_url("www.website.com/view/2");
+		String[] tags = {"Tag1", "Thing", "DVK:Single", "Last"};
+		dvk.set_web_tags(tags);
+		dvk.set_dvk_file(new File(this.test_dir, "dvk8.dvk"));
+		dvk.set_media_file("dvk8.txt");
+		dvk.write_dvk();
 		//CHECK GET ARTISTS
 		ArrayList<Dvk> dvks;
 		File[] dirs = {this.test_dir};
@@ -108,7 +117,7 @@ public class TestArtistHosting {
 		DvkHandler handler = new DvkHandler();
 		handler.read_dvks(dirs, prefs, null, false, false, false);
 		handler.sort_dvks_title(true, false);
-		assertEquals(7, handler.get_size());
+		assertEquals(8, handler.get_size());
 		dvks = ArtistHosting.get_artists(handler, "website.com");
 		assertEquals(3, dvks.size());
 		assertEquals("artist1", dvks.get(0).get_artists()[0]);

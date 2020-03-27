@@ -77,6 +77,9 @@ public class TestInOut{
 		InOut.write_file(file, list);
 		out = InOut.read_file(file);
 		assertEquals("item\r\nnext", out);
+		InOut.write_file(file, "");
+		out = InOut.read_file(file);
+		assertEquals("", out);
 	}
 	
 	/**

@@ -487,7 +487,13 @@ public class Dvk implements Serializable {
 			this.web_tags = null;
 		}
 		else {
-			this.web_tags = ArrayProcessing.clean_array(web_tags);
+			String[] tags = ArrayProcessing.clean_array(web_tags);
+			if(tags.length == 0) {
+				this.web_tags = null;
+			}
+			else {
+				this.web_tags = tags;
+			}
 		}
 	}
 	

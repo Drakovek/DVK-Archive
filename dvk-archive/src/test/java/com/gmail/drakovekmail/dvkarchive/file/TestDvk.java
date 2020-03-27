@@ -403,6 +403,10 @@ public class TestDvk {
 		assertEquals(2, dvk.get_web_tags().length);
 		assertEquals("tag1", dvk.get_web_tags()[0]);
 		assertEquals("Tag2", dvk.get_web_tags()[1]);
+		input = new String[1];
+		input[0] = null;
+		dvk.set_web_tags(input);
+		assertTrue(dvk.get_web_tags() == null);
 	}
 	
 	/**

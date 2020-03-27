@@ -152,7 +152,7 @@ public class MangaDexGUI extends ArtistHostingGUI {
 		ArrayList<Dvk> chapters = MangaDex.get_chapters(
 				this.connect, title, this.start_gui, "English", 1);
 		this.start_gui.append_console("downloading_pages", true);
-		MangaDex.get_dvks(
+		ArrayList<Dvk> downloaded = MangaDex.get_dvks(
 				this.sel,
 				this.dvk_handler,
 				this.start_gui,
@@ -160,6 +160,9 @@ public class MangaDexGUI extends ArtistHostingGUI {
 				chapters,
 				check_all,
 				true);
+		for(int i = 0; i < downloaded.size(); i++) {
+			this.dvk_handler.add_dvk(downloaded.get(i));
+		}
 	}
 
 	@Override

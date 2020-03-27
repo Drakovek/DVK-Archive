@@ -417,10 +417,7 @@ public class FurAffinity extends ArtistHosting {
 		if(this.connect == null) {
 			initialize_connect();
 		}
-		String xpath = "//section[contains(@id,'jid')]"
-				+ "//a[contains(@href,'/journal/')]"
-				+ "|//table[contains(@id,'jid')]"
-				+ "//a[contains(@href,'/journal/')]";
+		String xpath = "//a[contains(@href,'/gallery/" + artist + "')]";
 		if(start_gui != null && start_gui.get_base_gui().is_canceled()) {
 			this.connect.set_page(null);
 		}
@@ -438,6 +435,10 @@ public class FurAffinity extends ArtistHosting {
 			return null;
 		}
 		//GET PAGES
+		xpath = "//section[contains(@id,'jid')]"
+				+ "//a[contains(@href,'/journal/')]"
+				+ "|//table[contains(@id,'jid')]"
+				+ "//a[contains(@href,'/journal/')]";
 		ArrayList<String> pages = new ArrayList<>();
 		List<DomElement> ds;
 		ds = this.connect.get_page().getByXPath(xpath);
@@ -503,11 +504,13 @@ public class FurAffinity extends ArtistHosting {
 	 * @param page_url URL of FurAffinity media page
 	 * @param directory Directory in which to save Dvk.
 	 * @param save Whether to save Dvk and media
+	 * @param single Whether this is a single download
 	 * @return Dvk of FurAffinity media page
 	 */
 	public Dvk get_dvk(
 			String page_url,
 			File directory,
+			boolean single,
 			boolean save) {
 		Dvk dvk = new Dvk();
 		dvk.set_id(get_page_id(page_url, true));
@@ -723,6 +726,9 @@ public class FurAffinity extends ArtistHosting {
 			for(int i = 0; i < ds.size(); i++) {
 				tags.add(ds.get(i).asText());
 			}
+			if(single) {
+				tags.add("DVK:Single");
+			}
 			dvk.set_web_tags(ArrayProcessing.list_to_array(tags));
 			//SET MEDIA FILES
 			String filename = dvk.get_filename();
@@ -755,11 +761,13 @@ public class FurAffinity extends ArtistHosting {
 	 * @param page_url URL of FurAffinity journal page
 	 * @param directory Directory in which to save Dvk.
 	 * @param save Whether to save Dvk and media
+	 * @param single Whether this is a single download
 	 * @return Dvk of FurAffinity media page
 	 */
 	public Dvk get_journal_dvk(
 			String page_url,
 			File directory,
+			boolean single,
 			boolean save) {
 		Dvk dvk = new Dvk();
 		dvk.set_id(get_page_id(page_url, true));
@@ -815,8 +823,17 @@ public class FurAffinity extends ArtistHosting {
 			xpath = "//div[@class='journal-content']"
 					+ "|//div[@class='journal-body']";
 			de = this.connect.get_page().getFirstByXPath(xpath);
-			dvk.set_description(
-					DConnect.remove_header_footer(de.asXml()));
+			String description = "";
+			if(de != null) {
+				description = DConnect.remove_header_footer(de.asXml());
+				dvk.set_description(description);
+			}
+			//SET TAGS
+			String[] tags = new String[1];
+			if(single) {
+				tags[0] = "DVK:Single";
+			}
+			dvk.set_web_tags(tags);
 			//SET FILE
 			String filename = dvk.get_filename();
 			dvk.set_dvk_file(
@@ -829,7 +846,7 @@ public class FurAffinity extends ArtistHosting {
 					return new Dvk();
 				}
 				InOut.write_file(dvk.get_media_file(),
-						dvk.get_description());
+						description);
 				if(!dvk.get_media_file().exists()) {
 					dvk.get_dvk_file().delete();
 					return new Dvk();
