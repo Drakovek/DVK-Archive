@@ -3,6 +3,8 @@ package com.gmail.drakovekmail.dvkarchive.processing;
 import java.util.ArrayList;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for the ArrayProcessing class.
@@ -134,5 +136,21 @@ public class TestArrayProcessing {
 		assertEquals("I-1,I-2,Other", out);
 		out = ArrayProcessing.array_to_string(in, 2);
 		assertEquals("I-1,  I-2,  Other", out);
+	}
+	
+	/**
+	 * Tests the contains method.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_contains() {
+		//INVALID
+		assertFalse(ArrayProcessing.contains(null, "thing"));
+		//VALID
+		String[] array = {"these", "are", "words"};
+		assertFalse(ArrayProcessing.contains(array, "thing"));
+		assertTrue(ArrayProcessing.contains(array, "these"));
+		assertTrue(ArrayProcessing.contains(array, "are"));
+		assertTrue(ArrayProcessing.contains(array, "words"));
 	}
 }

@@ -123,4 +123,22 @@ public class ArrayProcessing {
 		}
 		return builder.toString();
 	}
+	
+	/**
+	 * Returns whether given String array contains a given string.
+	 * 
+	 * @param array Array in which to search for string
+	 * @param search String to search for
+	 * @return Whether array contains search
+	 */
+	public static boolean contains(String[] array, String search) {
+		if(array == null) {
+			return false;
+		}
+		for(int i = 0; i < array.length; i++) {
+			if(array[i].equals(search))
+			return true;
+		}
+		return false;
+	}
 }

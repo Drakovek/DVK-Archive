@@ -190,6 +190,26 @@ public class TestDvkHandler {
 	}
 	
 	/**
+	 * Tests the set_dvk method.
+	 */
+	@Test
+	public void test_set_dvk() {
+		FilePrefs prefs = new FilePrefs();
+		File[] dirs = {this.test_dir};
+		DvkHandler handler = new DvkHandler();
+		handler.read_dvks(dirs, prefs, null, false, true, false);
+		handler.sort_dvks_title(false, false);
+		//TEST SETTING DVKS
+		assertEquals(5, handler.get_size());
+		assertEquals("Page 1", handler.get_dvk(0).get_title());
+		Dvk dvk = new Dvk();
+		dvk.set_title("New title");
+		dvk.set_id("id-bleh");
+		handler.set_dvk(dvk, 0);
+		assertEquals("New title", handler.get_dvk(0).get_title());
+	}
+	
+	/**
 	 * Tests the get_size method.
 	 */
 	@Test

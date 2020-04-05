@@ -1,6 +1,8 @@
 package com.gmail.drakovekmail.dvkarchive.web.artisthosting;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -159,5 +161,90 @@ public class TestArtistHosting {
 		assertEquals(sub1, file);
 		file = ArtistHosting.get_common_directory(sub2, supsub);
 		assertEquals(this.test_dir, file);
+	}
+	
+	/**
+	 * Tests the update_dvk method.
+	 */
+	@Test
+	public void test_update_dvk() {
+		Dvk dvk = new Dvk();
+		dvk.set_id("id123");
+		dvk.set_title("Title");
+		dvk.set_artist("artist");
+		dvk.set_page_url("/page/");
+		String[] tags = {"some", "Tags", "DVK:Single", "Favorite:Test"};
+		dvk.set_web_tags(tags);
+		dvk.set_dvk_file(new File(this.test_dir, "dvk.dvk"));
+		dvk.set_media_file("dvk.txt");
+		dvk.set_secondary_file("dvk.png");
+		try {
+			dvk.get_media_file().createNewFile();
+			dvk.get_secondary_file().createNewFile();
+		} catch (IOException e) {}
+		dvk.write_dvk();
+		assertTrue(dvk.get_dvk_file().exists());
+		assertTrue(dvk.get_media_file().exists());
+		assertTrue(dvk.get_secondary_file().exists());
+		//CHANGE NOTHING
+		dvk = ArtistHosting.update_dvk(dvk, null, null);
+		assertTrue(dvk.get_dvk_file().exists());
+		assertTrue(dvk.get_media_file().exists());
+		assertTrue(dvk.get_secondary_file().exists());
+		assertEquals(this.test_dir,
+				dvk.get_dvk_file().getParentFile());
+		assertEquals(4, dvk.get_web_tags().length);
+		//ADD FAVORITE
+		dvk = ArtistHosting.update_dvk(dvk, this.test_dir, "Name");
+		assertTrue(dvk.get_dvk_file().exists());
+		assertTrue(dvk.get_media_file().exists());
+		assertTrue(dvk.get_secondary_file().exists());
+		assertEquals(this.test_dir,
+				dvk.get_dvk_file().getParentFile());
+		assertEquals(5, dvk.get_web_tags().length);
+		assertEquals("Favorite:Test", dvk.get_web_tags()[3]);
+		assertEquals("Favorite:Name", dvk.get_web_tags()[4]);
+		//CHANGE DIRECTORY
+		File sub = new File(this.test_dir, "sub");
+		if(!sub.isDirectory()) {
+			sub.mkdir();
+		}
+		dvk.set_web_tags(tags);
+		dvk = ArtistHosting.update_dvk(dvk, sub, "Name");
+		assertTrue(dvk.get_dvk_file().exists());
+		assertTrue(dvk.get_media_file().exists());
+		assertTrue(dvk.get_secondary_file().exists());
+		assertEquals(sub,
+				dvk.get_dvk_file().getParentFile());
+		assertEquals(sub,
+				dvk.get_media_file().getParentFile());
+		assertEquals(sub,
+				dvk.get_secondary_file().getParentFile());
+		assertEquals("dvk.dvk",
+				dvk.get_dvk_file().getName());
+		assertEquals("dvk.txt",
+				dvk.get_media_file().getName());
+		assertEquals("dvk.png",
+				dvk.get_secondary_file().getName());
+		assertEquals(5, dvk.get_web_tags().length);
+		assertEquals("Favorite:Test", dvk.get_web_tags()[3]);
+		assertEquals("Favorite:Name", dvk.get_web_tags()[4]);
+		//DON'T MOVE, DVK NOT SINGLE
+		dvk.set_secondary_file(null);
+		dvk = ArtistHosting.update_dvk(dvk, null, "Name");
+		assertTrue(dvk.get_dvk_file().exists());
+		assertTrue(dvk.get_media_file().exists());
+		assertEquals(null, dvk.get_secondary_file());
+		assertEquals(sub,
+				dvk.get_dvk_file().getParentFile());
+		assertEquals(sub,
+				dvk.get_media_file().getParentFile());
+		assertEquals("dvk.dvk",
+				dvk.get_dvk_file().getName());
+		assertEquals("dvk.txt",
+				dvk.get_media_file().getName());
+		assertEquals(5, dvk.get_web_tags().length);
+		assertEquals("Favorite:Test", dvk.get_web_tags()[3]);
+		assertEquals("Favorite:Name", dvk.get_web_tags()[4]);
 	}
 }

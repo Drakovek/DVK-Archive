@@ -81,6 +81,16 @@ public class DvkHandler {
 	}
 	
 	/**
+	 * Sets the Dvk object at a given index.
+	 * 
+	 * @param dvk Given Dvk object
+	 * @param index Index of Dvk to replace
+	 */
+	public void set_dvk(Dvk dvk, int index) {
+		this.dvks.set(index, dvk);
+	}
+	
+	/**
 	 * Returns the number of Dvk objects loaded.
 	 * 
 	 * @return Size of dvks list

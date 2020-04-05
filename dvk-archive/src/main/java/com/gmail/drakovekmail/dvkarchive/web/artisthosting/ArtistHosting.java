@@ -1,6 +1,7 @@
 package com.gmail.drakovekmail.dvkarchive.web.artisthosting;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -15,6 +16,7 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DLabel;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DPasswordField;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DTextField;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
+import com.google.common.io.Files;
 
 /**
  * Contains methods for getting info from artist hosting websites.
@@ -170,6 +172,66 @@ public abstract class ArtistHosting implements DActionEvent {
 		info[1] = pass_txt.get_text();
 		info[2] = cap_txt.getText();
 		return info;
+	}
+	
+	/**
+	 * Updates a downloaded DVK file with new information.
+	 * Moves the DVK file if specified.
+	 * 
+	 * @param dvk Dvk object to update
+	 * @param directory Directory to move Dvk to, if single.
+	 * Does not move if directory is null.
+	 * @param artist Artist to use when adding favorite tag.
+	 * If null, does not add favorite tag.
+	 * @return Updated Dvk object
+	 */
+	public static Dvk update_dvk(
+			Dvk dvk,
+			File directory,
+			String artist) {
+		Dvk new_dvk = dvk;
+		//ADD FAVORITE ARTIST
+		String[] tags;
+		if(new_dvk.get_web_tags() != null) {
+			tags = new String[new_dvk.get_web_tags().length + 1];
+		}
+		else {
+			tags = new String[1];
+		}
+		for(int i = 0; i < tags.length -1; i++) {
+			tags[i] = new_dvk.get_web_tags()[i];
+		}
+		//ADD FAVORITE ARTIST
+		if(artist != null) {
+			tags[tags.length - 1] = "Favorite:" + artist;
+		}
+		new_dvk.set_web_tags(tags);
+		//MOVE FILES IF NECESSARY
+		if(directory != null && !dvk.get_dvk_file().getParentFile().equals(directory)) {
+			//SET DVK FILE
+			File file = new File(directory,
+					dvk.get_dvk_file().getName());
+			dvk.get_dvk_file().delete();
+			new_dvk.set_dvk_file(file);
+			//MOVE MEDIA FILE
+			file = new File(directory,
+					dvk.get_media_file().getName());
+			try {
+				Files.move(dvk.get_media_file(), file);
+			} catch (IOException e) {}
+			new_dvk.set_media_file(file.getName());
+			//MOVE SECONDARY FILE
+			if(dvk.get_secondary_file() != null) {
+				file = new File(directory,
+						dvk.get_secondary_file().getName());
+				try {
+					Files.move(dvk.get_secondary_file(), file);
+				} catch (IOException e) {}
+				new_dvk.set_secondary_file(file.getName());
+			}
+		}
+		new_dvk.write_dvk();
+		return new_dvk;
 	}
 	
 	@Override

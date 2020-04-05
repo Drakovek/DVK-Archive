@@ -78,6 +78,7 @@ public class DEnglish extends LanguageMap{
 		this.lang_keys.put("getting_gallery", "Getting Gallery Pages...");
 		this.lang_keys.put("getting_scraps", "Getting Scrap Pages...");
 		this.lang_keys.put("getting_journals", "Getting Journal Pages...");
+		this.lang_keys.put("getting_favorites", "Getting Favorites Pages...");
 		this.lang_keys.put("downloading_pages", "Downloading Pages...");
 		this.lang_keys.put("getting_artist", "Getting Artist");
 		this.lang_keys.put("invalid_url", "Invalid URL");
