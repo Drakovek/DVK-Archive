@@ -1,5 +1,7 @@
 package com.gmail.drakovekmail.dvkarchive.gui.swing.components;
 
+import java.awt.Insets;
+
 import javax.swing.JButton;
 import com.gmail.drakovekmail.dvkarchive.gui.BaseGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.language.LanguageHandler;
@@ -12,9 +14,7 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionListener;
  * @author Drakovek
  */
 public class DButton extends JButton {
-	
-	//TODO ADD INSETS
-	
+
 	/**
 	 * SerialVersionUID
 	 */
@@ -55,6 +55,11 @@ public class DButton extends JButton {
 		set_text_id(id);
 		//SET FONT
 		this.setFont(base_gui.get_font());
+		//SET MARGINS
+		int w = base_gui.get_space_size();
+		int h = (w / 2);
+		Insets ins = new Insets(h, w, h, w);
+		setMargin(ins);
 		//SET ACTION
 		this.listener = new DActionListener(base_gui, event, id);
 		this.addActionListener(this.listener);

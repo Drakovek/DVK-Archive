@@ -1,5 +1,7 @@
 package com.gmail.drakovekmail.dvkarchive.gui.swing.components;
 
+import java.awt.Insets;
+
 import javax.swing.JPasswordField;
 
 import com.gmail.drakovekmail.dvkarchive.gui.BaseGUI;
@@ -10,8 +12,7 @@ import com.gmail.drakovekmail.dvkarchive.gui.BaseGUI;
  * @author Drakovek
  */
 public class DPasswordField extends JPasswordField{
-	
-	//TODO ADD INSETS
+
 	//TODO ADD ACTION
 
 	/**
@@ -25,7 +26,13 @@ public class DPasswordField extends JPasswordField{
 	 * @param base_gui BaseGUI for getting UI settings
 	 */
 	public DPasswordField(BaseGUI base_gui) {
+		//SET FONT
 		this.setFont(base_gui.get_font());
+		//SET MARGINS
+		int w = base_gui.get_space_size();
+		int h = (w / 2);
+		Insets ins = new Insets(h, w, h, w);
+		setMargin(ins);
 	}
 	
 	/**

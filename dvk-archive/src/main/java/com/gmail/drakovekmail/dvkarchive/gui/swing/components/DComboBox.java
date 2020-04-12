@@ -31,6 +31,7 @@ public class DComboBox extends JComboBox<String> {
 			String[] items,
 			String id) {
 		super(items);
+		//SET FONT
 		this.setFont(base_gui.get_font());
 		this.addActionListener(new DActionListener(base_gui, event, id));
 	}	

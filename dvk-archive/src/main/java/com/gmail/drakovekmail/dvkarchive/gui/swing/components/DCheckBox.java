@@ -17,23 +17,8 @@ public class DCheckBox extends JCheckBox {
 	/**
 	 * SerialVersionUID
 	 */
-	private static final long serialVersionUID = -7442427064479562628L;
+	private static final long serialVersionUID = 3318374385331931628L;
 
-	/**
-	 * ID of the CheckBox
-	 */
-	private String id;
-	
-	/**
-	 * DCheckEvent to call when checked/unchecked
-	 */
-	private DCheckEvent event;
-	
-	/**
-	 * ActionListener for getting button requests
-	 */
-	private DCheckListener listener;
-	
 	/**
 	 * Initializes DCheckBox object.
 	 * 
@@ -47,8 +32,6 @@ public class DCheckBox extends JCheckBox {
 			DCheckEvent event,
 			String id,
 			boolean selected) {
-		this.id = id;
-		this.event = event;
 		//SET TEXT
 		String ls = base_gui.get_language_string(id);
 		setText(LanguageHandler.get_text(ls));
@@ -62,20 +45,6 @@ public class DCheckBox extends JCheckBox {
 		//SET SELECTED
 		setSelected(selected);
 		//SET ACTION
-		this.listener = new DCheckListener(base_gui, event, id);
-		this.addItemListener(this.listener);
-	}
-	
-	/**
-	 * Sets the CheckBox to allow actions to be recorded,
-	 * even while a process is running.
-	 */
-	public void always_allow_action() {
-		this.removeItemListener(this.listener);
-		this.listener = new DCheckListener(
-				null, 
-				this.event,
-				this.id);
-		this.addItemListener(this.listener);
+		this.addItemListener(new DCheckListener(base_gui, event, id));
 	}
 }

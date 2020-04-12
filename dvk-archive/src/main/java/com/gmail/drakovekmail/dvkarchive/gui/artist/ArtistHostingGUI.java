@@ -17,6 +17,7 @@ import com.gmail.drakovekmail.dvkarchive.gui.ServiceGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.language.LanguageHandler;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DButton;
+import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DCheckBox;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DLabel;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DList;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DPasswordField;
@@ -24,13 +25,14 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DScrollPane;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DTextField;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.compound.DTextDialog;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
+import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DCheckEvent;
 
 /**
  * GUI for downloading files from artist-hosting websites.
  * 
  * @author Drakovek
  */
-public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEvent {
+public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEvent, DCheckEvent {
 	
 	/**
 	 * SerialVersionUID
@@ -45,7 +47,27 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	/**
 	 * Whether login was skipped.
 	 */
-	protected boolean skipped;
+	private boolean skipped;
+	
+	/**
+	 * Whether to download the main gallery
+	 */
+	private boolean main;
+	
+	/**
+	 * Whether to download the scraps gallery
+	 */
+	private boolean scraps;
+	
+	/**
+	 * Whether to download artist's journals
+	 */
+	private boolean journals;
+	
+	/**
+	 * Whether to download artist's favorites
+	 */
+	private boolean favorites;
 	
 	/**
 	 * DVK handler for loading existing DVK files.
@@ -145,11 +167,21 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	}
 	
 	/**
+	 * Returns whether login was skipped.
+	 * 
+	 * @return Whether login was skipped
+	 */
+	public boolean get_skipped() {
+		return this.skipped;
+	}
+	
+	/**
 	 * Creates and displays a login GUI.
 	 * 
 	 * @param use_captcha Whether to include CAPTCHA dialog in the GUI
 	 */
 	protected void create_login_gui(boolean use_captcha) {
+		load_checks();
 		this.start_gui.get_scroll_panel().set_fit(true, false);
 		BaseGUI base_gui = this.start_gui.get_base_gui();
 		this.u_txt = new DTextField(base_gui, this, "nothing");
@@ -287,14 +319,32 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		DLabel art_lbl = new DLabel(base_gui, this.lst, "artists");
 		art_lbl.setHorizontalAlignment(SwingConstants.CENTER);
 		JPanel art_pnl = base_gui.get_y_stack(art_lbl, 0, scr, 1);
-		JPanel side_panel = base_gui.get_y_stack(
+		JPanel side_pnl = base_gui.get_y_stack(
 				art_pnl, 1, this.refresh_btn, 0);
+		//CREATE CHECK PANEL
+		int space = base_gui.get_space_size();
+		JPanel check_pnl = new JPanel();
+		check_pnl.setLayout(new GridLayout(2, 2, space, space));
+		DCheckBox main_chk = new DCheckBox(
+				base_gui, this, "main", get_main());
+		DCheckBox scraps_chk = new DCheckBox(
+				base_gui, this, "scraps", get_scraps());
+		DCheckBox journal_chk = new DCheckBox(
+				base_gui, this, "journals", get_journals());
+		DCheckBox favorite_chk = new DCheckBox(
+				base_gui, this, "favorites", get_favorites());
+		check_pnl.add(main_chk);
+		check_pnl.add(scraps_chk);
+		check_pnl.add(journal_chk);
+		check_pnl.add(favorite_chk);
+		JPanel action_pnl = base_gui.get_y_stack(
+				btn_pnl, 1, check_pnl, 0);
 		//CREATE SPLIT PANEL
 		JPanel split_pnl = new JPanel();
 		split_pnl.setLayout(
 				new GridLayout(1, 2, base_gui.get_space_size(), 0));
-		split_pnl.add(btn_pnl);
-		split_pnl.add(side_panel);
+		split_pnl.add(action_pnl);
+		split_pnl.add(side_pnl);
 		//CREATE TOP PANEL
 		DLabel lbl = new DLabel(base_gui, null, "artists");
 		lbl.setText(this.name);
@@ -309,6 +359,88 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 				top_pnl, 0, split_pnl, 1));
 		this.revalidate();
 		this.repaint();
+	}
+	
+	/**
+	 * Loads preferences for gallery check boxes.
+	 */
+	public abstract void load_checks();
+	
+	/**
+	 * Saves preferences for gallery check boxes.
+	 */
+	public abstract void save_checks();
+	
+	/**
+	 * Sets whether to get main gallery pages.
+	 * 
+	 * @param main Whether to get main gallery
+	 */
+	public void set_main(boolean main) {
+		this.main = main;
+	}
+	
+	/**
+	 * Returns whether to get main gallery pages.
+	 * 
+	 * @return Whether to get main gallery
+	 */
+	public boolean get_main() {
+		return this.main;
+	}
+	
+	/**
+	 * Sets whether to get scraps gallery pages.
+	 * 
+	 * @param scraps Whether to get scraps gallery
+	 */
+	public void set_scraps(boolean scraps) {
+		this.scraps = scraps;
+	}
+	
+	/**
+	 * Returns whether to get scraps gallery pages.
+	 * 
+	 * @return Whether to get scraps gallery
+	 */
+	public boolean get_scraps() {
+		return this.scraps;
+	}
+	
+	/**
+	 * Sets whether to get journal pages.
+	 * 
+	 * @param journals Whether to get journals
+	 */
+	public void set_journals(boolean journals) {
+		this.journals = journals;
+	}
+	
+	/**
+	 * Returns whether to get journal pages.
+	 * 
+	 * @return Whether to get journals
+	 */
+	public boolean get_journals() {
+		return this.journals;
+	}
+	
+	/**
+	 * Sets whether to get favorites pages.
+	 * 
+	 * @param favorites Whether to get favorites
+	 */
+	public void set_favorites(boolean favorites) {
+		this.favorites = favorites;
+	}
+	
+	/**
+	 * Returns whether to get favorites pages.
+	 * 
+	 * @return Whether to get favorites
+	 */
+	public boolean get_favorites() {
+		return this.favorites;
 	}
 	
 	/**
@@ -494,6 +626,25 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	}
 	
 	@Override
+	public void check_event(String id, boolean checked) {
+		switch(id) {
+			case "main":
+				this.main = checked;
+				break;
+			case "scraps":
+				this.scraps = checked;
+				break;
+			case "journals":
+				this.journals = checked;
+				break;
+			case "favorites":
+				this.favorites = checked;
+				break;
+		}
+		save_checks();
+	}
+	
+	@Override
 	public void run(String id) {
 		switch(id) {
 			case "login":
@@ -531,7 +682,7 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		this.start_gui.get_base_gui().set_running(false);
 		this.start_gui.enable_all();
 		if(id.equals("login")) {
-			if(this.skipped) {
+			if(get_skipped()) {
 				start_process("refresh_captcha", true);
 			}
 			else {

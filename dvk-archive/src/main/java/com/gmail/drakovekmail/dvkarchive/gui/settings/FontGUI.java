@@ -103,7 +103,6 @@ public class FontGUI extends JPanel implements DActionEvent, DCheckEvent {
 		//CREATE BOTTOM PANEL
 		DCheckBox bold_chk = new DCheckBox(
 				base_gui, this, "bold", this.start_font.isBold());
-		bold_chk.always_allow_action();
 		JPanel mid_pnl = new JPanel();
 		mid_pnl.setLayout(
 				new GridLayout(1, 2, base_gui.get_space_size(), 1));
@@ -111,7 +110,6 @@ public class FontGUI extends JPanel implements DActionEvent, DCheckEvent {
 		mid_pnl.add(size_pnl);
 		DCheckBox aa_chk = new DCheckBox(
 				base_gui, this, "aa", this.start_aa);
-		aa_chk.always_allow_action();
 		JPanel btm_pnl = base_gui.get_y_stack(mid_pnl, aa_chk);
 		//CREATE FONT PANEL
 		this.font_lst = new DList(base_gui, this, "font", false);

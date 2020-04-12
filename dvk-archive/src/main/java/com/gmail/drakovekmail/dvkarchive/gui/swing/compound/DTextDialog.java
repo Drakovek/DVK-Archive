@@ -66,6 +66,7 @@ public class DTextDialog implements DActionEvent {
 		}
 		//CENTER PANEL
 		this.text = new DTextField(base_gui, this, "ok");
+		this.text.always_allow_action();
 		JPanel center_pnl = base_gui.get_y_stack(text_pnl, this.text);
 		//FULL PANEL
 		JPanel full_pnl = base_gui.get_spaced_panel(base_gui.get_y_stack(center_pnl, btn_pnl));

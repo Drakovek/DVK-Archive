@@ -6,7 +6,7 @@ import java.io.File;
 import javax.swing.JFileChooser;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
-import javax.swing.JSeparator;
+import javax.swing.JSplitPane;
 import javax.swing.SwingConstants;
 import com.gmail.drakovekmail.dvkarchive.file.FilePrefs;
 import com.gmail.drakovekmail.dvkarchive.gui.artist.FurAffinityGUI;
@@ -187,6 +187,7 @@ public class StartGUI implements DActionEvent, Disabler {
 		this.console = new DTextArea(this.base_gui);
 		this.console.setLineWrap(false);
 		this.console_scr = new DScrollPane(this.console);
+		this.console.setText("");
 		console_pnl = this.base_gui.get_y_stack(
 				console_lbl, 0, this.console_scr, 1);
 		JPanel log_pnl = this.base_gui.get_y_stack(
@@ -194,15 +195,11 @@ public class StartGUI implements DActionEvent, Disabler {
 		//CREATE CENTER PANEL
 		this.content_pnl = new DScrollablePanel();
 		DScrollPane c_scr = new DScrollPane(this.content_pnl);
-		JPanel center_pnl = new JPanel();
-		center_pnl.setLayout(new GridLayout(2, 1));
-		center_pnl.add(this.base_gui.get_spaced_panel(
-				c_scr, 1, 1, false, true, false, false));
-		JSeparator sep = new JSeparator(SwingConstants.HORIZONTAL);
-		JPanel bottom_pnl = this.base_gui.get_y_stack(sep, 0, log_pnl, 1);
-		center_pnl.add(bottom_pnl);
+		JSplitPane spl = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+				c_scr,
+				log_pnl);
 		this.frame.getContentPane().add(
-				this.base_gui.get_spaced_panel(center_pnl),
+				this.base_gui.get_spaced_panel(spl),
 				BorderLayout.CENTER);
 		//CREATE MENU BAR
 		JMenuBar menu_bar = new JMenuBar();

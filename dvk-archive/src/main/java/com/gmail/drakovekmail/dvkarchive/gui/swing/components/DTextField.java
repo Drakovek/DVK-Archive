@@ -1,5 +1,7 @@
 package com.gmail.drakovekmail.dvkarchive.gui.swing.components;
 
+import java.awt.Insets;
+
 import javax.swing.JTextField;
 import com.gmail.drakovekmail.dvkarchive.gui.BaseGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
@@ -11,8 +13,6 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionListener;
  * @author Drakovek
  */
 public class DTextField extends JTextField {
-	
-	//TODO ADD INSETS
 	
 	/**
 	 * ID for the text field
@@ -46,10 +46,15 @@ public class DTextField extends JTextField {
 		this.id = id;
 		this.event = event;
 		//SET FONT
-		this.setFont(base_gui.get_font());
+		setFont(base_gui.get_font());
+		//SET MARGINS
+		int w = base_gui.get_space_size();
+		int h = (w / 2);
+		Insets ins = new Insets(h, w, h, w);
+		setMargin(ins);
 		//SET ACTION
 		this.listener = new DActionListener(base_gui, event, id);
-		this.addActionListener(this.listener);
+		addActionListener(this.listener);
 	}
 	
 	/**
@@ -57,11 +62,11 @@ public class DTextField extends JTextField {
 	 * even while a process is running.
 	 */
 	public void always_allow_action() {
-		this.removeActionListener(this.listener);
+		removeActionListener(this.listener);
 		this.listener = new DActionListener(
 				null, 
 				this.event,
 				this.id);
-		this.addActionListener(this.listener);
+		addActionListener(this.listener);
 	}
 }

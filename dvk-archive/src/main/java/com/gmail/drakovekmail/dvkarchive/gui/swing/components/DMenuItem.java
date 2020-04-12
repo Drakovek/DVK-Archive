@@ -1,5 +1,7 @@
 package com.gmail.drakovekmail.dvkarchive.gui.swing.components;
 
+import java.awt.Insets;
+
 import javax.swing.JMenuItem;
 import com.gmail.drakovekmail.dvkarchive.gui.BaseGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.language.LanguageHandler;
@@ -14,7 +16,7 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionListener;
 public class DMenuItem extends JMenuItem {
 	
 	/**
-	 * SerialVerionUID
+	 * SerialVersionUID
 	 */
 	private static final long serialVersionUID = 2820703107830083389L;
 
@@ -35,6 +37,11 @@ public class DMenuItem extends JMenuItem {
 		this.setMnemonic(label.charAt(index));
 		//SET FONT
 		this.setFont(base_gui.get_font());
+		//SET MARGINS
+		int w = base_gui.get_space_size();
+		int h = (w / 2);
+		Insets ins = new Insets(h, w, h, w);
+		setMargin(ins);
 		//SET ACTION
 		this.addActionListener(new DActionListener(base_gui, event, id));
 	}

@@ -21,7 +21,7 @@ public class MangaDexGUI extends ArtistHostingGUI {
 	/**
 	 * SerialVersionUID
 	 */
-	private static final long serialVersionUID = -4042530806079268106L;
+	private static final long serialVersionUID = -4511022942598801099L;
 
 	/**
 	 * DConnect object for connecting to MangaDex chapters
@@ -190,4 +190,10 @@ public class MangaDexGUI extends ArtistHostingGUI {
 		this.start_gui.append_console("", false);
 		this.start_gui.append_console("running_mangadex", true);
 	}
+
+	@Override
+	public void load_checks() {}
+
+	@Override
+	public void save_checks() {}
 }

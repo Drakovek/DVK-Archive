@@ -82,6 +82,10 @@ public class DEnglish extends LanguageMap{
 		this.lang_keys.put("downloading_pages", "Downloading Pages...");
 		this.lang_keys.put("getting_artist", "Getting Artist");
 		this.lang_keys.put("invalid_url", "Invalid URL");
+		this.lang_keys.put("main", "^Main");
+		this.lang_keys.put("scraps", "Sc^raps");
+		this.lang_keys.put("journals", "^Journals");
+		this.lang_keys.put("favorites", "^Favorites");
 		//COMICS
 		this.lang_keys.put("mangadex", "MangaDex");
 		//ERROR FINDING
