@@ -34,6 +34,8 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DCheckEvent;
  */
 public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEvent, DCheckEvent {
 	
+	//TODO DISABLE BUTTONS AFTER CANCEL
+	
 	/**
 	 * SerialVersionUID
 	 */
@@ -100,9 +102,29 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	private DButton single_btn;
 	
 	/**
-	 * Refreshes the artist/title list
+	 * Button for adding artists/titles
 	 */
-	private DButton refresh_btn;
+	private DButton add_btn;
+	
+	/**
+	 * CheckBox for main gallery
+	 */
+	private DCheckBox main_chk;
+	
+	/**
+	 * CheckBox for scraps gallery
+	 */
+	private DCheckBox scraps_chk;
+	
+	/**
+	 * CheckBox for journal gallery
+	 */
+	private DCheckBox journal_chk;
+	
+	/**
+	 * CheckBox for favorites gallery
+	 */
+	private DCheckBox favorite_chk;
 	
 	/**
 	 * Label for showing CAPTCHA images.
@@ -153,15 +175,24 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		this.setLayout(new GridLayout(1, 1));
 		this.skipped = true;
 		//INITIALIZE COMPONENTS
+		load_checks();
 		BaseGUI base_gui = start_gui.get_base_gui();
 		this.all_btn = new DButton(base_gui, this, "check_all");
 		this.new_btn = new DButton(base_gui, this, "check_new");
 		this.single_btn = new DButton(base_gui, this, "download_single");
-		this.refresh_btn = new DButton(base_gui, this, "refresh");
+		this.add_btn = new DButton(base_gui, this, "add");
 		this.lst = new DList(base_gui, this, "list", true);
 		this.cap_btn = new DButton(base_gui, this, "refresh_captcha");
 		this.login_btn = new DButton(base_gui, this, "login");
 		this.skip_btn = new DButton(base_gui, this, "skip_login");
+		this.main_chk = new DCheckBox(
+				base_gui, this, "main", get_main());
+		this.scraps_chk = new DCheckBox(
+				base_gui, this, "scraps", get_scraps());
+		this.journal_chk = new DCheckBox(
+				base_gui, this, "journals", get_journals());
+		this.favorite_chk = new DCheckBox(
+				base_gui, this, "favorites", get_favorites());
 		//CREATE GUI
 		create_initial_gui();
 	}
@@ -181,7 +212,6 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	 * @param use_captcha Whether to include CAPTCHA dialog in the GUI
 	 */
 	protected void create_login_gui(boolean use_captcha) {
-		load_checks();
 		this.start_gui.get_scroll_panel().set_fit(true, false);
 		BaseGUI base_gui = this.start_gui.get_base_gui();
 		this.u_txt = new DTextField(base_gui, this, "nothing");
@@ -311,6 +341,11 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		this.new_btn.setEnabled(false);
 		this.all_btn.setEnabled(false);
 		this.single_btn.setEnabled(false);
+		this.add_btn.setEnabled(false);
+		this.main_chk.setEnabled(false);
+		this.scraps_chk.setEnabled(false);
+		this.favorite_chk.setEnabled(false);
+		this.journal_chk.setEnabled(false);
 		btn_pnl.add(this.new_btn);
 		btn_pnl.add(this.all_btn);
 		btn_pnl.add(this.single_btn);
@@ -320,23 +355,15 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		art_lbl.setHorizontalAlignment(SwingConstants.CENTER);
 		JPanel art_pnl = base_gui.get_y_stack(art_lbl, 0, scr, 1);
 		JPanel side_pnl = base_gui.get_y_stack(
-				art_pnl, 1, this.refresh_btn, 0);
+				art_pnl, 1, this.add_btn, 0);
 		//CREATE CHECK PANEL
 		int space = base_gui.get_space_size();
 		JPanel check_pnl = new JPanel();
 		check_pnl.setLayout(new GridLayout(2, 2, space, space));
-		DCheckBox main_chk = new DCheckBox(
-				base_gui, this, "main", get_main());
-		DCheckBox scraps_chk = new DCheckBox(
-				base_gui, this, "scraps", get_scraps());
-		DCheckBox journal_chk = new DCheckBox(
-				base_gui, this, "journals", get_journals());
-		DCheckBox favorite_chk = new DCheckBox(
-				base_gui, this, "favorites", get_favorites());
-		check_pnl.add(main_chk);
-		check_pnl.add(scraps_chk);
-		check_pnl.add(journal_chk);
-		check_pnl.add(favorite_chk);
+		check_pnl.add(this.main_chk);
+		check_pnl.add(this.scraps_chk);
+		check_pnl.add(this.journal_chk);
+		check_pnl.add(this.favorite_chk);
 		JPanel action_pnl = base_gui.get_y_stack(
 				btn_pnl, 1, check_pnl, 0);
 		//CREATE SPLIT PANEL
@@ -555,6 +582,11 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	public abstract void download_page(String url);
 	
 	/**
+	 * Called to add artist/title.
+	 */
+	public abstract void add();
+	
+	/**
 	 * Sorts the DVKs in the DvkHandler.
 	 */
 	public abstract void sort_dvks();
@@ -567,11 +599,15 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 			this.all_btn.setEnabled(true);
 			this.single_btn.setEnabled(true);
 		}
-		this.refresh_btn.setEnabled(true);
+		this.add_btn.setEnabled(true);
 		this.lst.setEnabled(true);
 		this.cap_btn.setEnabled(true);
 		this.login_btn.setEnabled(true);
 		this.skip_btn.setEnabled(true);
+		this.main_chk.setEnabled(true);
+		this.scraps_chk.setEnabled(true);
+		this.journal_chk.setEnabled(true);
+		this.favorite_chk.setEnabled(true);
 	}
 
 	@Override
@@ -579,11 +615,15 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		this.new_btn.setEnabled(false);
 		this.all_btn.setEnabled(false);
 		this.single_btn.setEnabled(false);
-		this.refresh_btn.setEnabled(false);
+		this.add_btn.setEnabled(false);
 		this.lst.setEnabled(false);
 		this.cap_btn.setEnabled(false);
 		this.login_btn.setEnabled(false);
 		this.skip_btn.setEnabled(false);
+		this.main_chk.setEnabled(false);
+		this.scraps_chk.setEnabled(false);
+		this.journal_chk.setEnabled(false);
+		this.favorite_chk.setEnabled(false);
 	}
 	
 	@Override
@@ -599,14 +639,14 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 				create_main_gui();
 				start_process("read_dvks", true);
 				break;
-			case "refresh":
-				start_process("read_dvks", true);
-				break;
 			case "check_new":
 				start_process("check_new", false);
 				break;
 			case "check_all":
 				start_process("check_all", false);
+				break;
+			case "add":
+				add();
 				break;
 			case "download_single":
 				if(this.directory_loaded()) {
@@ -690,6 +730,8 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 				start_process("read_dvks", true);
 			}
 		}
-		enable_all();
+		else {
+			enable_all();
+		}
 	}
 }

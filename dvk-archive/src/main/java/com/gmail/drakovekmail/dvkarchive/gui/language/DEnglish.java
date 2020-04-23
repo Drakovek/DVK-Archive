@@ -67,8 +67,9 @@ public class DEnglish extends LanguageMap{
 		this.lang_keys.put("check_all", "Check A^ll");
 		this.lang_keys.put("check_new", "Check ^New");
 		this.lang_keys.put("download_single", "^Download Single");
-		this.lang_keys.put("refresh", "^Refresh");
+		this.lang_keys.put("add_artist", "Add Artist");
 		this.lang_keys.put("artists", "^Artists");
+		this.lang_keys.put("add", "A^dd");
 		this.lang_keys.put("enter_page_url", "Enter Page URL:");
 		this.lang_keys.put("loading_captcha", "Loading Captcha...");
 		this.lang_keys.put("captcha_failed", "Failed Loading Captcha");
@@ -103,8 +104,7 @@ public class DEnglish extends LanguageMap{
 		//FURAFFINITY
 		this.lang_keys.put("running_furaffinity", "[RUNNING FUR AFFINITY]");
 		this.lang_keys.put("fur_affinity_failed", "Fur Affinity Failed");
-		this.lang_keys.put("invalid_fur_url", "Not a valid Fur Affinity URL.");
-		this.lang_keys.put("use_fur_artist", "Use as Fur Affinity artist instead?");
+		this.lang_keys.put("enter_furaffinity", "Enter Fur Affinity Artist:");
 		//UNLINKED MEDIA
 		this.lang_keys.put("unlinked_title", "Find Unlinked Media");
 		this.lang_keys.put("unlinked_console", "[FINDING UNLINKED MEDIA]");

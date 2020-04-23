@@ -196,4 +196,10 @@ public class MangaDexGUI extends ArtistHostingGUI {
 
 	@Override
 	public void save_checks() {}
+
+	@Override
+	public void add() {
+		// TODO Auto-generated method stub
+		
+	}
 }

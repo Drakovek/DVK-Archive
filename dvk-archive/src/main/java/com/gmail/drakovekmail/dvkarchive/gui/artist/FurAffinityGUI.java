@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.prefs.Preferences;
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
 import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
-import com.gmail.drakovekmail.dvkarchive.gui.swing.compound.DButtonDialog;
+import com.gmail.drakovekmail.dvkarchive.gui.swing.compound.DTextDialog;
 import com.gmail.drakovekmail.dvkarchive.processing.StringProcessing;
 import com.gmail.drakovekmail.dvkarchive.web.artisthosting.ArtistHosting;
 import com.gmail.drakovekmail.dvkarchive.web.artisthosting.FurAffinity;
@@ -192,31 +192,30 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 			download_page(
 					url, this.start_gui.get_directory(), null, true);
 		}
-		else {
-			//ASK TO ADD AS ARTIST
-			String[] labels = {"invalid_fur_url", "use_fur_artist"};
-			String[] buttons = {"yes", "no"};
-			DButtonDialog dbd = new DButtonDialog();
-			String result = dbd.open(
-					this.start_gui.get_base_gui(),
-					this.start_gui.get_frame(),
-					"invalid_url", labels, buttons);
-			if(result.equals("yes")) {
-				//CREATE ARTIST FOLDER
-				File dir = new File(
-						this.start_gui.get_directory(),
-						StringProcessing.get_filename(url));
-				if(!dir.exists()) {
-					dir.mkdir();
-				}
-				//ADD TO ARTIST LIST
-				Dvk art_dvk = new Dvk();
-				art_dvk.set_artist(url);
-				art_dvk.set_dvk_file(new File(dir, "dvk.dvk").getParentFile());
-				this.dvks.add(0, art_dvk);
-				set_artists();
-			}
+	}
+	
+	@Override
+	public void add() {
+		String[] messages = {"enter_furaffinity"};
+		DTextDialog dialog = new DTextDialog();
+		String artist = dialog.open(
+				this.start_gui.get_base_gui(),
+				this.start_gui.get_frame(),
+				"add_artist",
+				messages);
+		//CREATE ARTIST FOLDER
+		File dir = new File(
+				this.start_gui.get_directory(),
+				StringProcessing.get_filename(artist));
+		if(!dir.exists()) {
+			dir.mkdir();
 		}
+		//ADD TO ARTIST LIST
+		Dvk art_dvk = new Dvk();
+		art_dvk.set_artist(artist);
+		art_dvk.set_dvk_file(new File(dir, "dvk.dvk").getParentFile());
+		this.dvks.add(0, art_dvk);
+		set_artists();
 	}
 	
 	/**
