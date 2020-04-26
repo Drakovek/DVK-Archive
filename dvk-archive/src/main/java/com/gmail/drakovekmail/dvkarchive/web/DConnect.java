@@ -247,6 +247,15 @@ public class DConnect {
 	}
 	
 	/**
+	 * Returns the current web_client.
+	 * 
+	 * @return WebClient
+	 */
+	public WebClient get_client() {
+		return this.web_client;
+	}
+	
+	/**
 	 * Closes the web_client and loaded page.
 	 */
 	public void close_client() {
@@ -369,35 +378,37 @@ public class DConnect {
 			fos = null;
 		}
 	}
-	
+
 	/**
-	 * Removes the HTML header and footer tags from a given element.
+	 * Cleans up HTML element.
+	 * Removes whitespace and removes header and footer tags.
 	 * 
 	 * @param html HTML element
-	 * @return Element with header and footer tags removed
+	 * @param remove_ends Whether to remove header and footer tags
+	 * @return Cleaned HTML element
 	 */
-	public static String remove_header_footer(String html) {
+	public static String clean_element(String html, boolean remove_ends) {
 		String str = html.replace("\n", "");
 		str = str.replace("\r", "");
-		//REMOVE HEADER
-		int start;
-		if(str.startsWith("<")) {
-			start = str.indexOf('>');
-			str = str.substring(start + 1);
+		//REMOVE WHITESPACE BETWEEN TAGS
+		while(str.contains(" <")) {
+			str = str.replace(" <", "<");
 		}
-		//REMOVE FOOTER
-		int end;
-		if(str.endsWith(">")) {
-			end = str.lastIndexOf('<');
-			if(end != -1) {
-				str = str.substring(0, end);
+		while(str.contains("> ")) {
+			str = str.replace("> ", ">");
+		}
+		//REMOVE HEADER AND FOOTER
+		if(remove_ends) {
+			int start = str.indexOf('>') + 1;
+			int end = str.lastIndexOf('<');
+			if(start > 0 && start <= end) {
+				str = str.substring(start, end);
 			}
 		}
-		//REMOVE FRONT SPACE
+		//REMOVE WHITESPACE
 		while(str.startsWith(" ")) {
 			str = str.substring(1);
 		}
-		//REMOVE END SPACE
 		while(str.endsWith(" ")) {
 			str = str.substring(0, str.length() - 1);
 		}

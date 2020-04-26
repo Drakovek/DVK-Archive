@@ -118,13 +118,15 @@ public class TestMangaDex {
 		assertEquals("Web Comic", dvk.get_web_tags()[6]);
 		assertEquals("Comedy", dvk.get_web_tags()[7]);
 		assertEquals("Slice of Life", dvk.get_web_tags()[8]);
-		String value = "English :  <br/>  A world where logic does not exist"
-				+ " and anything is possible. The only limit is your "
-				+ "imagination. Bite-sized comics with dry humor for the "
-				+ "broken souls.  <br/>  <br/>  Un monde o&#249; la logique "
-				+ "n&#8217;existe pas et o&#249; tout est possible. La seule "
-				+ "limite est votre imagination. Des bandes "
-				+ "dessin&#233;es mordues.";
+		String value = "English :<br/>A world where logic does"
+				+ " not exist and anything is possible. The "
+				+ "only limit is your imagination. Bite-sized "
+				+ "comics with dry humor for the broken souls."
+				+ "<br/><br/>Un monde o&#249; la logique "
+				+ "n&#8217;existe pas et o&#249; tout est "
+				+ "possible. La seule limite est votre "
+				+ "imagination. Des bandes dessin&#233;es "
+				+ "mordues.";
 		assertEquals(value, dvk.get_description());
 		String url = "https://mangadex.org/title/34326/randomphilia";
 		assertEquals(url, dvk.get_page_url());
@@ -150,13 +152,15 @@ public class TestMangaDex {
 		assertEquals("Martial Arts", dvk.get_web_tags()[11]);
 		assertEquals("Supernatural", dvk.get_web_tags()[12]);
 		assertEquals("Vampires", dvk.get_web_tags()[13]);
-		value = "Second story arc of JoJo no Kimyou na Bouken "
-				+ "series.  <br/>  <br/>  Takes place in the 1930s"
-				+ ", and follows the misadventures of Joseph Joestar,"
-				+ " the grandson of Jonathan Joestar, as he fights "
-				+ "vampires and ancient super beings with some help "
-				+ "from a cybernetically-enhanced Nazi and an Italian "
-				+ "man he has a lot in common with.";
+		value = "Second story arc of JoJo no Kimyou na "
+				+ "Bouken series.<br/><br/>Takes place "
+				+ "in the 1930s, and follows the "
+				+ "misadventures of Joseph Joestar, the "
+				+ "grandson of Jonathan Joestar, as he "
+				+ "fights vampires and ancient super beings "
+				+ "with some help from a cybernetically-"
+				+ "enhanced Nazi and an Italian man he "
+				+ "has a lot in common with.";
 		assertEquals(value, dvk.get_description());
 		value = "https://mangadex.org/title/27152/jojo-s-bizarre"
 				+ "-adventure-part-2-battle-tendency-official-colored";

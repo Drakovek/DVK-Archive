@@ -132,7 +132,7 @@ public class MangaDex {
 				if(ds.get(i).asText().equals("Description:")) {
 					de = ds.get(i).getNextElementSibling();
 					dvk.set_description(
-							DConnect.remove_header_footer(de.asXml()));
+							DConnect.clean_element(de.asXml(), true));
 					break;
 				}
 			}

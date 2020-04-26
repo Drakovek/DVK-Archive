@@ -550,11 +550,11 @@ public class TestFurAffinity {
 		assertEquals(value, dvk.get_direct_url());
 		assertEquals(null, dvk.get_secondary_url());
 		value = "Puro: \"Are you going to eat the peach, "
-				+ "Lin-san?\"  <br/>  <br/>  Lin: \"Go right "
-				+ "ahead.\"  <br/>  <br/>  Puro: \"Thank "
-				+ "you...\"  <br/>  <br/>  Puro: \"LickLickLick"
-				+ "LickLick....\"  <br/>  <br/>  Lin: *blushing*"
-				+ " \"Yare Yare Daze...\"";
+				+ "Lin-san?\"<br/><br/>Lin: \"Go right "
+				+ "ahead.\"<br/><br/>Puro: \"Thank you..."
+				+ "\"<br/><br/>Puro: \"LickLickLick"
+				+ "LickLick....\"<br/><br/>Lin: *"
+				+ "blushing* \"Yare Yare Daze...\"";
 		assertEquals(value, dvk.get_description());
 		assertEquals(33, dvk.get_web_tags().length);
 		assertEquals("Rating:General", dvk.get_web_tags()[0]);
@@ -596,10 +596,9 @@ public class TestFurAffinity {
 					+ "/1401843083.angrboda_cougars_small_3.jpg";
 			assertEquals(value, dvk.get_direct_url());
 			assertEquals(null, dvk.get_secondary_url());
-			value = "comm 3/3 from last year for   <a href="
-					+ "\"/user/talent\" class=\"linkusername"
-					+ "\">    talent  </a>  , who wrote the "
-					+ "text.";
+			value = "comm 3/3 from last year for<a href=\""
+					+ "/user/talent\" class=\"linkusername\""
+					+ ">talent</a>, who wrote the text.";
 			assertEquals(value, dvk.get_description());
 			assertEquals(16, dvk.get_web_tags().length);
 			assertEquals("Rating:Adult", dvk.get_web_tags()[0]);
@@ -650,13 +649,16 @@ public class TestFurAffinity {
 		assertEquals(value, dvk.get_page_url());
 		assertEquals(null, dvk.get_direct_url());
 		assertEquals(null, dvk.get_secondary_url());
-		value = "This actually isn't that special, but thanks. Also, "
-				+ "one of my stories broke 1000 views earlier this week. "
-				+ "Good times.  <br/>  <br/>  So what do you guys actually "
-				+ "want to see from me? I'm mostly just trying fetishes "
-				+ "to see which get a lot of views, and working from there."
-				+ "   <br/>  <br/>  Also I have a patreon that I assure you "
-				+ "has the highest quality.";
+		value = "This actually isn't that special, but "
+				+ "thanks. Also, one of my stories broke "
+				+ "1000 views earlier this week. Good "
+				+ "times.<br/><br/>So what do you guys "
+				+ "actually want to see from me? I'm "
+				+ "mostly just trying fetishes to see "
+				+ "which get a lot of views, and working "
+				+ "from there.<br/><br/>Also I have a "
+				+ "patreon that I assure you has the "
+				+ "highest quality.";
 		assertEquals(value, dvk.get_description());
 		assertTrue(dvk.get_web_tags() == null);
 		assertEquals("100 watcher special_FAF8594821-J.dvk",
@@ -681,37 +683,39 @@ public class TestFurAffinity {
 		assertEquals(value, dvk.get_page_url());
 		assertEquals(null, dvk.get_direct_url());
 		assertEquals(null, dvk.get_secondary_url());
-		value = "Edit - closed, thanks everyone. Sorry the spots "
-				+ "went so fast!  <br/>  <br/>  <hr class=\""
-				+ "bbcode bbcode_hr\"/>  <br/>  <br/>  Just "
-				+ "finished up a bunch of big stuff, taking 4 "
-				+ "little ones to unwind. Same rules as always:  "
-				+ "<br/>  <br/>  Examples here:  <br/>  <a href=\""
-				+ "http://www.furaffinity.net/view/10852541/\" "
-				+ "title=\"http://www.furaffinity.net/view/10852541"
-				+ "/\" class=\"auto_link\">    http://www.furaffinity"
-				+ ".net/view/10852541/  </a>  <br/>  <a href=\""
-				+ "http://www.furaffinity.net/view/10546296/\" "
-				+ "title=\"http://www.furaffinity.net/view/10546296/"
-				+ "\" class=\"auto_link\">    http://www.furaffinity"
-				+ ".net/view/10546296/  </a>  <br/>  <br/>  1 character,"
-				+ " no background, simple colors. No proofs given, "
-				+ "final files delivered via note. As always, regular "
-				+ "TOS applies. Minor changes can be made if necessary."
-				+ "  <br/>  <br/>  Can be general to adult (please "
-				+ "specify if your request seems ambiguous)  <br/>  "
-				+ "<br/>  Please give a link to a visual ref or a good "
-				+ "written descrip, as well as the type of pose you're "
-				+ "looking for.  <br/>  <br/>  These will be pay on "
-				+ "delivery; I will note you when your pic is complete "
-				+ "and give you my payment info, and you will receive "
-				+ "the file after payment clears.  <br/>  <br/>  1)   "
-				+ "<a href=\"/user/rusvul\" class=\"linkusername\">    "
-				+ "rusvul  </a>  <br/>  2)   <a href=\"/user/stormkern\" "
-				+ "class=\"linkusername\">    stormkern  </a>  <br/>  3)"
-				+ "   <a href=\"/user/aryte\" class=\"linkusername\"> "
-				+ "   aryte  </a>  <br/>  4)   <a href=\"/user/avios\" "
-				+ "class=\"linkusername\">    avios  </a>";
+		value = "Edit - closed, thanks everyone. Sorry the "
+				+ "spots went so fast!<br/><br/><hr "
+				+ "class=\"bbcode bbcode_hr\"/><br/><br/>"
+				+ "Just finished up a bunch of big stuff, "
+				+ "taking 4 little ones to unwind. Same "
+				+ "rules as always:<br/><br/>Examples "
+				+ "here:<br/><a href=\"http://www.furaffinity."
+				+ "net/view/10852541/\" title=\"http://www."
+				+ "furaffinity.net/view/10852541/\" "
+				+ "class=\"auto_link\">http://www.furaffinity"
+				+ ".net/view/10852541/</a><br/><a href=\""
+				+ "http://www.furaffinity.net/view/10546296/"
+				+ "\" title=\"http://www.furaffinity.net/view"
+				+ "/10546296/\" class=\"auto_link\">http://www."
+				+ "furaffinity.net/view/10546296/</a><br/><br/>"
+				+ "1 character, no background, simple colors. "
+				+ "No proofs given, final files delivered via "
+				+ "note. As always, regular TOS applies. Minor "
+				+ "changes can be made if necessary.<br/><br/>"
+				+ "Can be general to adult (please specify if "
+				+ "your request seems ambiguous)<br/><br/>Please"
+				+ " give a link to a visual ref or a good written "
+				+ "descrip, as well as the type of pose you're "
+				+ "looking for.<br/><br/>These will be pay on "
+				+ "delivery; I will note you when your pic is "
+				+ "complete and give you my payment info, and "
+				+ "you will receive the file after payment "
+				+ "clears.<br/><br/>1)<a href=\"/user/rusvul\""
+				+ " class=\"linkusername\">rusvul</a><br/>2)<a"
+				+ " href=\"/user/stormkern\" class=\"linkusername"
+				+ "\">stormkern</a><br/>3)<a href=\"/user/aryte\" "
+				+ "class=\"linkusername\">aryte</a><br/>4)<a href="
+				+ "\"/user/avios\" class=\"linkusername\">avios</a>";
 		assertEquals(value, dvk.get_description());
 		assertEquals(1, dvk.get_web_tags().length);
 		assertEquals("DVK:Single", dvk.get_web_tags()[0]);

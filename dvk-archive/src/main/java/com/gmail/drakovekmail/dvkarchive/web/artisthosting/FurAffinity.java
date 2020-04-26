@@ -93,6 +93,7 @@ public class FurAffinity extends ArtistHosting {
 	
 	/**
 	 * Attempts to login to FurAffinity.
+	 * 
 	 * @param username Username
 	 * @param password Password
 	 * @param captcha Captcha
@@ -618,7 +619,7 @@ public class FurAffinity extends ArtistHosting {
 					+ "[@style='padding:8px'][@valign='top']"
 					+ "[@align='left']";
 			de = this.connect.get_page().getFirstByXPath(xpath);
-			dvk.set_description(DConnect.remove_header_footer(de.asXml()));
+			dvk.set_description(DConnect.clean_element(de.asXml(), true));
 			//GET RATING
 			String rating = null;
 			ArrayList<String> tags = new ArrayList<>();
@@ -857,7 +858,7 @@ public class FurAffinity extends ArtistHosting {
 			de = this.connect.get_page().getFirstByXPath(xpath);
 			String description = "";
 			if(de != null) {
-				description = DConnect.remove_header_footer(de.asXml());
+				description = DConnect.clean_element(de.asXml(), true);
 				dvk.set_description(description);
 			}
 			//SET TAGS
