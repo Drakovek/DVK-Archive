@@ -64,25 +64,63 @@ public class TestDeviantArt {
 	public void test_get_page_id() {
 		String id;
 		String url;
+		//GALLERY URLW
 		url = "www.deviantart.com/pokefan-tf/art/Anthro-Incineroar-TF-TG-831012876/";
 		id = DeviantArt.get_page_id(url);
 		assertEquals("DVA831012876", id);
 		url = "www.deviantart.com/artist/art/thing-1579354";
 		id = DeviantArt.get_page_id(url);
 		assertEquals("DVA1579354", id);
-		url = "https://www.deviantart.com/thing/art/thing-1579354";
+		url = "deviantart.com/thing/art/1579354";
 		id = DeviantArt.get_page_id(url);
 		assertEquals("DVA1579354", id);
+		//JOURNAL URLS
+		url = "https://www.deviantart.com/artist/journal/title-12357";
+		id = DeviantArt.get_page_id(url);
+		assertEquals("DVA12357-J", id);
+		url = "deviantart.com/artist/journal/title-54321";
+		id = DeviantArt.get_page_id(url);
+		assertEquals("DVA54321-J", id);
+		url = "deviantart.com/bleh/journal/2561024";
+		id = DeviantArt.get_page_id(url);
+		assertEquals("DVA2561024-J", id);
+		//STATUS URLS
+		url = "https://www.deviantart.com/artist/status-update/12345";
+		id = DeviantArt.get_page_id(url);
+		assertEquals("DVA12345-S", id);
+		url = "www.deviantart.com/artist/status-update/5876";
+		id = DeviantArt.get_page_id(url);
+		assertEquals("DVA5876-S", id);
+		url = "deviantart.com/artist/status-update/1800215";
+		id = DeviantArt.get_page_id(url);
+		assertEquals("DVA1800215-S", id);
+		//POLL URLS
+		url = "https://www.deviantart.com/akuoreo/poll/title-thing-87659";
+		id = DeviantArt.get_page_id(url);
+		assertEquals("DVA87659-P", id);
+		url = "www.deviantart.com/akuoreo/poll/thing-2500";
+		id = DeviantArt.get_page_id(url);
+		assertEquals("DVA2500-P", id);
+		url = "deviantart.com/akuoreo/poll/86256";
+		id = DeviantArt.get_page_id(url);
+		assertEquals("DVA86256-P", id);
+		//INVALID URLS
 		url = "www.nope.com/bleh/art/thing-1579354";
+		id = DeviantArt.get_page_id(url);
+		assertEquals(null, id);
+		url = "https://www.deviantart.com/thing/bleh/thing-1579354";
+		id = DeviantArt.get_page_id(url);
+		assertEquals(null, id);
+		url = "https://www.deviantart.com/thing/art/";
 		id = DeviantArt.get_page_id(url);
 		assertEquals(null, id);
 	}
 	
 	/**
-	 * Tests the get_dvk method.
+	 * Tests all DeviantArt methods that require login.
 	 */
 	@Test
-	public void test_get_dvk() {
+	public void test_login_methods() {
 		//LOGIN
 		this.dev.initialize_connect();
 		String[] info = this.dev.get_user_info(
@@ -90,6 +128,15 @@ public class TestDeviantArt {
 		this.dev.login(info[0], info[1]);
 		info = null;
 		assertTrue(this.dev.is_logged_in());
+		//TEST METHODS
+		test_get_dvk();
+		test_get_journal_dvk();
+	}
+	
+	/**
+	 * Tests the get_dvk method.
+	 */
+	public void test_get_dvk() {
 		//FIRST DVK - IMAGE
 		String url = "deviantart.com/pokefan-tf/art/Anthro-Incineroar-TF-TG-831012876";
 		Dvk dvk = this.dev.get_dvk(url, "Gallery:Main", this.test_dir, "Somebody", true, false);
@@ -134,10 +181,13 @@ public class TestDeviantArt {
 				dvk.get_media_file().getName());
 		assertEquals(null, dvk.get_secondary_file());
 		//SECOND DVK - LITERATURE
-		url = "https://www.deviantart.com/legomax98/art/Finding-One-s-True-Self-770569130";
-		dvk = this.dev.get_dvk(url, "Gallery:Main", this.test_dir, null, false, true);
+		url = "https://www.deviantart.com/legomax98/"
+				+ "art/Finding-One-s-True-Self-770569130";
+		dvk = this.dev.get_dvk(
+				url, "Gallery:Main", this.test_dir, null, false, true);
 		assertEquals("DVA770569130", dvk.get_id());
-		url = "https://www.deviantart.com/legomax98/art/Finding-One-s-True-Self-770569130";
+		url = "https://www.deviantart.com/legomax98/"
+				+ "art/Finding-One-s-True-Self-770569130";
 		assertEquals(url, dvk.get_page_url());
 		assertEquals("Finding One's True Self", dvk.get_title());
 		assertEquals(1, dvk.get_artists().length);
@@ -171,14 +221,21 @@ public class TestDeviantArt {
 		assertEquals(null, dvk.get_secondary_file());
 		assertTrue(dvk.get_media_file().exists());
 		String file = InOut.read_file(dvk.get_media_file());
-		assertTrue(file.startsWith("<!DOCTYPE html><html><span><p><span>To say that Lisa enjoyed the outdoors"));
-		assertTrue(file.endsWith("and together they bounded off into the forest.</span></p><div><span><br/></span></div></span></html>"));
-		assertTrue(file.contains("A voice in the back of her mind told her this wasn’t normal wolf behavior"));
+		assertTrue(file.startsWith("<!DOCTYPE html><html><span><p>"
+				+ "<span>To say that Lisa enjoyed the outdoors"));
+		assertTrue(file.endsWith("and together they bounded off "
+				+ "into the forest.</span></p><div><span><br/>"
+				+ "</span></div></span></html>"));
+		assertTrue(file.contains("A voice in the back of her mind"
+				+ " told her this wasn’t normal wolf behavior"));
 		//THIRD DVK - LITERATURE
-		url = "http://www.deviantart.com/pokefan-tf/art/Pokeclipse-TF-RP-700042244";
-		dvk = this.dev.get_dvk(url, "Gallery:Scraps", this.test_dir, null, true, true);
+		url = "http://www.deviantart.com/pokefan-tf/art/"
+				+ "Pokeclipse-TF-RP-700042244";
+		dvk = this.dev.get_dvk(
+				url, "Gallery:Scraps", this.test_dir, null, true, true);
 		assertEquals("DVA700042244", dvk.get_id());
-		url = "https://www.deviantart.com/pokefan-tf/art/Pokeclipse-TF-RP-700042244";
+		url = "https://www.deviantart.com/pokefan-tf/art/"
+				+ "Pokeclipse-TF-RP-700042244";
 		assertEquals(url, dvk.get_page_url());
 		assertEquals("Pokeclipse! (TF RP)", dvk.get_title());
 		assertEquals(1, dvk.get_artists().length);
@@ -222,10 +279,14 @@ public class TestDeviantArt {
 				+ "that.<br/>5. Have fun!</html>";
 		assertEquals(desc, file);
 		//FOURTH DVK - VIDEO
-		url = "http://www.deviantart.com/fezmangaka/art/Calem-s-Noivern-TF-786108284";
-		dvk = this.dev.get_dvk(url, "Gallery:Scraps", this.test_dir, "Person", false, false);
+		url = "http://www.deviantart.com/fezmangaka/art/Calem-s"
+				+ "-Noivern-TF-786108284";
+		dvk = this.dev.get_dvk(
+				url, "Gallery:Scraps", this.test_dir,
+				"Person", false, false);
 		assertEquals("DVA786108284", dvk.get_id());
-		url = "https://www.deviantart.com/fezmangaka/art/Calem-s-Noivern-TF-786108284";
+		url = "https://www.deviantart.com/fezmangaka/"
+				+ "art/Calem-s-Noivern-TF-786108284";
 		assertEquals(url, dvk.get_page_url());
 		assertEquals("Calem's Noivern TF", dvk.get_title());
 		assertEquals(1, dvk.get_artists().length);
@@ -269,10 +330,14 @@ public class TestDeviantArt {
 		assertEquals("Calem-s Noivern TF_DVA786108284.jpg",
 				dvk.get_secondary_file().getName());
 		//FIFTH DVK - SWF
-		url = "deviantart.com/doom-the-wolf/art/Interactive-dragoness-transformation-298825987";
-		dvk = this.dev.get_dvk(url, "Gallery:Scraps", this.test_dir, "Somebody", false, false);
+		url = "deviantart.com/doom-the-wolf/art/"
+				+ "Interactive-dragoness-transformation-298825987";
+		dvk = this.dev.get_dvk(
+				url, "Gallery:Scraps", this.test_dir,
+				"Somebody", false, false);
 		assertEquals("DVA298825987", dvk.get_id());
-		url = "https://www.deviantart.com/doom-the-wolf/art/Interactive-dragoness-transformation-298825987";
+		url = "https://www.deviantart.com/doom-the-wolf/art/"
+				+ "Interactive-dragoness-transformation-298825987";
 		assertEquals(url, dvk.get_page_url());
 		assertEquals("Interactive dragoness transformation", dvk.get_title());
 		assertEquals(1, dvk.get_artists().length);
@@ -327,7 +392,8 @@ public class TestDeviantArt {
 				dvk.get_secondary_file().getName());
 		//SIXTH DVK - UNDOWNLOADABLE
 		url = "https://www.deviantart.com/drakovek/art/Drakovek-839354922";
-		dvk = this.dev.get_dvk(url, "Gallery:Main", this.test_dir, null, false, false);
+		dvk = this.dev.get_dvk(
+				url, "Gallery:Main", this.test_dir, null, false, false);
 		assertEquals("DVA839354922", dvk.get_id());
 		url = "https://www.deviantart.com/drakovek/art/Drakovek-839354922";
 		assertEquals(url, dvk.get_page_url());
@@ -367,5 +433,121 @@ public class TestDeviantArt {
 		assertEquals("Drakovek_DVA839354922.png",
 				dvk.get_media_file().getName());
 		assertEquals(null, dvk.get_secondary_file());
+	}
+
+	/**
+	 * Tests the get_journal method.
+	 */
+	public void test_get_journal_dvk() {
+		//FIRST DVK
+		String url = "deviantart.com/akuoreo/journal/Looking"
+				+ "-to-hire-3D-modeler-817361421";
+		Dvk dvk = this.dev.get_journal_dvk(url, this.test_dir, true, false);
+		assertEquals("DVA817361421-J", dvk.get_id());
+		assertEquals("Looking to hire 3D modeler", dvk.get_title());
+		assertEquals(1, dvk.get_artists().length);
+		assertEquals("AkuOreo", dvk.get_artists()[0]);
+		assertEquals("2019/10/19|11:53", dvk.get_time());
+		assertEquals(5, dvk.get_web_tags().length);
+		assertEquals("Rating:General", dvk.get_web_tags()[0]);
+		assertEquals("Gallery:Journals", dvk.get_web_tags()[1]);
+		assertEquals("Journals", dvk.get_web_tags()[2]);
+		assertEquals("Personal", dvk.get_web_tags()[3]);
+		assertEquals("DVK:Single", dvk.get_web_tags()[4]);
+		String desc = "<div>We have wanted to use the money we have "
+				+ "gotten to commission more MSF High related stuff";
+		assertTrue(dvk.get_description().startsWith(desc));
+		desc = "It will be posted for free on my youtube channel "
+				+ "once done.</q></span></a></span><!-- ^TTT -->"
+				+ "<!-- TTT$ --></span></div><div><br/></div><br/>"
+				+ "<div><br/></div><div><br/></div><div><br/></div>"
+				+ "<div><br/></div><div><br/></div><div><br/>"
+				+ "</div><div><br/></div>";
+		assertTrue(dvk.get_description().endsWith(desc));
+		url = "https://www.deviantart.com/akuoreo/journal/"
+				+ "Looking-to-hire-3D-modeler-817361421";
+		assertEquals(url, dvk.get_page_url());
+		assertEquals(null, dvk.get_direct_url());
+		url = "https://images-wixmp-ed30a86b8c4ca887773594c2."
+				+ "wixmp.com/f/4b1ad4c6-d4d5-4075-aef2-"
+				+ "66b5e4fbe46b/ddimle3-f2eeb66b-6459-4082-"
+				+ "9a9a-0b767df12356.jpg/v1/fill/w_1280,h_720"
+				+ ",q_75,strp/vice_principal_kasumi_wallpaper_"
+				+ "by_akuoreo_ddimle3-fullview.jpg?";
+		assertTrue(dvk.get_secondary_url().startsWith(url));
+		assertEquals("Looking to hire 3D modeler_DVA817361421-J.dvk",
+				dvk.get_dvk_file().getName());
+		assertEquals("Looking to hire 3D modeler_DVA817361421-J.txt",
+				dvk.get_media_file().getName());
+		assertEquals("Looking to hire 3D modeler_DVA817361421-J.jpg",
+				dvk.get_secondary_file().getName());
+		//SECOND DVK
+		url = "https://www.deviantart.com/akuoreo/journal/Slime-Girl-TF-TG-Deal-Closed-762225768";
+		dvk = this.dev.get_journal_dvk(url, this.test_dir, false, true);
+		assertEquals("DVA762225768-J", dvk.get_id());
+		assertEquals("Slime Girl TF TG Deal (Closed)", dvk.get_title());
+		assertEquals(1, dvk.get_artists().length);
+		assertEquals("AkuOreo", dvk.get_artists()[0]);
+		assertEquals("2018/09/02|03:09", dvk.get_time());
+		assertEquals(4, dvk.get_web_tags().length);
+		assertEquals("Rating:General", dvk.get_web_tags()[0]);
+		assertEquals("Gallery:Journals", dvk.get_web_tags()[1]);
+		assertEquals("Journals", dvk.get_web_tags()[2]);
+		assertEquals("Personal", dvk.get_web_tags()[3]);
+		desc = "<div>I'm having another deal, but for only two people";
+		assertTrue(dvk.get_description().startsWith(desc));
+		desc = "Please give info on what you want.</b><br/></div>";
+		assertTrue(dvk.get_description().endsWith(desc));
+		url = "https://www.deviantart.com/akuoreo/journal/"
+				+ "Slime-Girl-TF-TG-Deal-Closed-762225768";
+		assertEquals(url, dvk.get_page_url());
+		assertEquals(null, dvk.get_direct_url());
+		assertEquals(null, dvk.get_secondary_url());
+		assertEquals("Slime Girl TF TG Deal Closed_DVA762225768-J.dvk",
+				dvk.get_dvk_file().getName());
+		assertEquals("Slime Girl TF TG Deal Closed_DVA762225768-J.txt",
+				dvk.get_media_file().getName());
+		assertEquals(null, dvk.get_secondary_file());
+		assertTrue(dvk.get_dvk_file().exists());
+		assertTrue(dvk.get_media_file().exists());
+		String text = InOut.read_file(dvk.get_media_file());
+		desc = "<!DOCTYPE html><html><div>I'm having another deal,"
+				+ " but for only two people";
+		assertTrue(text.startsWith(desc));
+		desc = "Please give info on what you want.</b><br/></div></html>";
+		assertTrue(text.endsWith(desc));
+		//THIRD DVK
+		url = "https://www.deviantart.com/pokefan-tf/journal/On-Break-749882887";
+		dvk = this.dev.get_journal_dvk(url, this.test_dir, true, true);
+		assertEquals("DVA749882887-J", dvk.get_id());
+		assertEquals("On Break.", dvk.get_title());
+		assertEquals(1, dvk.get_artists().length);
+		assertEquals("Pokefan-Tf", dvk.get_artists()[0]);
+		assertEquals("2018/06/15|08:07", dvk.get_time());
+		assertEquals(5, dvk.get_web_tags().length);
+		assertEquals("Rating:General", dvk.get_web_tags()[0]);
+		assertEquals("Gallery:Journals", dvk.get_web_tags()[1]);
+		assertEquals("Journals", dvk.get_web_tags()[2]);
+		assertEquals("Personal", dvk.get_web_tags()[3]);
+		assertEquals("DVK:Single", dvk.get_web_tags()[4]);
+		desc = "I'm gonna be away from my computer 'till the "
+				+ "beginning of next month, so don't expect "
+				+ "many RP responses from me.";
+		assertEquals(desc, dvk.get_description());
+		url = "https://www.deviantart.com/pokefan-tf/journal/On-Break-749882887";
+		assertEquals(url, dvk.get_page_url());
+		assertEquals(null, dvk.get_direct_url());
+		assertEquals(null, dvk.get_secondary_url());
+		assertEquals("On Break_DVA749882887-J.dvk",
+				dvk.get_dvk_file().getName());
+		assertEquals("On Break_DVA749882887-J.txt",
+				dvk.get_media_file().getName());
+		assertEquals(null, dvk.get_secondary_file());
+		assertTrue(dvk.get_dvk_file().exists());
+		assertTrue(dvk.get_media_file().exists());
+		text = InOut.read_file(dvk.get_media_file());
+		desc = "<!DOCTYPE html><html>" + 
+				desc + "</html>";
+		assertEquals(desc, text);
 	}
 }

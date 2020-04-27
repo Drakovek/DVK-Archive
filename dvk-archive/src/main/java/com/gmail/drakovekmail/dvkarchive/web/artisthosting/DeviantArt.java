@@ -66,16 +66,48 @@ public class DeviantArt extends ArtistHosting {
 	 */
 	public static String get_page_id(String page_url) {
 		//CHECKS IF FROM DEVIANTART
-		if(!page_url.contains("deviantart.com/")
-				|| !page_url.contains("/art/")) {
+		if(!page_url.contains("deviantart.com/")) {
 			return null;
 		}
+		//GET ENDING OF ID
+		int s1 = -1;
+		String suffix = null;
+		if(page_url.contains("/art/")) {
+			s1 = page_url.indexOf("/art/") + 1;
+			s1 = page_url.indexOf('/', s1) + 1;
+			suffix = "";
+		}
+		else if(page_url.contains("/journal/")) {
+			s1 = page_url.indexOf("/journal/") + 1;
+			s1 = page_url.indexOf('/', s1) + 1;
+			suffix = "-J";
+		}
+		else if(page_url.contains("/status-update/")) {
+			s1 = page_url.indexOf("/status-update/") + 1;
+			s1 = page_url.indexOf('/', s1) + 1;
+			suffix = "-S";
+		}
+		else if(page_url.contains("/poll/")) {
+			s1 = page_url.indexOf("/poll/") + 1;
+			s1 = page_url.indexOf('/', s1) + 1;
+			suffix = "-P";
+		}
+		else {
+			return null;
+		}
+		//GET ID SUBSTRING
 		int start = page_url.lastIndexOf('-') + 1;
+		if(start < s1) {
+			start = s1;
+		}
 		int end = page_url.indexOf('/', start);
 		if(end == -1) {
 			end = page_url.length();
 		}
-		return "DVA" + page_url.substring(start, end);
+		if(start == end) {
+			return null;
+		}
+		return "DVA" + page_url.substring(start, end) + suffix;
 	}
 	
 	/**
@@ -314,12 +346,21 @@ public class DeviantArt extends ArtistHosting {
 			}
 			//SET SECONDARY URL
 			try {
-				String second = json.getString("thumbnail_url");
-				if(!type.equals("photo") && second != null) {
+				String second = json.getString("fullsize_url");
+				if(!type.equals("photo")) {
 					dvk.set_secondary_url(second);
 				}
 			}
 			catch (JSONException f) {}
+			if(dvk.get_secondary_url() == null) {
+				try {
+					String second = json.getString("thumbnail_url");
+					if(!type.equals("photo")) {
+						dvk.set_secondary_url(second);
+					}
+				}
+				catch (JSONException f) {}
+			}
 			//SET FILES
 			String ext;
 			String filename = dvk.get_filename();
@@ -355,7 +396,142 @@ public class DeviantArt extends ArtistHosting {
 			}
 			return dvk;
 		}
-		catch(Exception e){
+		catch(Exception e){}
+		return new Dvk();
+	}
+	
+	/**
+	 * Returns a Dvk for a given DeviantArt journal page.
+	 * 
+	 * @param page_url URL of DeviantArt journal page
+	 * @param directory Directory in which to save Dvk.
+	 * @param single Whether this is a single download
+	 * @param save Whether to save Dvk and media
+	 * @return Dvk of DeviantArt media page
+	 */
+	@SuppressWarnings("resource")
+	public Dvk get_journal_dvk(
+			String page_url,
+			File directory,
+			boolean single,
+			boolean save) {
+		Dvk dvk = new Dvk();
+		dvk.set_id(get_page_id(page_url));
+		if(dvk.get_id() == null) {
+			//CANCEL
+			return new Dvk();
+		}
+		//GET PAGE URL
+		int start = page_url.indexOf("deviantart.com/");
+		String url = "https://www." + page_url.substring(start);
+		dvk.set_page_url(url);
+		//LOAD PAGE
+		if(this.connect == null) {
+			initialize_connect();
+		}
+		String xpath = "//link[@type='application/json+oembed']";
+		this.connect.load_page(url, xpath, 1);
+		try {
+			TimeUnit.MILLISECONDS.sleep(1000);
+		} catch (InterruptedException e) {}
+		try {
+			//CHECK IF STILL LOGGED IN
+			if(!is_logged_in()) {
+				throw new Exception();
+			}
+			//GET DESCRIPTION
+			int end;
+			DomElement de;
+			String desc = null;
+			xpath = "//div[contains(@class,'legacy-journal')]//script/parent::div";
+			de = this.connect.get_page().getFirstByXPath(xpath);
+			desc = DConnect.clean_element(de.asXml(), true);
+			start = desc.indexOf("<script");
+			end = desc.indexOf("</script>", start);
+			end = desc.indexOf('>', end) + 1;
+			desc = desc.substring(0, start) + desc.substring(end);
+			dvk.set_description(desc);
+			//GET JSON
+			DomAttr da;
+			xpath = "//link[@type='application/json+oembed']/@href";
+			da = this.connect.get_page().getFirstByXPath(xpath);
+			WebClient client = this.connect.get_client();
+			UnexpectedPage page;
+			page = (UnexpectedPage)client.getPage(da.getNodeValue());
+			String res = page.getWebResponse().getContentAsString();
+			JSONObject json = new JSONObject(res);
+			//GET TITLE
+			dvk.set_title(json.getString("title"));
+			//GET ARTIST
+			dvk.set_artist(json.getString("author_name"));
+			//GET TIME PUBLISHED
+			String time = json.getString("pubdate");
+			dvk.set_time(time.substring(0, 16));
+			//GET RATING
+			ArrayList<String> tags = new ArrayList<>();
+			String rating = json.getString("safety");
+			if(rating.equals("nonadult")) {
+				tags.add("Rating:General");
+			}
+			else if (rating.equals("adult")){
+				tags.add("Rating:Mature");
+			}
+			else {
+				throw new Exception();
+			}
+			//GET GALLERY
+			tags.add("Gallery:Journals");
+			//GET CATEGORIES
+			String category = json.getString("category");
+			while(category.contains(" > ")) {
+				start = category.indexOf(" > ");
+				tags.add(category.substring(0, start));
+				category = category.substring(start + 3);
+			}
+			tags.add(category);
+			if(single) {
+				tags.add("DVK:Single");
+			}
+			dvk.set_web_tags(ArrayProcessing.list_to_array(tags));
+			//SET SECONDARY URL
+			try {
+				String second = json.getString("fullsize_url");
+				dvk.set_secondary_url(second);
+			}
+			catch (JSONException f) {}
+			if(dvk.get_secondary_url() == null) {
+				try {
+					String second = json.getString("thumbnail_url");
+					dvk.set_secondary_url(second);
+				}
+				catch (JSONException f) {}
+			}
+			//SET FILES
+			String filename = dvk.get_filename();
+			dvk.set_dvk_file(new File(directory, filename + ".dvk"));
+			dvk.set_media_file(filename + ".txt");
+			//SET SECONDARY FILE
+			if(dvk.get_secondary_url() != null) {
+				String ext;
+				ext = StringProcessing.get_extension(
+						dvk.get_secondary_url());
+				dvk.set_secondary_file(filename + ext);
+			}
+			//SAVE
+			if(save) {
+				desc = "<!DOCTYPE html><html>" + 
+						desc + "</html>";
+				dvk.write_dvk();
+				InOut.write_file(dvk.get_media_file(), desc);
+				if(dvk.get_secondary_url() != null) {
+					this.connect.download(
+							dvk.get_secondary_url(),
+							dvk.get_secondary_file());
+				}
+			}
+			return dvk;
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 		}
 		return new Dvk();

@@ -70,10 +70,21 @@ public class TestReformat {
 		dvk2.set_dvk_file(new File(this.test_dir, "dvk2.dvk"));
 		dvk2.set_media_file("dvk2.jpg");
 		dvk2.set_secondary_file("dvk2.txt");
+		dvk2.set_description("This is fine already.");
+		Dvk dvk3 = new Dvk();
+		dvk3.set_id("ID3");
+		dvk3.set_title("Title 3");
+		dvk3.set_artist("Artist");
+		dvk3.set_page_url("/page/");
+		dvk3.set_dvk_file(new File(this.test_dir, "dvk3.dvk"));
+		dvk3.set_media_file("dvk3.txt");
+		dvk3.set_description(" <a> <b>words 'n stuff  </b>   </a> ");
 		dvk1.write_dvk();
 		dvk2.write_dvk();
+		dvk3.write_dvk();
 		assertTrue(dvk1.get_dvk_file().exists());
 		assertTrue(dvk2.get_dvk_file().exists());
+		assertTrue(dvk3.get_dvk_file().exists());
 		//REFORMAT DVKS
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
@@ -83,15 +94,24 @@ public class TestReformat {
 		//CHECK DVKS STILL VALID
 		handler.read_dvks(dirs, prefs, null, false, false, false);
 		handler.sort_dvks_title(false, false);
-		assertEquals(2, handler.get_size());
+		assertEquals(3, handler.get_size());
 		assertTrue(handler.get_dvk(0).get_dvk_file().exists());
 		assertTrue(handler.get_dvk(1).get_dvk_file().exists());
+		assertTrue(handler.get_dvk(2).get_dvk_file().exists());
 		assertEquals("Title 1", handler.get_dvk(0).get_title());
 		assertEquals("Title 2", handler.get_dvk(1).get_title());
+		assertEquals("Title 3", handler.get_dvk(2).get_title());
 		assertEquals("dvk1.dvk",
 				handler.get_dvk(0).get_dvk_file().getName());
 		assertEquals("dvk2.dvk",
 				handler.get_dvk(1).get_dvk_file().getName());
+		assertEquals("dvk3.dvk",
+				handler.get_dvk(2).get_dvk_file().getName());
+		assertEquals(null, handler.get_dvk(0).get_description());
+		assertEquals("This is fine already.",
+				handler.get_dvk(1).get_description());
+		assertEquals("<a><b>words 'n stuff</b></a>",
+				handler.get_dvk(2).get_description());
 	}
 	
 	/**

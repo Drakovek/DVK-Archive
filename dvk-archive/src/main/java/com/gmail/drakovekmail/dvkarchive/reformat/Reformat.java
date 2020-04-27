@@ -3,6 +3,7 @@ package com.gmail.drakovekmail.dvkarchive.reformat;
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
 import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
 import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
+import com.gmail.drakovekmail.dvkarchive.web.DConnect;
 
 /**
  * Methods for reformatting Dvks and associated media.
@@ -33,6 +34,11 @@ public class Reformat {
 			}
 			//REFORMAT DVKS
 			Dvk dvk = dvk_handler.get_dvk(i);
+			String desc = dvk.get_description();
+			if(desc != null) {
+				desc = DConnect.clean_element(desc, false);
+				dvk.set_description(desc);
+			}
 			dvk.write_dvk();
 			dvk.update_extensions();
 		}

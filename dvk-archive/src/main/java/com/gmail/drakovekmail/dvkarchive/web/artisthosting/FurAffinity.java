@@ -25,6 +25,8 @@ import com.gmail.drakovekmail.dvkarchive.web.DConnect;
  */
 public class FurAffinity extends ArtistHosting {
 
+	//TODO Fix journal tags to include single download, rating, and gallery
+	
 	/**
 	 * DConnect object for connecting to FurAffinity
 	 */
