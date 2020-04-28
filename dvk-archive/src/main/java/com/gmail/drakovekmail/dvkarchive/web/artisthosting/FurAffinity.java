@@ -406,7 +406,7 @@ public class FurAffinity extends ArtistHosting {
 			}
 			pages.addAll(next);
 		}
-		return pages;
+		return ArrayProcessing.clean_list(pages);
 	}
 	
 	/**
@@ -524,7 +524,7 @@ public class FurAffinity extends ArtistHosting {
 			}
 			pages.addAll(next);
 		}
-		return pages;
+		return ArrayProcessing.clean_list(pages);
 	}
 	
 	/**

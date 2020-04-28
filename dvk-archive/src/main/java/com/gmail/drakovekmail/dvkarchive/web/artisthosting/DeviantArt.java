@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.gargoylesoftware.htmlunit.UnexpectedPage;
@@ -15,7 +17,9 @@ import com.gargoylesoftware.htmlunit.html.HtmlImage;
 import com.gargoylesoftware.htmlunit.html.HtmlInput;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
+import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
 import com.gmail.drakovekmail.dvkarchive.file.InOut;
+import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
 import com.gmail.drakovekmail.dvkarchive.processing.ArrayProcessing;
 import com.gmail.drakovekmail.dvkarchive.processing.HtmlProcessing;
 import com.gmail.drakovekmail.dvkarchive.processing.StringProcessing;
@@ -124,18 +128,15 @@ public class DeviantArt extends ArtistHosting {
 			HtmlInput pass;
 			try {
 				//INPUT USERNAME
-				HtmlInput user = this.connect.get_page()
-						.getFirstByXPath(xpath);
+				HtmlInput user = this.connect.get_page().getFirstByXPath(xpath);
 				user.setValueAttribute(username);
 				//INPUT PASSWORD
 				xpath = "//input[@id='password']";
-				pass = this.connect.get_page()
-						.getFirstByXPath(xpath);
+				pass = this.connect.get_page().getFirstByXPath(xpath);
 				pass.setValueAttribute(password);
 				//SUBMIT INFO
 				xpath = "//button[@id='loginbutton']";
-				HtmlButton submit = this.connect.get_page()
-						.getFirstByXPath(xpath);
+				HtmlButton submit = this.connect.get_page().getFirstByXPath(xpath);
 				this.connect.set_page((HtmlPage)submit.click());
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -151,8 +152,7 @@ public class DeviantArt extends ArtistHosting {
 	 * @return Whether connect is logged in
 	 */
 	public boolean is_logged_in() {
-		if(this.connect == null
-				|| this.connect.get_page() == null) {
+		if(this.connect == null || this.connect.get_page() == null) {
 			return false;
 		}
 		DomElement de;
@@ -174,13 +174,7 @@ public class DeviantArt extends ArtistHosting {
 	 * @return Dvk of DeviantArt media page
 	 */
 	@SuppressWarnings("resource")
-	public Dvk get_dvk(
-			String page_url,
-			String gallery,
-			File directory,
-			String artist,
-			boolean single,
-			boolean save) {
+	public Dvk get_dvk(String page_url, String gallery, File directory, String artist, boolean single, boolean save) {
 		Dvk dvk = new Dvk();
 		dvk.set_id(get_page_id(page_url));
 		if(dvk.get_id() == null) {
@@ -207,13 +201,10 @@ public class DeviantArt extends ArtistHosting {
 			}
 			//GET DESCRIPTION
 			DomElement de;
-			xpath = "//a[contains(@class,'user-link')]/parent::div/"
-					+ "following-sibling::div"
-					+ "[contains(@class,'legacy-journal')]";
+			xpath = "//a[contains(@class,'user-link')]/parent::div/following-sibling::div[contains(@class,'legacy-journal')]";
 			de = this.connect.get_page().getFirstByXPath(xpath);
 			if(de != null) {
-				dvk.set_description(DConnect.clean_element(
-						de.asXml(), true));
+				dvk.set_description(DConnect.clean_element(de.asXml(), true));
 			}
 			//GET TEXT IF LITERATURE PAGE
 			int end;
@@ -221,8 +212,7 @@ public class DeviantArt extends ArtistHosting {
 			xpath = "//div[contains(@class,'legacy-journal')]//script/parent::div";
 			de = this.connect.get_page().getFirstByXPath(xpath);
 			if(de != null) {
-				text = DConnect.clean_element(
-						de.asXml(), true);
+				text = DConnect.clean_element(de.asXml(), true);
 				start = text.indexOf("<script");
 				end = text.indexOf("</script>", start);
 				end = text.indexOf('>', end) + 1;
@@ -294,7 +284,7 @@ public class DeviantArt extends ArtistHosting {
 			if(rating.equals("nonadult")) {
 				tags.add("Rating:General");
 			}
-			else if (rating.equals("adult")){
+			else if (rating.equals("adult")) {
 				tags.add("Rating:Mature");
 			}
 			else {
@@ -311,16 +301,19 @@ public class DeviantArt extends ArtistHosting {
 			}
 			tags.add(category);
 			//GET MAIN TAGS
-			String tag;
-			String tag_str = json.getString("tags");
-			while(tag_str.contains(", ")) {
-				start = tag_str.indexOf(", ");
-				tag = tag_str.substring(0, start);
-				tag = HtmlProcessing.replace_escapes(tag);
-				tags.add(tag);
-				tag_str = tag_str.substring(start + 2);
+			try {
+				String tag;
+				String tag_str = json.getString("tags");
+				while(tag_str.contains(", ")) {
+					start = tag_str.indexOf(", ");
+					tag = tag_str.substring(0, start);
+					tag = HtmlProcessing.replace_escapes(tag);
+					tags.add(tag);
+					tag_str = tag_str.substring(start + 2);
+				}
+				tags.add(tag_str);
 			}
-			tags.add(tag_str);
+			catch (JSONException f) {}
 			//SINGLE AND FAVORITE TAGS
 			if(single) {
 				tags.add("DVK:Single");
@@ -369,14 +362,12 @@ public class DeviantArt extends ArtistHosting {
 				dvk.set_media_file(filename + ".txt");
 			}
 			else {
-				ext = StringProcessing.get_extension(
-						dvk.get_direct_url());
+				ext = StringProcessing.get_extension(dvk.get_direct_url());
 				dvk.set_media_file(filename + ext);
 			}
 			//SET SECONDARY FILE
 			if(dvk.get_secondary_url() != null) {
-				ext = StringProcessing.get_extension(
-						dvk.get_secondary_url());
+				ext = StringProcessing.get_extension(dvk.get_secondary_url());
 				dvk.set_secondary_file(filename + ext);
 			}
 			//SAVE FILES
@@ -385,9 +376,7 @@ public class DeviantArt extends ArtistHosting {
 					dvk.write_dvk();
 					InOut.write_file(dvk.get_media_file(), text);
 					if(dvk.get_secondary_url() != null) {
-						this.connect.download(
-								dvk.get_secondary_url(),
-								dvk.get_secondary_file());
+						this.connect.download(dvk.get_secondary_url(), dvk.get_secondary_file());
 					}
 				}
 				else {
@@ -441,10 +430,9 @@ public class DeviantArt extends ArtistHosting {
 			}
 			//GET DESCRIPTION
 			int end;
-			DomElement de;
 			String desc = null;
 			xpath = "//div[contains(@class,'legacy-journal')]//script/parent::div";
-			de = this.connect.get_page().getFirstByXPath(xpath);
+			DomElement de = this.connect.get_page().getFirstByXPath(xpath);
 			desc = DConnect.clean_element(de.asXml(), true);
 			start = desc.indexOf("<script");
 			end = desc.indexOf("</script>", start);
@@ -452,12 +440,10 @@ public class DeviantArt extends ArtistHosting {
 			desc = desc.substring(0, start) + desc.substring(end);
 			dvk.set_description(desc);
 			//GET JSON
-			DomAttr da;
 			xpath = "//link[@type='application/json+oembed']/@href";
-			da = this.connect.get_page().getFirstByXPath(xpath);
+			DomAttr da = this.connect.get_page().getFirstByXPath(xpath);
 			WebClient client = this.connect.get_client();
-			UnexpectedPage page;
-			page = (UnexpectedPage)client.getPage(da.getNodeValue());
+			UnexpectedPage page = (UnexpectedPage)client.getPage(da.getNodeValue());
 			String res = page.getWebResponse().getContentAsString();
 			JSONObject json = new JSONObject(res);
 			//GET TITLE
@@ -473,7 +459,7 @@ public class DeviantArt extends ArtistHosting {
 			if(rating.equals("nonadult")) {
 				tags.add("Rating:General");
 			}
-			else if (rating.equals("adult")){
+			else if (rating.equals("adult")) {
 				tags.add("Rating:Mature");
 			}
 			else {
@@ -513,20 +499,16 @@ public class DeviantArt extends ArtistHosting {
 			//SET SECONDARY FILE
 			if(dvk.get_secondary_url() != null) {
 				String ext;
-				ext = StringProcessing.get_extension(
-						dvk.get_secondary_url());
+				ext = StringProcessing.get_extension(dvk.get_secondary_url());
 				dvk.set_secondary_file(filename + ext);
 			}
 			//SAVE
 			if(save) {
-				desc = "<!DOCTYPE html><html>" + 
-						desc + "</html>";
+				desc = "<!DOCTYPE html><html>" + desc + "</html>";
 				dvk.write_dvk();
 				InOut.write_file(dvk.get_media_file(), desc);
 				if(dvk.get_secondary_url() != null) {
-					this.connect.download(
-							dvk.get_secondary_url(),
-							dvk.get_secondary_file());
+					this.connect.download(dvk.get_secondary_url(), dvk.get_secondary_file());
 				}
 			}
 			return dvk;
@@ -535,5 +517,141 @@ public class DeviantArt extends ArtistHosting {
 			e.printStackTrace();
 		}
 		return new Dvk();
+	}
+	
+	/**
+	 * Returns a list of DeviantArt media page URLs for a given artist.
+	 * 
+	 * @param start_gui Used for canceling and showing progress
+	 * @param artist DeviantArt artist
+	 * @param directory Directory to move DVKs to, if specified
+	 * @param type Type of gallery to scan ('m' - Main, 's' - Scraps, 'f' - Favorites)
+	 * @param dvk_handler Used to check for already downloaded files
+	 * @param check_all Whether to check all gallery pages
+	 * @param offset Gallery page offset
+	 * @return List of DeviantArt media page URLs
+	 */
+	@SuppressWarnings("resource")
+	public ArrayList<String> get_pages(
+			StartGUI start_gui,
+			String artist,
+			File directory,
+			char type,
+			DvkHandler dvk_handler,
+			boolean check_all,
+			int offset) {
+		//GET URL
+		StringBuilder url = new StringBuilder();
+		url.append("https://www.deviantart.com/_napi/da-user-profile/api/");
+		if(type == 'm') {
+			url.append("gallery/contents?username=");
+			url.append(artist);
+			url.append("&limit=24&all_folder=true&mode=newest&offset=");
+		}
+		else if(type == 's') {
+			url.append("gallery/contents?username=");
+			url.append(artist);
+			url.append("&limit=24&scraps_folder=true&mode=newest&offset=");
+		}
+		else if(type == 'f') {
+			url.append("collection/contents?username=");
+			url.append(artist);
+			url.append("&limit=24&all_folder=true&mode=newest&offset=");
+		}
+		url.append(offset);
+		try {
+			//LOAD PAGE
+			if(this.connect == null) {
+				initialize_connect();
+			}
+			JSONObject json = null;
+			if(start_gui == null || !start_gui.get_base_gui().is_canceled()) {
+				WebClient client = this.connect.get_client();
+				UnexpectedPage page;
+				page = (UnexpectedPage)client.getPage(url.toString());
+				String res = page.getWebResponse().getContentAsString();
+				json = new JSONObject(res);
+				TimeUnit.MILLISECONDS.sleep(1000);
+			}
+			if(json == null || !is_logged_in()) {
+				if(offset == 0) {
+					return new ArrayList<>();
+				}
+				return null;
+			}
+			//GET PAGES
+			JSONArray arr;
+			ArrayList<String> pages = new ArrayList<>();
+			arr = json.getJSONArray("results");
+			boolean check_next = true;
+			int size = dvk_handler.get_size();
+			for(int i = 0; i < arr.length(); i++) {
+				boolean contains = false;
+				JSONObject obj = arr.getJSONObject(i).getJSONObject("deviation");
+				String link = obj.getString("url");
+				String id = get_page_id(link);
+				for(int k = 0; k < size; k++) {
+					if(get_page_id(dvk_handler.get_dvk(k).get_page_url()).equals(id)) {
+						contains = true;
+						//UPDATE DVK LOCATION AND FAVORITE IF ALREADY DOWNLOADED
+						Dvk dvk;
+						if(type == 'f') {
+							dvk = ArtistHosting.update_dvk(dvk_handler.get_dvk(k), null, artist);
+						}
+						else {
+							dvk = ArtistHosting.update_dvk(dvk_handler.get_dvk(k), directory, null);
+						}
+						dvk_handler.set_dvk(dvk, k);
+						//ENDS IF DOWNLOADED DVK IS NOT A SINGLE DOWNLOAD
+						if(!ArrayProcessing.contains(dvk.get_web_tags(), "DVK:Single")) {
+							check_next = false;
+						}
+						else {
+							//ADD GALLERY TAG
+							if(type == 'm' && !ArrayProcessing.contains(dvk.get_web_tags(), "Gallery:Main")) {
+								ArrayList<String> tags = ArrayProcessing.array_to_list(dvk.get_web_tags());
+								tags.add(0, "Gallery:Main");
+								dvk.set_web_tags(ArrayProcessing.list_to_array(tags));
+								dvk.write_dvk();
+							}
+							else if(type == 's' && !ArrayProcessing.contains(dvk.get_web_tags(), "Gallery:Scraps")) {
+								ArrayList<String> tags = ArrayProcessing.array_to_list(dvk.get_web_tags());
+								tags.add(0, "Gallery:Scraps");
+								dvk.set_web_tags(ArrayProcessing.list_to_array(tags));
+								dvk.write_dvk();
+							}
+						}
+						break;
+					}
+				}
+				if(!contains) {
+					pages.add(link);
+				}
+			}
+			//GET NEXT PAGES
+			boolean more = json.getBoolean("hasMore");
+			if(more && (check_all || check_next)) {
+				ArrayList<String> next = get_pages(start_gui, artist, directory, type, dvk_handler, check_all, offset + 20);
+				if(next == null) {
+					if(offset == 0) {
+						if(start_gui != null) {
+							start_gui.append_console("fur_affinity_failed", true);
+							start_gui.get_base_gui().set_canceled(true);
+						}
+						return new ArrayList<>();
+					}
+					return null;
+				}
+				pages.addAll(next);
+			}
+			return ArrayProcessing.clean_list(pages);
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+		if(offset == 0) {
+			return new ArrayList<>();
+		}
+		return null;
 	}
 }

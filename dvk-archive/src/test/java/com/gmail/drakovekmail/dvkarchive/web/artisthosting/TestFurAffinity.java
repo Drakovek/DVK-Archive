@@ -204,11 +204,11 @@ public class TestFurAffinity {
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
 		DvkHandler handler = new DvkHandler();
-		handler.read_dvks(dirs, prefs, null, false, false, false);
 		File sub = new File(this.test_dir, "sub");
 		if(!sub.isDirectory()) {
 			sub.mkdir();
 		}
+		handler.read_dvks(dirs, prefs, null, false, false, false);
 		//TEST SMALL SAMPLE
 		ArrayList<String> links = this.fur.get_pages(
 				null, "drakovek", sub, 'm', handler, true, false, 1);
