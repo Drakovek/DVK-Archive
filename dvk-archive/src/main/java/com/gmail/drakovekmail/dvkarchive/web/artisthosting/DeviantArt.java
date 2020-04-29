@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -91,6 +90,11 @@ public class DeviantArt extends ArtistHosting {
 			s1 = page_url.indexOf('/', s1) + 1;
 			suffix = "-S";
 		}
+		else if(page_url.contains("/status/")) {
+			s1 = page_url.indexOf("/status/") + 1;
+			s1 = page_url.indexOf('/', s1) + 1;
+			suffix = "-S";
+		}
 		else if(page_url.contains("/poll/")) {
 			s1 = page_url.indexOf("/poll/") + 1;
 			s1 = page_url.indexOf('/', s1) + 1;
@@ -139,7 +143,6 @@ public class DeviantArt extends ArtistHosting {
 				HtmlButton submit = this.connect.get_page().getFirstByXPath(xpath);
 				this.connect.set_page((HtmlPage)submit.click());
 			} catch (Exception e) {
-				e.printStackTrace();
 				this.connect.initialize_client();
 			}
 			pass = null;
@@ -390,6 +393,128 @@ public class DeviantArt extends ArtistHosting {
 	}
 	
 	/**
+	 * Returns a Dvk for a given DeviantArt poll page.
+	 * 
+	 * @param info Dvk containing poll info
+	 * @param directory Directory in which to save Dvk.
+	 * @param save Whether to save Dvk and media
+	 * @return Dvk of DeviantArt media page
+	 */
+	public static Dvk get_poll_dvk(Dvk info, File directory, boolean save) {
+		//PARSE OUT VOTING OPTIONS AND VOTE COUNTS
+		String[] tags = info.get_web_tags();
+		if((tags.length / 2) * 2 != tags.length) {
+			return new Dvk();
+		}
+		int[] votes = new int[info.get_web_tags().length / 2];
+		String[] insides = new String[votes.length];
+		int vote = -1;
+		int greatest = -1;
+		for(int i = 0; i < votes.length; i++) {
+			try {
+				votes[i] = Integer.parseInt(tags[i * 2]);
+				if(votes[i] > vote) {
+					vote = votes[i];
+					greatest = i;
+				}
+			}
+			catch(NumberFormatException e) {
+				return new Dvk();
+			}
+			insides[i] = tags[(i * 2) + 1];
+		}
+		//SET COMMON INFO
+		Dvk dvk = new Dvk();
+		dvk.set_title(info.get_title());
+		dvk.set_artists(info.get_artists());
+		dvk.set_time(info.get_time());
+		String[] gallery = {"Gallery:Polls", "Rating:General"};
+		dvk.set_web_tags(gallery);
+		dvk.set_page_url(info.get_page_url());
+		dvk.set_id(get_page_id(dvk.get_page_url()));
+		//SET HTML
+		StringBuilder text = new StringBuilder("<body><center><h1>");
+		text.append(dvk.get_title());
+		text.append("</h><p>");
+		for(int i = 0; i < insides.length; i++) {
+			if(i > 0) {
+				text.append("</br></br>");
+			}
+			text.append("<button><center>");
+			text.append(insides[i]);
+			text.append("</br></br><i>");
+			String vs = Integer.toString(votes[i]) + " Votes";
+			if(i == greatest) {
+				vs = "<b>" + vs + "</b>";
+			}
+			text.append(vs);
+			text.append("</i></center></button>");
+		}
+		text.append("</p></center></body>");
+		dvk.set_description(text.toString());
+		text.insert(0, "<!DOCTYPE html><html>");
+		text.append("</html>");
+		//SET FILENAMES
+		String filename = dvk.get_filename();
+		dvk.set_dvk_file(new File(directory, filename + ".dvk"));
+		dvk.set_media_file(filename + ".html");
+		if(save) {
+			dvk.write_dvk();
+			InOut.write_file(dvk.get_media_file(), text.toString());
+		}
+		return dvk;
+	}
+	
+	/**
+	 * Returns a Dvk for a given DeviantArt status update page.
+	 * 
+	 * @param info Dvk containing status info
+	 * @param directory Directory in which to save Dvk.
+	 * @param save Whether to save Dvk and media
+	 * @return Dvk of DeviantArt media page
+	 */
+	public static Dvk get_status_dvk(Dvk info, File directory, boolean save) {
+		if(info.get_time().equals("0000/00/00|00:00")) {
+			return new Dvk();
+		}
+		Dvk dvk = new Dvk();
+		dvk.set_id(get_page_id(info.get_page_url()));
+		dvk.set_artists(info.get_artists());
+		String[] gallery = {"Gallery:Status-Updates", "Rating:General"};
+		dvk.set_web_tags(gallery);
+		dvk.set_page_url(info.get_page_url());
+		dvk.set_time(info.get_time());
+		dvk.set_description(info.get_description());
+		String text = "<!DOCTYPE html><html>" + info.get_description() + "</html>";
+		//GET TITLE
+		String[] months = {"January", "February", "March", "April", "May", "June", 
+				"July", "August", "September", "October", "November", "December"};
+		int year = Integer.parseInt(info.get_time().substring(0, 4));
+		int month = Integer.parseInt(info.get_time().substring(5, 7)) - 1;
+		int day = Integer.parseInt(info.get_time().substring(8, 10));
+		StringBuilder title = new StringBuilder();
+		title.append(day);
+		title.append(" ");
+		title.append(months[month]);
+		title.append(" ");
+		title.append(year);
+		title.append(" | ");
+		title.append(dvk.get_artists()[0]);
+		title.append(" Update");
+		dvk.set_title(title.toString());
+		//SET FILES
+		String filename = dvk.get_filename();
+		dvk.set_dvk_file(new File(directory, filename + ".dvk"));
+		dvk.set_media_file(filename + ".txt");
+		//SAVE
+		if(save) {
+			dvk.write_dvk();
+			InOut.write_file(dvk.get_media_file(), text);
+		}
+		return dvk;
+	}
+	
+	/**
 	 * Returns a Dvk for a given DeviantArt journal page.
 	 * 
 	 * @param page_url URL of DeviantArt journal page
@@ -513,9 +638,7 @@ public class DeviantArt extends ArtistHosting {
 			}
 			return dvk;
 		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
+		catch (Exception e) {}
 		return new Dvk();
 	}
 	
@@ -573,7 +696,7 @@ public class DeviantArt extends ArtistHosting {
 				json = new JSONObject(res);
 				TimeUnit.MILLISECONDS.sleep(1000);
 			}
-			if(json == null || !is_logged_in()) {
+			if(json == null) {
 				if(offset == 0) {
 					return new ArrayList<>();
 				}
@@ -635,7 +758,7 @@ public class DeviantArt extends ArtistHosting {
 				if(next == null) {
 					if(offset == 0) {
 						if(start_gui != null) {
-							start_gui.append_console("fur_affinity_failed", true);
+							start_gui.append_console("deviantart_failed", true);
 							start_gui.get_base_gui().set_canceled(true);
 						}
 						return new ArrayList<>();
@@ -646,9 +769,204 @@ public class DeviantArt extends ArtistHosting {
 			}
 			return ArrayProcessing.clean_list(pages);
 		}
-		catch(Exception e) {
-			e.printStackTrace();
+		catch(Exception e) {}
+		//RETURN BLANK IF FAILED
+		if(offset == 0) {
+			return new ArrayList<>();
 		}
+		return null;
+	}
+	
+	/**
+	 * Returns a list of Dvk objects containing media info for a given artist.
+	 * Used for getting journals, status updates, and polls.
+	 * 
+	 * @param start_gui Used for canceling and showing progress
+	 * @param artist DeviantArt artist
+	 * @param id Module ID for getting pages, leave null to be retrieved automatically
+	 * @param directory Directory to move DVKs to, if specified
+	 * @param type Type of gallery to scan ('j' - Journals, 's' - Status Updates, 'p' - Polls)
+	 * @param dvk_handler Used to check for already downloaded files
+	 * @param check_all Whether to check all gallery pages
+	 * @param offset Gallery page offset
+	 * @return List of Dvks with DeviantArt info
+	 */
+	@SuppressWarnings("resource")
+	public ArrayList<Dvk> get_module_pages(
+			StartGUI start_gui,
+			String artist,
+			final String id,
+			File directory,
+			char type,
+			DvkHandler dvk_handler,
+			boolean check_all,
+			int offset) {
+		StringBuilder url;
+		String mod_id = id;
+		if(id == null) {
+			//GET INITIAL URL
+			url = new StringBuilder("https://www.deviantart.com/");
+			url.append(artist);
+			url.append("/posts/journals");
+			//CONNECT
+			if(this.connect == null) {
+				initialize_connect();
+			}
+			String xpath = "//div[@id='root']/following-sibling::script";
+			this.connect.load_page(url.toString(), xpath, 2);
+			if(this.connect.get_page() == null) {
+				if(offset == 0) {
+					return new ArrayList<>();
+				}
+				return null;
+			}
+			//GET ID
+			int end;
+			int start = 0;
+			ArrayList<String> ids = new ArrayList<>();
+			String script = ((DomElement)this.connect.get_page().getFirstByXPath(xpath)).asXml();
+			start = script.indexOf("moduleId");
+			while(start != -1) {
+				end = script.indexOf('}', start);
+				ids.add(script.substring(start, end));
+				start = script.indexOf("moduleId", end);
+			}
+			String search = "";
+			switch(type) {
+				case 'j':
+					search = "journals";
+					break;
+				case 's':
+					search = "statuses";
+					break;
+				case 'p':
+					search = "polls";
+					break;
+			}
+			for(int i = 0; i < ids.size(); i++) {
+				if(ids.get(i).contains(search) && !ids.get(i).contains("featured")) {
+					start = ids.get(i).indexOf(':') + 1;
+					end = ids.get(i).indexOf(',', start);
+					mod_id = ids.get(i).substring(start, end);
+					break;
+				}
+			}
+		}
+		//GET JSON URL
+		url = new StringBuilder("https://www.deviantart.com/_napi/da-user-profile/api/module/");
+		switch(type) {
+			case 'j':
+				url.append("journals?username=");
+				break;
+			case 's':
+				url.append("statuses?username=");
+				break;
+			case 'p':
+				url.append("polls?username=");
+				break;
+		}
+		url.append(artist);
+		url.append("&moduleid=");
+		url.append(mod_id);
+		url.append("&mode=newest&limit=24&offset=");
+		url.append(offset);
+		try {
+			//LOAD PAGE
+			if(this.connect == null) {
+				initialize_connect();
+			}
+			JSONObject json = null;
+			if(start_gui == null || !start_gui.get_base_gui().is_canceled()) {
+				WebClient client = this.connect.get_client();
+				UnexpectedPage page;
+				page = (UnexpectedPage)client.getPage(url.toString());
+				String res = page.getWebResponse().getContentAsString();
+				json = new JSONObject(res);
+				TimeUnit.MILLISECONDS.sleep(1000);
+			}
+			if(json == null) {
+				if(offset == 0) {
+					return new ArrayList<>();
+				}
+				return null;
+			}
+			//GET PAGES
+			JSONArray arr;
+			ArrayList<Dvk> dvks = new ArrayList<>();
+			arr = json.getJSONArray("results");
+			boolean check_next = true;
+			int size = dvk_handler.get_size();
+			for(int i = 0; i < arr.length(); i++) {
+				boolean contains = false;
+				JSONObject obj = arr.getJSONObject(i);
+				String link = obj.getString("url");
+				String page_id = get_page_id(link);
+				for(int k = 0; k < size; k++) {
+					if(get_page_id(dvk_handler.get_dvk(k).get_page_url()).equals(page_id)) {
+						contains = true;
+						//UPDATE DVK LOCATION IF ALREADY DOWNLOADED
+						Dvk dvk;
+						dvk = ArtistHosting.update_dvk(dvk_handler.get_dvk(k), directory, null);
+						dvk_handler.set_dvk(dvk, k);
+						//ENDS IF DOWNLOADED DVK IS NOT A SINGLE DOWNLOAD
+						if(!ArrayProcessing.contains(dvk.get_web_tags(), "DVK:Single")) {
+							check_next = false;
+						}
+						break;
+					}
+				}
+				if(!contains) {
+					Dvk summary = new Dvk();
+					summary.set_page_url(link);
+					summary.set_time(obj.getString("publishedTime").substring(0, 16));
+					if(type == 'p') {
+						summary.set_title(obj.getString("title"));
+						//GET POLL RESULTS
+						JSONArray poll = obj.getJSONObject("poll").getJSONArray("answers");
+						ArrayList<String> results = new ArrayList<>();
+						for(int r = 0; r < poll.length(); r++) {
+							results.add(Integer.toString(poll.getJSONObject(r).getInt("votes")));
+							results.add(poll.getJSONObject(r)
+									.getJSONObject("textContent").getString("excerpt"));
+						}
+						summary.set_web_tags(ArrayProcessing.list_to_array(results));
+					}
+					else if(type == 's') {
+						summary.set_description(obj.getJSONObject("textContent").getString("excerpt"));
+					}
+					dvks.add(summary);
+				}
+			}
+			//GET NEXT PAGES
+			boolean more = json.getBoolean("hasMore");
+			if(more && (check_all || check_next)) {
+				ArrayList<Dvk> next = get_module_pages(
+						start_gui, artist, mod_id, directory, type, dvk_handler, check_all, offset + 20);
+				if(next == null) {
+					if(offset == 0) {
+						if(start_gui != null) {
+							start_gui.append_console("deviantart_failed", true);
+							start_gui.get_base_gui().set_canceled(true);
+						}
+						return new ArrayList<>();
+					}
+					return null;
+				}
+				dvks.addAll(next);
+			}
+			//REMOVE DUPLICATE ENTRIES
+			for(int i = 0; i < dvks.size(); i++) {
+				for(int k = i + 1; k < dvks.size(); k++) {
+					if(dvks.get(i).get_page_url().equals(dvks.get(k).get_page_url())) {
+						dvks.remove(k);
+						k--;
+					}
+				}
+			}
+			return dvks;
+		}
+		catch(Exception e) {}
+		//RETURN BLANK IF FAILED
 		if(offset == 0) {
 			return new ArrayList<>();
 		}

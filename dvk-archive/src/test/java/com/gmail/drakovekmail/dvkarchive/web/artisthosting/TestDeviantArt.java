@@ -109,7 +109,7 @@ public class TestDeviantArt {
 		url = "www.deviantart.com/artist/status-update/5876";
 		id = DeviantArt.get_page_id(url);
 		assertEquals("DVA5876-S", id);
-		url = "deviantart.com/artist/status-update/1800215";
+		url = "deviantart.com/artist/status/1800215";
 		id = DeviantArt.get_page_id(url);
 		assertEquals("DVA1800215-S", id);
 		//POLL URLS
@@ -145,7 +145,11 @@ public class TestDeviantArt {
 		this.dev.login(info[0], info[1]);
 		info = null;
 		assertTrue(this.dev.is_logged_in());
+		//TEST GETTING MODULE PAGES
+		test_get_module_pages();
+		remove_directory();
 		//TEST GETTING FAVORITES
+		create_directory();
 		test_get_favorites_pages();
 		remove_directory();
 		//TEST GETTING GALLERY PAGES
@@ -487,6 +491,93 @@ public class TestDeviantArt {
 	}
 	
 	/**
+	 * Tests the get_status_dvk method.
+	 */
+	@Test
+	public void test_get_status_dvk() {
+		//CREATE INFO DVK
+		Dvk dvk = new Dvk();
+		dvk.set_artist("Pokefan-Tf");
+		dvk.set_time("2020/04/27|16:35");
+		dvk.set_page_url("https://www.deviantart.com/pokefan-tf/status/15696838");
+		dvk.set_description("This is a test");
+		//TEST DVK
+		Dvk result = DeviantArt.get_status_dvk(dvk, this.test_dir, true);
+		assertEquals("DVA15696838-S", result.get_id());
+		assertEquals("27 April 2020 | Pokefan-Tf Update", result.get_title());
+		assertEquals(1, result.get_artists().length);
+		assertEquals("Pokefan-Tf", result.get_artists()[0]);
+		assertEquals(2, result.get_web_tags().length);
+		assertEquals("Gallery:Status-Updates", result.get_web_tags()[0]);
+		assertEquals("Rating:General", result.get_web_tags()[1]);
+		assertEquals("This is a test", result.get_description());
+		assertEquals("27 April 2020 - Pokefan-Tf Update_DVA15696838-S.dvk", result.get_dvk_file().getName());
+		assertEquals("27 April 2020 - Pokefan-Tf Update_DVA15696838-S.txt", result.get_media_file().getName());
+		assertTrue(result.get_dvk_file().exists());
+		assertTrue(result.get_media_file().exists());
+		String text = InOut.read_file(result.get_media_file());
+		assertEquals("<!DOCTYPE html><html>This is a test</html>", text);
+		//TEST INVALID DATES
+		dvk.set_time("asdlf");
+		result = DeviantArt.get_status_dvk(dvk, this.test_dir, true);
+		assertEquals(null, result.get_title());
+	}
+	
+	/**
+	 * Tests the get_poll_dvk method.
+	 */
+	@Test
+	public void test_get_poll_dvk() {
+		//CREATE INFO DVK
+		Dvk dvk = new Dvk();
+		dvk.set_title("What do you think?");
+		dvk.set_artist("Person");
+		dvk.set_page_url("https://www.deviantart.com/bleh/poll/something-58635424");
+		dvk.set_time("2018/07/12|05:36");
+		String[] tags = {"25", "Yes", "47", "No", "5", "Maybe"};
+		dvk.set_web_tags(tags);
+		//TEST DVK
+		Dvk result = DeviantArt.get_poll_dvk(dvk, this.test_dir, true);
+		assertEquals("DVA58635424-P", result.get_id());
+		assertEquals("What do you think?", result.get_title());
+		assertEquals(1, dvk.get_artists().length);
+		assertEquals("Person", dvk.get_artists()[0]);
+		assertEquals("2018/07/12|05:36", result.get_time());
+		assertEquals(2, result.get_web_tags().length);
+		assertEquals("Gallery:Polls", result.get_web_tags()[0]);
+		assertEquals("Rating:General", result.get_web_tags()[1]);
+		String desc = "<body><center><h1>What do you think?</h><p><button><center>Yes</br></br><i>25 Votes</i>"
+				+ "</center></button></br></br><button><center>No</br></br><i><b>47 Votes</b></i></center>"
+				+ "</button></br></br><button><center>Maybe</br></br><i>5 Votes</i></center></button>"
+				+ "</p></center></body>";
+		assertEquals(desc, result.get_description());
+		assertEquals("What do you think_DVA58635424-P.dvk", result.get_dvk_file().getName());
+		assertEquals("What do you think_DVA58635424-P.html", result.get_media_file().getName());
+		assertTrue(result.get_dvk_file().exists());
+		assertTrue(result.get_media_file().exists());
+		String text = InOut.read_file(result.get_media_file());
+		desc = "<!DOCTYPE html><html>" + desc + "</html>";
+		assertEquals(desc, text);
+		//TEST INVALID TAGS - TOO FEW
+		tags = new String[3];
+		tags[0] = "12";
+		tags[1] = "yes";
+		tags[2] = "53";
+		dvk.set_web_tags(tags);
+		result = DeviantArt.get_poll_dvk(dvk, this.test_dir, false);
+		assertEquals(null, result.get_title());
+		//TEST INVALID TAGS - VOTES NOT NUMERICAL
+		tags = new String[4];
+		tags[0] = "12";
+		tags[1] = "yes";
+		tags[2] = "what?";
+		tags[3] = "no";
+		dvk.set_web_tags(tags);
+		result = DeviantArt.get_poll_dvk(dvk, this.test_dir, false);
+		assertEquals(null, result.get_title());
+	}
+	
+	/**
 	 * Tests the get_pages method.
 	 */
 	public void test_get_pages() {
@@ -674,5 +765,142 @@ public class TestDeviantArt {
 		assertEquals("DVK:Single", tags[1]);
 		assertEquals("Favorite:Whoever", tags[2]);
 		assertEquals("Favorite:Pokefan-Tf", tags[3]);
+	}
+	
+	/**
+	 * Tests the get_module_pages method.
+	 */
+	public void test_get_module_pages() {
+		//CREATE DVK 1
+		Dvk dvk = new Dvk();
+		dvk.set_id("DVA7283020-P");
+		dvk.set_title("Good TF");
+		dvk.set_artist("FezMangaka");
+		String[] tags = {"Test", "Thing", "Whatever"};
+		dvk.set_web_tags(tags);
+		dvk.set_page_url("https://www.deviantart.com/fezmangaka/poll/What-makes-a-good-TF-7283020");
+		dvk.set_dvk_file(new File(this.test_dir, "good.dvk"));
+		dvk.set_media_file("good.jpg");
+		dvk.write_dvk();
+		//CREATE DVK 2
+		dvk = new Dvk();
+		dvk.set_id("DVA786195189-J");
+		dvk.set_title("RPs");
+		dvk.set_artist("Pokefan-Tf");
+		dvk.set_web_tags(tags);
+		dvk.set_page_url("https://www.deviantart.com/pokefan-tf/journal/RPs-again-786195189");
+		dvk.set_dvk_file(new File(this.test_dir, "rp.dvk"));
+		dvk.set_media_file("rp.jpg");
+		dvk.write_dvk();
+		//CREATE DVK 3
+		dvk = new Dvk();
+		dvk.set_id("DVA15164324-S");
+		dvk.set_title("Requests");
+		dvk.set_artist("Pokefan-Tf");
+		dvk.set_web_tags(tags);
+		dvk.set_page_url("https://www.deviantart.com/pokefan-tf/status-update/15164324");
+		dvk.set_dvk_file(new File(this.test_dir, "request.dvk"));
+		dvk.set_media_file("request.jpg");
+		dvk.write_dvk();
+		//CREATE DVK 4
+		dvk = new Dvk();
+		dvk.set_id("DVA19789401-S");
+		dvk.set_title("Bird TF");
+		dvk.set_artist("Pokefan-Tf");
+		tags[1] = "DVK:Single";
+		dvk.set_web_tags(tags);
+		dvk.set_page_url("https://www.deviantart.com/pokefan-tf/status-update/19789401");
+		dvk.set_dvk_file(new File(this.test_dir, "bird.dvk"));
+		dvk.set_media_file("bird.jpg");
+		dvk.write_dvk();
+		//READ DVKS
+		File[] dirs = {this.test_dir};
+		FilePrefs prefs = new FilePrefs();
+		DvkHandler handler = new DvkHandler();
+		handler.read_dvks(dirs, prefs, null, false, false, false);
+		File sub = new File(this.test_dir, "sub");
+		if(!sub.isDirectory()) {
+			sub.mkdir();
+		}
+		//GET POLLS
+		ArrayList<Dvk> dvks;
+		dvks = this.dev.get_module_pages(null, "FezMangaka", null, this.test_dir, 'p', handler, false, 0);
+		assertTrue(dvks.size() > 42);
+		int index = -1;
+		for(int i = 0; i < dvks.size(); i++) {
+			assertNotEquals("https://www.deviantart.com/fezmangaka/poll/What-makes-a-good-TF-7283020",
+					dvks.get(i).get_page_url());
+			if(dvks.get(i).get_page_url().equals(
+					"https://www.deviantart.com/fezmangaka/poll/Is-there-any-aftermath-"
+					+ "drawing-you-peps-would-want-to-see-as-of-the-recent-posts-7294815")) {
+				index = i;
+			}
+		}
+		assertNotEquals(-1, index);
+		assertEquals("https://www.deviantart.com/fezmangaka/poll/Which-is-your-favourite-and-what-do-you-think-of-them-7306515", dvks.get(index - 1).get_page_url());
+		assertEquals("https://www.deviantart.com/fezmangaka/poll/Transformation-with-mental-changes-7311213", dvks.get(index - 2).get_page_url());
+		dvk = dvks.get(index - 2);
+		assertEquals("Transformation with mental changes?", dvk.get_title());
+		assertEquals("2018/06/21|10:04", dvk.get_time());
+		assertEquals(4, dvk.get_web_tags().length);
+		assertEquals("274", dvk.get_web_tags()[0]);
+		assertEquals("Like", dvk.get_web_tags()[1]);
+		assertEquals("127", dvk.get_web_tags()[2]);
+		assertEquals("Dislike", dvk.get_web_tags()[3]);
+		//GET STATUS UPDATES
+		dvks = this.dev.get_module_pages(null, "Pokefan-tf", null, sub, 's', handler, false, 0);
+		assertTrue(dvks.size() > 21);
+		index = -1;
+		for(int i = 0; i < dvks.size(); i++) {
+			assertFalse(dvks.get(i).get_page_url().endsWith("/15164324"));
+			assertFalse(dvks.get(i).get_page_url().endsWith("/19789401"));
+			if(dvks.get(i).get_page_url().endsWith("/15165275")) {
+				index = i;
+			}
+		}
+		assertNotEquals(-1, index);
+		assertTrue(dvks.get(index - 1).get_page_url().endsWith("/15696838"));
+		assertTrue(dvks.get(index - 2).get_page_url().endsWith("/15896220"));
+		dvk = dvks.get(index - 1);
+		assertEquals(null, dvk.get_title());
+		assertEquals("2018/12/02|09:23", dvk.get_time());
+		assertTrue(dvk.get_web_tags() == null);
+		assertEquals("TFW you have almost 100 RPs to get back to, but you don't "
+				+ "feel motivated to respond to any of them...", dvk.get_description());
+		//CHECK JOURNALS
+		dvks = this.dev.get_module_pages(null, "Pokefan-Tf", null, this.test_dir, 'j', handler, false, 0);
+		assertTrue(dvks.size() > 22);
+		index = -1;
+		for(int i = 0; i < dvks.size(); i++) {
+			assertNotEquals("https://www.deviantart.com/pokefan-tf/journal/RPs-again-786195189",
+					dvks.get(i).get_page_url());
+			if(dvks.get(i).get_page_url().equals(
+					"https://www.deviantart.com/pokefan-tf/journal/RP-Status-and-the-Future-793770508")) {
+				index = i;
+			}
+		}
+		assertNotEquals(-1, index);
+		assertEquals("https://www.deviantart.com/pokefan-tf/journal/Discord-799504005", dvks.get(index - 1).get_page_url());
+		assertEquals("https://www.deviantart.com/pokefan-tf/journal/Apokelypse-TF-RP-Discord-server-827904463", dvks.get(index - 2).get_page_url());
+		//CHECK NO ENTRIES
+		dvks = this.dev.get_module_pages(null, "drakovek", null, sub, 'j', handler, false, 0);
+		assertEquals(0, dvks.size());
+		dvks = this.dev.get_module_pages(null, "drakovek", null, sub, 'p', handler, false, 0);
+		assertEquals(0, dvks.size());
+		dvks = this.dev.get_module_pages(null, "drakovek", null, sub, 's', handler, false, 0);
+		assertEquals(0, dvks.size());
+		//CHECK DVKS MOVED
+		handler = new DvkHandler();
+		handler.read_dvks(dirs, prefs, null, false, false, false);
+		handler.sort_dvks_title(false, false);
+		assertEquals(4, handler.get_size());
+		assertEquals("Bird TF", handler.get_dvk(0).get_title());
+		assertEquals("Good TF", handler.get_dvk(1).get_title());
+		assertEquals("Requests", handler.get_dvk(2).get_title());
+		assertEquals("RPs", handler.get_dvk(3).get_title());
+		assertEquals(sub, handler.get_dvk(0).get_dvk_file().getParentFile());
+		assertEquals(this.test_dir, handler.get_dvk(1).get_dvk_file().getParentFile());
+		assertEquals(sub, handler.get_dvk(2).get_dvk_file().getParentFile());
+		assertEquals(this.test_dir, handler.get_dvk(3).get_dvk_file().getParentFile());
 	}
 }
