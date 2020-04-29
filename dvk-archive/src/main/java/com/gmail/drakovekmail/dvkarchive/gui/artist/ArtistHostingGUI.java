@@ -52,6 +52,11 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	private boolean skipped;
 	
 	/**
+	 * Whether GUI is using CAPTCHA when logging in
+	 */
+	private boolean use_captcha;
+	
+	/**
 	 * Whether to download the main gallery
 	 */
 	private boolean main;
@@ -169,6 +174,7 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	 */
 	public ArtistHostingGUI(StartGUI start_gui, String name_id) {
 		super(start_gui);
+		this.use_captcha = false;
 		this.dvks = new ArrayList<>();
 		this.name = start_gui.get_base_gui()
 				.get_language_string(name_id);
@@ -209,9 +215,11 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	/**
 	 * Creates and displays a login GUI.
 	 * 
-	 * @param use_captcha Whether to include CAPTCHA dialog in the GUI
+	 * @param allow_skipping Whether to allow skipping login
+	 * @param captcha Whether to include CAPTCHA dialog in the GUI
 	 */
-	protected void create_login_gui(boolean use_captcha) {
+	protected void create_login_gui(boolean allow_skipping, boolean captcha) {
+		this.use_captcha = captcha;
 		this.start_gui.get_scroll_panel().set_fit(true, false);
 		BaseGUI base_gui = this.start_gui.get_base_gui();
 		this.u_txt = new DTextField(base_gui, this, "nothing");
@@ -223,9 +231,14 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		JPanel pass_pnl = base_gui.get_x_stack(p_lbl, 0, this.p_txt, 1);
 		JPanel in_pnl = base_gui.get_y_stack(usr_pnl, pass_pnl);
 		//CREATE BOTTOM PANEL
-		JPanel btn_pnl = base_gui.get_y_stack(
-				this.login_btn, this.skip_btn);
-		JPanel btm_pnl = base_gui.get_y_stack(in_pnl, btn_pnl);
+		JPanel btn_pnl = base_gui.get_y_stack(this.login_btn, this.skip_btn);
+		JPanel btm_pnl;
+		if(allow_skipping) {
+			btm_pnl = base_gui.get_y_stack(in_pnl, btn_pnl);
+		}
+		else {
+			btm_pnl = base_gui.get_y_stack(in_pnl, this.login_btn);
+		}
 		//CREATE TOP LABEL
 		String label = base_gui.get_language_string("login");
 		label = LanguageHandler.get_text(label);
@@ -250,7 +263,7 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		JPanel cap_pnl = base_gui.get_y_stack(c_txt_pnl, this.cap_btn);
 		//CREATE FULL LOGIN PANEL
 		JPanel login_pnl;
-		if(use_captcha) {
+		if(this.use_captcha) {
 			login_pnl = base_gui.get_y_stack(
 					top_pnl,
 					base_gui.get_y_stack(cap_pnl, btm_pnl));
@@ -273,6 +286,8 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	 */
 	public abstract void create_initial_gui();
 	
+	//TODO remove captcha message
+	
 	/**
 	 * Refreshes the Displayed CAPTCHA image.
 	 */
@@ -281,7 +296,7 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		this.start_gui.append_console("", false);
 		this.start_gui.append_console("loading_captcha", true);
 		File captcha = get_captcha();
-		if(captcha.exists()) {
+		if(captcha != null && captcha.exists()) {
 			ImageIcon icon = new ImageIcon(captcha.getAbsolutePath());
 			this.image_lbl.setIcon(icon);
 		}
@@ -722,12 +737,15 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		this.start_gui.get_base_gui().set_running(false);
 		this.start_gui.enable_all();
 		if(id.equals("login")) {
-			if(get_skipped()) {
+			if(!get_skipped()) {
+				create_main_gui();
+				start_process("read_dvks", true);
+			}
+			else if(this.use_captcha) {
 				start_process("refresh_captcha", true);
 			}
 			else {
-				create_main_gui();
-				start_process("read_dvks", true);
+				enable_all();
 			}
 		}
 		else {

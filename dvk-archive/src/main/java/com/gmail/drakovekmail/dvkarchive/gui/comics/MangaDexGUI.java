@@ -36,7 +36,7 @@ public class MangaDexGUI extends ArtistHostingGUI {
 	/**
 	 * Key for MangaDex directory in preferences
 	 */
-	private static final String DIRECTORY = "directory";
+	private static final String DIRECTORY = "MDX-DIR";
 	
 	/**
 	 * Initializes the MangaDexGUI object.

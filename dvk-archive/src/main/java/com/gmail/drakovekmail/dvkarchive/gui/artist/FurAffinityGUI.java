@@ -25,7 +25,7 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 	/**
 	 * Key for Fur Affinity directory in preferences
 	 */
-	private static final String DIRECTORY = "directory";
+	private static final String DIRECTORY = "FUR-DIR";
 	
 	/**
 	 * FurAffinity object for downloading from FurAffinity
@@ -44,7 +44,7 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 	
 	@Override
 	public void create_initial_gui() {
-		create_login_gui(true);
+		create_login_gui(true, true);
 		if(this.fur != null) {
 			this.fur.close();
 		}
@@ -112,12 +112,10 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 	
 	@Override
 	public void get_pages(Dvk dvk, boolean check_all) {
-		this.start_gui.get_main_pbar().set_progress(
-				true, false, 0, 0);
+		this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
 		File dir = dvk.get_dvk_file();
 		this.start_gui.append_console(
-				this.start_gui.get_base_gui()
-					.get_language_string("getting_artist")
+				this.start_gui.get_base_gui().get_language_string("getting_artist")
 				+ " - " + dvk.get_artists()[0], false);
 		//GET MAIN GALLERY PAGES
 		ArrayList<String> pages = new ArrayList<>();
@@ -238,23 +236,20 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 				//DOWNLOAD JOURNAL PAGE
 				dvk = this.fur.get_journal_dvk(
 						url, directory, single, true);
-				this.dvk_handler.add_dvk(dvk);
 			}
 			else {
 				//DOWNLOAD GALLERY PAGE
 				dvk = this.fur.get_dvk(
 						url, directory, artist, single, true);
 			}
+			this.dvk_handler.add_dvk(dvk);
 			//CANCEL IF DOWNLOAD FAILED
 			if(dvk == null || dvk.get_title() == null) {
 				this.start_gui.get_base_gui().set_canceled(true);
-				this.start_gui.append_console(
-						"fur_affinity_failed", true);
+				this.start_gui.append_console("fur_affinity_failed", true);
 				return null;
 			}
-			this.start_gui.append_console(
-					dvk.get_artists()[0] + " - " + dvk.get_title(),
-					false);
+			this.start_gui.append_console(dvk.get_artists()[0] + " - " + dvk.get_title(), false);
 			this.dvk_handler.add_dvk(dvk);
 			return dvk;
 		}
@@ -287,18 +282,18 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 	@Override
 	public void load_checks() {
 		Preferences prefs = Preferences.userNodeForPackage(FurAffinityGUI.class);
-		set_main(prefs.getBoolean("main", false));
-		set_scraps(prefs.getBoolean("scraps", false));
-		set_journals(prefs.getBoolean("journals", false));
-		set_favorites(prefs.getBoolean("favorites", false));
+		set_main(prefs.getBoolean("FUR-MAIN", false));
+		set_scraps(prefs.getBoolean("FUR-SCRAPS", false));
+		set_journals(prefs.getBoolean("FUR-JOURNALS", false));
+		set_favorites(prefs.getBoolean("FUR-FAVORITES", false));
 	}
 
 	@Override
 	public void save_checks() {
 		Preferences prefs = Preferences.userNodeForPackage(FurAffinityGUI.class);
-		prefs.putBoolean("main", get_main());
-		prefs.putBoolean("scraps", get_scraps());
-		prefs.putBoolean("journals", get_journals());
-		prefs.putBoolean("favorites", get_favorites());
+		prefs.putBoolean("FUR-MAIN", get_main());
+		prefs.putBoolean("FUR-SCRAPS", get_scraps());
+		prefs.putBoolean("FUR-JOURNALS", get_journals());
+		prefs.putBoolean("FUR-FAVORITES", get_favorites());
 	}
 }

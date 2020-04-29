@@ -125,28 +125,32 @@ public class DeviantArt extends ArtistHosting {
 	 * @param password Password
 	 */
 	public void login(String username, String password) {
-		if(this.connect != null) {
-			String xpath = "//input[@id='username']";
-			String url = "https://www.deviantart.com/users/login";
-			this.connect.load_page(url, xpath, 1);
-			HtmlInput pass;
-			try {
-				//INPUT USERNAME
-				HtmlInput user = this.connect.get_page().getFirstByXPath(xpath);
-				user.setValueAttribute(username);
-				//INPUT PASSWORD
-				xpath = "//input[@id='password']";
-				pass = this.connect.get_page().getFirstByXPath(xpath);
-				pass.setValueAttribute(password);
-				//SUBMIT INFO
-				xpath = "//button[@id='loginbutton']";
-				HtmlButton submit = this.connect.get_page().getFirstByXPath(xpath);
-				this.connect.set_page((HtmlPage)submit.click());
-			} catch (Exception e) {
-				this.connect.initialize_client();
-			}
-			pass = null;
+		if(this.connect == null) {
+			initialize_connect();
 		}
+		String xpath = "//input[@id='username']";
+		String url = "https://www.deviantart.com/users/login";
+		this.connect.load_page(url, xpath, 2);
+		try {
+			TimeUnit.MILLISECONDS.sleep(2000);
+		} catch (InterruptedException e) {}
+		HtmlInput pass;
+		try {
+			//INPUT USERNAME
+			HtmlInput user = this.connect.get_page().getFirstByXPath(xpath);
+			user.setValueAttribute(username);
+			//INPUT PASSWORD
+			xpath = "//input[@id='password']";
+			pass = this.connect.get_page().getFirstByXPath(xpath);
+			pass.setValueAttribute(password);
+			//SUBMIT INFO
+			xpath = "//button[@id='loginbutton']";
+			HtmlButton submit = this.connect.get_page().getFirstByXPath(xpath);
+			this.connect.set_page((HtmlPage)submit.click());
+		} catch (Exception e) {
+			this.connect.initialize_client();
+		}
+		pass = null;
 	}
 	
 	/**
@@ -193,9 +197,9 @@ public class DeviantArt extends ArtistHosting {
 			initialize_connect();
 		}
 		String xpath = "//link[@type='application/json+oembed']";
-		this.connect.load_page(url, xpath, 1);
+		this.connect.load_page(url, xpath, 2);
 		try {
-			TimeUnit.MILLISECONDS.sleep(1000);
+			TimeUnit.MILLISECONDS.sleep(2000);
 		} catch (InterruptedException e) {}
 		try {
 			//CHECK IF STILL LOGGED IN
@@ -272,6 +276,9 @@ public class DeviantArt extends ArtistHosting {
 			WebClient client = this.connect.get_client();
 			UnexpectedPage page;
 			page = (UnexpectedPage)client.getPage(da.getNodeValue());
+			try {
+				TimeUnit.MILLISECONDS.sleep(2000);
+			} catch (InterruptedException e) {}
 			String res = page.getWebResponse().getContentAsString();
 			JSONObject json = new JSONObject(res);
 			//GET TITLE
@@ -362,7 +369,7 @@ public class DeviantArt extends ArtistHosting {
 			String filename = dvk.get_filename();
 			dvk.set_dvk_file(new File(directory, filename + ".dvk"));
 			if(type.equals("rich")) {
-				dvk.set_media_file(filename + ".txt");
+				dvk.set_media_file(filename + ".html");
 			}
 			else {
 				ext = StringProcessing.get_extension(dvk.get_direct_url());
@@ -388,7 +395,7 @@ public class DeviantArt extends ArtistHosting {
 			}
 			return dvk;
 		}
-		catch(Exception e){}
+		catch(Exception e) {}
 		return new Dvk();
 	}
 	
@@ -505,7 +512,7 @@ public class DeviantArt extends ArtistHosting {
 		//SET FILES
 		String filename = dvk.get_filename();
 		dvk.set_dvk_file(new File(directory, filename + ".dvk"));
-		dvk.set_media_file(filename + ".txt");
+		dvk.set_media_file(filename + ".html");
 		//SAVE
 		if(save) {
 			dvk.write_dvk();
@@ -544,9 +551,9 @@ public class DeviantArt extends ArtistHosting {
 			initialize_connect();
 		}
 		String xpath = "//link[@type='application/json+oembed']";
-		this.connect.load_page(url, xpath, 1);
+		this.connect.load_page(url, xpath, 2);
 		try {
-			TimeUnit.MILLISECONDS.sleep(1000);
+			TimeUnit.MILLISECONDS.sleep(2000);
 		} catch (InterruptedException e) {}
 		try {
 			//CHECK IF STILL LOGGED IN
@@ -569,6 +576,9 @@ public class DeviantArt extends ArtistHosting {
 			DomAttr da = this.connect.get_page().getFirstByXPath(xpath);
 			WebClient client = this.connect.get_client();
 			UnexpectedPage page = (UnexpectedPage)client.getPage(da.getNodeValue());
+			try {
+				TimeUnit.MILLISECONDS.sleep(2000);
+			} catch (InterruptedException e) {}
 			String res = page.getWebResponse().getContentAsString();
 			JSONObject json = new JSONObject(res);
 			//GET TITLE
@@ -620,7 +630,7 @@ public class DeviantArt extends ArtistHosting {
 			//SET FILES
 			String filename = dvk.get_filename();
 			dvk.set_dvk_file(new File(directory, filename + ".dvk"));
-			dvk.set_media_file(filename + ".txt");
+			dvk.set_media_file(filename + ".html");
 			//SET SECONDARY FILE
 			if(dvk.get_secondary_url() != null) {
 				String ext;
@@ -694,7 +704,7 @@ public class DeviantArt extends ArtistHosting {
 				page = (UnexpectedPage)client.getPage(url.toString());
 				String res = page.getWebResponse().getContentAsString();
 				json = new JSONObject(res);
-				TimeUnit.MILLISECONDS.sleep(1000);
+				TimeUnit.MILLISECONDS.sleep(2000);
 			}
 			if(json == null) {
 				if(offset == 0) {
@@ -814,6 +824,9 @@ public class DeviantArt extends ArtistHosting {
 			}
 			String xpath = "//div[@id='root']/following-sibling::script";
 			this.connect.load_page(url.toString(), xpath, 2);
+			try {
+				TimeUnit.MILLISECONDS.sleep(2000);
+			} catch (InterruptedException e) {}
 			if(this.connect.get_page() == null) {
 				if(offset == 0) {
 					return new ArrayList<>();
@@ -882,7 +895,7 @@ public class DeviantArt extends ArtistHosting {
 				page = (UnexpectedPage)client.getPage(url.toString());
 				String res = page.getWebResponse().getContentAsString();
 				json = new JSONObject(res);
-				TimeUnit.MILLISECONDS.sleep(1000);
+				TimeUnit.MILLISECONDS.sleep(2000);
 			}
 			if(json == null) {
 				if(offset == 0) {
@@ -918,6 +931,7 @@ public class DeviantArt extends ArtistHosting {
 				if(!contains) {
 					Dvk summary = new Dvk();
 					summary.set_page_url(link);
+					summary.set_artist(obj.getJSONObject("author").getString("username"));
 					summary.set_time(obj.getString("publishedTime").substring(0, 16));
 					if(type == 'p') {
 						summary.set_title(obj.getString("title"));

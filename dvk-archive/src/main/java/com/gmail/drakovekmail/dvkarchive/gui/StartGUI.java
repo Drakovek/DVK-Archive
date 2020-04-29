@@ -9,6 +9,7 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.SwingConstants;
 import com.gmail.drakovekmail.dvkarchive.file.FilePrefs;
+import com.gmail.drakovekmail.dvkarchive.gui.artist.DeviantArtGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.artist.FurAffinityGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.comics.MangaDexGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.error.MissingMediaGUI;
@@ -254,8 +255,9 @@ public class StartGUI implements DActionEvent, Disabler {
 		String[] services = new String[0];
 		switch(category) {
 			case "artist_hosting":
-				services = new String[1];
-				services[0] = "fur_affinity";
+				services = new String[2];
+				services[0] = "deviantart";
+				services[1] = "fur_affinity";
 				break;
 			case "comics":
 				services = new String[1];
@@ -309,6 +311,9 @@ public class StartGUI implements DActionEvent, Disabler {
 				switch(service) {
 					case "fur_affinity":
 						this.service_pnl = new FurAffinityGUI(this);
+						break;
+					case "deviantart":
+						this.service_pnl = new DeviantArtGUI(this);
 						break;
 					case "mangadex":
 						this.service_pnl = new MangaDexGUI(this);

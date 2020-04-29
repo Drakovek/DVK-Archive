@@ -208,7 +208,7 @@ public class TestDeviantArt {
 		assertEquals(null, dvk.get_secondary_file());
 		//SECOND DVK - LITERATURE
 		url = "https://www.deviantart.com/legomax98/art/Finding-One-s-True-Self-770569130";
-		dvk = this.dev.get_dvk(url, "Gallery:Main", this.test_dir, null, false, true);
+		dvk = this.dev.get_dvk(url, null, this.test_dir, null, false, true);
 		assertEquals("DVA770569130", dvk.get_id());
 		url = "https://www.deviantart.com/legomax98/art/Finding-One-s-True-Self-770569130";
 		assertEquals(url, dvk.get_page_url());
@@ -216,27 +216,26 @@ public class TestDeviantArt {
 		assertEquals(1, dvk.get_artists().length);
 		assertEquals("Legomax98", dvk.get_artists()[0]);
 		assertEquals("2018/10/30|20:33", dvk.get_time());
-		assertEquals(13, dvk.get_web_tags().length);
+		assertEquals(12, dvk.get_web_tags().length);
 		assertEquals("Rating:General", dvk.get_web_tags()[0]);
-		assertEquals("Gallery:Main", dvk.get_web_tags()[1]);
-		assertEquals("Literature", dvk.get_web_tags()[2]);
-		assertEquals("Prose", dvk.get_web_tags()[3]);
-		assertEquals("Fiction", dvk.get_web_tags()[4]);
-		assertEquals("Fantasy", dvk.get_web_tags()[5]);
-		assertEquals("Short Stories", dvk.get_web_tags()[6]);
-		assertEquals("female", dvk.get_web_tags()[7]);
-		assertEquals("transformation", dvk.get_web_tags()[8]);
-		assertEquals("animaltransformation", dvk.get_web_tags()[9]);
-		assertEquals("wolftransformation", dvk.get_web_tags()[10]);
-		assertEquals("animaltfstory", dvk.get_web_tags()[11]);
-		assertEquals("feraltransformation", dvk.get_web_tags()[12]);
+		assertEquals("Literature", dvk.get_web_tags()[1]);
+		assertEquals("Prose", dvk.get_web_tags()[2]);
+		assertEquals("Fiction", dvk.get_web_tags()[3]);
+		assertEquals("Fantasy", dvk.get_web_tags()[4]);
+		assertEquals("Short Stories", dvk.get_web_tags()[5]);
+		assertEquals("female", dvk.get_web_tags()[6]);
+		assertEquals("transformation", dvk.get_web_tags()[7]);
+		assertEquals("animaltransformation", dvk.get_web_tags()[8]);
+		assertEquals("wolftransformation", dvk.get_web_tags()[9]);
+		assertEquals("animaltfstory", dvk.get_web_tags()[10]);
+		assertEquals("feraltransformation", dvk.get_web_tags()[11]);
 		desc = "My first story of hopefully many to come. A young woman travels to a place she always "
 				+ "wanted to visit and ends up staying a bit longer than expected";
 		assertEquals(desc, dvk.get_description());
 		assertEquals(null, dvk.get_direct_url());
 		assertEquals(null, dvk.get_secondary_url());
 		assertEquals("Finding One-s True Self_DVA770569130.dvk", dvk.get_dvk_file().getName());
-		assertEquals("Finding One-s True Self_DVA770569130.txt", dvk.get_media_file().getName());
+		assertEquals("Finding One-s True Self_DVA770569130.html", dvk.get_media_file().getName());
 		assertEquals(null, dvk.get_secondary_file());
 		assertTrue(dvk.get_media_file().exists());
 		String file = InOut.read_file(dvk.get_media_file());
@@ -272,7 +271,7 @@ public class TestDeviantArt {
 		assertEquals(null, dvk.get_direct_url());
 		assertEquals(null, dvk.get_secondary_url());
 		assertEquals("Pokeclipse TF RP_DVA700042244.dvk", dvk.get_dvk_file().getName());
-		assertEquals("Pokeclipse TF RP_DVA700042244.txt", dvk.get_media_file().getName());
+		assertEquals("Pokeclipse TF RP_DVA700042244.html", dvk.get_media_file().getName());
 		assertTrue(dvk.get_media_file().exists());
 		file = InOut.read_file(dvk.get_media_file());
 		desc = "<!DOCTYPE html><html>A solar eclipse is something that is amazing to experience... And we "
@@ -426,7 +425,7 @@ public class TestDeviantArt {
 				+ "kasumi_wallpaper_by_akuoreo_ddimle3-fullview.jpg?";
 		assertTrue(dvk.get_secondary_url().startsWith(url));
 		assertEquals("Looking to hire 3D modeler_DVA817361421-J.dvk", dvk.get_dvk_file().getName());
-		assertEquals("Looking to hire 3D modeler_DVA817361421-J.txt", dvk.get_media_file().getName());
+		assertEquals("Looking to hire 3D modeler_DVA817361421-J.html", dvk.get_media_file().getName());
 		assertEquals("Looking to hire 3D modeler_DVA817361421-J.jpg", dvk.get_secondary_file().getName());
 		//SECOND DVK
 		url = "https://www.deviantart.com/akuoreo/journal/Slime-Girl-TF-TG-Deal-Closed-762225768";
@@ -450,7 +449,7 @@ public class TestDeviantArt {
 		assertEquals(null, dvk.get_direct_url());
 		assertEquals(null, dvk.get_secondary_url());
 		assertEquals("Slime Girl TF TG Deal Closed_DVA762225768-J.dvk", dvk.get_dvk_file().getName());
-		assertEquals("Slime Girl TF TG Deal Closed_DVA762225768-J.txt", dvk.get_media_file().getName());
+		assertEquals("Slime Girl TF TG Deal Closed_DVA762225768-J.html", dvk.get_media_file().getName());
 		assertEquals(null, dvk.get_secondary_file());
 		assertTrue(dvk.get_dvk_file().exists());
 		assertTrue(dvk.get_media_file().exists());
@@ -481,7 +480,7 @@ public class TestDeviantArt {
 		assertEquals(null, dvk.get_direct_url());
 		assertEquals(null, dvk.get_secondary_url());
 		assertEquals("On Break_DVA749882887-J.dvk", dvk.get_dvk_file().getName());
-		assertEquals("On Break_DVA749882887-J.txt", dvk.get_media_file().getName());
+		assertEquals("On Break_DVA749882887-J.html", dvk.get_media_file().getName());
 		assertEquals(null, dvk.get_secondary_file());
 		assertTrue(dvk.get_dvk_file().exists());
 		assertTrue(dvk.get_media_file().exists());
@@ -512,7 +511,7 @@ public class TestDeviantArt {
 		assertEquals("Rating:General", result.get_web_tags()[1]);
 		assertEquals("This is a test", result.get_description());
 		assertEquals("27 April 2020 - Pokefan-Tf Update_DVA15696838-S.dvk", result.get_dvk_file().getName());
-		assertEquals("27 April 2020 - Pokefan-Tf Update_DVA15696838-S.txt", result.get_media_file().getName());
+		assertEquals("27 April 2020 - Pokefan-Tf Update_DVA15696838-S.html", result.get_media_file().getName());
 		assertTrue(result.get_dvk_file().exists());
 		assertTrue(result.get_media_file().exists());
 		String text = InOut.read_file(result.get_media_file());
@@ -841,6 +840,8 @@ public class TestDeviantArt {
 		assertEquals("https://www.deviantart.com/fezmangaka/poll/Transformation-with-mental-changes-7311213", dvks.get(index - 2).get_page_url());
 		dvk = dvks.get(index - 2);
 		assertEquals("Transformation with mental changes?", dvk.get_title());
+		assertEquals(1, dvk.get_artists().length);
+		assertEquals("FezMangaka", dvk.get_artists()[0]);
 		assertEquals("2018/06/21|10:04", dvk.get_time());
 		assertEquals(4, dvk.get_web_tags().length);
 		assertEquals("274", dvk.get_web_tags()[0]);
@@ -864,6 +865,8 @@ public class TestDeviantArt {
 		dvk = dvks.get(index - 1);
 		assertEquals(null, dvk.get_title());
 		assertEquals("2018/12/02|09:23", dvk.get_time());
+		assertEquals(1, dvk.get_artists().length);
+		assertEquals("Pokefan-Tf", dvk.get_artists()[0]);
 		assertTrue(dvk.get_web_tags() == null);
 		assertEquals("TFW you have almost 100 RPs to get back to, but you don't "
 				+ "feel motivated to respond to any of them...", dvk.get_description());
