@@ -69,6 +69,7 @@ public class DEnglish extends LanguageMap{
 		this.lang_keys.put("download_single", "^Download Single");
 		this.lang_keys.put("add_artist", "Add Artist");
 		this.lang_keys.put("artists", "^Artists");
+		this.lang_keys.put("titles", "^Titles");
 		this.lang_keys.put("add", "A^dd");
 		this.lang_keys.put("enter_page_url", "Enter Page URL:");
 		this.lang_keys.put("loading_captcha", "Loading Captcha...");
@@ -97,6 +98,8 @@ public class DEnglish extends LanguageMap{
 		this.lang_keys.put("reformat_dvks", "Reformat DVKs");
 		this.lang_keys.put("rename_files", "Rename Files");
 		//MANGADEX
+		String desc = "Downloads comics from MangaDex.org.";
+		this.lang_keys.put("mangadex_desc", desc);
 		this.lang_keys.put("running_mangadex", "[RUNNING MANGADEX]");
 		this.lang_keys.put("getting_title", "Getting Title");
 		this.lang_keys.put("getting_chapters", "Getting Chapters...");
@@ -112,7 +115,7 @@ public class DEnglish extends LanguageMap{
 		//UNLINKED MEDIA
 		this.lang_keys.put("unlinked_title", "Find Unlinked Media");
 		this.lang_keys.put("unlinked_console", "[FINDING UNLINKED MEDIA]");
-		String desc = "Finds media files in DVK directories that ";
+		desc = "Finds media files in DVK directories that ";
 		desc = desc + "do not have a corresponding DVK file.";
 		this.lang_keys.put("unlinked_desc", desc);
 		//SAME IDS

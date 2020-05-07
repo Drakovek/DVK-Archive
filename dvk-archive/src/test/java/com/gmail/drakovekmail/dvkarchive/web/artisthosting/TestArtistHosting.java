@@ -164,20 +164,20 @@ public class TestArtistHosting {
 	}
 	
 	/**
-	 * Tests the update_dvk method.
+	 * Tests the move_dvk method.
 	 */
 	@Test
-	public void test_update_dvk() {
+	public void test_move_dvk() {
 		Dvk dvk = new Dvk();
 		dvk.set_id("id123");
 		dvk.set_title("Title");
 		dvk.set_artist("artist");
 		dvk.set_page_url("/page/");
-		String[] tags = {"some", "Tags", "DVK:Single", "Favorite:Test"};
-		dvk.set_web_tags(tags);
 		dvk.set_dvk_file(new File(this.test_dir, "dvk.dvk"));
 		dvk.set_media_file("dvk.txt");
 		dvk.set_secondary_file("dvk.png");
+		String[] tags = {"bleh", "DVK:Single"};
+		dvk.set_web_tags(tags);
 		try {
 			dvk.get_media_file().createNewFile();
 			dvk.get_secondary_file().createNewFile();
@@ -187,64 +187,72 @@ public class TestArtistHosting {
 		assertTrue(dvk.get_media_file().exists());
 		assertTrue(dvk.get_secondary_file().exists());
 		//CHANGE NOTHING
-		dvk = ArtistHosting.update_dvk(dvk, null, null);
+		dvk = ArtistHosting.move_dvk(dvk, null);
 		assertTrue(dvk.get_dvk_file().exists());
 		assertTrue(dvk.get_media_file().exists());
 		assertTrue(dvk.get_secondary_file().exists());
-		assertEquals(this.test_dir,
-				dvk.get_dvk_file().getParentFile());
-		assertEquals(4, dvk.get_web_tags().length);
-		//ADD FAVORITE
-		dvk = ArtistHosting.update_dvk(dvk, this.test_dir, "Name");
-		assertTrue(dvk.get_dvk_file().exists());
-		assertTrue(dvk.get_media_file().exists());
-		assertTrue(dvk.get_secondary_file().exists());
-		assertEquals(this.test_dir,
-				dvk.get_dvk_file().getParentFile());
-		assertEquals(5, dvk.get_web_tags().length);
-		assertEquals("Favorite:Test", dvk.get_web_tags()[3]);
-		assertEquals("Favorite:Name", dvk.get_web_tags()[4]);
+		assertEquals(this.test_dir, dvk.get_dvk_file().getParentFile());
 		//CHANGE DIRECTORY
 		File sub = new File(this.test_dir, "sub");
 		if(!sub.isDirectory()) {
 			sub.mkdir();
 		}
-		dvk.set_web_tags(tags);
-		dvk = ArtistHosting.update_dvk(dvk, sub, "Name");
+		dvk = ArtistHosting.move_dvk(dvk, sub);
 		assertTrue(dvk.get_dvk_file().exists());
 		assertTrue(dvk.get_media_file().exists());
 		assertTrue(dvk.get_secondary_file().exists());
-		assertEquals(sub,
-				dvk.get_dvk_file().getParentFile());
-		assertEquals(sub,
-				dvk.get_media_file().getParentFile());
-		assertEquals(sub,
-				dvk.get_secondary_file().getParentFile());
-		assertEquals("dvk.dvk",
-				dvk.get_dvk_file().getName());
-		assertEquals("dvk.txt",
-				dvk.get_media_file().getName());
-		assertEquals("dvk.png",
-				dvk.get_secondary_file().getName());
-		assertEquals(5, dvk.get_web_tags().length);
-		assertEquals("Favorite:Test", dvk.get_web_tags()[3]);
-		assertEquals("Favorite:Name", dvk.get_web_tags()[4]);
+		assertEquals(sub, dvk.get_dvk_file().getParentFile());
+		assertEquals(sub, dvk.get_media_file().getParentFile());
+		assertEquals(sub, dvk.get_secondary_file().getParentFile());
+		assertEquals("dvk.dvk", dvk.get_dvk_file().getName());
+		assertEquals("dvk.txt", dvk.get_media_file().getName());
+		assertEquals("dvk.png", dvk.get_secondary_file().getName());
 		//DON'T MOVE, DVK NOT SINGLE
 		dvk.set_secondary_file(null);
-		dvk = ArtistHosting.update_dvk(dvk, null, "Name");
+		dvk.set_web_tags(null);
+		dvk = ArtistHosting.move_dvk(dvk, this.test_dir);
 		assertTrue(dvk.get_dvk_file().exists());
 		assertTrue(dvk.get_media_file().exists());
 		assertEquals(null, dvk.get_secondary_file());
-		assertEquals(sub,
-				dvk.get_dvk_file().getParentFile());
-		assertEquals(sub,
-				dvk.get_media_file().getParentFile());
-		assertEquals("dvk.dvk",
-				dvk.get_dvk_file().getName());
-		assertEquals("dvk.txt",
-				dvk.get_media_file().getName());
-		assertEquals(5, dvk.get_web_tags().length);
-		assertEquals("Favorite:Test", dvk.get_web_tags()[3]);
-		assertEquals("Favorite:Name", dvk.get_web_tags()[4]);
+		assertEquals(sub, dvk.get_dvk_file().getParentFile());
+		assertEquals(sub, dvk.get_media_file().getParentFile());
+		assertEquals("dvk.dvk", dvk.get_dvk_file().getName());
+		assertEquals("dvk.txt", dvk.get_media_file().getName());
+	}
+	
+	/**
+	 * Tests the update favorite method.
+	 */
+	@Test
+	public void test_update_favorite() {
+		//CREATE DVK
+		Dvk dvk = new Dvk();
+		dvk.set_id("ID123");
+		dvk.set_title("Title!");
+		dvk.set_artist("ArtGuy");
+		dvk.set_page_url("/page/");
+		String[] tags = {"Something", "blah", "favorite:person"};
+		dvk.set_web_tags(tags);
+		dvk.set_dvk_file(new File(this.test_dir, "dvk.dvk"));
+		dvk.set_media_file("dvk.jpg");
+		dvk.write_dvk();
+		//READ DVKS
+		File[] dirs = {this.test_dir};
+		FilePrefs prefs = new FilePrefs();
+		DvkHandler handler = new DvkHandler();
+		handler.read_dvks(dirs, prefs, null, false, true, false);
+		//TEST UPDATITNG FAVORITES
+		assertEquals(1, handler.get_size());
+		assertEquals(null, ArtistHosting.update_favorite(handler, "blah", "ID256"));
+		Dvk result = ArtistHosting.update_favorite(handler, "Person", "ID123");
+		assertEquals("Title!", result.get_title());
+		assertEquals(3, result.get_web_tags().length);
+		result = ArtistHosting.update_favorite(handler, "Other", "ID123");
+		assertEquals("Title!", result.get_title());
+		assertEquals(4, result.get_web_tags().length);
+		assertEquals("Something", result.get_web_tags()[0]);
+		assertEquals("blah", result.get_web_tags()[1]);
+		assertEquals("favorite:person", result.get_web_tags()[2]);
+		assertEquals("Favorite:Other", result.get_web_tags()[3]);
 	}
 }

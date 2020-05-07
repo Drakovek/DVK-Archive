@@ -196,8 +196,6 @@ public class DConnect {
 			}
 		}
 		catch(Exception e) {
-			e.printStackTrace();
-			System.out.println(url);
 			this.page = null;
 		}
 	}

@@ -16,6 +16,7 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DLabel;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DPasswordField;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DTextField;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
+import com.gmail.drakovekmail.dvkarchive.processing.ArrayProcessing;
 import com.google.common.io.Files;
 
 /**
@@ -175,55 +176,31 @@ public abstract class ArtistHosting implements DActionEvent {
 	}
 	
 	/**
-	 * Updates a downloaded DVK file with new information.
-	 * Moves the DVK file if specified.
+	 * Moves a DVK file to a given directory if Dvk is a single download.
 	 * 
-	 * @param dvk Dvk object to update
-	 * @param directory Directory to move Dvk to, if single.
-	 * Does not move if directory is null.
-	 * @param artist Artist to use when adding favorite tag.
-	 * If null, does not add favorite tag.
-	 * @return Updated Dvk object
+	 * @param dvk DVK file to move
+	 * @param directory Directory in which to move Dvk
+	 * @return Dvk of moved DVK file
 	 */
-	public static Dvk update_dvk(
-			Dvk dvk,
-			File directory,
-			String artist) {
+	public static Dvk move_dvk(Dvk dvk, File directory) {
 		Dvk new_dvk = dvk;
-		//ADD FAVORITE ARTIST
-		String[] tags;
-		if(new_dvk.get_web_tags() != null) {
-			tags = new String[new_dvk.get_web_tags().length + 1];
-		}
-		else {
-			tags = new String[1];
-		}
-		for(int i = 0; i < tags.length -1; i++) {
-			tags[i] = new_dvk.get_web_tags()[i];
-		}
-		//ADD FAVORITE ARTIST
-		if(artist != null) {
-			tags[tags.length - 1] = "Favorite:" + artist;
-		}
-		new_dvk.set_web_tags(tags);
 		//MOVE FILES IF NECESSARY
-		if(directory != null && !dvk.get_dvk_file().getParentFile().equals(directory)) {
+		if(directory != null && 
+				ArrayProcessing.contains(dvk.get_web_tags(), "dvk:single", false) && 
+				!dvk.get_dvk_file().getParentFile().equals(directory)) {
 			//SET DVK FILE
-			File file = new File(directory,
-					dvk.get_dvk_file().getName());
+			File file = new File(directory, dvk.get_dvk_file().getName());
 			dvk.get_dvk_file().delete();
 			new_dvk.set_dvk_file(file);
 			//MOVE MEDIA FILE
-			file = new File(directory,
-					dvk.get_media_file().getName());
+			file = new File(directory, dvk.get_media_file().getName());
 			try {
 				Files.move(dvk.get_media_file(), file);
 			} catch (IOException e) {}
 			new_dvk.set_media_file(file.getName());
 			//MOVE SECONDARY FILE
 			if(dvk.get_secondary_file() != null) {
-				file = new File(directory,
-						dvk.get_secondary_file().getName());
+				file = new File(directory, dvk.get_secondary_file().getName());
 				try {
 					Files.move(dvk.get_secondary_file(), file);
 				} catch (IOException e) {}
@@ -232,6 +209,41 @@ public abstract class ArtistHosting implements DActionEvent {
 		}
 		new_dvk.write_dvk();
 		return new_dvk;
+	}
+	
+	/**
+	 * Updates Dvk object of given ID to include a given favorite tag if available.
+	 * Returns updated Dvk object.
+	 * 
+	 * @param dvk_handler Used to search for Dvk with given ID
+	 * @param artist Artist to use when adding favorite tag
+	 * @param id Given ID of Dvk to update
+	 * @return Updated Dvk object, null if Dvk with given ID does not exist
+	 */
+	public static Dvk update_favorite(DvkHandler dvk_handler, String artist, String id) {
+		int size = dvk_handler.get_size();
+		for(int i = 0; i < size; i++) {
+			Dvk dvk = dvk_handler.get_dvk(i);
+			if(dvk.get_id().equals(id)) {
+				String[] tags = dvk.get_web_tags();
+				if(!ArrayProcessing.contains(tags, "favorite:" + artist, false)) {
+					String[] new_tags;
+					if(tags == null) {
+						new_tags = new String[1];
+					}
+					else {
+						new_tags = new String[tags.length + 1];
+						for(int k = 0; k < tags.length; k++) {
+							new_tags[k] = tags[k];
+						}
+					}
+					new_tags[new_tags.length - 1] = "Favorite:" + artist;
+					dvk.set_web_tags(new_tags);
+				}
+				return dvk;
+			}
+		}
+		return null;
 	}
 	
 	@Override

@@ -141,6 +141,7 @@ public class DvkHandler {
 			}
 		}
 		while(all_dirs.size() > 0) {
+			//TODO NULL POINTER?
 			//SEARCH FOR DVKS AND NEW DIRECTORIES
 			boolean add_dirs = false;
 			files = all_dirs.get(0).listFiles();

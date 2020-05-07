@@ -145,12 +145,22 @@ public class TestArrayProcessing {
 	@SuppressWarnings("static-method")
 	public void test_contains() {
 		//INVALID
-		assertFalse(ArrayProcessing.contains(null, "thing"));
-		//VALID
-		String[] array = {"these", "are", "words"};
-		assertFalse(ArrayProcessing.contains(array, "thing"));
-		assertTrue(ArrayProcessing.contains(array, "these"));
-		assertTrue(ArrayProcessing.contains(array, "are"));
-		assertTrue(ArrayProcessing.contains(array, "words"));
+		assertFalse(ArrayProcessing.contains(null, "thing", true));
+		assertFalse(ArrayProcessing.contains(null, "thing", false));
+		//CASE SENSITIVE
+		String[] array = {"these", "are", null, "words"};
+		assertFalse(ArrayProcessing.contains(array, "thing", true));
+		assertTrue(ArrayProcessing.contains(array, "these", true));
+		assertTrue(ArrayProcessing.contains(array, "are", true));
+		assertTrue(ArrayProcessing.contains(array, "words", true));
+		assertFalse(ArrayProcessing.contains(array, "WoRdS", true));
+		assertFalse(ArrayProcessing.contains(array, "These", true));
+		//CASE INSENSITIVE
+		assertFalse(ArrayProcessing.contains(array, "thing", false));
+		assertTrue(ArrayProcessing.contains(array, "these", false));
+		assertTrue(ArrayProcessing.contains(array, "are", false));
+		assertTrue(ArrayProcessing.contains(array, "words", false));
+		assertTrue(ArrayProcessing.contains(array, "WoRdS", false));
+		assertTrue(ArrayProcessing.contains(array, "These", false));
 	}
 }

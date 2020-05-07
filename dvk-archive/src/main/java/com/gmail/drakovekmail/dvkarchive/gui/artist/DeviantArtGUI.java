@@ -38,7 +38,7 @@ public class DeviantArtGUI extends ArtistHostingGUI {
 	 * @param start_gui Parent of DeviantArtGUI
 	 */
 	public DeviantArtGUI(StartGUI start_gui) {
-		super(start_gui, "deviantart");
+		super(start_gui, "deviantart", "artists", false);
 		load_directory();
 	}
 	
@@ -197,18 +197,18 @@ public class DeviantArtGUI extends ArtistHostingGUI {
 		this.start_gui.append_console("downloading_pages", true);
 		for(int i = g_size - 1; !this.start_gui.get_base_gui().is_canceled() && i > -1; i--) {
 			this.start_gui.get_main_pbar().set_progress(false, true, g_size - (i + 1), size);
-			d = this.download_media_page(main_pages.get(i), dir, artist, "Gallery:Main", false);
+			d = this.download_media_page(main_pages.get(i), dir, null, "Gallery:Main", false);
 		}
 		//DOWNLOAD SCRAPS GALLERY
 		for(int i = s_size - 1; !this.start_gui.get_base_gui().is_canceled() && i > -1; i--) {
 			this.start_gui.get_main_pbar().set_progress(false, true, g_size + (s_size - (i + 1)), size);
-			d = this.download_media_page(scrap_pages.get(i), dir, artist, "Gallery:Main", false);
+			d = this.download_media_page(scrap_pages.get(i), dir, null, "Gallery:Main", false);
 		}
 		//DOWNLOAD JOURNAL GALLERY
 		int off = g_size + s_size;
 		for(int i = j_size - 1; !this.start_gui.get_base_gui().is_canceled() && i > -1; i--) {
 			this.start_gui.get_main_pbar().set_progress(false, true, off + (j_size - (i + 1)), size);
-			d = this.download_media_page(journal_pages.get(i), dir, artist, null, false);
+			d = this.download_media_page(journal_pages.get(i), dir, null, null, false);
 		}
 		//DOWNLOAD MODULE PAGES
 		off += j_size;
@@ -223,7 +223,7 @@ public class DeviantArtGUI extends ArtistHostingGUI {
 		off += m_size;
 		for(int i = f_size - 1; !this.start_gui.get_base_gui().is_canceled() && i > -1; i--) {
 			this.start_gui.get_main_pbar().set_progress(false, true, off + (f_size - (i + 1)), size);
-			this.download_media_page(favs.get(i), fav_dir, fav_artist, null, true);
+			download_media_page(favs.get(i), fav_dir, fav_artist, null, true);
 		}
 		this.start_gui.append_console("", false);
 	}
@@ -267,7 +267,7 @@ public class DeviantArtGUI extends ArtistHostingGUI {
 			}
 			else {
 				//DOWNLOAD GALLERY PAGE
-				dvk = this.dev.get_dvk(url, gallery, directory, artist, single, true);
+				dvk = this.dev.get_dvk(url, this.dvk_handler, gallery, directory, artist, single, true);
 			}
 			this.dvk_handler.add_dvk(dvk);
 			//CANCEL IF DOWNLOAD FAILED
@@ -326,19 +326,21 @@ public class DeviantArtGUI extends ArtistHostingGUI {
 				this.start_gui.get_frame(),
 				"add_artist",
 				messages);
-		//CREATE ARTIST FOLDER
-		File dir = new File(
-				this.start_gui.get_directory(),
-				StringProcessing.get_filename(artist));
-		if(!dir.exists()) {
-			dir.mkdir();
+		if(artist != null) {
+			//CREATE ARTIST FOLDER
+			File dir = new File(
+					this.start_gui.get_directory(),
+					StringProcessing.get_filename(artist));
+			if(!dir.exists()) {
+				dir.mkdir();
+			}
+			//ADD TO ARTIST LIST
+			Dvk art_dvk = new Dvk();
+			art_dvk.set_artist(artist);
+			art_dvk.set_dvk_file(new File(dir, "dvk.dvk").getParentFile());
+			this.dvks.add(0, art_dvk);
+			set_artists();
 		}
-		//ADD TO ARTIST LIST
-		Dvk art_dvk = new Dvk();
-		art_dvk.set_artist(artist);
-		art_dvk.set_dvk_file(new File(dir, "dvk.dvk").getParentFile());
-		this.dvks.add(0, art_dvk);
-		set_artists();
 	}
 
 	@Override

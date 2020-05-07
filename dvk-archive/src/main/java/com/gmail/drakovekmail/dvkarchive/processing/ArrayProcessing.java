@@ -129,15 +129,27 @@ public class ArrayProcessing {
 	 * 
 	 * @param array Array in which to search for string
 	 * @param search String to search for
+	 * @param case_sensitive Whether comparison should be case sensitive
 	 * @return Whether array contains search
 	 */
-	public static boolean contains(String[] array, String search) {
+	public static boolean contains(String[] array, String search, boolean case_sensitive) {
 		if(array == null) {
 			return false;
 		}
-		for(int i = 0; i < array.length; i++) {
-			if(array[i].equals(search))
-			return true;
+		if(case_sensitive) {
+			for(int i = 0; i < array.length; i++) {
+				if(array[i] != null && array[i].equals(search)) {
+					return true;
+				}
+			}
+		}
+		else {
+			String lower = search.toLowerCase();
+			for(int i = 0; i < array.length; i++) {
+				if(array[i] != null && array[i].toLowerCase().equals(lower)) {
+					return true;
+				}
+			}
 		}
 		return false;
 	}

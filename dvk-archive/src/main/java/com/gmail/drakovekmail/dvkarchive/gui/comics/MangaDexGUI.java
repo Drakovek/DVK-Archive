@@ -1,11 +1,18 @@
 package com.gmail.drakovekmail.dvkarchive.gui.comics;
 
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.prefs.Preferences;
+import javax.swing.JPanel;
+import javax.swing.JSeparator;
+import javax.swing.SwingConstants;
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
+import com.gmail.drakovekmail.dvkarchive.gui.BaseGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.artist.ArtistHostingGUI;
+import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DButton;
+import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DLabel;
 import com.gmail.drakovekmail.dvkarchive.processing.StringProcessing;
 import com.gmail.drakovekmail.dvkarchive.web.DConnect;
 import com.gmail.drakovekmail.dvkarchive.web.DConnectSelenium;
@@ -44,14 +51,35 @@ public class MangaDexGUI extends ArtistHostingGUI {
 	 * @param start_gui Parent of MangaDexGUI
 	 */
 	public MangaDexGUI(StartGUI start_gui) {
-		super(start_gui, "mangadex");
+		super(start_gui, "mangadex", "titles", true);
 		load_directory();
 	}
 	
 	@Override
 	public void create_initial_gui() {
-		create_main_gui();
-		this.set_list(new ArrayList<>());
+		BaseGUI base_gui = this.start_gui.get_base_gui();
+		//CREATE TITLE PANEL
+		DLabel title_lbl = new DLabel(base_gui, null, "mangadex");
+		title_lbl.setHorizontalAlignment(SwingConstants.CENTER);
+		title_lbl.set_font_large();
+		JSeparator sep = new JSeparator(SwingConstants.HORIZONTAL);
+		JPanel title_pnl = base_gui.get_y_stack(title_lbl, sep);
+		//CREATE DESCRIPTION PANEL
+		DLabel desc_lbl = new DLabel(base_gui, null, "mangadex_desc");
+		desc_lbl.setHorizontalAlignment(SwingConstants.CENTER);
+		desc_lbl.wrap_text(true);
+		JPanel desc_pnl = base_gui.get_y_stack(title_pnl, desc_lbl);
+		//CREATE BUTTON PANEL
+		DButton run_btn = new DButton(base_gui, this, "skip_login");
+		run_btn.set_text_id("run");
+		JPanel button_pnl = base_gui.get_y_stack(desc_pnl, run_btn);
+		//CREATE SERVICE PANEL
+		JPanel service_pnl = base_gui.get_spaced_panel(
+				button_pnl, 0, 0, false, false, false, false);
+		this.removeAll();
+		this.add(service_pnl);
+		this.revalidate();
+		this.repaint();
 	}
 	
 	/**
@@ -198,8 +226,5 @@ public class MangaDexGUI extends ArtistHostingGUI {
 	public void save_checks() {}
 
 	@Override
-	public void add() {
-		// TODO Auto-generated method stub
-		
-	}
+	public void add() {}
 }

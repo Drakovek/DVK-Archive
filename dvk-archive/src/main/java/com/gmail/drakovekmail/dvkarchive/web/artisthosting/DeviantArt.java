@@ -31,6 +31,9 @@ import com.gmail.drakovekmail.dvkarchive.web.DConnect;
  */
 public class DeviantArt extends ArtistHosting {
 	
+	//TODO FIX SCANNING NEW FAVORITES
+	//TODO DON'T ADD SINGLE TAG TO FAVORITES DOWNLOAD
+	
 	/**
 	 * DConnect object for connecting to DeviantArt
 	 */
@@ -172,6 +175,7 @@ public class DeviantArt extends ArtistHosting {
 	 * Returns a Dvk for a given DeviantArt media page.
 	 * 
 	 * @param page_url URL of DeviantArt media page
+	 * @param dvk_handler Used for checking already downloaded favorites pages
 	 * @param gallery Gallery tag to add to Dvk
 	 * @param directory Directory in which to save Dvk.
 	 * @param artist Artist to use when adding favorite tag.
@@ -181,9 +185,29 @@ public class DeviantArt extends ArtistHosting {
 	 * @return Dvk of DeviantArt media page
 	 */
 	@SuppressWarnings("resource")
-	public Dvk get_dvk(String page_url, String gallery, File directory, String artist, boolean single, boolean save) {
-		Dvk dvk = new Dvk();
-		dvk.set_id(get_page_id(page_url));
+	public Dvk get_dvk(
+			String page_url,
+			DvkHandler dvk_handler,
+			String gallery,
+			File directory,
+			String artist,
+			boolean single,
+			boolean save) {
+		//ADD FAVORITES IF DVK ALREADY EXISTS
+		String id = get_page_id(page_url);
+		Dvk dvk = null;
+		if(dvk_handler != null && artist != null) {
+			dvk = ArtistHosting.update_favorite(dvk_handler, artist, id);
+			if(dvk != null) {
+				if(save) {
+					dvk.write_dvk();
+				}
+				return dvk;
+			}
+		}
+		//GET NEW DVK
+		dvk = new Dvk();
+		dvk.set_id(id);
 		if(dvk.get_id() == null) {
 			//CANCEL
 			return new Dvk();
@@ -395,7 +419,10 @@ public class DeviantArt extends ArtistHosting {
 			}
 			return dvk;
 		}
-		catch(Exception e) {}
+		catch(Exception e) {
+			e.printStackTrace();
+			System.out.println(page_url);
+		}
 		return new Dvk();
 	}
 	
@@ -408,18 +435,30 @@ public class DeviantArt extends ArtistHosting {
 	 * @return Dvk of DeviantArt media page
 	 */
 	public static Dvk get_poll_dvk(Dvk info, File directory, boolean save) {
-		//PARSE OUT VOTING OPTIONS AND VOTE COUNTS
-		String[] tags = info.get_web_tags();
-		if((tags.length / 2) * 2 != tags.length) {
+		if(info.get_description() == null) {
 			return new Dvk();
 		}
-		int[] votes = new int[info.get_web_tags().length / 2];
+		//PARSE VOTE DATA
+		String vote_str = info.get_description();
+		ArrayList<String> vote_data = new ArrayList<>();
+		int index;
+		while(vote_str.length() > 0) {
+			index = vote_str.indexOf("<DVK-POLL-SEP>");
+			vote_data.add(vote_str.substring(0, index));
+			index = vote_str.indexOf('>', index) + 1;
+			vote_str = vote_str.substring(index);
+		}
+		//PARSE OUT VOTING OPTIONS AND VOTE COUNTS
+		if((vote_data.size() / 2) * 2 != vote_data.size()) {
+			return new Dvk();
+		}
+		int[] votes = new int[vote_data.size() / 2];
 		String[] insides = new String[votes.length];
 		int vote = -1;
 		int greatest = -1;
 		for(int i = 0; i < votes.length; i++) {
 			try {
-				votes[i] = Integer.parseInt(tags[i * 2]);
+				votes[i] = Integer.parseInt(vote_data.get(i * 2));
 				if(votes[i] > vote) {
 					vote = votes[i];
 					greatest = i;
@@ -428,7 +467,7 @@ public class DeviantArt extends ArtistHosting {
 			catch(NumberFormatException e) {
 				return new Dvk();
 			}
-			insides[i] = tags[(i * 2) + 1];
+			insides[i] = vote_data.get((i * 2) + 1);
 		}
 		//SET COMMON INFO
 		Dvk dvk = new Dvk();
@@ -563,13 +602,16 @@ public class DeviantArt extends ArtistHosting {
 			//GET DESCRIPTION
 			int end;
 			String desc = null;
-			xpath = "//div[contains(@class,'legacy-journal')]//script/parent::div";
+			xpath = "//div[contains(@class,'legacy-journal')]//script/parent::div|"
+					+ "//div[@class='da-editor-journal']//div[@dir='ltr']";
 			DomElement de = this.connect.get_page().getFirstByXPath(xpath);
 			desc = DConnect.clean_element(de.asXml(), true);
 			start = desc.indexOf("<script");
-			end = desc.indexOf("</script>", start);
-			end = desc.indexOf('>', end) + 1;
-			desc = desc.substring(0, start) + desc.substring(end);
+			if(start != -1) {
+				end = desc.indexOf("</script>", start);
+				end = desc.indexOf('>', end) + 1;
+				desc = desc.substring(0, start) + desc.substring(end);
+			}
 			dvk.set_description(desc);
 			//GET JSON
 			xpath = "//link[@type='application/json+oembed']/@href";
@@ -648,7 +690,10 @@ public class DeviantArt extends ArtistHosting {
 			}
 			return dvk;
 		}
-		catch (Exception e) {}
+		catch (Exception e) {
+			e.printStackTrace();
+			System.out.println(page_url);
+		}
 		return new Dvk();
 	}
 	
@@ -726,33 +771,34 @@ public class DeviantArt extends ArtistHosting {
 				for(int k = 0; k < size; k++) {
 					if(get_page_id(dvk_handler.get_dvk(k).get_page_url()).equals(id)) {
 						contains = true;
-						//UPDATE DVK LOCATION AND FAVORITE IF ALREADY DOWNLOADED
-						Dvk dvk;
-						if(type == 'f') {
-							dvk = ArtistHosting.update_dvk(dvk_handler.get_dvk(k), null, artist);
-						}
-						else {
-							dvk = ArtistHosting.update_dvk(dvk_handler.get_dvk(k), directory, null);
-						}
-						dvk_handler.set_dvk(dvk, k);
 						//ENDS IF DOWNLOADED DVK IS NOT A SINGLE DOWNLOAD
-						if(!ArrayProcessing.contains(dvk.get_web_tags(), "DVK:Single")) {
-							check_next = false;
+						String[] wts = dvk_handler.get_dvk(k).get_web_tags();
+						if (type == 'f') {
+							if(!ArrayProcessing.contains(wts, "favorite:" + artist, false)) {
+								contains = false;
+							}
+							else {
+								check_next = false;
+							}
 						}
-						else {
-							//ADD GALLERY TAG
-							if(type == 'm' && !ArrayProcessing.contains(dvk.get_web_tags(), "Gallery:Main")) {
-								ArrayList<String> tags = ArrayProcessing.array_to_list(dvk.get_web_tags());
-								tags.add(0, "Gallery:Main");
-								dvk.set_web_tags(ArrayProcessing.list_to_array(tags));
-								dvk.write_dvk();
-							}
-							else if(type == 's' && !ArrayProcessing.contains(dvk.get_web_tags(), "Gallery:Scraps")) {
-								ArrayList<String> tags = ArrayProcessing.array_to_list(dvk.get_web_tags());
-								tags.add(0, "Gallery:Scraps");
-								dvk.set_web_tags(ArrayProcessing.list_to_array(tags));
-								dvk.write_dvk();
-							}
+						//UPDATE DVK LOCATION AND FAVORITE IF ALREADY DOWNLOADED
+						Dvk dvk = dvk_handler.get_dvk(k);
+						if(type != 'f') {
+							dvk = ArtistHosting.move_dvk(dvk_handler.get_dvk(k), directory);
+							dvk_handler.set_dvk(dvk, k);
+						}
+						//ADD GALLERY TAG
+						if(type == 'm' && !ArrayProcessing.contains(dvk.get_web_tags(), "gallery:main", false)) {
+							ArrayList<String> tags = ArrayProcessing.array_to_list(dvk.get_web_tags());
+							tags.add(0, "Gallery:Main");
+							dvk.set_web_tags(ArrayProcessing.list_to_array(tags));
+							dvk.write_dvk();
+						}
+						else if(type == 's' && !ArrayProcessing.contains(dvk.get_web_tags(), "gallery:scraps", false)) {
+							ArrayList<String> tags = ArrayProcessing.array_to_list(dvk.get_web_tags());
+							tags.add(0, "Gallery:Scraps");
+							dvk.set_web_tags(ArrayProcessing.list_to_array(tags));
+							dvk.write_dvk();
 						}
 						break;
 					}
@@ -764,7 +810,7 @@ public class DeviantArt extends ArtistHosting {
 			//GET NEXT PAGES
 			boolean more = json.getBoolean("hasMore");
 			if(more && (check_all || check_next)) {
-				ArrayList<String> next = get_pages(start_gui, artist, directory, type, dvk_handler, check_all, offset + 20);
+				ArrayList<String> next = get_pages(start_gui, artist, directory, type, dvk_handler, check_all, offset + 24);
 				if(next == null) {
 					if(offset == 0) {
 						if(start_gui != null) {
@@ -919,10 +965,11 @@ public class DeviantArt extends ArtistHosting {
 						contains = true;
 						//UPDATE DVK LOCATION IF ALREADY DOWNLOADED
 						Dvk dvk;
-						dvk = ArtistHosting.update_dvk(dvk_handler.get_dvk(k), directory, null);
+						dvk = ArtistHosting.move_dvk(dvk_handler.get_dvk(k), directory);
 						dvk_handler.set_dvk(dvk, k);
 						//ENDS IF DOWNLOADED DVK IS NOT A SINGLE DOWNLOAD
-						if(!ArrayProcessing.contains(dvk.get_web_tags(), "DVK:Single")) {
+						String[] tags = dvk.get_web_tags();
+						if(!ArrayProcessing.contains(tags, "dvk:single", false)) {
 							check_next = false;
 						}
 						break;
@@ -937,13 +984,15 @@ public class DeviantArt extends ArtistHosting {
 						summary.set_title(obj.getString("title"));
 						//GET POLL RESULTS
 						JSONArray poll = obj.getJSONObject("poll").getJSONArray("answers");
-						ArrayList<String> results = new ArrayList<>();
+						StringBuilder results = new StringBuilder();
 						for(int r = 0; r < poll.length(); r++) {
-							results.add(Integer.toString(poll.getJSONObject(r).getInt("votes")));
-							results.add(poll.getJSONObject(r)
+							results.append(Integer.toString(poll.getJSONObject(r).getInt("votes")));
+							results.append("<DVK-POLL-SEP>");
+							results.append(poll.getJSONObject(r)
 									.getJSONObject("textContent").getString("excerpt"));
+							results.append("<DVK-POLL-SEP>");
 						}
-						summary.set_web_tags(ArrayProcessing.list_to_array(results));
+						summary.set_description(results.toString());
 					}
 					else if(type == 's') {
 						summary.set_description(obj.getJSONObject("textContent").getString("excerpt"));
@@ -955,7 +1004,7 @@ public class DeviantArt extends ArtistHosting {
 			boolean more = json.getBoolean("hasMore");
 			if(more && (check_all || check_next)) {
 				ArrayList<Dvk> next = get_module_pages(
-						start_gui, artist, mod_id, directory, type, dvk_handler, check_all, offset + 20);
+						start_gui, artist, mod_id, directory, type, dvk_handler, check_all, offset + 24);
 				if(next == null) {
 					if(offset == 0) {
 						if(start_gui != null) {

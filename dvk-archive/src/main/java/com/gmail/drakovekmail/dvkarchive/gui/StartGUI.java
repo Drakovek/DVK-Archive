@@ -27,7 +27,6 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DMenu;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DMenuItem;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DProgressBar;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DScrollPane;
-import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DScrollablePanel;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DTextArea;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
 
@@ -40,6 +39,8 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
  */
 public class StartGUI implements DActionEvent, Disabler {
 
+	//TODO ENSURE CONNECTIONS CLOSED WHEN CLOSING PROGRAM
+	
 	/**
 	 * Current directory for the StartGUI
 	 */
@@ -114,7 +115,7 @@ public class StartGUI implements DActionEvent, Disabler {
 	/**
 	 * Panel for holding service_pnl
 	 */
-	private DScrollablePanel content_pnl;
+	private JPanel content_pnl;
 	
 	/**
 	 * Panel containing GUI elements for the current service
@@ -146,7 +147,7 @@ public class StartGUI implements DActionEvent, Disabler {
 		this.file_prefs.set_captcha_dir(sub);
 		this.file_prefs.set_use_index(true);
 		this.current_service = new String();
-		this.frame = new DFrame(this.base_gui, "dvk_archive");
+		this.frame = new DFrame(this.base_gui, this, "dvk_archive");
 		//CREATE SETTINGS BAR
 		this.settings_bar = new SettingsBarGUI(this);
 		this.frame.getContentPane().add(this.settings_bar,
@@ -194,11 +195,10 @@ public class StartGUI implements DActionEvent, Disabler {
 		JPanel log_pnl = this.base_gui.get_y_stack(
 				console_pnl, 1, cancel_pnl, 0);
 		//CREATE CENTER PANEL
-		this.content_pnl = new DScrollablePanel();
-		DScrollPane c_scr = new DScrollPane(this.content_pnl);
+		this.content_pnl = new JPanel();
+		this.content_pnl.setLayout(new GridLayout(1, 1));
 		JSplitPane spl = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-				c_scr,
-				log_pnl);
+				this.content_pnl, log_pnl);
 		this.frame.getContentPane().add(
 				this.base_gui.get_spaced_panel(spl),
 				BorderLayout.CENTER);
@@ -335,7 +335,10 @@ public class StartGUI implements DActionEvent, Disabler {
 						break;
 				}
 				JPanel spaced = this.base_gui.get_spaced_panel(this.service_pnl);
-				this.content_pnl.set_panel(spaced);
+				this.content_pnl.removeAll();
+				this.content_pnl.add(spaced);
+				this.content_pnl.revalidate();
+				this.content_pnl.repaint();
 				this.current_service = service;
 			}
 		}
@@ -350,15 +353,6 @@ public class StartGUI implements DActionEvent, Disabler {
 	public void append_console(String text, boolean is_id) {
 		this.console.append_text(text, is_id);
 		this.console_scr.bottom_left();
-	}
-	
-	/**
-	 * Returns the main scroll panel for service GUIs.
-	 * 
-	 * @return Service GUI scroll panel
-	 */
-	public DScrollablePanel get_scroll_panel() {
-		return this.content_pnl;
 	}
 	
 	/**
@@ -492,6 +486,12 @@ public class StartGUI implements DActionEvent, Disabler {
 				break;
 			case "clear":
 				cancel_clear();
+				break;
+			case "close_frame":
+				if(this.service_pnl != null) {
+					this.service_pnl.close();
+				}
+				this.frame.close();
 				break;
 		}
 	}

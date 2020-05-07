@@ -1,9 +1,9 @@
 package com.gmail.drakovekmail.dvkarchive.gui.artist;
 
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.io.File;
 import java.util.ArrayList;
-
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -34,8 +34,6 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DCheckEvent;
  */
 public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEvent, DCheckEvent {
 	
-	//TODO DISABLE BUTTONS AFTER CANCEL
-	
 	/**
 	 * SerialVersionUID
 	 */
@@ -45,6 +43,16 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	 * Name of the current artist-hosting service.
 	 */
 	private String name;
+	
+	/**
+	 * Label for the main GUI list of artists/titles/etc.
+	 */
+	private String list_label;
+	
+	/**
+	 * Whether the main GUI uses simple layout without checkboxes and add button
+	 */
+	private boolean simple;
 	
 	/**
 	 * Whether login was skipped.
@@ -171,15 +179,17 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	 * 
 	 * @param start_gui Parent of ArtistHostingGUI
 	 * @param name_id Language ID for the name of current service.
+	 * @param list_label Label for the main GUI list of artists/titles/etc.
+	 * @param simple Whether the main GUI uses simple layout without checkboxes and add button
 	 */
-	public ArtistHostingGUI(StartGUI start_gui, String name_id) {
+	public ArtistHostingGUI(StartGUI start_gui, String name_id, String list_label, boolean simple) {
 		super(start_gui);
+		this.list_label = list_label;
+		this.simple = simple;
 		this.use_captcha = false;
 		this.dvks = new ArrayList<>();
-		this.name = start_gui.get_base_gui()
-				.get_language_string(name_id);
+		this.name = start_gui.get_base_gui().get_language_string(name_id);
 		this.setLayout(new GridLayout(1, 1));
-		this.skipped = true;
 		//INITIALIZE COMPONENTS
 		load_checks();
 		BaseGUI base_gui = start_gui.get_base_gui();
@@ -191,15 +201,12 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		this.cap_btn = new DButton(base_gui, this, "refresh_captcha");
 		this.login_btn = new DButton(base_gui, this, "login");
 		this.skip_btn = new DButton(base_gui, this, "skip_login");
-		this.main_chk = new DCheckBox(
-				base_gui, this, "main", get_main());
-		this.scraps_chk = new DCheckBox(
-				base_gui, this, "scraps", get_scraps());
-		this.journal_chk = new DCheckBox(
-				base_gui, this, "journals", get_journals());
-		this.favorite_chk = new DCheckBox(
-				base_gui, this, "favorites", get_favorites());
+		this.main_chk = new DCheckBox(base_gui, this, "main", get_main());
+		this.scraps_chk = new DCheckBox(base_gui, this, "scraps", get_scraps());
+		this.journal_chk = new DCheckBox(base_gui, this, "journals", get_journals());
+		this.favorite_chk = new DCheckBox(base_gui, this, "favorites", get_favorites());
 		//CREATE GUI
+		this.skipped = true;
 		create_initial_gui();
 	}
 	
@@ -220,7 +227,6 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	 */
 	protected void create_login_gui(boolean allow_skipping, boolean captcha) {
 		this.use_captcha = captcha;
-		this.start_gui.get_scroll_panel().set_fit(true, false);
 		BaseGUI base_gui = this.start_gui.get_base_gui();
 		this.u_txt = new DTextField(base_gui, this, "nothing");
 		this.p_txt = new DPasswordField(base_gui);
@@ -253,31 +259,36 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		this.c_txt = new DTextField(base_gui, this, "nothing");
 		DLabel c_lbl = new DLabel(base_gui, this.c_txt, "captcha");
 		this.image_lbl = new JLabel();
-		this.image_lbl.setHorizontalAlignment(
-				SwingConstants.CENTER);
-		this.image_lbl.setVerticalAlignment(
-				SwingConstants.CENTER);
+		this.image_lbl.setHorizontalAlignment(SwingConstants.CENTER);
+		this.image_lbl.setVerticalAlignment(SwingConstants.CENTER);
 		JPanel c_txt_pnl = base_gui.get_y_stack(
-				this.image_lbl,
-				base_gui.get_x_stack(c_lbl, 0, this.c_txt, 1));
+				this.image_lbl, base_gui.get_x_stack(c_lbl, 0, this.c_txt, 1));
 		JPanel cap_pnl = base_gui.get_y_stack(c_txt_pnl, this.cap_btn);
 		//CREATE FULL LOGIN PANEL
 		JPanel login_pnl;
 		if(this.use_captcha) {
-			login_pnl = base_gui.get_y_stack(
-					top_pnl,
-					base_gui.get_y_stack(cap_pnl, btm_pnl));
+			login_pnl = base_gui.get_y_stack(top_pnl, base_gui.get_y_stack(cap_pnl, btm_pnl));
 		}
 		else {
 			login_pnl = base_gui.get_y_stack(top_pnl, btm_pnl);
 		}
 		//CREATE CENTER PANEL
-		JPanel center_pnl = base_gui.get_spaced_panel(login_pnl, 0, 0, false, false, false, false);
+		JPanel center_pnl = base_gui.get_spaced_panel(login_pnl, 0, 0, true, true, true, true);
+		DScrollPane scr = new DScrollPane(center_pnl);
 		//UPDATE MAIN PANEL
 		this.removeAll();
-		this.add(center_pnl);
+		this.add(scr);
 		this.revalidate();
 		this.repaint();
+		//LIMIT SIZE
+		int height = base_gui.get_font().getSize() * 2;
+		height += base_gui.get_space_size();
+		int width = (int)this.u_txt.getSize().getWidth();
+		this.u_txt.setPreferredSize(new Dimension(width, height));
+		width = (int)this.p_txt.getSize().getWidth();
+		this.p_txt.setPreferredSize(new Dimension(width, height));
+		width = (int)this.c_txt.getSize().getWidth();
+		this.c_txt.setPreferredSize(new Dimension(width, height));
 	}
 	
 	/**
@@ -285,9 +296,7 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	 * Also called to reset when process is canceled.
 	 */
 	public abstract void create_initial_gui();
-	
-	//TODO remove captcha message
-	
+
 	/**
 	 * Refreshes the Displayed CAPTCHA image.
 	 */
@@ -312,10 +321,7 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	private void start_login() {
 		this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
 		this.start_gui.append_console("attempt_login", true);
-		boolean login = login(
-				this.u_txt.getText(),
-				this.p_txt.get_text(),
-				this.c_txt.getText());
+		boolean login = login(this.u_txt.getText(), this.p_txt.get_text(), this.c_txt.getText());
 		if(login) {
 			this.p_txt.setText("");
 			this.start_gui.append_console("login_success", true);
@@ -347,12 +353,10 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	 * Creates the main artist hosting GUI.
 	 */
 	public void create_main_gui() {
-		this.start_gui.get_scroll_panel().set_fit(true, true);
 		BaseGUI base_gui = this.start_gui.get_base_gui();
 		//CREATE BUTTON PANEL
 		JPanel btn_pnl = new JPanel();
-		btn_pnl.setLayout(new GridLayout(
-				3, 1, 0, base_gui.get_space_size()));
+		btn_pnl.setLayout(new GridLayout(3, 1, 0, base_gui.get_space_size()));
 		this.new_btn.setEnabled(false);
 		this.all_btn.setEnabled(false);
 		this.single_btn.setEnabled(false);
@@ -366,11 +370,10 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		btn_pnl.add(this.single_btn);
 		//CREATE SIDE PANEL
 		DScrollPane scr = new DScrollPane(this.lst);
-		DLabel art_lbl = new DLabel(base_gui, this.lst, "artists");
-		art_lbl.setHorizontalAlignment(SwingConstants.CENTER);
-		JPanel art_pnl = base_gui.get_y_stack(art_lbl, 0, scr, 1);
-		JPanel side_pnl = base_gui.get_y_stack(
-				art_pnl, 1, this.add_btn, 0);
+		DLabel list_lbl = new DLabel(base_gui, this.lst, this.list_label);
+		list_lbl.setHorizontalAlignment(SwingConstants.CENTER);
+		JPanel art_pnl = base_gui.get_y_stack(list_lbl, 0, scr, 1);
+		JPanel side_pnl = base_gui.get_y_stack(art_pnl, 1, this.add_btn, 0);
 		//CREATE CHECK PANEL
 		int space = base_gui.get_space_size();
 		JPanel check_pnl = new JPanel();
@@ -379,14 +382,18 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		check_pnl.add(this.scraps_chk);
 		check_pnl.add(this.journal_chk);
 		check_pnl.add(this.favorite_chk);
-		JPanel action_pnl = base_gui.get_y_stack(
-				btn_pnl, 1, check_pnl, 0);
+		JPanel action_pnl = base_gui.get_y_stack(btn_pnl, 1, check_pnl, 0);
 		//CREATE SPLIT PANEL
 		JPanel split_pnl = new JPanel();
-		split_pnl.setLayout(
-				new GridLayout(1, 2, base_gui.get_space_size(), 0));
-		split_pnl.add(action_pnl);
-		split_pnl.add(side_pnl);
+		split_pnl.setLayout(new GridLayout(1, 2, base_gui.get_space_size(), 0));
+		if(this.simple) {
+			split_pnl.add(btn_pnl);
+			split_pnl.add(art_pnl);
+		}
+		else {
+			split_pnl.add(action_pnl);
+			split_pnl.add(side_pnl);
+		}
 		//CREATE TOP PANEL
 		DLabel lbl = new DLabel(base_gui, null, "artists");
 		lbl.setText(this.name);
@@ -397,8 +404,7 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		JPanel top_pnl = base_gui.get_y_stack(lbl, sep);
 		//UPDATE MAIN PANEL
 		this.removeAll();
-		this.add(base_gui.get_y_stack(
-				top_pnl, 0, split_pnl, 1));
+		this.add(base_gui.get_y_stack(top_pnl, 0, split_pnl, 1));
 		this.revalidate();
 		this.repaint();
 	}
@@ -493,8 +499,7 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	 */
 	public void set_list(ArrayList<String> list) {
 		String[] array = new String[list.size() + 1];
-		array[0] = this.start_gui.get_base_gui(
-				).get_language_string("select_all");
+		array[0] = this.start_gui.get_base_gui().get_language_string("select_all");
 		for(int i = 0; i < list.size(); i++) {
 			array[i + 1] = list.get(i);
 		}
@@ -514,13 +519,11 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		File[] dirs = {this.start_gui.get_directory()};
 		FilePrefs prefs = this.start_gui.get_file_prefs();
 		boolean index = prefs.use_index();
-		this.dvk_handler.read_dvks(
-				dirs, prefs, this.start_gui, index, true, index);
+		this.dvk_handler.read_dvks(dirs, prefs, this.start_gui, index, true, index);
 		//SORT DVKS
 		if(!this.start_gui.get_base_gui().is_canceled()) {
 			this.start_gui.append_console("sorting_dvks", true);
-			this.start_gui.get_main_pbar()
-				.set_progress(true, false, 0, 0);
+			this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
 			sort_dvks();
 		}
 		get_artists();
@@ -558,8 +561,7 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		print_start();
 		int[] sel = get_selected();
 		for(int i = 0; i < sel.length; i++) {
-			this.start_gui.get_secondary_pbar().set_progress(
-					false, true, i, sel.length);
+			this.start_gui.get_secondary_pbar().set_progress(false, true, i, sel.length);
 			if(!this.start_gui.get_base_gui().is_canceled()) {
 				get_pages(this.dvks.get(sel[i]), check_all);
 			}
@@ -608,8 +610,7 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	
 	@Override
 	public void enable_all() {
-		if(! this.start_gui.get_base_gui()
-				.is_canceled()) {
+		if(!this.start_gui.get_base_gui().is_canceled()) {
 			this.new_btn.setEnabled(true);
 			this.all_btn.setEnabled(true);
 			this.single_btn.setEnabled(true);
@@ -729,6 +730,7 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		this.start_gui.get_secondary_pbar().set_progress(false, false, 0, 0);
 		if(this.start_gui.get_base_gui().is_canceled()) {
 			this.start_gui.append_console("canceled", true);
+			this.skipped = true;
 			create_initial_gui();
 		}
 		else {
