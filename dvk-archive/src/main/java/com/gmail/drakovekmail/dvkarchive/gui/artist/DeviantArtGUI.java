@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.prefs.Preferences;
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
 import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
+import com.gmail.drakovekmail.dvkarchive.gui.swing.compound.DButtonDialog;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.compound.DTextDialog;
 import com.gmail.drakovekmail.dvkarchive.processing.StringProcessing;
 import com.gmail.drakovekmail.dvkarchive.web.artisthosting.ArtistHosting;
@@ -233,9 +234,33 @@ public class DeviantArtGUI extends ArtistHostingGUI {
 		//CHECK URL IS VALID
 		String id = DeviantArt.get_page_id(url);
 		if(id.length() > 0 && !id.endsWith("-P") && !id.endsWith("-S")) {
+			//CHECK DVK IS NOT ALREADY DOWNLOADED
+			boolean download = true;
+			int size = this.dvk_handler.get_size();
+			for(int i = 0; i < size; i++) {
+				if(this.dvk_handler.get_dvk(i).get_id().equals(id)) {
+					download = false;
+					break;
+				}
+			}
 			//DOWNLOAD PAGE
-			download_media_page(url, this.start_gui.get_directory(), null, null, true);
-		}		
+			if(download) {
+				download_media_page(url, this.start_gui.get_directory(), null, null, true);
+			}
+			else {
+				this.start_gui.append_console("already_downloaded", true);
+			}
+		}
+		else {
+			//DISPLAY INVALID URL MESSAGE
+			String[] buttons = {"ok"};
+			String[] labels = {"invalid_deviantart"};
+			String title = this.start_gui.get_base_gui().get_language_string("invalid_url");
+			DButtonDialog dialog = new DButtonDialog();
+			this.start_gui.get_base_gui().set_running(true);
+			dialog.open(this.start_gui.get_base_gui(), this.start_gui.get_frame(), title, labels, buttons);
+			this.start_gui.get_base_gui().set_running(false);
+		}
 	}
 	
 	/**

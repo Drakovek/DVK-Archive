@@ -31,8 +31,6 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DCheckEvent;
  * @author Drakovek
  */
 public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEvent, DCheckEvent {
-	
-	//TODO ADD FUNCTION TO NOT ALLOW DOWNLOADING EXISTING DVK FILES
 
 	/**
 	 * SerialVersionUID

@@ -291,6 +291,10 @@ public class FurAffinity extends ArtistHosting {
 			TimeUnit.MILLISECONDS.sleep(SLEEP);
 		} catch (InterruptedException e) {}
 		if(this.connect.get_page() == null || (check_login && !is_logged_in())) {
+			if(start_gui != null) {
+				start_gui.append_console("fur_affinity_failed", true);
+				start_gui.get_base_gui().set_canceled(true);
+			}
 			if(url == null) {
 				return new ArrayList<>();
 			}
@@ -414,6 +418,10 @@ public class FurAffinity extends ArtistHosting {
 			TimeUnit.MILLISECONDS.sleep(SLEEP);
 		} catch (InterruptedException e) {}
 		if(this.connect.get_page() == null || (check_login && !is_logged_in())) {
+			if(start_gui != null) {
+				start_gui.append_console("fur_affinity_failed", true);
+				start_gui.get_base_gui().set_canceled(true);
+			}
 			if(page == 1) {
 				return new ArrayList<>();
 			}

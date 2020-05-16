@@ -88,6 +88,7 @@ public class DEnglish extends LanguageMap{
 		this.lang_keys.put("scraps", "Sc^raps");
 		this.lang_keys.put("journals", "^Journals");
 		this.lang_keys.put("favorites", "^Favorites");
+		this.lang_keys.put("already_downloaded", "Already Downloaded");
 		//COMICS
 		this.lang_keys.put("mangadex", "MangaDex");
 		//ERROR FINDING
@@ -108,11 +109,13 @@ public class DEnglish extends LanguageMap{
 		this.lang_keys.put("running_furaffinity", "[RUNNING FUR AFFINITY]");
 		this.lang_keys.put("fur_affinity_failed", "Fur Affinity Failed");
 		this.lang_keys.put("enter_furaffinity", "Enter Fur Affinity Artist:");
+		this.lang_keys.put("invalid_fur_affinity", "Invalid Fur Affinity URL.");
 		this.lang_keys.put("offset", "Offset");
 		//DEVIANTART
 		this.lang_keys.put("running_deviantart", "[RUNNING DEVIANTART]");
 		this.lang_keys.put("deviantart_failed", "DeviantArt Failed");
 		this.lang_keys.put("enter_deviantart", "Enter DeviantArt Artist:");
+		this.lang_keys.put("invalid_deviantart", "Invalid DeviantArt URL.");
 		//UNLINKED MEDIA
 		this.lang_keys.put("unlinked_title", "Find Unlinked Media");
 		this.lang_keys.put("unlinked_console", "[FINDING UNLINKED MEDIA]");

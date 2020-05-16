@@ -13,6 +13,7 @@ import com.gmail.drakovekmail.dvkarchive.gui.BaseGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DButton;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DLabel;
+import com.gmail.drakovekmail.dvkarchive.gui.swing.compound.DButtonDialog;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.compound.DTextDialog;
 import com.gmail.drakovekmail.dvkarchive.processing.StringProcessing;
 import com.gmail.drakovekmail.dvkarchive.web.artisthosting.ArtistHosting;
@@ -24,8 +25,6 @@ import com.gmail.drakovekmail.dvkarchive.web.artisthosting.FurAffinity;
  * @author Drakovek
  */
 public class FurAffinityGUI extends ArtistHostingGUI {
-
-	//TODO ADD FUNCTION TO NOT ALLOW DOWNLOADING EXISTING DVK FILES
 
 	/**
 	 * SerialVersionUID
@@ -204,10 +203,35 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 	@Override
 	public void download_page(String url) {
 		this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
-		//CHECK URL IS VALID
-		if(FurAffinity.get_page_id(url, false).length() > 0) {
+		//CHECK URL IS VALID FUR AFFINITY URL
+		String id = FurAffinity.get_page_id(url, true);
+		if(id.length() > 0) {
+			//CHECK DVK IS NOT ALREADY DOWNLOADED
+			boolean download = true;
+			int size = this.dvk_handler.get_size();
+			for(int i = 0; i < size; i++) {
+				if(this.dvk_handler.get_dvk(i).get_id().equals(id)) {
+					download = false;
+					break;
+				}
+			}
 			//DOWNLOAD PAGE
-			download_page(url, this.start_gui.get_directory(), null, true);
+			if(download) {
+				download_page(url, this.start_gui.get_directory(), null, true);
+			}
+			else {
+				this.start_gui.append_console("already_downloaded", true);
+			}
+		}
+		else {
+			//DISPLAY INVALID URL MESSAGE
+			String[] buttons = {"ok"};
+			String[] labels = {"invalid_fur_affinity"};
+			String title = this.start_gui.get_base_gui().get_language_string("invalid_url");
+			DButtonDialog dialog = new DButtonDialog();
+			this.start_gui.get_base_gui().set_running(true);
+			dialog.open(this.start_gui.get_base_gui(), this.start_gui.get_frame(), title, labels, buttons);
+			this.start_gui.get_base_gui().set_running(false);
 		}
 	}
 	
