@@ -71,10 +71,10 @@ public class FurAffinity extends ArtistHosting {
 		if(this.connect == null) {
 			initialize_connect(false);
 		}
-		//HIDE WINDOW
+		//MAXIMIZE WINDOW
 		WebDriver driver = this.connect.get_driver();
 		try {
-			driver.manage().window().setPosition(new Point(-4000, 0));
+			driver.manage().window().maximize();
 		}
 		catch(Exception e) {}
 		//LOAD FUR AFFINITY HOME PAGE
@@ -90,8 +90,6 @@ public class FurAffinity extends ArtistHosting {
 			this.connect.load_page("https://www.furaffinity.net/login", null, 1, 10);
 		}
 		try {
-			//MAXIMIZE WINDOW
-			driver.manage().window().maximize();
 			//WAIT UNTIL LOGGED IN OR TIMEOUT
 			xpath = "//a[@id='my-username']";
 			WebDriverWait wait = new WebDriverWait(driver, 180);
@@ -291,10 +289,6 @@ public class FurAffinity extends ArtistHosting {
 			TimeUnit.MILLISECONDS.sleep(SLEEP);
 		} catch (InterruptedException e) {}
 		if(this.connect.get_page() == null || (check_login && !is_logged_in())) {
-			if(start_gui != null) {
-				start_gui.append_console("fur_affinity_failed", true);
-				start_gui.get_base_gui().set_canceled(true);
-			}
 			if(url == null) {
 				return new ArrayList<>();
 			}
@@ -418,10 +412,6 @@ public class FurAffinity extends ArtistHosting {
 			TimeUnit.MILLISECONDS.sleep(SLEEP);
 		} catch (InterruptedException e) {}
 		if(this.connect.get_page() == null || (check_login && !is_logged_in())) {
-			if(start_gui != null) {
-				start_gui.append_console("fur_affinity_failed", true);
-				start_gui.get_base_gui().set_canceled(true);
-			}
 			if(page == 1) {
 				return new ArrayList<>();
 			}
