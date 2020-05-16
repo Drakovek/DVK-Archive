@@ -108,6 +108,7 @@ public class DEnglish extends LanguageMap{
 		this.lang_keys.put("running_furaffinity", "[RUNNING FUR AFFINITY]");
 		this.lang_keys.put("fur_affinity_failed", "Fur Affinity Failed");
 		this.lang_keys.put("enter_furaffinity", "Enter Fur Affinity Artist:");
+		this.lang_keys.put("offset", "Offset");
 		//DEVIANTART
 		this.lang_keys.put("running_deviantart", "[RUNNING DEVIANTART]");
 		this.lang_keys.put("deviantart_failed", "DeviantArt Failed");

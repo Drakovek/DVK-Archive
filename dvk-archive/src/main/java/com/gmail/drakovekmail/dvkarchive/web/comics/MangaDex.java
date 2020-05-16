@@ -376,7 +376,7 @@ public class MangaDex {
 					//LOAD PAGE
 					String xpath = "//div[@data-page='" + Integer.toString(page)
 						+ "']//img[@class='noselect nodrag cursor-pointer']";
-					connect.load_page(dvk.get_page_url(), xpath, 1);
+					connect.load_page(dvk.get_page_url(), xpath, 1, 10);
 					try {
 						TimeUnit.MILLISECONDS.sleep(2000);
 					} catch (InterruptedException e) {}

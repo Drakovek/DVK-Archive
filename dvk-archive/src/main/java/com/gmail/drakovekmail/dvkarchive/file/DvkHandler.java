@@ -55,8 +55,7 @@ public class DvkHandler {
 		for(int i = 0; i < max; i++) {
 			//SHOW PROGRESS
 			if(start_gui != null) {
-				start_gui.get_main_pbar().set_progress(
-						false, true, i, max);
+				start_gui.get_main_pbar().set_progress(false, true, i, max);
 				//BREAK IF CANCELLED
 				if(start_gui.get_base_gui().is_canceled()) {
 					break;

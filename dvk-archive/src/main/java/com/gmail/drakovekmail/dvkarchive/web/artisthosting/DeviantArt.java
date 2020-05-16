@@ -7,8 +7,6 @@ import java.util.concurrent.TimeUnit;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.gargoylesoftware.htmlunit.UnexpectedPage;
-import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomAttr;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlButton;
@@ -30,9 +28,11 @@ import com.gmail.drakovekmail.dvkarchive.web.DConnect;
  * @author Drakovek
  */
 public class DeviantArt extends ArtistHosting {
-	
-	//TODO FIX SCANNING NEW FAVORITES
-	//TODO DON'T ADD SINGLE TAG TO FAVORITES DOWNLOAD
+
+	/**
+	 * Milliseconds to wait after loading page for rate limiting.
+	 */
+	private static final int SLEEP = 3000;
 	
 	/**
 	 * DConnect object for connecting to DeviantArt
@@ -71,9 +71,12 @@ public class DeviantArt extends ArtistHosting {
 	 * @return ID for page
 	 */
 	public static String get_page_id(String page_url) {
+		if(page_url == null) {
+			return new String();
+		}
 		//CHECKS IF FROM DEVIANTART
 		if(!page_url.contains("deviantart.com/")) {
-			return null;
+			return new String();
 		}
 		//GET ENDING OF ID
 		int s1 = -1;
@@ -104,7 +107,7 @@ public class DeviantArt extends ArtistHosting {
 			suffix = "-P";
 		}
 		else {
-			return null;
+			return new String();
 		}
 		//GET ID SUBSTRING
 		int start = page_url.lastIndexOf('-') + 1;
@@ -116,7 +119,7 @@ public class DeviantArt extends ArtistHosting {
 			end = page_url.length();
 		}
 		if(start == end) {
-			return null;
+			return new String();
 		}
 		return "DVA" + page_url.substring(start, end) + suffix;
 	}
@@ -135,7 +138,7 @@ public class DeviantArt extends ArtistHosting {
 		String url = "https://www.deviantart.com/users/login";
 		this.connect.load_page(url, xpath, 2);
 		try {
-			TimeUnit.MILLISECONDS.sleep(2000);
+			TimeUnit.MILLISECONDS.sleep(SLEEP);
 		} catch (InterruptedException e) {}
 		HtmlInput pass;
 		try {
@@ -184,7 +187,6 @@ public class DeviantArt extends ArtistHosting {
 	 * @param save Whether to save Dvk and media
 	 * @return Dvk of DeviantArt media page
 	 */
-	@SuppressWarnings("resource")
 	public Dvk get_dvk(
 			String page_url,
 			DvkHandler dvk_handler,
@@ -223,7 +225,7 @@ public class DeviantArt extends ArtistHosting {
 		String xpath = "//link[@type='application/json+oembed']";
 		this.connect.load_page(url, xpath, 2);
 		try {
-			TimeUnit.MILLISECONDS.sleep(2000);
+			TimeUnit.MILLISECONDS.sleep(SLEEP);
 		} catch (InterruptedException e) {}
 		try {
 			//CHECK IF STILL LOGGED IN
@@ -237,6 +239,11 @@ public class DeviantArt extends ArtistHosting {
 			if(de != null) {
 				dvk.set_description(DConnect.clean_element(de.asXml(), true));
 			}
+			//GET JSON
+			DomAttr da;
+			xpath = "//link[@type='application/json+oembed']/@href";
+			da = this.connect.get_page().getFirstByXPath(xpath);
+			String json_url = da.getNodeValue();
 			//GET TEXT IF LITERATURE PAGE
 			int end;
 			String text = null;
@@ -268,8 +275,8 @@ public class DeviantArt extends ArtistHosting {
 				}
 			}
 			//GET DOWNLOAD LINK
+			da = null;
 			String download = null;
-			DomAttr da = null;
 			xpath = "//a[@data-hook='download_button']/@href";
 			da = this.connect.get_page().getFirstByXPath(xpath);
 			if(da != null) {
@@ -294,17 +301,29 @@ public class DeviantArt extends ArtistHosting {
 					this.connect.set_page((HtmlPage)img.click());
 				}
 			}
-			//GET JSON
-			xpath = "//link[@type='application/json+oembed']/@href";
-			da = this.connect.get_page().getFirstByXPath(xpath);
-			WebClient client = this.connect.get_client();
-			UnexpectedPage page;
-			page = (UnexpectedPage)client.getPage(da.getNodeValue());
+			//GET SWF LINK
+			String swf = null;
+			if(download == null) {
+				xpath = "//iframe[contains(@src,'.swf')][contains(@src,'sandbox.deviantart.com')]/@src";
+				da = this.connect.get_page().getFirstByXPath(xpath);
+				if(da != null) {
+					swf = da.getNodeValue();
+					xpath = "//embed[@id='sandboxembed']";
+					this.connect.load_page(swf, xpath, 2);
+					xpath = "//embed[@id='sandboxembed']/@src";
+					da = this.connect.get_page().getFirstByXPath(xpath);
+					if(da != null) {
+						swf = da.getNodeValue();
+					}
+					else {
+						swf = null;
+					}
+				}
+			}
+			JSONObject json = this.connect.load_json(json_url, 2);
 			try {
-				TimeUnit.MILLISECONDS.sleep(2000);
+				TimeUnit.MILLISECONDS.sleep(SLEEP);
 			} catch (InterruptedException e) {}
-			String res = page.getWebResponse().getContentAsString();
-			JSONObject json = new JSONObject(res);
 			//GET TITLE
 			dvk.set_title(json.getString("title"));
 			//GET ARTIST
@@ -364,9 +383,11 @@ public class DeviantArt extends ArtistHosting {
 			else if(type.equals("video")) {
 				dvk.set_direct_url(video);
 			}
-			else if(download == null
-					&& type.equals("photo")) {
+			else if(download == null && type.equals("photo")) {
 				dvk.set_direct_url(image);
+			}
+			else if (download == null && swf != null) {
+				dvk.set_direct_url(swf);
 			}
 			else {
 				dvk.set_direct_url(download);
@@ -415,6 +436,9 @@ public class DeviantArt extends ArtistHosting {
 				}
 				else {
 					dvk.write_media(this.connect);
+				}
+				if(!dvk.get_dvk_file().exists()) {
+					throw new Exception();
 				}
 			}
 			return dvk;
@@ -569,7 +593,6 @@ public class DeviantArt extends ArtistHosting {
 	 * @param save Whether to save Dvk and media
 	 * @return Dvk of DeviantArt media page
 	 */
-	@SuppressWarnings("resource")
 	public Dvk get_journal_dvk(
 			String page_url,
 			File directory,
@@ -592,7 +615,7 @@ public class DeviantArt extends ArtistHosting {
 		String xpath = "//link[@type='application/json+oembed']";
 		this.connect.load_page(url, xpath, 2);
 		try {
-			TimeUnit.MILLISECONDS.sleep(2000);
+			TimeUnit.MILLISECONDS.sleep(SLEEP);
 		} catch (InterruptedException e) {}
 		try {
 			//CHECK IF STILL LOGGED IN
@@ -616,13 +639,10 @@ public class DeviantArt extends ArtistHosting {
 			//GET JSON
 			xpath = "//link[@type='application/json+oembed']/@href";
 			DomAttr da = this.connect.get_page().getFirstByXPath(xpath);
-			WebClient client = this.connect.get_client();
-			UnexpectedPage page = (UnexpectedPage)client.getPage(da.getNodeValue());
+			JSONObject json = this.connect.load_json(da.getNodeValue(), 2);
 			try {
-				TimeUnit.MILLISECONDS.sleep(2000);
+				TimeUnit.MILLISECONDS.sleep(SLEEP);
 			} catch (InterruptedException e) {}
-			String res = page.getWebResponse().getContentAsString();
-			JSONObject json = new JSONObject(res);
 			//GET TITLE
 			dvk.set_title(json.getString("title"));
 			//GET ARTIST
@@ -687,6 +707,9 @@ public class DeviantArt extends ArtistHosting {
 				if(dvk.get_secondary_url() != null) {
 					this.connect.download(dvk.get_secondary_url(), dvk.get_secondary_file());
 				}
+				if(!dvk.get_dvk_file().exists()) {
+					throw new Exception();
+				}
 			}
 			return dvk;
 		}
@@ -709,7 +732,6 @@ public class DeviantArt extends ArtistHosting {
 	 * @param offset Gallery page offset
 	 * @return List of DeviantArt media page URLs
 	 */
-	@SuppressWarnings("resource")
 	public ArrayList<String> get_pages(
 			StartGUI start_gui,
 			String artist,
@@ -744,12 +766,8 @@ public class DeviantArt extends ArtistHosting {
 			}
 			JSONObject json = null;
 			if(start_gui == null || !start_gui.get_base_gui().is_canceled()) {
-				WebClient client = this.connect.get_client();
-				UnexpectedPage page;
-				page = (UnexpectedPage)client.getPage(url.toString());
-				String res = page.getWebResponse().getContentAsString();
-				json = new JSONObject(res);
-				TimeUnit.MILLISECONDS.sleep(2000);
+				json = this.connect.load_json(url.toString(), 2);
+				TimeUnit.MILLISECONDS.sleep(SLEEP);
 			}
 			if(json == null) {
 				if(offset == 0) {
@@ -780,6 +798,9 @@ public class DeviantArt extends ArtistHosting {
 							else {
 								check_next = false;
 							}
+						}
+						else if (!ArrayProcessing.contains(wts, "dvk:single", false)) {
+							check_next = false;
 						}
 						//UPDATE DVK LOCATION AND FAVORITE IF ALREADY DOWNLOADED
 						Dvk dvk = dvk_handler.get_dvk(k);
@@ -847,7 +868,6 @@ public class DeviantArt extends ArtistHosting {
 	 * @param offset Gallery page offset
 	 * @return List of Dvks with DeviantArt info
 	 */
-	@SuppressWarnings("resource")
 	public ArrayList<Dvk> get_module_pages(
 			StartGUI start_gui,
 			String artist,
@@ -871,7 +891,7 @@ public class DeviantArt extends ArtistHosting {
 			String xpath = "//div[@id='root']/following-sibling::script";
 			this.connect.load_page(url.toString(), xpath, 2);
 			try {
-				TimeUnit.MILLISECONDS.sleep(2000);
+				TimeUnit.MILLISECONDS.sleep(SLEEP);
 			} catch (InterruptedException e) {}
 			if(this.connect.get_page() == null) {
 				if(offset == 0) {
@@ -936,12 +956,8 @@ public class DeviantArt extends ArtistHosting {
 			}
 			JSONObject json = null;
 			if(start_gui == null || !start_gui.get_base_gui().is_canceled()) {
-				WebClient client = this.connect.get_client();
-				UnexpectedPage page;
-				page = (UnexpectedPage)client.getPage(url.toString());
-				String res = page.getWebResponse().getContentAsString();
-				json = new JSONObject(res);
-				TimeUnit.MILLISECONDS.sleep(2000);
+				json = this.connect.load_json(url.toString(), 2);
+				TimeUnit.MILLISECONDS.sleep(SLEEP);
 			}
 			if(json == null) {
 				if(offset == 0) {

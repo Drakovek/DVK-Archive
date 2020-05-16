@@ -1,14 +1,17 @@
 package com.gmail.drakovekmail.dvkarchive.web.artisthosting;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Point;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import com.gargoylesoftware.htmlunit.html.DomAttr;
 import com.gargoylesoftware.htmlunit.html.DomElement;
-import com.gargoylesoftware.htmlunit.html.HtmlInput;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
 import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
 import com.gmail.drakovekmail.dvkarchive.file.FilePrefs;
@@ -17,6 +20,7 @@ import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
 import com.gmail.drakovekmail.dvkarchive.processing.ArrayProcessing;
 import com.gmail.drakovekmail.dvkarchive.processing.StringProcessing;
 import com.gmail.drakovekmail.dvkarchive.web.DConnect;
+import com.gmail.drakovekmail.dvkarchive.web.DConnectSelenium;
 
 /**
  * Class for downloading media from FurAffinity.net
@@ -24,18 +28,21 @@ import com.gmail.drakovekmail.dvkarchive.web.DConnect;
  * @author Drakovek
  */
 public class FurAffinity extends ArtistHosting {
-
-	//TODO Fix journal tags to include single download, rating, and gallery
 	
 	/**
-	 * DConnect object for connecting to FurAffinity
+	 * Milliseconds to wait after connection events for rate limiting.
 	 */
-	private DConnect connect;
+	private static final int SLEEP = 4000;
 	
 	/**
-	 * FilePrefs for DVK Archive
+	 * DConnectSelenium object for connecting to FurAffinity
 	 */
-	private FilePrefs prefs;
+	private DConnectSelenium connect;
+	
+	/**
+	 * DConnect object for downloading media
+	 */
+	private DConnect downloader;
 	
 	/**
 	 * Initializes the FurAffinity object.
@@ -43,84 +50,57 @@ public class FurAffinity extends ArtistHosting {
 	 * @param prefs FilePrefs for DVK Archive
 	 */
 	public FurAffinity(FilePrefs prefs) {
-		this.prefs = prefs;
 		this.connect = null;
 	}
 	
 	/**
 	 * Initializes the main DConnect object.
-	 */
-	private void initialize_connect() {
-		this.connect = new DConnect(false, true);
-		this.connect.set_timeout(4);
-	}
-	
-	/**
-	 * Returns the file for a downloaded CAPTCHA from FurAffinity.
 	 * 
-	 * @return File path of downloaded CAPTCHA
+	 * @param headless Whether Selenium driver should be headless
 	 */
-	public File get_captcha() {
-		close();
-		//LOAD LOGIN PAGE
-		String xpath = "//img[@id='captcha_img']";
-		initialize_connect();
-		this.connect.load_page(
-				"https://www.furaffinity.net/login/?mode=imagecaptcha", xpath, 2);
-		if(this.connect.get_page() != null) {
-			//GET CAPTCHA URL
-			xpath = "//img[@id='captcha_img']/@src";
-			DomAttr da = this.connect.get_page().getFirstByXPath(xpath);
-			String url = "https://www.furaffinity.net" + da.getNodeValue();
-			//GET FILENAME
-			File file;
-			int num = 0;
-			String ext = StringProcessing.get_extension(url);
-			do {
-				file = new File(
-						this.prefs.get_captcha_dir(),
-						Integer.toString(num) + ext);
-				num++;
-			} while(file.exists());
-			//DOWNLOAD
-			this.connect.download(url, file);
-			return file;
-		}
-		return new File("");
+	private void initialize_connect(boolean headless) {
+		this.connect = new DConnectSelenium(headless);
+		this.downloader = new DConnect(false, true);
 	}
 	
 	/**
 	 * Attempts to login to FurAffinity.
-	 * 
-	 * @param username Username
-	 * @param password Password
-	 * @param captcha Captcha
 	 */
-	public void login(String username, String password, String captcha) {
-		if(this.connect != null && this.connect.get_page() != null) {
-			HtmlInput pass;
-			try {
-				//INPUT USERNAME
-				String xpath = "//input[@id='login']";
-				HtmlInput user = this.connect.get_page().getFirstByXPath(xpath);
-				user.setValueAttribute(username);
-				//INPUT PASSWORD
-				xpath = "//input[@type='password']";
-				pass = this.connect.get_page().getFirstByXPath(xpath);
-				pass.setValueAttribute(password);
-				//INPUT CAPTCHA
-				xpath = "//input[@id='captcha']";
-				HtmlInput cap = this.connect.get_page().getFirstByXPath(xpath);
-				cap.setValueAttribute(captcha);
-				//SUBMIT INFO
-				xpath = "//input[@type='submit']";
-				HtmlInput submit = this.connect.get_page().getFirstByXPath(xpath);
-				this.connect.set_page((HtmlPage)submit.click());
-			} catch (IOException e) {
-				this.connect.initialize_client();
-			}
-			pass = null;
+	public void login() {
+		//OPEN SELENIUM WINDOW
+		if(this.connect == null) {
+			initialize_connect(false);
 		}
+		//HIDE WINDOW
+		WebDriver driver = this.connect.get_driver();
+		try {
+			driver.manage().window().setPosition(new Point(-4000, 0));
+		}
+		catch(Exception e) {}
+		//LOAD FUR AFFINITY HOME PAGE
+		String xpath = "//span[@class='top-heading']//a[@href='/login']";
+		this.connect.load_page("https://www.furaffinity.net", xpath, 2, 10);
+		//CLICK LOGIN PAGE BUTTON
+		WebElement log = driver.findElement(By.xpath(xpath));
+		try {
+			log.click();
+		}
+		catch(Exception e) {
+			//IF LOGIN PAGE BUTTON DOESN'T EXIST, LOADS LOGIN PAGE
+			this.connect.load_page("https://www.furaffinity.net/login", null, 1, 10);
+		}
+		try {
+			//MAXIMIZE WINDOW
+			driver.manage().window().maximize();
+			//WAIT UNTIL LOGGED IN OR TIMEOUT
+			xpath = "//a[@id='my-username']";
+			WebDriverWait wait = new WebDriverWait(driver, 180);
+			wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(xpath)));
+			//HIDE WINDOW
+			driver.manage().window().setPosition(new Point(-4000, 0));
+			this.connect.load_page("https://www.furaffinity.net/", xpath, 1, 10);
+		}
+		catch(Exception e) {}
 	}
 	
 	/**
@@ -296,20 +276,19 @@ public class FurAffinity extends ArtistHosting {
 		else {
 			c_url.append(url);
 		}
-		
 		//LOAD PAGE
 		if(this.connect == null) {
-			initialize_connect();
+			initialize_connect(true);
 		}
 		String xpath = "//a[contains(@href,'/journals/" + url_artist + "')]";
 		if(start_gui != null && start_gui.get_base_gui().is_canceled()) {
 			this.connect.set_page(null);
 		}
 		else {
-			this.connect.load_page(c_url.toString(), xpath, 2);
+			this.connect.load_page(c_url.toString(), xpath, 2, 10);
 		}
 		try {
-			TimeUnit.MILLISECONDS.sleep(1000);
+			TimeUnit.MILLISECONDS.sleep(SLEEP);
 		} catch (InterruptedException e) {}
 		if(this.connect.get_page() == null || (check_login && !is_logged_in())) {
 			if(url == null) {
@@ -319,14 +298,14 @@ public class FurAffinity extends ArtistHosting {
 		}
 		//GET PAGES
 		ArrayList<String> pages = new ArrayList<>();
-		List<DomAttr> ds;
+		List<DomAttr> das;
 		xpath = "//figure//u//a[contains(@href,'/view/')]/@href";
-		ds = this.connect.get_page().getByXPath(xpath);
+		das = this.connect.get_page().getByXPath(xpath);
 		boolean check_next = true;
 		int size = dvk_handler.get_size();
-		for(int i = 0; i < ds.size(); i++) {
+		for(int i = 0; i < das.size(); i++) {
 			boolean contains = false;
-			String link = "https://www.furaffinity.net" + ds.get(i).getNodeValue();
+			String link = "https://www.furaffinity.net" + das.get(i).getNodeValue();
 			String id = get_page_id(link, true);
 			for(int k = 0; k < size; k++) {
 				if(get_page_id(dvk_handler.get_dvk(k).get_page_url(), true).equals(id)) {
@@ -358,17 +337,17 @@ public class FurAffinity extends ArtistHosting {
 			}
 		}
 		//GET NEXT PAGES
-		DomElement de;
-		String new_url = new String();
+		List<DomElement> des;
+		String new_url = null;
 		xpath = "//button[@class='button standard'][@type='submit']/parent::form";
-		de = this.connect.get_page().getFirstByXPath(xpath);
-		if(de != null && !de.asText().equals("Next")) {
-			de = null;
+		des = this.connect.get_page().getByXPath(xpath);
+		for(int i = 0; i < des.size(); i++) {
+			if(des.get(i).asText().equals("Next")) {
+				new_url = "https://www.furaffinity.net" + des.get(i).getAttribute("action");
+			}
 		}
-		else if(de != null) {
-			new_url = "https://www.furaffinity.net" + de.getAttribute("action");
-		}
-		if(de == null) {
+		DomElement de;
+		if(new_url == null) {
 			xpath = "//a[@class='button-link right'][contains(@href,'/gallery/')]|"
 					+ "//a[@class='button-link right'][contains(@href,'/scraps/')]|"
 					+ "//a[contains(@class, 'button')][contains(@class, 'right')][contains(@href, '/favorites/')]";
@@ -377,8 +356,8 @@ public class FurAffinity extends ArtistHosting {
 				new_url = "https://www.furaffinity.net" + de.getAttribute("href");
 			}
 		}
-		if(de != null && (check_all || check_next)) {
-			ArrayList<String> next = get_pages(start_gui, artist, directory, type, 
+		if(new_url != null && (check_all || check_next)) {
+			ArrayList<String> next = get_pages(start_gui, artist, directory, type,
 					dvk_handler, check_all, check_login, new_url);
 			if(next == null) {
 				if(url == null) {
@@ -422,17 +401,17 @@ public class FurAffinity extends ArtistHosting {
 				"/" + Integer.toString(page) + "/";
 		//LOAD PAGE
 		if(this.connect == null) {
-			initialize_connect();
+			initialize_connect(true);
 		}
 		String xpath = "//a[contains(@href,'/gallery/" + url_artist + "')]";
 		if(start_gui != null && start_gui.get_base_gui().is_canceled()) {
 			this.connect.set_page(null);
 		}
 		else {
-			this.connect.load_page(url.toString(), xpath, 2);
+			this.connect.load_page(url.toString(), xpath, 2, 10);
 		}
 		try {
-			TimeUnit.MILLISECONDS.sleep(1000);
+			TimeUnit.MILLISECONDS.sleep(SLEEP);
 		} catch (InterruptedException e) {}
 		if(this.connect.get_page() == null || (check_login && !is_logged_in())) {
 			if(page == 1) {
@@ -537,13 +516,13 @@ public class FurAffinity extends ArtistHosting {
 		String url = "https://www.furaffinity.net/view/" + get_page_id(page_url, false) + "/";
 		dvk.set_page_url(url);
 		//LOAD PAGE
-		if(this.connect == null) {
-			initialize_connect();
+		if(this.connect == null || this.downloader == null) {
+			initialize_connect(true);
 		}
 		String xpath = "//div[contains(@class,'submission-title')]//h2";
-		this.connect.load_page(url, xpath, 2);
+		this.connect.load_page(url, xpath, 2, 10);
 		try {
-			TimeUnit.MILLISECONDS.sleep(1000);
+			TimeUnit.MILLISECONDS.sleep(SLEEP);
 		} catch (InterruptedException e1) {}
 		if(this.connect.get_page() == null) {
 			return new Dvk();
@@ -577,6 +556,7 @@ public class FurAffinity extends ArtistHosting {
 			//GET DIRECT URL
 			DomAttr da;
 			xpath = "//div[@class='download fullsize']//a[contains(@href,'facdn.net')]/@href|"
+					+ "//a[contains(@class,'mobile-fix')][contains(@href,'facdn.net')]/@href|"
 					+ "//table[@class='maintable']//a[contains(@href,'facdn.net')]/@href";
 			da = this.connect.get_page().getFirstByXPath(xpath);
 			dvk.set_direct_url("https:" + da.getNodeValue());
@@ -739,7 +719,7 @@ public class FurAffinity extends ArtistHosting {
 			}
 			//SAVE DVK
 			if(save) {
-				dvk.write_media(this.connect);
+				dvk.write_media(this.downloader);
 				if(!dvk.get_dvk_file().exists()) {
 					dvk.write_dvk();
 				}
@@ -772,13 +752,13 @@ public class FurAffinity extends ArtistHosting {
 		dvk.set_page_url(url);
 		//LOAD PAGE
 		if(this.connect == null) {
-			initialize_connect();
+			initialize_connect(true);
 		}
 		String xpath = "//h2[@class='journal-title']"
 				+ "|//td[@class='journal-title-box']//div[@class='no_overflow']";
-		this.connect.load_page(url, xpath, 2);
+		this.connect.load_page(url, xpath, 2, 10);
 		try {
-			TimeUnit.MILLISECONDS.sleep(1000);
+			TimeUnit.MILLISECONDS.sleep(SLEEP);
 		} catch (InterruptedException e1) {}
 		if(this.connect.get_page() == null) {
 			return new Dvk();
@@ -855,7 +835,10 @@ public class FurAffinity extends ArtistHosting {
 	 */
 	public void close() {
 		if(this.connect != null) {
-			this.connect.close_client();
+			this.connect.close_driver();
+		}
+		if(this.downloader != null) {
+			this.downloader.close_client();
 		}
 	}
 }

@@ -41,8 +41,7 @@ public class ErrorFinding {
 			//UPDATE PROGRESS
 			if(start_gui != null) {
 				
-				start_gui.get_main_pbar()
-					.set_progress(false, true, i, dirs.length);
+				start_gui.get_main_pbar().set_progress(false, true, i, dirs.length);
 			}
 			//LOAD DIRECTORY
 			File[] files = {dirs[i]};

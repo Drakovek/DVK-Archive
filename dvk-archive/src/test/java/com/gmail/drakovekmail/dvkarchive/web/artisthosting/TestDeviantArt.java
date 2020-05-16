@@ -125,13 +125,15 @@ public class TestDeviantArt {
 		//INVALID URLS
 		url = "www.nope.com/bleh/art/thing-1579354";
 		id = DeviantArt.get_page_id(url);
-		assertEquals(null, id);
+		assertEquals("", id);
 		url = "https://www.deviantart.com/thing/bleh/thing-1579354";
 		id = DeviantArt.get_page_id(url);
-		assertEquals(null, id);
+		assertEquals("", id);
 		url = "https://www.deviantart.com/thing/art/";
 		id = DeviantArt.get_page_id(url);
-		assertEquals(null, id);
+		assertEquals("", id);
+		id = DeviantArt.get_page_id(null);
+		assertEquals("", id);
 	}
 	
 	/**
@@ -415,6 +417,39 @@ public class TestDeviantArt {
 		assertEquals("Drakovek_DVA839354922.dvk", dvk.get_dvk_file().getName());
 		assertEquals("Drakovek_DVA839354922.png", dvk.get_media_file().getName());
 		assertEquals(null, dvk.get_secondary_file());
+		//SEVENTH DVK - UNDOWNLOADABLE SWF
+		url = "www.deviantart.com/horsuhanon/art/TF-Mask-777228001";
+		dvk = this.dev.get_dvk(url, dvk_handler, "Gallery:Main", this.test_dir, null, true, false);
+		assertEquals("DVA777228001", dvk.get_id());
+		url = "https://www.deviantart.com/horsuhanon/art/TF-Mask-777228001";
+		assertEquals(url, dvk.get_page_url());
+		assertEquals("TF: Mask", dvk.get_title());
+		assertEquals(1, dvk.get_artists().length);
+		assertEquals("HorsuhAnon", dvk.get_artists()[0]);
+		assertEquals("2018/12/18|10:02", dvk.get_time());
+		assertEquals(8, dvk.get_web_tags().length);
+		assertEquals("Rating:General", dvk.get_web_tags()[0]);
+		assertEquals("Gallery:Main", dvk.get_web_tags()[1]);
+		assertEquals("Flash", dvk.get_web_tags()[2]);
+		assertEquals("Animations", dvk.get_web_tags()[3]);
+		assertEquals("tf", dvk.get_web_tags()[4]);
+		assertEquals("animation", dvk.get_web_tags()[5]);
+		assertEquals("transformation", dvk.get_web_tags()[6]);
+		assertEquals("DVK:Single", dvk.get_web_tags()[7]);
+		desc = "Commissioned by<span><span class=\"username-with-symbol u\"><a class=\"u regular username\""
+				+ " href=\"https://www.deviantart.com/onyxsteelgray1213\">OnyxSteelGray1213</a><span "
+				+ "class=\"user-symbol regular\" data-quicktip-text=\"\" data-show-tooltip=\"\" "
+				+ "data-gruser-type=\"regular\"></span></span></span>";
+		assertEquals(desc, dvk.get_description());
+		url = "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/976aef10-4f8c-47ce-8b7c-073393f2b5cc/"
+				+ "dcuqoyp-7e5578c6-e5be-4ba4-889e-6ec8ed373292.swf?";
+		assertTrue(dvk.get_direct_url().startsWith(url));
+		url = "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/i/976aef10-4f8c-47ce-"
+				+ "8b7c-073393f2b5cc/dcuqoyp-25c8e83b-3eb8-4834-ad2c-a17b5bff76c0.jpg";
+		assertEquals(url, dvk.get_secondary_url());
+		assertEquals("TF Mask_DVA777228001.dvk", dvk.get_dvk_file().getName());
+		assertEquals("TF Mask_DVA777228001.swf", dvk.get_media_file().getName());
+		assertEquals("TF Mask_DVA777228001.jpg", dvk.get_secondary_file().getName());
 	}
 
 	/**
@@ -683,6 +718,10 @@ public class TestDeviantArt {
 		assertTrue(links.contains(url));
 		url = "https://www.deviantart.com/pokefan-tf/art/Protogen-POV-TF-839224833";
 		assertTrue(links.contains(url));
+		url = "https://www.deviantart.com/pokefan-tf/art/Mallow-TF-TG-735924561";
+		assertFalse(links.contains(url));
+		url = "https://www.deviantart.com/pokefan-tf/art/Aliens-TF-RP-678082839";
+		assertFalse(links.contains(url));
 		//TEST SCRAPS
 		links = this.dev.get_pages(null, "AkuOreo", sub, 's', handler, false, 0);
 		url = "https://www.deviantart.com/akuoreo/art/Fire-Within-p1-345943229";

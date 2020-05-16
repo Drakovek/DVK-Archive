@@ -72,8 +72,7 @@ public abstract class SimpleServiceGUI extends ServiceGUI implements DActionEven
 	
 	@Override
 	public void done(String id) {
-		this.start_gui.get_main_pbar()
-			.set_progress(false, false, 0, 0);
+		this.start_gui.get_main_pbar().set_progress(false, false, 0, 0);
 		if(this.start_gui.get_base_gui().is_canceled()) {
 			this.start_gui.append_console("canceled", true);
 		}

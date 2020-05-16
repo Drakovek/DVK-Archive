@@ -134,8 +134,7 @@ public class MangaDexGUI extends ArtistHostingGUI {
 
 	@Override
 	public void get_pages(Dvk dvk, boolean check_all) {
-		this.start_gui.get_main_pbar().set_progress(
-				true, false, 0, 0);
+		this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
 		File dir = dvk.get_dvk_file();
 		Dvk title = MangaDex.get_title_info(
 				this.connect, dvk.get_id());
@@ -204,12 +203,7 @@ public class MangaDexGUI extends ArtistHostingGUI {
 	}
 
 	@Override
-	public File get_captcha() {
-		return null;
-	}
-
-	@Override
-	public boolean login(String username, String password, String captcha) {
+	public boolean login(String username, String password) {
 		return false;
 	}
 

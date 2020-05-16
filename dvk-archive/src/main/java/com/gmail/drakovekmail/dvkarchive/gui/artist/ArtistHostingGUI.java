@@ -4,8 +4,6 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.io.File;
 import java.util.ArrayList;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
@@ -34,6 +32,8 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DCheckEvent;
  */
 public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEvent, DCheckEvent {
 	
+	//TODO ADD FUNCTION TO NOT ALLOW DOWNLOADING EXISTING DVK FILES
+
 	/**
 	 * SerialVersionUID
 	 */
@@ -58,11 +58,6 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	 * Whether login was skipped.
 	 */
 	private boolean skipped;
-	
-	/**
-	 * Whether GUI is using CAPTCHA when logging in
-	 */
-	private boolean use_captcha;
 	
 	/**
 	 * Whether to download the main gallery
@@ -140,16 +135,6 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	private DCheckBox favorite_chk;
 	
 	/**
-	 * Label for showing CAPTCHA images.
-	 */
-	private JLabel image_lbl;
-	
-	/**
-	 * Button for reloading CAPTCHA
-	 */
-	private DButton cap_btn;
-	
-	/**
 	 * Button for logging in
 	 */
 	private DButton login_btn;
@@ -170,11 +155,6 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	private DPasswordField p_txt;
 	
 	/**
-	 * Text field for entering captcha
-	 */
-	private DTextField c_txt;
-	
-	/**
 	 * Initializes the ArtistHostingGUI object.
 	 * 
 	 * @param start_gui Parent of ArtistHostingGUI
@@ -186,7 +166,6 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		super(start_gui);
 		this.list_label = list_label;
 		this.simple = simple;
-		this.use_captcha = false;
 		this.dvks = new ArrayList<>();
 		this.name = start_gui.get_base_gui().get_language_string(name_id);
 		this.setLayout(new GridLayout(1, 1));
@@ -198,7 +177,6 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		this.single_btn = new DButton(base_gui, this, "download_single");
 		this.add_btn = new DButton(base_gui, this, "add");
 		this.lst = new DList(base_gui, this, "list", true);
-		this.cap_btn = new DButton(base_gui, this, "refresh_captcha");
 		this.login_btn = new DButton(base_gui, this, "login");
 		this.skip_btn = new DButton(base_gui, this, "skip_login");
 		this.main_chk = new DCheckBox(base_gui, this, "main", get_main());
@@ -225,8 +203,7 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	 * @param allow_skipping Whether to allow skipping login
 	 * @param captcha Whether to include CAPTCHA dialog in the GUI
 	 */
-	protected void create_login_gui(boolean allow_skipping, boolean captcha) {
-		this.use_captcha = captcha;
+	protected void create_login_gui(boolean allow_skipping) {
 		BaseGUI base_gui = this.start_gui.get_base_gui();
 		this.u_txt = new DTextField(base_gui, this, "nothing");
 		this.p_txt = new DPasswordField(base_gui);
@@ -255,23 +232,9 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		login_lbl.setText(label);
 		JSeparator sep = new JSeparator(SwingConstants.HORIZONTAL);
 		JPanel top_pnl = base_gui.get_y_stack(login_lbl, sep);
-		//CREATE CAPTCHA PANEL
-		this.c_txt = new DTextField(base_gui, this, "nothing");
-		DLabel c_lbl = new DLabel(base_gui, this.c_txt, "captcha");
-		this.image_lbl = new JLabel();
-		this.image_lbl.setHorizontalAlignment(SwingConstants.CENTER);
-		this.image_lbl.setVerticalAlignment(SwingConstants.CENTER);
-		JPanel c_txt_pnl = base_gui.get_y_stack(
-				this.image_lbl, base_gui.get_x_stack(c_lbl, 0, this.c_txt, 1));
-		JPanel cap_pnl = base_gui.get_y_stack(c_txt_pnl, this.cap_btn);
 		//CREATE FULL LOGIN PANEL
 		JPanel login_pnl;
-		if(this.use_captcha) {
-			login_pnl = base_gui.get_y_stack(top_pnl, base_gui.get_y_stack(cap_pnl, btm_pnl));
-		}
-		else {
-			login_pnl = base_gui.get_y_stack(top_pnl, btm_pnl);
-		}
+		login_pnl = base_gui.get_y_stack(top_pnl, btm_pnl);
 		//CREATE CENTER PANEL
 		JPanel center_pnl = base_gui.get_spaced_panel(login_pnl, 0, 0, true, true, true, true);
 		DScrollPane scr = new DScrollPane(center_pnl);
@@ -287,8 +250,6 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		this.u_txt.setPreferredSize(new Dimension(width, height));
 		width = (int)this.p_txt.getSize().getWidth();
 		this.p_txt.setPreferredSize(new Dimension(width, height));
-		width = (int)this.c_txt.getSize().getWidth();
-		this.c_txt.setPreferredSize(new Dimension(width, height));
 	}
 	
 	/**
@@ -296,24 +257,6 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	 * Also called to reset when process is canceled.
 	 */
 	public abstract void create_initial_gui();
-
-	/**
-	 * Refreshes the Displayed CAPTCHA image.
-	 */
-	private void refresh_captcha() {
-		this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
-		this.start_gui.append_console("", false);
-		this.start_gui.append_console("loading_captcha", true);
-		File captcha = get_captcha();
-		if(captcha != null && captcha.exists()) {
-			ImageIcon icon = new ImageIcon(captcha.getAbsolutePath());
-			this.image_lbl.setIcon(icon);
-		}
-		else {
-			this.start_gui.append_console("captcha_failed", true);
-			this.image_lbl.setIcon(null);
-		}
-	}
 	
 	/**
 	 * Starts the process of logging in to website.
@@ -321,9 +264,22 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	private void start_login() {
 		this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
 		this.start_gui.append_console("attempt_login", true);
-		boolean login = login(this.u_txt.getText(), this.p_txt.get_text(), this.c_txt.getText());
+		String user = null;
+		String pass = null;
+		try {
+			user = this.u_txt.getText();
+			pass = this.p_txt.get_text();
+			
+		}
+		catch(NullPointerException e) {}
+		boolean login = login(user, pass);
+		user = null;
+		pass = null;
 		if(login) {
-			this.p_txt.setText("");
+			try {
+				this.p_txt.setText("");
+			}
+			catch(NullPointerException e) {};
 			this.start_gui.append_console("login_success", true);
 			this.skipped = false;
 		}
@@ -337,17 +293,9 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	 * 
 	 * @param username Username
 	 * @param password Password
-	 * @param captcha Captcha
 	 * @return Whether login was successful
 	 */
-	public abstract boolean login(String username, String password, String captcha);
-	
-	/**
-	 * Returns the file of a downloaded CAPTCHA image.
-	 * 
-	 * @return File for downloaded CAPTCHA
-	 */
-	public abstract File get_captcha();
+	public abstract boolean login(String username, String password);
 	
 	/**
 	 * Creates the main artist hosting GUI.
@@ -617,7 +565,6 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		}
 		this.add_btn.setEnabled(true);
 		this.lst.setEnabled(true);
-		this.cap_btn.setEnabled(true);
 		this.login_btn.setEnabled(true);
 		this.skip_btn.setEnabled(true);
 		this.main_chk.setEnabled(true);
@@ -633,7 +580,6 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		this.single_btn.setEnabled(false);
 		this.add_btn.setEnabled(false);
 		this.lst.setEnabled(false);
-		this.cap_btn.setEnabled(false);
 		this.login_btn.setEnabled(false);
 		this.skip_btn.setEnabled(false);
 		this.main_chk.setEnabled(false);
@@ -706,9 +652,6 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 			case "login":
 				start_login();
 				break;
-			case "refresh_captcha":
-				refresh_captcha();
-				break;
 			case "check_new":
 				run_get_pages(false);
 				break;
@@ -743,15 +686,7 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 				create_main_gui();
 				start_process("read_dvks", true);
 			}
-			else if(this.use_captcha) {
-				start_process("refresh_captcha", true);
-			}
-			else {
-				enable_all();
-			}
 		}
-		else {
-			enable_all();
-		}
+		enable_all();
 	}
 }

@@ -38,8 +38,6 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
  *
  */
 public class StartGUI implements DActionEvent, Disabler {
-
-	//TODO ENSURE CONNECTIONS CLOSED WHEN CLOSING PROGRAM
 	
 	/**
 	 * Current directory for the StartGUI
@@ -144,7 +142,6 @@ public class StartGUI implements DActionEvent, Disabler {
 		if(!sub.isDirectory()) {
 			sub.mkdirs();
 		}
-		this.file_prefs.set_captcha_dir(sub);
 		this.file_prefs.set_use_index(true);
 		this.current_service = new String();
 		this.frame = new DFrame(this.base_gui, this, "dvk_archive");

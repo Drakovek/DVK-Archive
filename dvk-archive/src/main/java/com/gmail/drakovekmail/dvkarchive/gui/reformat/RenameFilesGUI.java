@@ -34,8 +34,7 @@ public class RenameFilesGUI extends SimpleServiceGUI {
 	 */
 	@Override
 	public void run_process() {
-		this.start_gui.get_main_pbar().set_progress(
-				true, false, 0, 0);
+		this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
 		File[] dirs = {this.start_gui.get_directory()};
 		FilePrefs prefs = this.start_gui.get_file_prefs();
 		DvkHandler dvk_handler = new DvkHandler();

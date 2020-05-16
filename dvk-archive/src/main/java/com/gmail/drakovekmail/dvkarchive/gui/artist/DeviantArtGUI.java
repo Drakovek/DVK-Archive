@@ -72,7 +72,7 @@ public class DeviantArtGUI extends ArtistHostingGUI {
 	
 	@Override
 	public void create_initial_gui() {
-		create_login_gui(false, false);
+		create_login_gui(false);
 		if(this.dev != null) {
 			this.dev.close();
 		}
@@ -80,16 +80,11 @@ public class DeviantArtGUI extends ArtistHostingGUI {
 	}
 
 	@Override
-	public boolean login(String username, String password, String captcha) {
+	public boolean login(String username, String password) {
 		this.dev.login(username, password);
 		return this.dev.is_logged_in();
 	}
-
-	@Override
-	public File get_captcha() {
-		return null;
-	}
-
+	
 	@Override
 	public void load_checks() {
 		Preferences prefs = Preferences.userNodeForPackage(DeviantArtGUI.class);
@@ -201,19 +196,22 @@ public class DeviantArtGUI extends ArtistHostingGUI {
 		}
 		//DOWNLOAD SCRAPS GALLERY
 		for(int i = s_size - 1; !this.start_gui.get_base_gui().is_canceled() && i > -1; i--) {
-			this.start_gui.get_main_pbar().set_progress(false, true, g_size + (s_size - (i + 1)), size);
+			this.start_gui.get_main_pbar().set_progress(
+					false, true, g_size + (s_size - (i + 1)), size);
 			d = this.download_media_page(scrap_pages.get(i), dir, null, "Gallery:Main", false);
 		}
 		//DOWNLOAD JOURNAL GALLERY
 		int off = g_size + s_size;
 		for(int i = j_size - 1; !this.start_gui.get_base_gui().is_canceled() && i > -1; i--) {
-			this.start_gui.get_main_pbar().set_progress(false, true, off + (j_size - (i + 1)), size);
+			this.start_gui.get_main_pbar().set_progress(
+					false, true, off + (j_size - (i + 1)), size);
 			d = this.download_media_page(journal_pages.get(i), dir, null, null, false);
 		}
 		//DOWNLOAD MODULE PAGES
 		off += j_size;
 		for(int i = m_size - 1; !this.start_gui.get_base_gui().is_canceled() && i > -1; i--) {
-			this.start_gui.get_main_pbar().set_progress(false, true, off + (m_size - (i + 1)), size);
+			this.start_gui.get_main_pbar().set_progress(
+					false, true, off + (m_size - (i + 1)), size);
 			d = this.download_module_page(mod_pages.get(i), dir);
 		}
 		if(d != null) {
@@ -222,7 +220,8 @@ public class DeviantArtGUI extends ArtistHostingGUI {
 		//DOWNLOAD FAVORITES PAGES
 		off += m_size;
 		for(int i = f_size - 1; !this.start_gui.get_base_gui().is_canceled() && i > -1; i--) {
-			this.start_gui.get_main_pbar().set_progress(false, true, off + (f_size - (i + 1)), size);
+			this.start_gui.get_main_pbar().set_progress(
+					false, true, off + (f_size - (i + 1)), size);
 			download_media_page(favs.get(i), fav_dir, fav_artist, null, true);
 		}
 		this.start_gui.append_console("", false);
@@ -230,8 +229,7 @@ public class DeviantArtGUI extends ArtistHostingGUI {
 
 	@Override
 	public void download_page(String url) {
-		this.start_gui.get_main_pbar().set_progress(
-				true, false, 0, 0);
+		this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
 		//CHECK URL IS VALID
 		String id = DeviantArt.get_page_id(url);
 		if(id.length() > 0 && !id.endsWith("-P") && !id.endsWith("-S")) {

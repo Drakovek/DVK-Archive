@@ -25,8 +25,7 @@ public class Reformat {
 		for(int i = 0; i < size; i++) {
 			//UPDATE PROGRESS
 			if(start_gui != null) {
-				start_gui.get_main_pbar().set_progress(
-						false, true, i, size);
+				start_gui.get_main_pbar().set_progress(false, true, i, size);
 				//BREAK IF CANCELED
 				if(start_gui.get_base_gui().is_canceled()) {
 					break;
@@ -57,8 +56,7 @@ public class Reformat {
 		for(int i = 0; i < size; i++) {
 			//UPDATE PROGRESS
 			if(start_gui != null) {
-				start_gui.get_main_pbar().set_progress(
-						false, true, i, size);
+				start_gui.get_main_pbar().set_progress(false, true, i, size);
 				//BREAK IF CANCELED
 				if(start_gui.get_base_gui().is_canceled()) {
 					break;

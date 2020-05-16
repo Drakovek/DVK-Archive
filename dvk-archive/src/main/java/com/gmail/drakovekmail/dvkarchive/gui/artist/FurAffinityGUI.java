@@ -3,8 +3,16 @@ package com.gmail.drakovekmail.dvkarchive.gui.artist;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.prefs.Preferences;
+
+import javax.swing.JPanel;
+import javax.swing.JSeparator;
+import javax.swing.SwingConstants;
+
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
+import com.gmail.drakovekmail.dvkarchive.gui.BaseGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
+import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DButton;
+import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DLabel;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.compound.DTextDialog;
 import com.gmail.drakovekmail.dvkarchive.processing.StringProcessing;
 import com.gmail.drakovekmail.dvkarchive.web.artisthosting.ArtistHosting;
@@ -18,6 +26,7 @@ import com.gmail.drakovekmail.dvkarchive.web.artisthosting.FurAffinity;
 public class FurAffinityGUI extends ArtistHostingGUI {
 
 	//TODO ADD FUNCTION TO NOT ALLOW DOWNLOADING EXISTING DVK FILES
+
 	/**
 	 * SerialVersionUID
 	 */
@@ -45,7 +54,26 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 	
 	@Override
 	public void create_initial_gui() {
-		create_login_gui(true, true);
+		BaseGUI base_gui = this.start_gui.get_base_gui();
+		//CREATE TITLE PANEL
+		DLabel title_lbl = new DLabel(base_gui, null, "fur_affinity");
+		title_lbl.setHorizontalAlignment(SwingConstants.CENTER);
+		title_lbl.set_font_large();
+		JSeparator sep = new JSeparator(SwingConstants.HORIZONTAL);
+		JPanel title_pnl = base_gui.get_y_stack(title_lbl, sep);
+		//CREATE BUTTON PANEL
+		DButton login_btn = new DButton(base_gui, this, "login");
+		DButton skip_btn = new DButton(base_gui, this, "skip_login");
+		JPanel button_pnl = base_gui.get_y_stack(login_btn, skip_btn);
+		//CREATE FULL PANEL
+		JPanel full_pnl = base_gui.get_y_stack(title_pnl, button_pnl);
+		//CREATE SERVICE PANEL
+		JPanel service_pnl = base_gui.get_spaced_panel(
+				full_pnl, 0, 0, false, false, false, false);
+		this.removeAll();
+		this.add(service_pnl);
+		this.revalidate();
+		this.repaint();
 		if(this.fur != null) {
 			this.fur.close();
 		}
@@ -248,13 +276,8 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 	}
 
 	@Override
-	public File get_captcha() {
-		return this.fur.get_captcha();
-	}
-
-	@Override
-	public boolean login(String username, String password, String captcha) {
-		this.fur.login(username, password, captcha);
+	public boolean login(String username, String password) {
+		this.fur.login();
 		return this.fur.is_logged_in();
 	}
 

@@ -98,11 +98,12 @@ public class DConnectSelenium {
 	 * @param url Given URL
 	 * @param element XPath element to wait for
 	 * @param tries How many times to attempt loading page
+	 * @param timeout How long to wait in seconds for element before timing out
 	 */
-	public void load_page(String url, String element, int tries) {
-		load_page(url, element);
+	public void load_page(String url, String element, int tries, int timeout) {
+		load_page(url, element, timeout);
 		for(int i = 0; this.get_page() == null && i < (tries - 1); i++) {
-			load_page(url, element);
+			load_page(url, element, timeout);
 		}
 	}
 	
@@ -111,20 +112,30 @@ public class DConnectSelenium {
 	 * 
 	 * @param url Given URL
 	 * @param element XPath element to wait for
+	 * @param timeout How long to wait in seconds for element before timing out
 	 */
-	private void load_page(String url, String element) {
+	private void load_page(String url, String element, int timeout) {
 		try {
 			this.driver.get(url);
 			if(element != null) {
-				WebDriverWait wait = new WebDriverWait(this.driver, 10);
+				WebDriverWait wait = new WebDriverWait(this.driver, timeout);
 				wait.until(ExpectedConditions
 						.presenceOfAllElementsLocatedBy(By.xpath(element)));
 			}
 			this.connect.load_from_string(this.driver.getPageSource());
 		}
 		catch(Exception e) {
-			this.connect.load_from_string(null);
+			this.connect.set_page(null);
 		}
+	}
+	
+	/**
+	 * Sets main page of DConnect directly.
+	 * 
+	 * @param page HtmlPage
+	 */
+	public void set_page(HtmlPage page) {
+		this.connect.set_page(page);
 	}
 	
 	/**
@@ -137,11 +148,21 @@ public class DConnectSelenium {
 	}
 	
 	/**
+	 * Returns the current WebDriver.
+	 * 
+	 * @return Current WebDriver
+	 */
+	public WebDriver get_driver() {
+		return this.driver;
+	}
+	
+	/**
 	 * Closes the current WebDriver, if available.
 	 */
 	public void close_driver() {
 		try {
 			this.driver.close();
+			this.connect.close_client();
 		}
 		catch(Exception e) {}
 	}

@@ -53,7 +53,6 @@ public class TestFilePrefs {
 		//SET PREFERENCES
 		FilePrefs prefs = new FilePrefs();
 		prefs.set_index_dir(this.test_dir);
-		prefs.set_captcha_dir(this.test_dir);
 		prefs.set_use_index(false);
 		//SAVE PREFERENCES
 		prefs.save_preferences();
@@ -61,7 +60,6 @@ public class TestFilePrefs {
 		prefs = new FilePrefs();
 		prefs.load_preferences();
 		assertEquals(this.test_dir, prefs.get_index_dir());
-		assertEquals(this.test_dir, prefs.get_captcha_dir());
 		assertFalse(prefs.use_index());
 	}
 	
@@ -81,21 +79,6 @@ public class TestFilePrefs {
 	}
 	
 	/**
-	 * Tests the get_captcha_dir and set_captcha_dir methods.
-	 */
-	@Test
-	public void test_get_set_captcha_dir() {
-		//TEST INVALID FILES
-		FilePrefs prefs = new FilePrefs();
-		prefs.set_captcha_dir(null);
-		assertEquals("", prefs.get_captcha_dir().getName());
-		//TEST VALID FILE
-		File dir = new File(this.test_dir, "bleh");
-		prefs.set_captcha_dir(dir);
-		assertEquals(dir, prefs.get_captcha_dir());
-	}
-	
-	/**
 	 * Tests the use_indexes and set_use_indexes methods.
 	 */
 	@Test
@@ -106,25 +89,5 @@ public class TestFilePrefs {
 		assertTrue(prefs.use_index());
 		prefs.set_use_index(false);
 		assertFalse(prefs.use_index());
-	}
-	
-	/**
-	 * Tests the delete_captchas method.
-	 */
-	@Test
-	public void test_delete_captchas() {
-		FilePrefs prefs = new FilePrefs();
-		prefs.set_captcha_dir(this.test_dir);
-		try {
-			File file = new File(this.test_dir, "file1");
-			file.createNewFile();
-			file = new File(this.test_dir, "file2");
-			file.createNewFile();
-		} catch (IOException e) {}
-		File[] files = this.test_dir.listFiles();
-		assertEquals(2, files.length);
-		prefs.delete_captchas();
-		files = this.test_dir.listFiles();
-		assertEquals(0, files.length);
 	}
 }

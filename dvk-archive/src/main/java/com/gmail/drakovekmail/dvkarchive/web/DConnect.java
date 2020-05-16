@@ -12,6 +12,8 @@ import java.net.URLConnection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
+
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.CookieManager;
 import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
@@ -168,6 +170,54 @@ public class DConnect {
 		load_page(url, element);
 		for(int i = 0; this.get_page() == null && i < (tries - 1); i++) {
 			load_page(url, element);
+		}
+	}
+	
+	/**
+	 * Returns a JSONObject from a given JSON URL.
+	 * 
+	 * @param url URL containing JSON data
+	 * @param tries How many times to attempt loading page
+	 * @return JSONObject from URL
+	 */
+	public JSONObject load_json(String url, int tries) {
+		JSONObject json = null;
+		load_json(url);
+		for(int i = 0; json == null && i < (tries - 1); i++) {
+			json = load_json(url);
+		}
+		return json;
+	}
+	
+	/**
+	 * Returns a JSONObject from a given JSON URL.
+	 * 
+	 * @param url URL containing JSON data
+	 * @return JSONObject from URL
+	 */
+	private JSONObject load_json(String url) {
+		this.page = null;
+		CookieManager cookies = this.web_client.getCookieManager();
+		List<WebWindow> windows = this.web_client.getWebWindows();
+		for(WebWindow window: windows) {
+			window.getJobManager().removeAllJobs();
+			window.getJobManager().shutdown();
+			window = null;
+		}
+		close_client();
+		System.gc();
+		initialize_client();
+		this.web_client.setCookieManager(cookies);
+		try {
+			UnexpectedPage u_page;
+			u_page = (UnexpectedPage)this.web_client.getPage(url.toString());
+			String res = u_page.getWebResponse().getContentAsString();
+			JSONObject json = new JSONObject(res);
+			TimeUnit.MILLISECONDS.sleep(2000);
+			return json;
+		}
+		catch(Exception e) {
+			return null;
 		}
 	}
 	

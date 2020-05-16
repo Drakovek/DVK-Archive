@@ -2,7 +2,6 @@ package com.gmail.drakovekmail.dvkarchive.web.artisthosting;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
@@ -42,7 +41,6 @@ public class TestFurAffinity {
 		create_directory();
 		//SET UP FURAFFINITY OBJECT
 		FilePrefs prefs = new FilePrefs();
-		prefs.set_captcha_dir(this.test_dir);
 		this.fur = new FurAffinity(prefs);
 	}
 	
@@ -201,9 +199,9 @@ public class TestFurAffinity {
 		assertEquals(url, links.get(0));
 		//TEST ALREADY DOWNLOADED
 		links = this.fur.get_pages(null, "mrsparta", sub, 'm', handler, false, false, null);
+		assertTrue(links.size() > 0);
 		assertFalse(links.contains("https://www.furaffinity.net/view/13982138/"));
-		int index = links.indexOf("https://www.furaffinity.net/view/14019897/");
-		assertNotEquals(-1, index);
+		assertTrue(links.contains("https://www.furaffinity.net/view/14019897/"));
 		assertTrue(links.contains("https://www.furaffinity.net/view/14202184/"));
 		assertTrue(links.contains("https://www.furaffinity.net/view/14354843/"));
 		assertTrue(links.contains("https://www.furaffinity.net/view/14664720/"));
@@ -347,8 +345,7 @@ public class TestFurAffinity {
 		//TEST SMALL SAMPLE
 		ArrayList<String> links = this.fur.get_journal_pages(
 				null, "mr_sparta", sub, handler, true, false, 1);
-		assertTrue(links.contains("https://www.furaffinity.net/journal/8594821/"));
-		assertTrue(links.contains("https://www.furaffinity.net/journal/8933071/"));
+		assertTrue(links.contains("https://www.furaffinity.net/journal/9485924/"));
 		//TEST ALREADY DOWNLOADED
 		links = this.fur.get_journal_pages(null, "angrboda", sub, handler, false, false, 1);
 		assertTrue(links.size() > 47);
@@ -384,10 +381,7 @@ public class TestFurAffinity {
 	 */
 	@Test
 	public void test_after_login() {
-		File cap_file = this.fur.get_captcha();
-		String[] info = this.fur.get_user_info("Fur Affinity", cap_file);
-		this.fur.login(info[0], info[1], info[2]);
-		info = null;
+		this.fur.login();
 		assertTrue(this.fur.is_logged_in());
 		//GET PAGES
 		test_get_pages();
@@ -469,7 +463,7 @@ public class TestFurAffinity {
 		assertEquals(null, dvk.get_secondary_file());
 		//SECOND DVK
 		url = "furaffinity.net/view/15301779";
-		dvk = this.fur.get_dvk(url, dvk_handler, this.test_dir, "ArtDude", true, false);
+		dvk = this.fur.get_dvk(url, dvk_handler, this.test_dir, "ArtDude", true, true);
 		assertEquals("FAF15301779", dvk.get_id());
 		assertEquals("Affinity Ch. 1", dvk.get_title());
 		assertEquals(1, dvk.get_artists().length);
@@ -477,8 +471,10 @@ public class TestFurAffinity {
 		assertEquals("2014/12/24|02:11", dvk.get_time());
 		value = "https://www.furaffinity.net/view/15301779/";
 		assertEquals(value, dvk.get_page_url());
-		value = "https://d.facdn.net/art/mrsparta/stories/1488278723/1419405086.mrsparta_md-1.txt";
-		assertEquals(value, dvk.get_direct_url());
+		value = "https://d.facdn.net/";
+		assertTrue(dvk.get_direct_url().startsWith(value));
+		value = "/art/mrsparta/stories/1488278723/1419405086.mrsparta_md-1.txt";
+		assertTrue(dvk.get_direct_url().endsWith(value));
 		value = "https://d.facdn.net/art/mrsparta/stories/1488278723/"
 				+ "1419405086.thumbnail.mrsparta_md-1.txt.gif";
 		assertEquals(value, dvk.get_secondary_url());
@@ -507,9 +503,16 @@ public class TestFurAffinity {
 		assertEquals(this.test_dir, dvk.get_dvk_file().getParentFile());
 		assertEquals("Affinity Ch 1_FAF15301779.txt", dvk.get_media_file().getName());
 		assertEquals(this.test_dir, dvk.get_media_file().getParentFile());
-		assertEquals("Affinity Ch 1_FAF15301779.gif", dvk.get_secondary_file().getName());
+		assertEquals("Affinity Ch 1_FAF15301779.jpg", dvk.get_secondary_file().getName());
 		assertEquals(this.test_dir, dvk.get_secondary_file().getParentFile());
-		//SECOND DVK
+		assertTrue(dvk.get_dvk_file().exists());
+		assertTrue(dvk.get_media_file().exists());
+		assertTrue(dvk.get_secondary_file().exists());
+		value = InOut.read_file(dvk.get_media_file());
+		assertTrue(value.contains("﻿Chapter 1. A place to stay; socializing; the nightmare"));
+		assertTrue(value.contains("To Be Continued!!???"));
+		assertTrue(value.contains("It was always the same dream for me."));
+		//THIRD DVK
 		url = "www.furaffinity.net/view/29756524/";
 		dvk = this.fur.get_dvk(url, dvk_handler, this.test_dir, null, false, false);
 		assertEquals("FAF29756524", dvk.get_id());
@@ -597,30 +600,30 @@ public class TestFurAffinity {
 	@Test
 	public void test_get_journal_dvk() {
 		//FIRST DVK
-		String url = "www.furaffinity.net/journal/8594821";
+		String url = "www.furaffinity.net/journal/9485924/";
 		Dvk dvk = this.fur.get_journal_dvk(url, this.test_dir, false, true);
-		assertEquals("FAF8594821-J", dvk.get_id());
-		assertEquals("100+ watcher special", dvk.get_title());
+		assertEquals("FAF9485924-J", dvk.get_id());
+		assertEquals("Commission Information", dvk.get_title());
 		assertEquals(1, dvk.get_artists().length);
 		assertEquals("MrSparta", dvk.get_artists()[0]);
-		assertEquals("2018/01/24|15:50", dvk.get_time());
-		String value = "https://www.furaffinity.net/journal/8594821/";
+		assertEquals("2020/05/06|01:44", dvk.get_time());
+		String value = "https://www.furaffinity.net/journal/9485924/";
 		assertEquals(value, dvk.get_page_url());
 		assertEquals(null, dvk.get_direct_url());
 		assertEquals(null, dvk.get_secondary_url());
-		value = "This actually isn't that special, but thanks. Also, one of my stories "
-				+ "broke 1000 views earlier this week. Good times.<br/><br/>So what do "
-				+ "you guys actually want to see from me? I'm mostly just trying "
-				+ "fetishes to see which get a lot of views, and working from there."
-				+ "<br/><br/>Also I have a patreon that I assure you has the "
-				+ "highest quality.";
+		value = "For those of you who want to help me eat. Copied from my commission "
+				+ "tab.<br/><br/>ART<br/><br/>Lineart/sketch - $15<br/><br/>flat "
+				+ "color - $20<br/><br/>flat color + shade - $25<br/><br/>fully "
+				+ "painted - $30<br/><br/>add background +$5<br/><br/><br/>STORY"
+				+ "<br/><br/><br/>$15 minimum, will negotiate a price based on "
+				+ "anticipated content and length.";
 		assertEquals(value, dvk.get_description());
 		assertEquals(2, dvk.get_web_tags().length);
 		assertEquals("Rating:General", dvk.get_web_tags()[0]);
 		assertEquals("Gallery:Journals", dvk.get_web_tags()[1]);
-		assertEquals("100 watcher special_FAF8594821-J.dvk", dvk.get_dvk_file().getName());
+		assertEquals("Commission Information_FAF9485924-J.dvk", dvk.get_dvk_file().getName());
 		assertEquals(this.test_dir, dvk.get_dvk_file().getParentFile());
-		assertEquals("100 watcher special_FAF8594821-J.html", dvk.get_media_file().getName());
+		assertEquals("Commission Information_FAF9485924-J.html", dvk.get_media_file().getName());
 		assertEquals(this.test_dir, dvk.get_media_file().getParentFile());
 		assertEquals(null, dvk.get_secondary_file());
 		assertTrue(dvk.get_dvk_file().exists());

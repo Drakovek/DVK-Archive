@@ -12,7 +12,7 @@ import com.gmail.drakovekmail.dvkarchive.gui.work.DWorker;
  * @author Drakovek
  */
 public class DProgressBar extends JProgressBar implements DWorker {
-	
+
 	/**
 	 * SerialVersionUID
 	 */
@@ -58,7 +58,8 @@ public class DProgressBar extends JProgressBar implements DWorker {
 	public void set_progress(
 			boolean indeterminate,
 			boolean painted,
-			int value, int max) {
+			int value,
+			int max) {
 		this.ind = indeterminate;
 		this.painted = painted;
 		this.value = value;
