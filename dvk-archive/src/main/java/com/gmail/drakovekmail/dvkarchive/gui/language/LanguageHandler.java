@@ -1,10 +1,7 @@
 package com.gmail.drakovekmail.dvkarchive.gui.language;
 
 import java.util.prefs.Preferences;
-
 import javax.swing.KeyStroke;
-
-import com.gmail.drakovekmail.dvkarchive.gui.BaseGUI;
 
 /**
  * Class for getting text values for the UI.
@@ -17,7 +14,7 @@ public class LanguageHandler {
 	/**
 	 * Key for the selected language in preferences.
 	 */
-	private static final String LANGUAGE = "language";
+	private static final String LANGUAGE = "dvk_language";
 	
 	/**
 	 * LanguageMap object for the selected language.
@@ -106,7 +103,7 @@ public class LanguageHandler {
 	 * @return UI Language
 	 */
 	public static String get_language() {
-		Preferences prefs = Preferences.userNodeForPackage(BaseGUI.class);
+		Preferences prefs = Preferences.userNodeForPackage(LanguageHandler.class);
 		String lang = prefs.get(LANGUAGE, "English").toString();
 		return lang;
 	}

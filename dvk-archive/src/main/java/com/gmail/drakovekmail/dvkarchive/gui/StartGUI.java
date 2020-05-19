@@ -39,6 +39,8 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
  */
 public class StartGUI implements DActionEvent, Disabler {
 	
+	//TODO SET CLOSE EVENT TO RUN ON THREAD
+	
 	/**
 	 * Current directory for the StartGUI
 	 */

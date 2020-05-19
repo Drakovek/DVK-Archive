@@ -55,6 +55,11 @@ public class SettingsGUI implements DActionEvent {
 	private DList cat_list;
 	
 	/**
+	 * GUI for selecting DVK Archive's displayed language
+	 */
+	private LanguageGUI language_gui;
+	
+	/**
 	 * GUI for selecting DVK Archive's main GUI theme
 	 */
 	private ThemeGUI theme_gui;
@@ -75,6 +80,7 @@ public class SettingsGUI implements DActionEvent {
 		BaseGUI base_gui;
 		base_gui = this.start_gui.get_base_gui();
 		//CREATE INTERNAL GUIS
+		this.language_gui = new LanguageGUI(base_gui);
 		this.theme_gui = new ThemeGUI(base_gui);
 		this.font_gui = new FontGUI(base_gui);
 		//CREATE SIDE PANEL
@@ -114,6 +120,9 @@ public class SettingsGUI implements DActionEvent {
 				BorderLayout.WEST);
 		full_pnl.add(this.service_pnl, BorderLayout.CENTER);
 		this.main_pnl = base_gui.get_spaced_panel(full_pnl);
+		//SELECT LANGUAGE
+		this.cat_list.setSelectedIndex(0);
+		change_category();
 	}
 
 	/**
@@ -131,12 +140,11 @@ public class SettingsGUI implements DActionEvent {
 	 */
 	public void open() {
 		this.start_gui.get_base_gui().set_running(true);
-		String title = this.start_gui.get_base_gui()
-				.get_language_string("settings");
+		String title = this.start_gui.get_base_gui().get_language_string("settings");
 		title = LanguageHandler.get_text(title);
-		this.dialog = new DDialog(
-				this.start_gui.get_frame(),
-				this.main_pnl, title);
+		int height = this.start_gui.get_base_gui().get_space_size() * 60;
+		int width = (int)(height *((double)4/(double)3));
+		this.dialog = new DDialog(this.start_gui.get_frame(), this.main_pnl, title, width, height);
 		this.dialog.setVisible(true);
 		this.dialog = null;
 		this.start_gui.get_base_gui().set_running(false);
@@ -154,6 +162,9 @@ public class SettingsGUI implements DActionEvent {
 				this.category = cat;
 				this.service_pnl.removeAll();
 				switch(cat) {
+					case "language":
+						this.service_pnl.add(this.language_gui);
+						break;
 					case "font":
 						this.service_pnl.add(this.font_gui);
 						break;
@@ -172,10 +183,11 @@ public class SettingsGUI implements DActionEvent {
 	 * Restarts program if necessary.
 	 */
 	private void save() {
+		boolean lchange = this.language_gui.save();
 		boolean tchange = this.theme_gui.save();
 		boolean fchange = this.font_gui.save();
 		this.dialog.dispose();
-		if(tchange || fchange) {
+		if(lchange || tchange || fchange) {
 			//RESTART
 			this.start_gui.get_frame().dispose();
 			Start.start();
