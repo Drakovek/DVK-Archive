@@ -214,9 +214,8 @@ public class StartGUI implements DActionEvent, Disabler {
 		//PACK AND CREATE FRAME
 		reset_directory();
 		this.service_list.setSelectedIndex(0);
-		this.frame.pack();
+		this.frame.pack_restricted();
 		this.frame.setLocationRelativeTo(null);
-		this.frame.setMinimumSize(this.frame.getSize());
 		if(show_gui) {
 			this.frame.setVisible(true);
 		}

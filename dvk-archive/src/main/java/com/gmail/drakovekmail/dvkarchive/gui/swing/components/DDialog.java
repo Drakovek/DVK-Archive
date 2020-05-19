@@ -6,14 +6,15 @@ import java.awt.Dimension;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 
+import com.gmail.drakovekmail.dvkarchive.gui.DScreenDimensions;
+
 /**
  * Modal dialog UI object for DVK Archive.
  * 
  * @author Drakovek
  */
 public class DDialog extends JDialog {
-	
-	//TODO ADD MAXIMUM SIZE
+
 	//TODO ADD EVENT FOR CLOSING DIALOG
 
 	/**
@@ -69,6 +70,17 @@ public class DDialog extends JDialog {
 		}
 		if(frame_height == 0) {
 			frame_height = getHeight() + 5;
+		}
+		//LIMIT TO LESS THAN MAXIMUM SIZE
+		DScreenDimensions sd = new DScreenDimensions();
+		Dimension max = sd.get_maximum_size();
+		int max_width = (int)max.getWidth();
+		int max_height = (int)max.getHeight();
+		if(frame_width > max_width) {
+			frame_width = max_width;
+		}
+		if(frame_height > max_height) {
+			frame_height = max_height;
 		}
 		Dimension size = new Dimension(frame_width, frame_height);
 		setPreferredSize(size);

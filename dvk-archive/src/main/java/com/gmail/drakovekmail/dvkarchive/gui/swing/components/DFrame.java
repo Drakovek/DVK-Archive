@@ -3,6 +3,7 @@ package com.gmail.drakovekmail.dvkarchive.gui.swing.components;
 import java.awt.Dimension;
 import javax.swing.JFrame;
 import com.gmail.drakovekmail.dvkarchive.gui.BaseGUI;
+import com.gmail.drakovekmail.dvkarchive.gui.DScreenDimensions;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DCloseListener;
 
@@ -12,9 +13,7 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DCloseListener;
  * @author Drakovek
  */
 public class DFrame extends JFrame implements DActionEvent {
-	
-	//TODO ADD SIZE LIMITS
-	
+
 	/**
 	 * SerialVersionUID
 	 */
@@ -40,6 +39,29 @@ public class DFrame extends JFrame implements DActionEvent {
 		this.addWindowListener(new DCloseListener(base_gui, this, "close_frame"));
 	}
 
+	/**
+	 * Packs the frame while ensuring frame fits on screen.
+	 */
+	public void pack_restricted() {
+		pack();
+		int width = getWidth();
+		int height = getHeight();
+		DScreenDimensions sd = new DScreenDimensions();
+		Dimension max = sd.get_maximum_size();
+		int max_width = (int)max.getWidth();
+		int max_height = (int)max.getHeight();
+		if(width > max_width) {
+			width = max_width;
+		}
+		if(height > max_height) {
+			height = max_height;
+		}
+		Dimension size = new Dimension(width, height);
+		setPreferredSize(size);
+		setMinimumSize(size);
+		pack();
+	}
+	
 	/**
 	 * Closes the frame.
 	 */
