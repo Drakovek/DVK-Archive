@@ -286,11 +286,11 @@ public class DeviantArtGUI extends ArtistHostingGUI {
 			Dvk dvk = null;
 			if(id.endsWith("-J")) {
 				//DOWNLOAD JOURNAL PAGE
-				dvk = this.dev.get_journal_dvk(url, directory, single, true);
+				dvk = this.dev.get_journal_dvk(url, directory, single);
 			}
 			else {
 				//DOWNLOAD GALLERY PAGE
-				dvk = this.dev.get_dvk(url, this.dvk_handler, gallery, directory, artist, single, true);
+				dvk = this.dev.get_dvk(url, this.dvk_handler, gallery, directory, artist, single);
 			}
 			this.dvk_handler.add_dvk(dvk);
 			//CANCEL IF DOWNLOAD FAILED

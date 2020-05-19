@@ -76,7 +76,7 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 		if(this.fur != null) {
 			this.fur.close();
 		}
-		this.fur = new FurAffinity(this.start_gui.get_file_prefs());
+		this.fur = new FurAffinity(this.start_gui.get_file_prefs(), this.start_gui);
 	}
 	
 	/**
@@ -148,14 +148,14 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 		if(get_main()) {
 			this.start_gui.append_console("getting_gallery", true);
 			g_pages = this.fur.get_pages(
-					this.start_gui, artist, dir, 'm', this.dvk_handler,
+					artist, dir, 'm', this.dvk_handler,
 					check_all, !get_skipped(), null);
 		}
 		//GET SCRAP PAGES
 		if(get_scraps()) {
 			this.start_gui.append_console("getting_scraps", true);
 			g_pages.addAll(this.fur.get_pages(
-					this.start_gui, artist, dir, 's', this.dvk_handler,
+					artist, dir, 's', this.dvk_handler,
 					check_all, !get_skipped(), null));
 		}
 		//GET JOURNAL PAGES
@@ -163,7 +163,7 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 			//GET JOURNAL PAGES
 			this.start_gui.append_console("getting_journals", true);
 			g_pages.addAll(this.fur.get_journal_pages(
-					this.start_gui, artist, dir, this.dvk_handler, check_all, !get_skipped(), 1));
+					artist, dir, this.dvk_handler, check_all, !get_skipped(), 1));
 		}
 		//GET FAVORITES
 		ArrayList<String> favs = new ArrayList<>();
@@ -174,7 +174,7 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 				fav_dir.mkdir();
 			}
 			favs = this.fur.get_pages(
-					this.start_gui, artist, fav_dir, 'f', this.dvk_handler, 
+					artist, fav_dir, 'f', this.dvk_handler, 
 					check_all, !get_skipped(), null);
 		}
 		//DOWNLOAD MAIN GALLERY

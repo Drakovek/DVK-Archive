@@ -7,9 +7,12 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
+import com.gmail.drakovekmail.dvkarchive.gui.swing.compound.DButtonDialog;
 
 /**
  * Class for getting web info using Selenium WebDriver.
@@ -33,8 +36,9 @@ public class DConnectSelenium {
 	 * Disables Selenium logs.
 	 * 
 	 * @param headless Whether drivers should be headless.
+	 * @param start_gui GUI to tie message box to if informing user to download Selenium driver.
 	 */
-	public DConnectSelenium(boolean headless) {
+	public DConnectSelenium(boolean headless, StartGUI start_gui) {
 		//DISABLE LOGS
 		java.util.logging.Logger.getLogger("org.openqa.selenium")
 			.setLevel(java.util.logging.Level.OFF);
@@ -46,19 +50,20 @@ public class DConnectSelenium {
 				"/dev/null");
 		//INITIALIZE OBJECT
 		this.connect = new DConnect(false, false);
-		initialize_driver("f", headless);
+		initialize_driver('f', headless, start_gui);
 	}
 	
 	/**
 	 * Initializes WebDriver to the given browser type.
-	 * Supports Firefox, Chrome, and Edge browsers.
+	 * Supports Firefox, Chrome, Safari, and Edge browsers.
 	 * Falls on other browsers if given browser is unavailable.
 	 * 
-	 * @param driver_type f - Firefox, c - Chrome, e - Edge
+	 * @param driver_type f - Firefox, c - Chrome, s - Safari e - Edge
 	 * @param headless Whether driver should be headless.
+	 * @param start_gui GUI to tie message box to if informing user to download Selenium driver.
 	 */
-	public void initialize_driver(String driver_type, boolean headless) {
-		if(driver_type.equals("f")) {
+	public void initialize_driver(char driver_type, boolean headless, StartGUI start_gui) {
+		if(driver_type == 'f') {
 			//FIREFOX DRIVER
 			try {
 				FirefoxOptions op = new FirefoxOptions();
@@ -66,10 +71,10 @@ public class DConnectSelenium {
 				this.driver = new FirefoxDriver(op);
 			}
 			catch(Exception e) {
-				initialize_driver("c", headless);
+				initialize_driver('c', headless, start_gui);
 			}
 		}
-		else if(driver_type.equals("c")) {
+		else if(driver_type == 'c') {
 			//CHROME DRIVER
 			try {
 				ChromeOptions op = new ChromeOptions();
@@ -77,17 +82,31 @@ public class DConnectSelenium {
 				this.driver = new ChromeDriver(op);
 			}
 			catch(Exception e) {
-				initialize_driver("e", headless);
+				initialize_driver('s', headless, start_gui);
 			}
 		}
-		else if(driver_type.equals("e")) {
-			//CHROME DRIVER
+		else if(driver_type == 's') {
+			//SAFARI DRIVER
+			try {
+				this.driver = new SafariDriver();
+			}
+			catch(Exception e) {
+				initialize_driver('e', headless, start_gui);
+			}
+		}
+		else if(driver_type == 'e') {
+			//EDGE DRIVER
 			try {
 				this.driver = new EdgeDriver();
 			}
 			catch(Exception e) {
-				//TODO Inform user to get selenium driver
-				System.out.println("https://selenium-python.readthedocs.io/installation.html#downloading-python-bindings-for-selenium");
+				if(start_gui != null) {
+					//INFORM USER TO INSTALL SELENIUM DRIVER
+					String[] buttons = {"ok"};
+					DButtonDialog dialog = new DButtonDialog();
+					dialog.open_html(start_gui.get_base_gui(), start_gui.get_frame(),
+							"selenium_title", "selenium_message", buttons);
+				}
 			}
 		}
 	}

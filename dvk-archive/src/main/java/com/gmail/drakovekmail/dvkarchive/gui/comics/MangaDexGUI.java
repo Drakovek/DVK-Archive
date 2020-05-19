@@ -118,7 +118,7 @@ public class MangaDexGUI extends ArtistHostingGUI {
 	public void get_artists() {
 		close();
 		this.connect = new DConnect(false, false);
-		this.sel = new DConnectSelenium(true);
+		this.sel = new DConnectSelenium(true, this.start_gui);
 		this.dvks = MangaDex.get_downloaded_titles(this.dvk_handler);
 		ArrayList<String> list = new ArrayList<>();
 		for(int i = 0; i < this.dvks.size(); i++) {

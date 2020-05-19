@@ -176,6 +176,7 @@ public class DeviantArt extends ArtistHosting {
 	
 	/**
 	 * Returns a Dvk for a given DeviantArt media page.
+	 * Defaults to saving DVK and media.
 	 * 
 	 * @param page_url URL of DeviantArt media page
 	 * @param dvk_handler Used for checking already downloaded favorites pages
@@ -183,6 +184,29 @@ public class DeviantArt extends ArtistHosting {
 	 * @param directory Directory in which to save Dvk.
 	 * @param artist Artist to use when adding favorite tag.
 	 * Doesn't create favorite tag if null.
+	 * @param single Whether this is a single download
+	 * @return Dvk of DeviantArt media page
+	 */
+	public Dvk get_dvk(
+			String page_url,
+			DvkHandler dvk_handler,
+			String gallery,
+			File directory,
+			String artist,
+			boolean single) {
+		return this.get_dvk(page_url, dvk_handler, gallery, directory, artist, 0, single, true);
+	}
+	
+	/**
+	 * Returns a Dvk for a given DeviantArt media page.
+	 * 
+	 * @param page_url URL of DeviantArt media page
+	 * @param dvk_handler Used for checking already downloaded favorites pages
+	 * @param gallery Gallery tag to add to Dvk
+	 * @param directory Directory in which to save Dvk.
+	 * @param artist Artist to use when adding favorite tag.
+	 * Doesn't create favorite tag if null.
+	 * @param try_num Number of times downloading media has been attempted
 	 * @param single Whether this is a single download
 	 * @param save Whether to save Dvk and media
 	 * @return Dvk of DeviantArt media page
@@ -193,6 +217,7 @@ public class DeviantArt extends ArtistHosting {
 			String gallery,
 			File directory,
 			String artist,
+			int try_num,
 			boolean single,
 			boolean save) {
 		//ADD FAVORITES IF DVK ALREADY EXISTS
@@ -438,7 +463,11 @@ public class DeviantArt extends ArtistHosting {
 					dvk.write_media(this.connect);
 				}
 				if(!dvk.get_dvk_file().exists()) {
-					throw new Exception();
+					if(try_num > 0) {
+						throw new Exception();
+					}
+					dvk = this.get_dvk(page_url, dvk_handler, gallery, directory,
+							artist, try_num + 1, single, save);
 				}
 			}
 			return dvk;
@@ -586,9 +615,23 @@ public class DeviantArt extends ArtistHosting {
 	
 	/**
 	 * Returns a Dvk for a given DeviantArt journal page.
+	 * Defaults to saving DVK and media.
 	 * 
 	 * @param page_url URL of DeviantArt journal page
 	 * @param directory Directory in which to save Dvk.
+	 * @param single Whether this is a single download
+	 * @return Dvk of DeviantArt media page
+	 */
+	public Dvk get_journal_dvk(String page_url, File directory, boolean single) {
+		return get_journal_dvk(page_url, directory, 0, single, true);
+	}
+	
+	/**
+	 * Returns a Dvk for a given DeviantArt journal page.
+	 * 
+	 * @param page_url URL of DeviantArt journal page
+	 * @param directory Directory in which to save Dvk
+	 * @param try_num Number of times downloading media has been attempted
 	 * @param single Whether this is a single download
 	 * @param save Whether to save Dvk and media
 	 * @return Dvk of DeviantArt media page
@@ -596,6 +639,7 @@ public class DeviantArt extends ArtistHosting {
 	public Dvk get_journal_dvk(
 			String page_url,
 			File directory,
+			int try_num,
 			boolean single,
 			boolean save) {
 		Dvk dvk = new Dvk();
@@ -707,8 +751,12 @@ public class DeviantArt extends ArtistHosting {
 				if(dvk.get_secondary_url() != null) {
 					this.connect.download(dvk.get_secondary_url(), dvk.get_secondary_file());
 				}
+				//CANCELS IF FAILED TO DOWNLOAD
 				if(!dvk.get_dvk_file().exists()) {
-					throw new Exception();
+					if(try_num > 0) {
+						throw new Exception();
+					}
+					dvk = this.get_journal_dvk(page_url, directory, try_num + 1, single, save);
 				}
 			}
 			return dvk;

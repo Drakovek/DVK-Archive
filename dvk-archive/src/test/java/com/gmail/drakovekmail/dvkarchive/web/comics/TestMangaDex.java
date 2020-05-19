@@ -336,7 +336,7 @@ public class TestMangaDex {
 			FilePrefs prefs = new FilePrefs();
 			DvkHandler handler = new DvkHandler();
 			handler.read_dvks(dirs, prefs, null, false, false, false);
-			s_connect = new DConnectSelenium(true);
+			s_connect = new DConnectSelenium(true, null);
 			ArrayList<Dvk> dvks = MangaDex.get_dvks(
 					s_connect, handler, null,
 					this.test_dir, cps, false, false);

@@ -16,15 +16,27 @@ public class StringProcessing {
 	 * @return String for input_int
 	 */
 	public static String extend_int(final int input_int, final int length) {
+		String int_string = Integer.toString(input_int);
+		return extend_num(int_string, length);
+	}
+	
+	/**
+	 * Returns a String for a given String of a given length.
+	 * If too small, pads out String with zeros.
+	 * 
+	 * @param input String to extend
+	 * @param length Length of returned String
+	 * @return Extended string
+	 */
+	public static String extend_num(String input, int length) {
 		if(length < 1) {
 			return new String();
 		}
-		String int_string = Integer.toString(input_int);
-		if(length < int_string.length()) {
+		if(length < input.length()) {
 			return extend_int(0, length);
 		}
 		StringBuilder builder = new StringBuilder();
-		builder.append(int_string);
+		builder.append(input);
 		while(builder.length() < length) {
 			builder.insert(0, "0");
 		}
@@ -215,5 +227,25 @@ public class StringProcessing {
 			return new String();
 		}
 		return filename.substring(start, end);
+	}
+	
+	/**
+	 * Removes a section from given text.
+	 * 
+	 * @param text Text to remove from
+	 * @param start Start index of section to remove (inclusive)
+	 * @param end End index of section to remove (exclusive)
+	 * @return Text with section removed
+	 */
+	public static String remove_section(String text, int start, int end)
+	{
+		StringBuilder builder = new StringBuilder();
+		if(start <= text.length()) {
+			builder.append(text.substring(0, start));
+		}
+		if(end < text.length()) {
+			builder.append(text.substring(end));
+		}
+		return builder.toString();
 	}
 }

@@ -677,14 +677,21 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		else {
 			this.start_gui.append_console("finished", true);
 		}
-		this.start_gui.get_base_gui().set_running(false);
-		this.start_gui.enable_all();
 		if(id.equals("login")) {
 			if(!get_skipped()) {
 				create_main_gui();
 				start_process("read_dvks", true);
 			}
+			else {
+				enable_all();
+				this.start_gui.get_base_gui().set_running(false);
+				this.start_gui.enable_all();
+			}
 		}
-		enable_all();
+		else {
+			enable_all();
+			this.start_gui.get_base_gui().set_running(false);
+			this.start_gui.enable_all();
+		}
 	}
 }

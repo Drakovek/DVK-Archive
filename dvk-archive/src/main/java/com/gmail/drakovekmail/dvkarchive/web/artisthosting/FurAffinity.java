@@ -45,12 +45,19 @@ public class FurAffinity extends ArtistHosting {
 	private DConnect downloader;
 	
 	/**
+	 * Used for canceling and showing progress
+	 */
+	private StartGUI start_gui;
+	
+	/**
 	 * Initializes the FurAffinity object.
 	 * 
 	 * @param prefs FilePrefs for DVK Archive
+	 * @param start_gui Used to display progress and messages if using GUI
 	 */
-	public FurAffinity(FilePrefs prefs) {
+	public FurAffinity(FilePrefs prefs, StartGUI start_gui) {
 		this.connect = null;
+		this.start_gui = start_gui;
 	}
 	
 	/**
@@ -59,7 +66,7 @@ public class FurAffinity extends ArtistHosting {
 	 * @param headless Whether Selenium driver should be headless
 	 */
 	private void initialize_connect(boolean headless) {
-		this.connect = new DConnectSelenium(headless);
+		this.connect = new DConnectSelenium(headless, this.start_gui);
 		this.downloader = new DConnect(false, true);
 	}
 	
@@ -77,28 +84,30 @@ public class FurAffinity extends ArtistHosting {
 			driver.manage().window().maximize();
 		}
 		catch(Exception e) {}
-		//LOAD FUR AFFINITY HOME PAGE
-		String xpath = "//span[@class='top-heading']//a[@href='/login']";
-		this.connect.load_page("https://www.furaffinity.net", xpath, 2, 10);
-		//CLICK LOGIN PAGE BUTTON
-		WebElement log = driver.findElement(By.xpath(xpath));
-		try {
-			log.click();
+		if(driver != null) {
+			//LOAD FUR AFFINITY HOME PAGE
+			String xpath = "//span[@class='top-heading']//a[@href='/login']";
+			this.connect.load_page("https://www.furaffinity.net", xpath, 2, 10);
+			//CLICK LOGIN PAGE BUTTON
+			WebElement log = driver.findElement(By.xpath(xpath));
+			try {
+				log.click();
+			}
+			catch(Exception e) {
+				//IF LOGIN PAGE BUTTON DOESN'T EXIST, LOADS LOGIN PAGE
+				this.connect.load_page("https://www.furaffinity.net/login", null, 1, 10);
+			}
+			try {
+				//WAIT UNTIL LOGGED IN OR TIMEOUT
+				xpath = "//a[@id='my-username']";
+				WebDriverWait wait = new WebDriverWait(driver, 180);
+				wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(xpath)));
+				//HIDE WINDOW
+				driver.manage().window().setPosition(new Point(-4000, 0));
+				this.connect.load_page("https://www.furaffinity.net/", xpath, 1, 10);
+			}
+			catch(Exception e) {}
 		}
-		catch(Exception e) {
-			//IF LOGIN PAGE BUTTON DOESN'T EXIST, LOADS LOGIN PAGE
-			this.connect.load_page("https://www.furaffinity.net/login", null, 1, 10);
-		}
-		try {
-			//WAIT UNTIL LOGGED IN OR TIMEOUT
-			xpath = "//a[@id='my-username']";
-			WebDriverWait wait = new WebDriverWait(driver, 180);
-			wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(xpath)));
-			//HIDE WINDOW
-			driver.manage().window().setPosition(new Point(-4000, 0));
-			this.connect.load_page("https://www.furaffinity.net/", xpath, 1, 10);
-		}
-		catch(Exception e) {}
 	}
 	
 	/**
@@ -232,10 +241,8 @@ public class FurAffinity extends ArtistHosting {
 	}
 	
 	/**
-	 * Returns a list of FurAffinity media page URLs
-	 * for a given artist.
+	 * Returns a list of FurAffinity media page URLs for a given artist.
 	 * 
-	 * @param start_gui Used for canceling and showing progress
 	 * @param artist Fur Affinity artist (in URL form)
 	 * @param directory Directory to move DVKs to, if specified
 	 * @param type Type of gallery to scan ('m' - Main, 's' - Scraps, 'f' - Favorites)
@@ -246,7 +253,6 @@ public class FurAffinity extends ArtistHosting {
 	 * @return List of FurAffinity media page URLs
 	 */
 	public ArrayList<String> get_pages(
-			StartGUI start_gui,
 			String artist,
 			File directory,
 			char type,
@@ -279,7 +285,7 @@ public class FurAffinity extends ArtistHosting {
 			initialize_connect(true);
 		}
 		String xpath = "//a[contains(@href,'/journals/" + url_artist + "')]";
-		if(start_gui != null && start_gui.get_base_gui().is_canceled()) {
+		if(this.start_gui != null && this.start_gui.get_base_gui().is_canceled()) {
 			this.connect.set_page(null);
 		}
 		else {
@@ -355,13 +361,13 @@ public class FurAffinity extends ArtistHosting {
 			}
 		}
 		if(new_url != null && (check_all || check_next)) {
-			ArrayList<String> next = get_pages(start_gui, artist, directory, type,
+			ArrayList<String> next = get_pages(artist, directory, type,
 					dvk_handler, check_all, check_login, new_url);
 			if(next == null) {
 				if(url == null) {
-					if(start_gui != null) {
-						start_gui.append_console("fur_affinity_failed", true);
-						start_gui.get_base_gui().set_canceled(true);
+					if(this.start_gui != null) {
+						this.start_gui.append_console("fur_affinity_failed", true);
+						this.start_gui.get_base_gui().set_canceled(true);
 					}
 					return new ArrayList<>();
 				}
@@ -375,8 +381,7 @@ public class FurAffinity extends ArtistHosting {
 	/**
 	 * Returns a list of FurAffinity journal page URLs
 	 * for a given artist.
-	 * 
-	 * @param start_gui Used for canceling and showing progress
+	 *
 	 * @param artist Fur Affinity artist (in URL form)
 	 * @param directory Directory to move DVKs to, if specified
 	 * @param dvk_handler Used to check for already downloaded files
@@ -386,7 +391,6 @@ public class FurAffinity extends ArtistHosting {
 	 * @return List of FurAffinity media page URLs
 	 */
 	public ArrayList<String> get_journal_pages(
-			StartGUI start_gui,
 			String artist,
 			File directory,
 			DvkHandler dvk_handler,
@@ -402,7 +406,7 @@ public class FurAffinity extends ArtistHosting {
 			initialize_connect(true);
 		}
 		String xpath = "//a[contains(@href,'/gallery/" + url_artist + "')]";
-		if(start_gui != null && start_gui.get_base_gui().is_canceled()) {
+		if(this.start_gui != null && this.start_gui.get_base_gui().is_canceled()) {
 			this.connect.set_page(null);
 		}
 		else {
@@ -461,12 +465,12 @@ public class FurAffinity extends ArtistHosting {
 		}
 		if(de != null && (check_all || check_next)) {
 			ArrayList<String> next = get_journal_pages(
-					start_gui, artist, directory, dvk_handler, check_all, check_login, page + 1);
+					artist, directory, dvk_handler, check_all, check_login, page + 1);
 			if(next == null) {
 				if(page == 1) {
-					if(start_gui != null) {
-						start_gui.append_console("fur_affinity_failed", true);
-						start_gui.get_base_gui().set_canceled(true);
+					if(this.start_gui != null) {
+						this.start_gui.append_console("fur_affinity_failed", true);
+						this.start_gui.get_base_gui().set_canceled(true);
 					}
 					return new ArrayList<>();
 				}

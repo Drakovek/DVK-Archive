@@ -143,5 +143,24 @@ public class DEnglish extends LanguageMap{
 		this.lang_keys.put("reformat_console", "[REFORMATTING DVKS]");
 		desc = "Reformats all DVK files to follow the current formatting standard.";
 		this.lang_keys.put("reformat_desc", desc);
+		//SELENIUM
+		this.lang_keys.put("selenium_title", "Download Selenium Drivers");
+		desc = "This program uses Selenium to process JavaScript.</br>You must install Selenium web drivers."
+				+ "<br><br>Download Selenium driver for your prefered browser,<br>"
+				+ "then copy drivers to a PATH directory.<br><br>"
+				+ "On Windows, find PATH with the command &quot;echo &#37;PATH&#37;&quot;<br>"
+				+ "On Mac/Linux, find PATH with the command &quot;echo &#36;PATH&quot;<br><br>"
+				+ "Use the drivers for your prefered browser.<br>Chrome&#58; "
+				+ "<a href='https://sites.google.com/a/chromium.org/chromedriver/downloads'>"
+				+ "https://sites.google.com/a/chromium.org/chromedriver/downloads</a><br>"
+				+ "Firefox&#58; <a href='https://github.com/mozilla/geckodriver/releases'>"
+				+ "https://github.com/mozilla/geckodriver/releases</a></html><br>Safari&#58; "
+				+ "<a href='https://webkit.org/blog/6900/webdriver-support-in-safari-10/'>"
+				+ "https://webkit.org/blog/6900/webdriver-support-in-safari-10/</a><br>"
+				+ "Edge&#58; <a href='https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/'>"
+				+ "https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/</a><br><br>"
+				+ "More info here&#58;<br><a href='https://selenium-python.readthedocs.io/installation.html'>"
+				+ "https://selenium-python.readthedocs.io/installation.html</a>";
+		this.lang_keys.put("selenium_message", desc);
 	}
 }

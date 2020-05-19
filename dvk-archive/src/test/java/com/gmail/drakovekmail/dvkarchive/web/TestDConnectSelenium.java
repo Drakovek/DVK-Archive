@@ -34,7 +34,7 @@ public class TestDConnectSelenium {
 	 */
 	@Before
 	public void set_up() {
-		this.connect = new DConnectSelenium(true);
+		this.connect = new DConnectSelenium(true, null);
 		String user_dir = System.getProperty("user.dir");
 		this.test_dir = new File(user_dir, "connect_dir");
 		if(!this.test_dir.isDirectory()) {

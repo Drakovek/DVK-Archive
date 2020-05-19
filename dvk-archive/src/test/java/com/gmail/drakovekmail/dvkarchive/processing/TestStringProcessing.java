@@ -24,6 +24,19 @@ public class TestStringProcessing {
 	}
 	
 	/**
+	 * Tests the extend_num method.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_extend_num() {
+		assertEquals("00", StringProcessing.extend_num("10F", 2));
+		assertEquals("", StringProcessing.extend_num("A3", 0));
+		assertEquals("", StringProcessing.extend_num("F3", -1));
+		assertEquals("2F", StringProcessing.extend_num("2F", 2));
+		assertEquals("0002E", StringProcessing.extend_num("2E", 5));
+	}
+	
+	/**
 	 * Tests the remove_whitespace method.
 	 */
 	@Test
@@ -106,5 +119,18 @@ public class TestStringProcessing {
 		assertEquals(".png", StringProcessing.get_extension("test.png?extra.thing"));
 		assertEquals(".thing", StringProcessing.get_extension("test.thing?"));
 		assertEquals("", StringProcessing.get_extension("test.tolong?extra"));
+	}
+	
+	/**
+	 * Tests the remove_section method.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_remove_section() {
+		assertEquals("test", StringProcessing.remove_section("test", 0, 0));
+		assertEquals("test", StringProcessing.remove_section("test", 4, 4));
+		assertEquals("test", StringProcessing.remove_section("testThing", 4, 9));
+		assertEquals("Test", StringProcessing.remove_section("ThisTest", 0, 4));
+		assertEquals("wordsstuff", StringProcessing.remove_section("wordsANDstuff", 5, 8));
 	}
 }
