@@ -61,6 +61,11 @@ public class TestFilePrefs {
 		prefs.load_preferences();
 		assertEquals(this.test_dir, prefs.get_index_dir());
 		assertFalse(prefs.use_index());
+		//CHECK DEFAULT INDEX FOLDER
+		prefs.set_index_dir(null);
+		prefs.save_preferences();
+		prefs.load_preferences();
+		assertEquals("dvk-data", prefs.get_index_dir().getName());
 	}
 	
 	/**
@@ -89,5 +94,14 @@ public class TestFilePrefs {
 		assertTrue(prefs.use_index());
 		prefs.set_use_index(false);
 		assertFalse(prefs.use_index());
+	}
+	
+	/**
+	 * Tests the get_default_directory method.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_get_default_directory() {
+		assertEquals("dvk-data", FilePrefs.get_default_directory().getName());
 	}
 }

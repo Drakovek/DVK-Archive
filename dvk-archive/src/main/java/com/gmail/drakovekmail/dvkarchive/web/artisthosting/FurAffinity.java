@@ -89,24 +89,27 @@ public class FurAffinity extends ArtistHosting {
 			String xpath = "//span[@class='top-heading']//a[@href='/login']";
 			this.connect.load_page("https://www.furaffinity.net", xpath, 2, 10);
 			//CLICK LOGIN PAGE BUTTON
-			WebElement log = driver.findElement(By.xpath(xpath));
 			try {
-				log.click();
+				WebElement log = driver.findElement(By.xpath(xpath));
+				try {
+					log.click();
+				}
+				catch(Exception e) {
+					//IF LOGIN PAGE BUTTON DOESN'T EXIST, LOADS LOGIN PAGE
+					this.connect.load_page("https://www.furaffinity.net/login", null, 1, 10);
+				}
+				try {
+					//WAIT UNTIL LOGGED IN OR TIMEOUT
+					xpath = "//a[@id='my-username']";
+					WebDriverWait wait = new WebDriverWait(driver, 180);
+					wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(xpath)));
+					//HIDE WINDOW
+					driver.manage().window().setPosition(new Point(-4000, 0));
+					this.connect.load_page("https://www.furaffinity.net/", xpath, 1, 10);
+				}
+				catch(Exception e) {}
 			}
-			catch(Exception e) {
-				//IF LOGIN PAGE BUTTON DOESN'T EXIST, LOADS LOGIN PAGE
-				this.connect.load_page("https://www.furaffinity.net/login", null, 1, 10);
-			}
-			try {
-				//WAIT UNTIL LOGGED IN OR TIMEOUT
-				xpath = "//a[@id='my-username']";
-				WebDriverWait wait = new WebDriverWait(driver, 180);
-				wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(xpath)));
-				//HIDE WINDOW
-				driver.manage().window().setPosition(new Point(-4000, 0));
-				this.connect.load_page("https://www.furaffinity.net/", xpath, 1, 10);
-			}
-			catch(Exception e) {}
+			catch(Exception f) {} //LOADING PAGE FAILED
 		}
 	}
 	

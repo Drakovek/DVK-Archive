@@ -130,23 +130,10 @@ public class StartGUI implements DActionEvent, Disabler {
 	 */
 	public StartGUI(BaseGUI base_gui, boolean show_gui) {
 		//INITIALIZE INSTANCE VARIABLES
-		//TODO Replace default preferences to user preferences
 		this.base_gui = base_gui;
 		this.file_prefs = new FilePrefs();
-		File file = new File(System.getProperty("user.home"));
-		file = new File(file, "dvk");
-		File sub = new File(file, "index");
-		if(!sub.isDirectory()) {
-			sub.mkdirs();
-		}
-		this.file_prefs.set_index_dir(sub);
-		sub = new File(file, "captcha");
-		if(!sub.isDirectory()) {
-			sub.mkdirs();
-		}
-		this.file_prefs.set_use_index(true);
 		this.current_service = new String();
-		this.frame = new DFrame(this.base_gui, this, "dvk_archive");
+		this.frame = new DFrame(this.base_gui, this, "dvk-data");
 		//CREATE SETTINGS BAR
 		this.settings_bar = new SettingsBarGUI(this);
 		this.frame.getContentPane().add(this.settings_bar,

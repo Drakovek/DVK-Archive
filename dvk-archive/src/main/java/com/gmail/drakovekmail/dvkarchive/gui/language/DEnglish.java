@@ -48,6 +48,9 @@ public class DEnglish extends LanguageMap{
 		this.lang_keys.put("preview_text", text);
 		this.lang_keys.put("language", "^Language");
 		this.lang_keys.put("theme", "^Theme");
+		this.lang_keys.put("index", "^Index");
+		this.lang_keys.put("use_index", "^Use Index Files");
+		this.lang_keys.put("browse", "^Browse");
 		//PROGRAM CATEGORIES
 		this.lang_keys.put("artist_hosting", "Artist Hosting");
 		this.lang_keys.put("comics", "Comics");

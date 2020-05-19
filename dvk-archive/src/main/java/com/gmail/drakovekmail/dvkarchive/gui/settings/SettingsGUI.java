@@ -70,6 +70,11 @@ public class SettingsGUI implements DActionEvent {
 	private FontGUI font_gui;
 	
 	/**
+	 * GUI for setting index file settings
+	 */
+	private IndexGUI index_gui;
+	
+	/**
 	 * Initializes the SettingsGUI.
 	 * 
 	 * @param start_gui Parent of the SettingsGUI
@@ -83,6 +88,7 @@ public class SettingsGUI implements DActionEvent {
 		this.language_gui = new LanguageGUI(base_gui);
 		this.theme_gui = new ThemeGUI(base_gui);
 		this.font_gui = new FontGUI(base_gui);
+		this.index_gui = new IndexGUI(base_gui, start_gui.get_file_prefs());
 		//CREATE SIDE PANEL
 		this.cat_list = new DList(base_gui, this, "category", false);
 		this.cat_list.set_list(get_categories(), true);
@@ -131,7 +137,7 @@ public class SettingsGUI implements DActionEvent {
 	 * @return List of settings categories
 	 */
 	public static String[] get_categories() {
-		String[] cats = {"language", "theme", "font"};
+		String[] cats = {"language", "theme", "font", "index"};
 		return cats;
 	}
 
@@ -171,6 +177,9 @@ public class SettingsGUI implements DActionEvent {
 					case "theme":
 						this.service_pnl.add(this.theme_gui);
 						break;
+					case "index":
+						this.service_pnl.add(this.index_gui);
+						break;
 				}
 				this.service_pnl.revalidate();
 				this.service_pnl.repaint();
@@ -186,6 +195,7 @@ public class SettingsGUI implements DActionEvent {
 		boolean lchange = this.language_gui.save();
 		boolean tchange = this.theme_gui.save();
 		boolean fchange = this.font_gui.save();
+		this.index_gui.save();
 		this.dialog.dispose();
 		if(lchange || tchange || fchange) {
 			//RESTART

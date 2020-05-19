@@ -44,9 +44,37 @@ public class FilePrefs {
 		Preferences prefs = Preferences.userNodeForPackage(FilePrefs.class);
 		//GET INDEX DIR
 		String path = prefs.get(INDEX_DIR, "");
-		set_index_dir(new File(path));
+		File file = new File(path);
+		if(!file.exists()) {
+			file = get_default_directory();
+		}
+		set_index_dir(file);
 		//GET USE INDEXVALUE
 		set_use_index(prefs.getBoolean(USE_INDEX, true));
+	}
+	
+	/**
+	 * Returns a default directory for storing data.
+	 * Should be in the same folder as FilePrefs class or .jar package.
+	 * 
+	 * @return Default directory
+	 */
+	public static File get_default_directory() {
+		try {
+			File file = new File(
+					FilePrefs.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+			while(file != null && file.exists() && !file.isDirectory()) {
+				file = file.getParentFile();
+			}
+			file = new File(file, "dvk-data");
+			if(!file.isDirectory()) {
+				file.mkdir();
+			}
+			return file;
+		}
+		catch (Exception e) {
+			return null;
+        }
 	}
 	
 	/**
@@ -55,7 +83,12 @@ public class FilePrefs {
 	public void save_preferences() {
 		Preferences prefs = Preferences.userNodeForPackage(FilePrefs.class);
 		//GET INDEX DIR
-		prefs.put(INDEX_DIR, get_index_dir().getAbsolutePath());
+		if(get_index_dir().exists() && !get_index_dir().getName().equals("")) {
+			prefs.put(INDEX_DIR, get_index_dir().getAbsolutePath());
+		}
+		else {
+			prefs.put(INDEX_DIR, "");
+		}
 		//GET USE INDEXVALUE
 		prefs.putBoolean(USE_INDEX, use_index());
 	}
