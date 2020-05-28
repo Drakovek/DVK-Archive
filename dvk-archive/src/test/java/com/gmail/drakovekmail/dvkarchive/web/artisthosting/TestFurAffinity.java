@@ -181,12 +181,12 @@ public class TestFurAffinity {
 		dvk.write_dvk();
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
-		DvkHandler handler = new DvkHandler();
+		DvkHandler handler = new DvkHandler(prefs);
 		File sub = new File(this.test_dir, "sub");
 		if(!sub.isDirectory()) {
 			sub.mkdir();
 		}
-		handler.read_dvks(dirs, prefs, null, false, false, false);
+		handler.read_dvks(dirs, null);
 		//TEST SMALL SAMPLE
 		ArrayList<String> links = this.fur.get_pages(
 				"drakovek", sub, 'm', handler, true, false, null);
@@ -208,8 +208,7 @@ public class TestFurAffinity {
 		assertTrue(links.contains("https://www.furaffinity.net/view/15593400/"));
 		assertTrue(links.contains("https://www.furaffinity.net/view/34790877/"));
 		//TEST IF DOWNLOADED DVK MOVED
-		handler.read_dvks(dirs, prefs, null, false, false, false);
-		handler.sort_dvks_title(false, false);
+		handler.read_dvks(dirs, null);
 		assertEquals(2, handler.get_size());
 		dvk = handler.get_dvk(0);
 		assertEquals("shortcut.dvk", dvk.get_dvk_file().getName());
@@ -267,8 +266,8 @@ public class TestFurAffinity {
 		dvk.write_dvk();
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
-		DvkHandler handler = new DvkHandler();
-		handler.read_dvks(dirs, prefs, null, false, false, false);
+		DvkHandler handler = new DvkHandler(prefs);
+		handler.read_dvks(dirs, null);
 		File sub = new File(this.test_dir, "sub");
 		if(!sub.isDirectory()) {
 			sub.mkdir();
@@ -283,8 +282,7 @@ public class TestFurAffinity {
 		assertTrue(links.contains("https://www.furaffinity.net/view/35470135/"));
 		assertTrue(links.contains("https://www.furaffinity.net/view/35496095/"));
 		//TEST ADDING FAVORITES TAG
-		handler.read_dvks(dirs, prefs, null, false, false, false);
-		handler.sort_dvks_title(false, false);
+		handler.read_dvks(dirs, null);
 		assertEquals(2, handler.get_size());
 		dvk = handler.get_dvk(0);
 		assertEquals("Crepes", dvk.get_title());
@@ -340,8 +338,8 @@ public class TestFurAffinity {
 		}
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
-		DvkHandler handler = new DvkHandler();
-		handler.read_dvks(dirs, prefs, null, false, false, false);
+		DvkHandler handler = new DvkHandler(prefs);
+		handler.read_dvks(dirs, null);
 		//TEST SMALL SAMPLE
 		ArrayList<String> links = this.fur.get_journal_pages(
 				"mr_sparta", sub, handler, true, false, 1);
@@ -358,8 +356,7 @@ public class TestFurAffinity {
 		assertTrue(links.contains("https://www.furaffinity.net/journal/7546586/"));
 		assertTrue(links.contains("https://www.furaffinity.net/journal/7207073/"));
 		//CHECK FILES MOVED
-		handler.read_dvks(dirs, prefs, null, false, false, false);
-		handler.sort_dvks_title(false, false);
+		handler.read_dvks(dirs, null);
 		assertEquals(2, handler.get_size());
 		dvk = handler.get_dvk(0);
 		assertEquals("finding me at MFF", dvk.get_title());
@@ -419,8 +416,8 @@ public class TestFurAffinity {
 		dvk.write_dvk();
 		FilePrefs prefs = new FilePrefs();
 		File[] dirs = {this.test_dir};
-		DvkHandler dvk_handler = new DvkHandler();
-		dvk_handler.read_dvks(dirs, prefs, null, false, true, false);
+		DvkHandler dvk_handler = new DvkHandler(prefs);
+		dvk_handler.read_dvks(dirs, null);
 		//TEST FAVORITING ALREADY DOWNLOADED DVK
 		String url = "http://www.furaffinity.net/view/1234567/";
 		dvk = this.fur.get_dvk(url, dvk_handler, this.test_dir, "Somebody", true, true);

@@ -461,17 +461,10 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	 * Reads all dvks in base_gui's selected directory.
 	 */
 	protected void read_dvks() {
-		this.dvk_handler = new DvkHandler();
-		File[] dirs = {this.start_gui.get_directory()};
 		FilePrefs prefs = this.start_gui.get_file_prefs();
-		boolean index = prefs.use_index();
-		this.dvk_handler.read_dvks(dirs, prefs, this.start_gui, index, true, index);
-		//SORT DVKS
-		if(!this.start_gui.get_base_gui().is_canceled()) {
-			this.start_gui.append_console("sorting_dvks", true);
-			this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
-			sort_dvks();
-		}
+		this.dvk_handler = new DvkHandler(prefs);
+		File[] dirs = {this.start_gui.get_directory()};
+		this.dvk_handler.read_dvks(dirs, this.start_gui);
 		get_artists();
 	}
 	
@@ -548,11 +541,6 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	 * Called to add artist/title.
 	 */
 	public abstract void add();
-	
-	/**
-	 * Sorts the DVKs in the DvkHandler.
-	 */
-	public abstract void sort_dvks();
 	
 	@Override
 	public void enable_all() {

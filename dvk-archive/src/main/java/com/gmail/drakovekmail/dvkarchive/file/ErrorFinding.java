@@ -25,7 +25,7 @@ public class ErrorFinding {
 			FilePrefs prefs,
 			File[] directories,
 			StartGUI start_gui) {
-		DvkHandler handler = new DvkHandler();
+		DvkHandler handler = new DvkHandler(prefs);
 		File[] dirs = new File[0];
 		if(start_gui == null || !start_gui.get_base_gui().is_canceled()) {
 			dirs = DvkHandler.get_directories(directories);
@@ -45,7 +45,7 @@ public class ErrorFinding {
 			}
 			//LOAD DIRECTORY
 			File[] files = {dirs[i]};
-			handler.read_dvks(files, prefs, null, prefs.use_index(), true, prefs.use_index());
+			handler.read_dvks(files, null);
 			files = dirs[i].listFiles();
 			Arrays.sort(files);
 			for(File file: files) {
@@ -64,6 +64,7 @@ public class ErrorFinding {
 				}
 			}
 		}
+		handler.close_connection();
 		return missing;
 	}
 	

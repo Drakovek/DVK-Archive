@@ -138,8 +138,8 @@ public class TestErrorFinding {
 	public void test_get_missing_media_dvks() {
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
-		DvkHandler dvk_handler = new DvkHandler();
-		dvk_handler.read_dvks(dirs, prefs, null, false, false, false);
+		DvkHandler dvk_handler = new DvkHandler(prefs);
+		dvk_handler.read_dvks(dirs, null);
 		assertEquals(4, dvk_handler.get_size());
 		ArrayList<File> missing;
 		missing = ErrorFinding.get_missing_media_dvks(dvk_handler, null);
@@ -159,8 +159,8 @@ public class TestErrorFinding {
 	public void test_get_same_ids() {
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
-		DvkHandler dvk_handler = new DvkHandler();
-		dvk_handler.read_dvks(dirs, prefs, null, false, false, false);
+		DvkHandler dvk_handler = new DvkHandler(prefs);
+		dvk_handler.read_dvks(dirs, null);
 		assertEquals(4, dvk_handler.get_size());
 		ArrayList<File> same;
 		same = ErrorFinding.get_same_ids(dvk_handler, null);

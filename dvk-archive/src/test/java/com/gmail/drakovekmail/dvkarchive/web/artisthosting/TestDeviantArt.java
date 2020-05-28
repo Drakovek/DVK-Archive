@@ -180,8 +180,8 @@ public class TestDeviantArt {
 		dvk.write_dvk();
 		FilePrefs prefs = new FilePrefs();
 		File[] dirs = {this.test_dir};
-		DvkHandler dvk_handler = new DvkHandler();
-		dvk_handler.read_dvks(dirs, prefs, null, false, true, false);
+		DvkHandler dvk_handler = new DvkHandler(prefs);
+		dvk_handler.read_dvks(dirs, null);
 		//TEST FAVORITING ALREADY DOWNLOADED DVK
 		String url = "deviantart.com/artist/art/Thing-1234567";
 		dvk = this.dev.get_dvk(url, dvk_handler, null, this.test_dir, "Somebody", true);
@@ -689,12 +689,12 @@ public class TestDeviantArt {
 		//READ DVKS
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
-		DvkHandler handler = new DvkHandler();
+		DvkHandler handler = new DvkHandler(prefs);
 		File sub = new File(this.test_dir, "sub");
 		if(!sub.isDirectory()) {
 			sub.mkdir();
 		}
-		handler.read_dvks(dirs, prefs, null, false, false, false);
+		handler.read_dvks(dirs, null);
 		//TEST SMALL SAMPLE
 		ArrayList<String> links = this.dev.get_pages(null, "drakovek", sub, 'm', handler, true, 0);
 		assertEquals(1, links.size());
@@ -732,9 +732,8 @@ public class TestDeviantArt {
 		assertTrue(links.contains("https://www.deviantart.com/akuoreo/art/Tip-jar-2-346117957"));
 		assertTrue(links.contains("https://www.deviantart.com/akuoreo/art/Ruby-Sketch-747801413"));
 		//TEST DVKS MOVED
-		handler = new DvkHandler();
-		handler.read_dvks(dirs, prefs, null, false, true, false);
-		handler.sort_dvks_title(false, false);
+		handler = new DvkHandler(prefs);
+		handler.read_dvks(dirs, null);
 		assertEquals(3, handler.get_size());
 		assertEquals("Draconic Amulet", handler.get_dvk(0).get_title());
 		assertEquals("Fire Within p1", handler.get_dvk(1).get_title());
@@ -795,8 +794,8 @@ public class TestDeviantArt {
 		//READ DVKS
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
-		DvkHandler handler = new DvkHandler();
-		handler.read_dvks(dirs, prefs, null, false, false, false);
+		DvkHandler handler = new DvkHandler(prefs);
+		handler.read_dvks(dirs, null);
 		File sub = new File(this.test_dir, "sub");
 		if(!sub.isDirectory()) {
 			sub.mkdir();
@@ -817,9 +816,8 @@ public class TestDeviantArt {
 		url = "https://www.deviantart.com/avatf/art/Firefox-pg-2-797373165";
 		assertTrue(links.contains(url));
 		//CHECK FAVORITES ADDED
-		handler = new DvkHandler();
-		handler.read_dvks(dirs, prefs, null, false, false, false);
-		handler.sort_dvks_title(false, false);
+		handler = new DvkHandler(prefs);
+		handler.read_dvks(dirs, null);
 		assertEquals(2, handler.get_size());
 		assertEquals("Greatsword", handler.get_dvk(0).get_title());
 		assertEquals("Latias Synth", handler.get_dvk(1).get_title());
@@ -885,8 +883,8 @@ public class TestDeviantArt {
 		//READ DVKS
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
-		DvkHandler handler = new DvkHandler();
-		handler.read_dvks(dirs, prefs, null, false, false, false);
+		DvkHandler handler = new DvkHandler(prefs);
+		handler.read_dvks(dirs, null);
 		File sub = new File(this.test_dir, "sub");
 		if(!sub.isDirectory()) {
 			sub.mkdir();
@@ -965,9 +963,8 @@ public class TestDeviantArt {
 		dvks = this.dev.get_module_pages(null, "drakovek", null, sub, 's', handler, false, 0);
 		assertEquals(0, dvks.size());
 		//CHECK DVKS MOVED
-		handler = new DvkHandler();
-		handler.read_dvks(dirs, prefs, null, false, false, false);
-		handler.sort_dvks_title(false, false);
+		handler = new DvkHandler(prefs);
+		handler.read_dvks(dirs, null);
 		assertEquals(4, handler.get_size());
 		assertEquals("Bird TF", handler.get_dvk(0).get_title());
 		assertEquals("Good TF", handler.get_dvk(1).get_title());

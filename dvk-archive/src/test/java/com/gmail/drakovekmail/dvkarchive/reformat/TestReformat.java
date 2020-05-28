@@ -88,12 +88,11 @@ public class TestReformat {
 		//REFORMAT DVKS
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
-		DvkHandler handler = new DvkHandler();
-		handler.read_dvks(dirs, prefs, null, false, false, false);
+		DvkHandler handler = new DvkHandler(prefs);
+		handler.read_dvks(dirs,  null);
 		Reformat.reformat_dvks(handler, null);
 		//CHECK DVKS STILL VALID
-		handler.read_dvks(dirs, prefs, null, false, false, false);
-		handler.sort_dvks_title(false, false);
+		handler.read_dvks(dirs, null);
 		assertEquals(3, handler.get_size());
 		assertTrue(handler.get_dvk(0).get_dvk_file().exists());
 		assertTrue(handler.get_dvk(1).get_dvk_file().exists());
@@ -150,12 +149,11 @@ public class TestReformat {
 		//RENAME FILES
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
-		DvkHandler handler = new DvkHandler();
-		handler.read_dvks(dirs, prefs, null, false, false, false);
+		DvkHandler handler = new DvkHandler(prefs);
+		handler.read_dvks(dirs, null);
 		Reformat.rename_files(handler, null);
 		//CHECK FILES READ
-		handler.read_dvks(dirs, prefs, null, false, false, false);
-		handler.sort_dvks_title(false, false);
+		handler.read_dvks(dirs, null);
 		assertEquals(2, handler.get_size());
 		assertTrue(handler.get_dvk(0).get_dvk_file().exists());
 		assertTrue(handler.get_dvk(0).get_media_file().exists());

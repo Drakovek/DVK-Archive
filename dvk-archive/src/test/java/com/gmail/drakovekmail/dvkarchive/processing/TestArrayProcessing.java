@@ -35,6 +35,26 @@ public class TestArrayProcessing {
 	}
 	
 	/**
+	 * Tests the string_to_array method.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_string_to_array() {
+		String[] array = ArrayProcessing.string_to_array("Test");
+		assertEquals(1, array.length);
+		assertEquals("Test", array[0]);
+		array = ArrayProcessing.string_to_array("Some,things");
+		assertEquals(2, array.length);
+		assertEquals("Some", array[0]);
+		assertEquals("things", array[1]);
+		array = ArrayProcessing.string_to_array("I&#45;1,I&#45;2,Other");
+		assertEquals(3, array.length);
+		assertEquals("I-1", array[0]);
+		assertEquals("I-2", array[1]);
+		assertEquals("Other", array[2]);
+	}
+	
+	/**
 	 * Tests the list_to_array method.
 	 */
 	@Test
@@ -127,15 +147,21 @@ public class TestArrayProcessing {
 	@SuppressWarnings("static-method")
 	public void test_array_to_string() {
 		String out;
-		out = ArrayProcessing.array_to_string(null, 0);
+		//NO HTML
+		out = ArrayProcessing.array_to_string(null, 0, false);
 		assertEquals(0, out.length());
 		String[] in = {"I-1", "I-2", "Other"};
-		out = ArrayProcessing.array_to_string(in, 0);
+		out = ArrayProcessing.array_to_string(in, 0, false);
 		assertEquals("I-1,I-2,Other", out);
-		out = ArrayProcessing.array_to_string(in, -1);
+		out = ArrayProcessing.array_to_string(in, -1, false);
 		assertEquals("I-1,I-2,Other", out);
-		out = ArrayProcessing.array_to_string(in, 2);
+		out = ArrayProcessing.array_to_string(in, 2, false);
 		assertEquals("I-1,  I-2,  Other", out);
+		//WITH HTML
+		out = ArrayProcessing.array_to_string(in, 0, true);
+		assertEquals("I&#45;1,I&#45;2,Other", out);
+		out = ArrayProcessing.array_to_string(in, 2, true);
+		assertEquals("I&#45;1,  I&#45;2,  Other", out);
 	}
 	
 	/**

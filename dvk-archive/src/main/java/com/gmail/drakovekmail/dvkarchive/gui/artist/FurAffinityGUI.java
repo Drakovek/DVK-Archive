@@ -129,11 +129,6 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 		}
 		this.set_list(list);
 	}
-
-	@Override
-	public void sort_dvks() {
-		this.dvk_handler.sort_dvks_title(true, false);
-	}
 	
 	@Override
 	public void get_pages(Dvk dvk, boolean check_all) {
@@ -297,6 +292,9 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 	@Override
 	public void close() {
 		this.fur.close();
+		if(this.dvk_handler != null) {
+			this.dvk_handler.close_connection();
+		}
 	}
 
 	@Override

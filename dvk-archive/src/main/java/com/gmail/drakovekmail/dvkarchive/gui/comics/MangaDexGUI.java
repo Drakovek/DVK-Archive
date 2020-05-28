@@ -128,11 +128,6 @@ public class MangaDexGUI extends ArtistHostingGUI {
 	}
 
 	@Override
-	public void sort_dvks() {
-		this.dvk_handler.sort_dvks_title(false, false);
-	}
-
-	@Override
 	public void get_pages(Dvk dvk, boolean check_all) {
 		this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
 		File dir = dvk.get_dvk_file();
@@ -200,6 +195,7 @@ public class MangaDexGUI extends ArtistHostingGUI {
 		if(this.sel != null) {
 			this.sel.close_driver();
 		}
+		this.dvk_handler.close_connection();
 	}
 
 	@Override

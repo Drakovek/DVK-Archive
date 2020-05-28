@@ -367,11 +367,6 @@ public class DeviantArtGUI extends ArtistHostingGUI {
 	}
 
 	@Override
-	public void sort_dvks() {
-		this.dvk_handler.sort_dvks_title(true, false);
-	}
-
-	@Override
 	public void directory_opened() {
 		save_directory(this.start_gui.get_directory());
 		if(!this.start_gui.get_base_gui().is_canceled()) {
@@ -382,5 +377,8 @@ public class DeviantArtGUI extends ArtistHostingGUI {
 	@Override
 	public void close() {
 		this.dev.close();
+		if(this.dvk_handler != null) {
+			this.dvk_handler.close_connection();
+		}
 	}
 }

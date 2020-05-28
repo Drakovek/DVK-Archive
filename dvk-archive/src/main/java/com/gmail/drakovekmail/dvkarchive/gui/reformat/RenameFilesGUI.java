@@ -37,14 +37,8 @@ public class RenameFilesGUI extends SimpleServiceGUI {
 		this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
 		File[] dirs = {this.start_gui.get_directory()};
 		FilePrefs prefs = this.start_gui.get_file_prefs();
-		DvkHandler dvk_handler = new DvkHandler();
-		dvk_handler.read_dvks(
-				dirs,
-				prefs,
-				this.start_gui,
-				prefs.use_index(),
-				true,
-				prefs.use_index());
+		DvkHandler dvk_handler = new DvkHandler(prefs);
+		dvk_handler.read_dvks(dirs, this.start_gui);
 		this.start_gui.append_console("", false);
 		this.start_gui.append_console("rename_console", true);
 		Reformat.rename_files(dvk_handler, this.start_gui);

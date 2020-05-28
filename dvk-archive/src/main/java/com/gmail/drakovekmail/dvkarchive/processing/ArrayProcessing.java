@@ -105,9 +105,10 @@ public class ArrayProcessing {
 	 * 
 	 * @param array Given String array
 	 * @param indent Number of spaces to use as indent between items
+	 * @param use_html Whether to replace non-ASCII characters with HTML escapes
 	 * @return String of given array
 	 */
-	public static String array_to_string(String[] array, int indent) {
+	public static String array_to_string(String[] array, int indent, boolean use_html) {
 		if(array == null) {
 			return new String();
 		}
@@ -119,9 +120,29 @@ public class ArrayProcessing {
 					builder.append(' ');
 				}
 			}
-			builder.append(array[i]);
+			if(use_html) {
+				builder.append(HtmlProcessing.add_escapes(array[i]));
+			}
+			else {
+				builder.append(array[i]);
+			}
 		}
 		return builder.toString();
+	}
+	
+	/**
+	 * Returns a String array from a given string with entries separated by commas.
+	 * Removes HTML escape characters from entries.
+	 * 
+	 * @param array_str String with entries separated by commas
+	 * @return String array from array_str
+	 */
+	public static String[] string_to_array(String array_str) {
+		String[] array = array_str.split(",");
+		for(int i = 0; i < array.length; i++) {
+			array[i] = HtmlProcessing.replace_escapes(array[i]);
+		}
+		return array;
 	}
 	
 	/**

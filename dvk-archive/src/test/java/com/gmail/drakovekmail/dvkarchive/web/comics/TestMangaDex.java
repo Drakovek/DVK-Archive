@@ -238,8 +238,8 @@ public class TestMangaDex {
 	public void test_get_start_chapter() {
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
-		DvkHandler dvk_handler = new DvkHandler();
-		dvk_handler.read_dvks(dirs, prefs, null, false, false, false);
+		DvkHandler dvk_handler = new DvkHandler(prefs);
+		dvk_handler.read_dvks(dirs, null);
 		//CREATE TEST CHAPTER DVKS
 		ArrayList<Dvk> cps = new ArrayList<>();
 		Dvk dvk = new Dvk();
@@ -275,7 +275,7 @@ public class TestMangaDex {
 		dvk.set_media_file("media.jpg");
 		dvk.write_dvk();
 		//CHECK START CHAPTER WITH EXISTING FILES
-		dvk_handler.read_dvks(dirs, prefs, null, false, false, false);
+		dvk_handler.read_dvks(dirs, null);
 		chapter = MangaDex.get_start_chapter(dvk_handler, cps, false);
 		assertEquals(2, chapter);
 		chapter = MangaDex.get_start_chapter(dvk_handler, cps, true);
@@ -288,7 +288,7 @@ public class TestMangaDex {
 		dvk.set_media_file("media.jpg");
 		dvk.write_dvk();
 		//CHECK START CHAPTER WITH LATEST CHAPTER DOWNLOADED
-		dvk_handler.read_dvks(dirs, prefs, null, false, false, false);
+		dvk_handler.read_dvks(dirs, null);
 		chapter = MangaDex.get_start_chapter(dvk_handler, cps, false);
 		assertEquals(0, chapter);
 	}
@@ -334,8 +334,8 @@ public class TestMangaDex {
 			//GET DVKS
 			File[] dirs = {this.test_dir};
 			FilePrefs prefs = new FilePrefs();
-			DvkHandler handler = new DvkHandler();
-			handler.read_dvks(dirs, prefs, null, false, false, false);
+			DvkHandler handler = new DvkHandler(prefs);
+			handler.read_dvks(dirs, null);
 			s_connect = new DConnectSelenium(true, null);
 			ArrayList<Dvk> dvks = MangaDex.get_dvks(
 					s_connect, handler, null,
@@ -484,9 +484,8 @@ public class TestMangaDex {
 		ArrayList<Dvk> dvks;
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
-		DvkHandler handler = new DvkHandler();
-		handler.read_dvks(dirs, prefs, null, false, false, false);
-		handler.sort_dvks_title(true, false);
+		DvkHandler handler = new DvkHandler(prefs);
+		handler.read_dvks(dirs, null);
 		assertEquals(7, handler.get_size());
 		dvks = MangaDex.get_downloaded_titles(handler);
 		assertEquals(3, dvks.size());
