@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.gargoylesoftware.htmlunit.html.DomElement;
+import com.gmail.drakovekmail.dvkarchive.file.DvkException;
 
 /**
  * Unit tests for the DConnectSelenium class.
@@ -34,7 +35,10 @@ public class TestDConnectSelenium {
 	 */
 	@Before
 	public void set_up() {
-		this.connect = new DConnectSelenium(true, null);
+		try {
+			this.connect = new DConnectSelenium(true, null);
+		}
+		catch(DvkException e) {}
 		String user_dir = System.getProperty("user.dir");
 		this.test_dir = new File(user_dir, "connect_dir");
 		if(!this.test_dir.isDirectory()) {
@@ -47,7 +51,10 @@ public class TestDConnectSelenium {
 	 */
 	@After
 	public void tear_down() {
-		this.connect.close_driver();
+		try {
+			this.connect.close();
+		}
+		catch(DvkException e) {}
 		try {
 			FileUtils.deleteDirectory(this.test_dir);
 		}

@@ -269,13 +269,12 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 			Dvk dvk = null;
 			if(id.endsWith("-J")) {
 				//DOWNLOAD JOURNAL PAGE
-				dvk = this.fur.get_journal_dvk(url, directory, single, true);
+				dvk = this.fur.get_journal_dvk(url, this.dvk_handler, directory, single, true);
 			}
 			else {
 				//DOWNLOAD GALLERY PAGE
 				dvk = this.fur.get_dvk(url, this.dvk_handler, directory, artist, single, true);
 			}
-			this.dvk_handler.add_dvk(dvk);
 			//CANCEL IF DOWNLOAD FAILED
 			if(dvk == null || dvk.get_title() == null) {
 				this.start_gui.get_base_gui().set_canceled(true);
@@ -283,7 +282,6 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 				return null;
 			}
 			this.start_gui.append_console(dvk.get_artists()[0] + " - " + dvk.get_title(), false);
-			this.dvk_handler.add_dvk(dvk);
 			return dvk;
 		}
 		return null;
@@ -292,9 +290,7 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 	@Override
 	public void close() {
 		this.fur.close();
-		if(this.dvk_handler != null) {
-			this.dvk_handler.close_connection();
-		}
+		close_dvk_handler();
 	}
 
 	@Override

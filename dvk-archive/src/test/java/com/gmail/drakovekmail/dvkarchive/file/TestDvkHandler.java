@@ -85,7 +85,10 @@ public class TestDvkHandler {
 		//CREATE INDEX DIRECTORY
 		FilePrefs prefs = new FilePrefs();
 		prefs.set_index_dir(index_dir);
-		this.dvk_handler = new DvkHandler(prefs);
+		try {
+			this.dvk_handler = new DvkHandler(prefs);
+		}
+		catch(DvkException e) {}
 		//CREATE DVK0
 		Dvk dvk = new Dvk();
 		dvk.set_dvk_file(new File(this.f1, "dvk0.dvk"));
@@ -146,7 +149,10 @@ public class TestDvkHandler {
 	 */
 	@After
 	public void delete_test_directory() {
-		this.dvk_handler.close_connection();
+		try {
+			this.dvk_handler.close();
+		}
+		catch(DvkException e) {}
 		try {
 			FileUtils.deleteDirectory(this.test_dir);
 		}
@@ -163,9 +169,13 @@ public class TestDvkHandler {
 		prefs.set_index_dir(this.test_dir);
 		File db = new File(this.test_dir, "dvk_archive.db");
 		assertFalse(db.exists());
-		this.dvk_handler = new DvkHandler(prefs);
-		this.dvk_handler.initialize_connection();
-		assertTrue(db.exists());
+		try (DvkHandler handler = new DvkHandler(prefs)) {
+			handler.initialize_connection();
+			assertTrue(db.exists());
+		}
+		catch(DvkException e) {
+			assertTrue(false);
+		}
 	}
 	
 	/**
@@ -184,6 +194,7 @@ public class TestDvkHandler {
 		ArrayList<Dvk> dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
 		assertEquals(5, dvks.size());
 		assertEquals("Page 1", dvks.get(0).get_title());
+		assertTrue(dvks.get(0).get_web_tags() == null);
 		assertEquals(null, dvks.get(0).get_secondary_file());
 		assertEquals("page 1.05", dvks.get(1).get_title());
 		assertEquals("Page 1.5", dvks.get(2).get_title());
@@ -191,6 +202,7 @@ public class TestDvkHandler {
 		//TEST ALL DVK PARAMETERS
 		Dvk dvk = dvks.get(3);
 		File f3 = new File(this.test_dir, "f3");
+		assertTrue(dvk.get_sql_id() > 0);
 		assertEquals(f3, dvk.get_dvk_file().getParentFile());
 		assertEquals("dvk3.dvk", dvk.get_dvk_file().getName());
 		assertEquals("DVK3", dvk.get_id());
@@ -600,5 +612,44 @@ public class TestDvkHandler {
 		assertEquals("Page 1.5", dvks.get(2).get_title());
 		assertEquals("Something", dvks.get(3).get_title());
 		assertEquals("Page 10", dvks.get(4).get_title());
+	}
+	
+	/**
+	 * Tests the contains_file method.
+	 */
+	@Test
+	public void test_contains_file() {
+		File[] dirs = {this.test_dir};
+		this.dvk_handler.read_dvks(dirs, null);
+		assertEquals(5, this.dvk_handler.get_size());
+		File file = new File(this.test_dir, "noFile.txt");
+		assertFalse(this.dvk_handler.contains_file(file));
+		file = new File(this.test_dir, "dvk2.png");
+		assertFalse(this.dvk_handler.contains_file(file));
+		file = new File(this.f2, "dvk2.png");
+		assertTrue(this.dvk_handler.contains_file(file));
+		File f3 = new File(this.test_dir, "f3");
+		file = new File(f3, "dvk3.txt");
+		assertTrue(this.dvk_handler.contains_file(file));
+		file = new File(f3, "dvk3.png");
+		assertTrue(this.dvk_handler.contains_file(file));
+	}
+	
+	/**
+	 * Tests the delete_database method.
+	 */
+	@Test
+	public void test_delete_database() {
+		FilePrefs prefs = new FilePrefs();
+		prefs.set_index_dir(this.test_dir);
+		try(DvkHandler handler = new DvkHandler(prefs)) {
+			File file = new File(this.test_dir, "dvk_archive.db");
+			assertTrue(file.exists());
+			handler.delete_database();
+			assertFalse(file.exists());
+		}
+		catch(DvkException e) {
+			assertTrue(false);
+		}
 	}
 }

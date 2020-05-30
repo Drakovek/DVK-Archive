@@ -1,6 +1,8 @@
 package com.gmail.drakovekmail.dvkarchive.gui.reformat;
 
 import java.io.File;
+
+import com.gmail.drakovekmail.dvkarchive.file.DvkException;
 import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
 import com.gmail.drakovekmail.dvkarchive.file.FilePrefs;
 import com.gmail.drakovekmail.dvkarchive.gui.SimpleServiceGUI;
@@ -37,11 +39,13 @@ public class RenameFilesGUI extends SimpleServiceGUI {
 		this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
 		File[] dirs = {this.start_gui.get_directory()};
 		FilePrefs prefs = this.start_gui.get_file_prefs();
-		DvkHandler dvk_handler = new DvkHandler(prefs);
-		dvk_handler.read_dvks(dirs, this.start_gui);
-		this.start_gui.append_console("", false);
-		this.start_gui.append_console("rename_console", true);
-		Reformat.rename_files(dvk_handler, this.start_gui);
+		try(DvkHandler dvk_handler = new DvkHandler(prefs)) {
+			dvk_handler.read_dvks(dirs, this.start_gui);
+			this.start_gui.append_console("", false);
+			this.start_gui.append_console("rename_console", true);
+			Reformat.rename_files(dvk_handler, this.start_gui);
+		}
+		catch(DvkException e) {}
 	}
 
 	@Override

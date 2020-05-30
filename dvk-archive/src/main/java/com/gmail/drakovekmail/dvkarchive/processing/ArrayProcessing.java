@@ -110,7 +110,7 @@ public class ArrayProcessing {
 	 */
 	public static String array_to_string(String[] array, int indent, boolean use_html) {
 		if(array == null) {
-			return new String();
+			return null;
 		}
 		StringBuilder builder = new StringBuilder();
 		for(int i = 0; i < array.length; i++) {
@@ -138,6 +138,9 @@ public class ArrayProcessing {
 	 * @return String array from array_str
 	 */
 	public static String[] string_to_array(String array_str) {
+		if(array_str == null) {
+			return null;
+		}
 		String[] array = array_str.split(",");
 		for(int i = 0; i < array.length; i++) {
 			array[i] = HtmlProcessing.replace_escapes(array[i]);

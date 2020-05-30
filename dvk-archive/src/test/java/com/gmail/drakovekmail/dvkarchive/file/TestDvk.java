@@ -57,6 +57,7 @@ public class TestDvk {
 	public void test_constructor() {
 		//TEST EMPTY CONSTRUCTOR
 		Dvk dvk = new Dvk();
+		assertEquals(0, dvk.get_sql_id());
 		assertEquals(null, dvk.get_title());
 		assertEquals(null, dvk.get_id());
 		assertEquals(null, dvk.get_title());
@@ -205,8 +206,7 @@ public class TestDvk {
 	 */
 	@Test
 	public void test_write_media() {
-		DConnect connect = new DConnect(false, false);
-		try {
+		try (DConnect connect = new DConnect(false, false)) {
 			//CREATE INVALID DVK
 			Dvk dvk = new Dvk();
 			dvk.set_id("ID123");
@@ -250,8 +250,8 @@ public class TestDvk {
 			assertEquals(39785L, dvk.get_media_file().length());
 			assertEquals(85007L, dvk.get_secondary_file().length());
 		}
-		finally {
-			connect.close_client();
+		catch(DvkException e) {
+			assertTrue(false);
 		}
 	}
 	
@@ -281,6 +281,19 @@ public class TestDvk {
 		assertEquals(null, dvk.get_id());
 		dvk.set_id("id1234");
 		assertEquals("ID1234", dvk.get_id());	
+	}
+	
+	/**
+	 * Tests the get_sql_id and set_sql_id methods.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_get_set_sql_id() {
+		Dvk dvk = new Dvk();
+		dvk.set_sql_id(15);
+		assertEquals(15, dvk.get_sql_id());
+		dvk.set_sql_id(25689746);
+		assertEquals(25689746, dvk.get_sql_id());
 	}
 	
 	/**

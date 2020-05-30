@@ -17,7 +17,7 @@ import com.gmail.drakovekmail.dvkarchive.processing.ArrayProcessing;
  * 
  * @author Drakovek
  */
-public class DvkHandler {
+public class DvkHandler implements AutoCloseable{
 	
 	/**
 	 * Label for the SQLite table used for holding Dvk information
@@ -115,11 +115,17 @@ public class DvkHandler {
 	private long modified;
 	
 	/**
+	 * File holding the SQLite database
+	 */
+	private File database;
+	
+	/**
 	 * Initializes DvkHandler with empty Dvk list.
 	 * 
 	 * @param prefs FilePrefs for getting directory in which to store SQLite database
+	 * @exception DvkException DvkException
 	 */
-	public DvkHandler(FilePrefs prefs) {
+	public DvkHandler(FilePrefs prefs) throws DvkException {
 		this.prefs = prefs;
 		this.connection = null;
 		initialize_connection();
@@ -127,15 +133,17 @@ public class DvkHandler {
 	
 	/**
 	 * Initializes connection to SQLite database.
+	 * 
+	 * @exception DvkException DvkException
 	 */
-	public void initialize_connection() {
-		close_connection();
-		File db = new File(this.prefs.get_index_dir(), "dvk_archive.db");
+	public void initialize_connection() throws DvkException {
+		close();
+		this.database = new File(this.prefs.get_index_dir(), "dvk_archive.db");
 		this.modified = 0L;
-		if(db.exists()) {
-			this.modified = db.lastModified();
+		if(this.database.exists()) {
+			this.modified = this.database.lastModified();
 		}
-		String url = "jdbc:sqlite:" + db.getAbsolutePath();
+		String url = "jdbc:sqlite:" + this.database.getAbsolutePath();
 		@SuppressWarnings("resource")
 		Statement smt = null;
 		try {
@@ -178,7 +186,7 @@ public class DvkHandler {
 		}
 		catch(SQLException e) {
 			e.printStackTrace();
-			close_connection();
+			close();
 		}
 		finally {
 			if(smt != null) {
@@ -208,7 +216,10 @@ public class DvkHandler {
 			start_gui.get_main_pbar().set_progress(true, false, 0, 0);
 		}
 		this.directories = dirs;
-		initialize_connection();
+		try {
+			initialize_connection();
+		}
+		catch(DvkException e) {}
 		File[] dvk_dirs = get_directories(dirs);
 		int max = dvk_dirs.length;
 		for(int i = 0; i < max; i++) {
@@ -317,10 +328,9 @@ public class DvkHandler {
 		return rs;
 	}
 	
-	/**
-	 * Closes the connection to the SQLite database.
-	 */
-	public void close_connection() {
+
+	@Override
+	public void close() throws DvkException {
 		if(this.connection != null) {
 			try {
 				this.connection.close();
@@ -490,22 +500,17 @@ public class DvkHandler {
 	}
 	
 	/**
-	 * Returns Dvk for given SQL ID.
+	 * Returns list of Dvk objects from SQL ResultSet.
 	 * 
-	 * @param sql_id Given SQL ID
-	 * @return Dvk for a given SQL ID
+	 * @param rs SQL ResultSet
+	 * @return List of Dvk objects
+	 * @throws SQLException Thrown if ResultSet is not valid for generating Dvks
 	 */
-	public Dvk get_dvk(final int sql_id) {
-		StringBuilder sql = new StringBuilder("SELECT * FROM ");
-		sql.append(DVKS);
-		sql.append(" WHERE ");
-		sql.append(SQL_ID);
-		sql.append(" = ");
-		sql.append(sql_id);
-		sql.append(';');
-		try(ResultSet rs = this.get_sql_set(sql.toString())) {
-			rs.next();
+	public static ArrayList<Dvk> get_dvks(ResultSet rs) throws SQLException {
+		ArrayList<Dvk> dvks = new ArrayList<>();
+		while(rs.next()) {
 			Dvk dvk = new Dvk();
+			dvk.set_sql_id(rs.getInt(SQL_ID));
 			dvk.set_id(rs.getString(DVK_ID));
 			dvk.set_title(rs.getString(TITLE));
 			dvk.set_artists(ArrayProcessing.string_to_array(rs.getString(ARTISTS)));
@@ -518,7 +523,27 @@ public class DvkHandler {
 			dvk.set_dvk_file(new File(rs.getString(DIRECTORY), rs.getString(DVK_FILE)));
 			dvk.set_media_file(rs.getString(MEDIA_FILE));
 			dvk.set_secondary_file(rs.getString(SECONDARY_FILE));
-			return dvk;
+			dvks.add(dvk);
+		}
+		return dvks;
+	}
+	
+	/**
+	 * Returns Dvk for given SQL ID.
+	 * 
+	 * @param sql_id Given SQL ID
+	 * @return Dvk for a given SQL ID
+	 */
+	public Dvk get_dvk(int sql_id) {
+		StringBuilder sql = new StringBuilder("SELECT * FROM ");
+		sql.append(DVKS);
+		sql.append(" WHERE ");
+		sql.append(SQL_ID);
+		sql.append(" = ");
+		sql.append(sql_id);
+		sql.append(';');
+		try(ResultSet rs = this.get_sql_set(sql.toString())) {
+			return get_dvks(rs).get(0);
 		}
 		catch(SQLException e) {}
 		return new Dvk();
@@ -606,24 +631,7 @@ public class DvkHandler {
 		}
 		sql.append(";");
 		try (ResultSet rs = get_sql_set(sql.toString())) {
-			ArrayList<Dvk> dvks = new ArrayList<>();
-			while(rs.next()) {
-				Dvk dvk = new Dvk();
-				dvk.set_id(rs.getString(DVK_ID));
-				dvk.set_title(rs.getString(TITLE));
-				dvk.set_artists(ArrayProcessing.string_to_array(rs.getString(ARTISTS)));
-				dvk.set_time(rs.getString(TIME));
-				dvk.set_web_tags(ArrayProcessing.string_to_array(rs.getString(WEB_TAGS)));
-				dvk.set_description(rs.getString(DESCRIPTION));
-				dvk.set_page_url(rs.getString(PAGE_URL));
-				dvk.set_direct_url(rs.getString(DIRECT_URL));
-				dvk.set_secondary_url(rs.getString(SECONDARY_URL));
-				dvk.set_dvk_file(new File(rs.getString(DIRECTORY), rs.getString(DVK_FILE)));
-				dvk.set_media_file(rs.getString(MEDIA_FILE));
-				dvk.set_secondary_file(rs.getString(SECONDARY_FILE));
-				dvks.add(dvk);
-			}
-			return dvks;
+			return get_dvks(rs);
 		}
 		catch(SQLException e) {
 			e.printStackTrace();
@@ -698,17 +706,43 @@ public class DvkHandler {
 	 * @return Whether any Dvks link to the given file
 	 */
 	public boolean contains_file(File file) {
-		int size = get_size();
-		for(int i = 0; i < size; i++) {
-			File media = get_dvk(i).get_media_file();
-			if(file.equals(media)) {
-				return true;
-			}
-			File second = get_dvk(i).get_secondary_file();
-			if(second != null && file.equals(second)) {
-				return true;
-			}
+		String name = file.getName();
+		String parent = file.getParentFile().getAbsolutePath();
+		StringBuilder sql = new StringBuilder("SELECT ");
+		sql.append(DvkHandler.SQL_ID);
+		sql.append(" FROM ");
+		sql.append(DvkHandler.DVKS);
+		sql.append(" WHERE (");
+		sql.append(DvkHandler.MEDIA_FILE);
+		sql.append(" = '");
+		sql.append(name);
+		sql.append("' OR ");
+		sql.append(DvkHandler.SECONDARY_FILE);
+		sql.append(" = '");
+		sql.append(name);
+		sql.append("') AND (");
+		sql.append(DvkHandler.DIRECTORY);
+		sql.append(" = '");
+		sql.append(parent);
+		sql.append("');");
+		boolean result = false;
+		try(ResultSet rs = get_sql_set(sql.toString())) {
+			result = rs.next();
 		}
-		return false;
+		catch(SQLException e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
+	/**
+	 * Deletes the SQLite database file.
+	 */
+	public void delete_database() {
+		try {
+			close();
+		}
+		catch(DvkException e) {}
+		this.database.delete();
 	}
 }

@@ -40,7 +40,9 @@ public class TestArrayProcessing {
 	@Test
 	@SuppressWarnings("static-method")
 	public void test_string_to_array() {
-		String[] array = ArrayProcessing.string_to_array("Test");
+		String[] array = ArrayProcessing.string_to_array(null);
+		assertTrue(array == null);
+		array = ArrayProcessing.string_to_array("Test");
 		assertEquals(1, array.length);
 		assertEquals("Test", array[0]);
 		array = ArrayProcessing.string_to_array("Some,things");
@@ -149,7 +151,7 @@ public class TestArrayProcessing {
 		String out;
 		//NO HTML
 		out = ArrayProcessing.array_to_string(null, 0, false);
-		assertEquals(0, out.length());
+		assertTrue(out == null);
 		String[] in = {"I-1", "I-2", "Other"};
 		out = ArrayProcessing.array_to_string(in, 0, false);
 		assertEquals("I-1,I-2,Other", out);

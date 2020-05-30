@@ -2,6 +2,8 @@ package com.gmail.drakovekmail.dvkarchive.web.artisthosting;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -43,47 +45,30 @@ public abstract class ArtistHosting implements DActionEvent {
 		if(handler == null) {
 			return new ArrayList<>();
 		}
-		ArrayList<Dvk> dvks = new ArrayList<>();
-		ArrayList<String> artists = new ArrayList<>();
-		int size = handler.get_size();
-		for(int i = 0; i < size; i++) {
-			Dvk dvk = handler.get_dvk(i);
-			String artist = dvk.get_artists()[0];
-			String url = dvk.get_page_url();
-			if(url.contains(domain)) {
-				//CHECK IF SINGLE
-				boolean single = false;
-				String[] tags = dvk.get_web_tags();
-				if(tags != null) {
-					for(int k = 0; k < tags.length; k++) {
-						if(tags[k].toLowerCase().equals("dvk:single")) {
-							single = true;
-							break;
-						}
-					}
-				}
-				if(!single) {
-					int index = artists.indexOf(artist);
-					Dvk newdvk = new Dvk();
-					newdvk.set_artists(dvk.get_artists());
-					if(index != -1) {
-						//ADJUST DIRECTORY
-						newdvk.set_dvk_file(get_common_directory(
-								dvks.get(index).get_dvk_file(),
-								dvk.get_dvk_file().getParentFile()));
-						dvks.set(index, newdvk);
-					}
-					else {
-						//ADD NEW ARTIST
-						artists.add(artist);
-						newdvk.set_dvk_file(
-								dvk.get_dvk_file().getParentFile());
-						dvks.add(newdvk);
-					}
-				}
+		StringBuilder sql = new StringBuilder("SELECT * FROM ");
+		sql.append(DvkHandler.DVKS);
+		sql.append(" WHERE ");
+		sql.append(DvkHandler.PAGE_URL);
+		sql.append(" COLLATE NOCASE LIKE '%");
+		sql.append(domain);
+		sql.append("%' AND (");
+		sql.append(DvkHandler.WEB_TAGS);
+		sql.append(" IS NULL OR ");
+		sql.append(DvkHandler.WEB_TAGS);
+		sql.append(" COLLATE NOCASE NOT LIKE '%dvk&#58;single%') GROUP BY ");
+		sql.append(DvkHandler.ARTISTS);
+		sql.append(" ORDER BY ");
+		sql.append(DvkHandler.ARTISTS);
+		sql.append(';');
+		try(ResultSet rs = handler.get_sql_set(sql.toString())) {
+			ArrayList<Dvk> dvks = DvkHandler.get_dvks(rs);
+			for(int i = 0; i < dvks.size(); i++) {
+				dvks.get(i).set_dvk_file(dvks.get(i).get_dvk_file().getParentFile());
 			}
+			return dvks;
 		}
-		return dvks;
+		catch(SQLException e) {}
+		return new ArrayList<>();
 	}
 	
 	/**
@@ -212,19 +197,26 @@ public abstract class ArtistHosting implements DActionEvent {
 	}
 	
 	/**
-	 * Updates Dvk object of given ID to include a given favorite tag if available.
+	 * Updates Dvk object of given DVK ID to include a given favorite tag if available.
 	 * Returns updated Dvk object.
 	 * 
 	 * @param dvk_handler Used to search for Dvk with given ID
 	 * @param artist Artist to use when adding favorite tag
-	 * @param id Given ID of Dvk to update
+	 * @param dvk_id Given DVK ID of Dvk to update
 	 * @return Updated Dvk object, null if Dvk with given ID does not exist
 	 */
-	public static Dvk update_favorite(DvkHandler dvk_handler, String artist, String id) {
-		int size = dvk_handler.get_size();
-		for(int i = 0; i < size; i++) {
-			Dvk dvk = dvk_handler.get_dvk(i);
-			if(dvk.get_id().equals(id)) {
+	public static Dvk update_favorite(DvkHandler dvk_handler, String artist, String dvk_id) {
+		StringBuilder sql = new StringBuilder("SELECT * FROM ");
+		sql.append(DvkHandler.DVKS);
+		sql.append(" WHERE ");
+		sql.append(DvkHandler.DVK_ID);
+		sql.append(" = '");
+		sql.append(dvk_id);
+		sql.append("';");
+		try(ResultSet rs = dvk_handler.get_sql_set(sql.toString())) {
+			ArrayList<Dvk> dvks = DvkHandler.get_dvks(rs);
+			if(dvks.size() > 0) {
+				Dvk dvk = dvks.get(0);
 				String[] tags = dvk.get_web_tags();
 				if(!ArrayProcessing.contains(tags, "favorite:" + artist, false)) {
 					String[] new_tags;
@@ -240,9 +232,12 @@ public abstract class ArtistHosting implements DActionEvent {
 					new_tags[new_tags.length - 1] = "Favorite:" + artist;
 					dvk.set_web_tags(new_tags);
 				}
+				dvk.write_dvk();
+				dvk_handler.set_dvk(dvk, dvk.get_sql_id());
 				return dvk;
 			}
 		}
+		catch(SQLException e) {}
 		return null;
 	}
 	

@@ -54,6 +54,11 @@ public class Dvk implements Serializable {
 	private File dvk_file;
 	
 	/**
+	 * ID for the Dvk object in the Dvk info SQLite database
+	 */
+	private int sql_id;
+	
+	/**
 	 * ID of the Dvk
 	 */
 	private String id;
@@ -131,6 +136,7 @@ public class Dvk implements Serializable {
 	 * Clears all Dvk fields to their default values.
 	 */
 	public void clear_dvk() {
+		set_sql_id(0);
 		set_id(null);
 		set_title(null);
 		set_artists(null);
@@ -326,6 +332,24 @@ public class Dvk implements Serializable {
 	 */
 	public File get_dvk_file() {
 		return this.dvk_file;
+	}
+	
+	/**
+	 * Sets the SQL ID.
+	 * 
+	 * @param sql_id SQL ID
+	 */
+	public void set_sql_id(int sql_id) {
+		this.sql_id = sql_id;
+	}
+	
+	/**
+	 * Returns the SQL ID.
+	 * 
+	 * @return SQL ID
+	 */
+	public int get_sql_id() {
+		return this.sql_id;
 	}
 	
 	/**

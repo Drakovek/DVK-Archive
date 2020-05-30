@@ -12,6 +12,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.gargoylesoftware.htmlunit.html.DomElement;
+import com.gmail.drakovekmail.dvkarchive.file.DvkException;
 
 /**
  * Unit tests for the DConnect class.
@@ -35,7 +36,10 @@ public class TestDConnect {
 	 */
 	@Before
 	public void set_up() {
-		this.connect = new DConnect(false, false);
+		try {
+			this.connect = new DConnect(false, false);
+		}
+		catch(DvkException e) {}
 		String user_dir = System.getProperty("user.dir");
 		this.test_dir = new File(user_dir, "connect_dir");
 		if(!this.test_dir.isDirectory()) {
@@ -48,7 +52,10 @@ public class TestDConnect {
 	 */
 	@After
 	public void tear_down() {
-		this.connect.close_client();
+		try {
+			this.connect.close();
+		}
+		catch(DvkException e) {}
 		try {
 			FileUtils.deleteDirectory(this.test_dir);
 		}

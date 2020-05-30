@@ -232,7 +232,7 @@ public class DeviantArtGUI extends ArtistHostingGUI {
 	public void download_page(String url) {
 		this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
 		//CHECK URL IS VALID
-		String id = DeviantArt.get_page_id(url);
+		String id = DeviantArt.get_page_id(url, true);
 		if(id.length() > 0 && !id.endsWith("-P") && !id.endsWith("-S")) {
 			//CHECK DVK IS NOT ALREADY DOWNLOADED
 			boolean download = true;
@@ -280,19 +280,18 @@ public class DeviantArtGUI extends ArtistHostingGUI {
 			String artist,
 			String gallery,
 			boolean single) {
-		String id = DeviantArt.get_page_id(url);
+		String id = DeviantArt.get_page_id(url, true);
 		if(!this.start_gui.get_base_gui().is_canceled() && id.length() > 0) {
 			//CHECK WHETHER URL IS JOURNAL OR GALLERY PAGE
 			Dvk dvk = null;
 			if(id.endsWith("-J")) {
 				//DOWNLOAD JOURNAL PAGE
-				dvk = this.dev.get_journal_dvk(url, directory, single);
+				dvk = this.dev.get_journal_dvk(url, this.dvk_handler, directory, single);
 			}
 			else {
 				//DOWNLOAD GALLERY PAGE
 				dvk = this.dev.get_dvk(url, this.dvk_handler, gallery, directory, artist, single);
 			}
-			this.dvk_handler.add_dvk(dvk);
 			//CANCEL IF DOWNLOAD FAILED
 			if(dvk == null || dvk.get_title() == null) {
 				this.start_gui.get_base_gui().set_canceled(true);
@@ -300,7 +299,6 @@ public class DeviantArtGUI extends ArtistHostingGUI {
 				return null;
 			}
 			this.start_gui.append_console(dvk.get_artists()[0] + " - " + dvk.get_title(), false);
-			this.dvk_handler.add_dvk(dvk);
 			return dvk;
 		}
 		return null;
@@ -315,19 +313,18 @@ public class DeviantArtGUI extends ArtistHostingGUI {
 	 * @return Downloaded Dvk object
 	 */
 	public Dvk download_module_page(Dvk info, File directory) {
-		String id = DeviantArt.get_page_id(info.get_page_url());
+		String id = DeviantArt.get_page_id(info.get_page_url(), true);
 		if(!this.start_gui.get_base_gui().is_canceled() && id.length() > 0) {
 			//CHECK WHETHER URL IS POLL OR STATUS UPDATE PAGE
 			Dvk dvk = null;
 			if(id.endsWith("-S")) {
 				//DOWNLOAD JOURNAL PAGE
-				dvk = DeviantArt.get_status_dvk(info, directory, true);
+				dvk = DeviantArt.get_status_dvk(info, this.dvk_handler, directory, true);
 			}
 			else {
 				//DOWNLOAD GALLERY PAGE
-				dvk = DeviantArt.get_poll_dvk(info, directory, true);
+				dvk = DeviantArt.get_poll_dvk(info, this.dvk_handler, directory, true);
 			}
-			this.dvk_handler.add_dvk(dvk);
 			//CANCEL IF DOWNLOAD FAILED
 			if(dvk == null || dvk.get_title() == null) {
 				this.start_gui.get_base_gui().set_canceled(true);
@@ -335,7 +332,6 @@ public class DeviantArtGUI extends ArtistHostingGUI {
 				return null;
 			}
 			this.start_gui.append_console(dvk.get_artists()[0] + " - " + dvk.get_title(), false);
-			this.dvk_handler.add_dvk(dvk);
 			return dvk;
 		}
 		return null;
@@ -377,8 +373,6 @@ public class DeviantArtGUI extends ArtistHostingGUI {
 	@Override
 	public void close() {
 		this.dev.close();
-		if(this.dvk_handler != null) {
-			this.dvk_handler.close_connection();
-		}
+		close_dvk_handler();
 	}
 }

@@ -8,6 +8,7 @@ import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
+import com.gmail.drakovekmail.dvkarchive.file.DvkException;
 import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
 import com.gmail.drakovekmail.dvkarchive.file.FilePrefs;
 import com.gmail.drakovekmail.dvkarchive.gui.BaseGUI;
@@ -462,10 +463,14 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	 */
 	protected void read_dvks() {
 		FilePrefs prefs = this.start_gui.get_file_prefs();
-		this.dvk_handler = new DvkHandler(prefs);
-		File[] dirs = {this.start_gui.get_directory()};
-		this.dvk_handler.read_dvks(dirs, this.start_gui);
-		get_artists();
+		close_dvk_handler();
+		try {
+			this.dvk_handler = new DvkHandler(prefs);
+			File[] dirs = {this.start_gui.get_directory()};
+			this.dvk_handler.read_dvks(dirs, this.start_gui);
+			get_artists();
+		}
+		catch(DvkException e) {}
 	}
 	
 	/**
@@ -680,6 +685,18 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 			enable_all();
 			this.start_gui.get_base_gui().set_running(false);
 			this.start_gui.enable_all();
+		}
+	}
+	
+	/**
+	 * Closes the main dvk_handler.
+	 */
+	public void close_dvk_handler() {
+		if(this.dvk_handler != null) {
+			try {
+				this.dvk_handler.close();
+			}
+			catch(DvkException e) {}
 		}
 	}
 }

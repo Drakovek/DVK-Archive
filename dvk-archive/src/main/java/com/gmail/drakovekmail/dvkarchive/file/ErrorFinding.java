@@ -1,6 +1,8 @@
 package com.gmail.drakovekmail.dvkarchive.file;
 
 import java.io.File;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
@@ -25,47 +27,44 @@ public class ErrorFinding {
 			FilePrefs prefs,
 			File[] directories,
 			StartGUI start_gui) {
-		DvkHandler handler = new DvkHandler(prefs);
-		File[] dirs = new File[0];
-		if(start_gui == null || !start_gui.get_base_gui().is_canceled()) {
-			dirs = DvkHandler.get_directories(directories);
-		}
-		ArrayList<File> missing = new ArrayList<>();
-		for(int i = 0; i < dirs.length; i++) {
-			//BREAK IF CANCELLED
-			if(start_gui != null 
-					&& start_gui.get_base_gui()
-						.is_canceled()) {
-				break;
+		try(DvkHandler handler = new DvkHandler(prefs)) {
+			File[] dirs = new File[0];
+			if(start_gui == null || !start_gui.get_base_gui().is_canceled()) {
+				dirs = DvkHandler.get_directories(directories);
 			}
-			//UPDATE PROGRESS
-			if(start_gui != null) {
-				
-				start_gui.get_main_pbar().set_progress(false, true, i, dirs.length);
-			}
-			//LOAD DIRECTORY
-			File[] files = {dirs[i]};
-			handler.read_dvks(files, null);
-			files = dirs[i].listFiles();
-			Arrays.sort(files);
-			for(File file: files) {
-				//CHECK IF FILE IS MISSING
-				if(!file.isDirectory()
-						&& !file.getName().endsWith(".dvk")
-						&& !missing.contains(file)
-						&& !handler.contains_file(file)) {
-					missing.add(file);
-					//PRINT PATH
-					if(start_gui != null) {
-						start_gui.append_console(
-								file.getAbsolutePath(),
-								false);
+			ArrayList<File> missing = new ArrayList<>();
+			for(int i = 0; i < dirs.length; i++) {
+				//BREAK IF CANCELLED
+				if(start_gui != null && start_gui.get_base_gui().is_canceled()) {
+					break;
+				}
+				//UPDATE PROGRESS
+				if(start_gui != null) {
+					start_gui.get_main_pbar().set_progress(false, true, i, dirs.length);
+				}
+				//LOAD DIRECTORY
+				File[] files = {dirs[i]};
+				handler.read_dvks(files, null);
+				files = dirs[i].listFiles();
+				Arrays.sort(files);
+				for(File file: files) {
+					//CHECK IF FILE IS MISSING
+					if(!file.isDirectory()
+							&& !file.getName().endsWith(".dvk")
+							&& !missing.contains(file)
+							&& !handler.contains_file(file)) {
+						missing.add(file);
+						//PRINT PATH
+						if(start_gui != null) {
+							start_gui.append_console(file.getAbsolutePath(), false);
+						}
 					}
 				}
 			}
+			return missing;
 		}
-		handler.close_connection();
-		return missing;
+		catch(DvkException e) {}
+		return new ArrayList<>();
 	}
 	
 	/**
@@ -78,7 +77,8 @@ public class ErrorFinding {
 	public static ArrayList<File> get_missing_media_dvks(
 			DvkHandler dvk_handler,
 			StartGUI start_gui) {
-		int size = dvk_handler.get_size();
+		ArrayList<Dvk> dvks = dvk_handler.get_dvks(0, -1, 'a', true, false);
+		int size = dvks.size();
 		ArrayList<File> files = new ArrayList<>();
 		for(int i = 0; i < size; i++) {
 			//UPDATE PROGRESS
@@ -89,7 +89,7 @@ public class ErrorFinding {
 					break;
 				}
 			}
-			Dvk dvk = dvk_handler.get_dvk(i);
+			Dvk dvk = dvks.get(i);
 			if(!dvk.get_media_file().exists()
 					|| (dvk.get_secondary_file() != null 
 					&& !dvk.get_secondary_file().exists())) {
@@ -113,52 +113,51 @@ public class ErrorFinding {
 	public static ArrayList<File> get_same_ids(
 			DvkHandler dvk_handler,
 			StartGUI start_gui) {
-		int size = dvk_handler.get_size();
-		ArrayList<File> files = new ArrayList<>();
-		ArrayList<Integer> indexes = new ArrayList<>();
-		for(int i = 0; i < size; i++) {
-			//UPDATE PROGRESS
-			if(start_gui != null) {
-				start_gui.get_main_pbar().set_progress(false, true, i, size);
-				//ESCAPE IF CANCELLED
-				if(start_gui.get_base_gui().is_canceled()) {
-					break;
-				}
-			}
-			String id1 = dvk_handler.get_dvk(i).get_id();
-			for(int k = i + 1; k < size; k++) {
-				//CHECK IF ID SAME AS FIRST ID
-				Dvk dvk = dvk_handler.get_dvk(k);
-				if(id1.equals(dvk.get_id()) 
-						&& !indexes.contains(Integer.valueOf(k))) {
-					//CHECK IF DVK ALREADY IN LIST
-					if(!indexes.contains(Integer.valueOf(i))) {
-						//ADD FIRST DVK
-						files.add(dvk_handler.get_dvk(i).get_dvk_file());
-						indexes.add(Integer.valueOf(i));
-						//PRINT
-						if(start_gui != null) {
-							start_gui.append_console(
-									dvk_handler
-										.get_dvk(i)
-										.get_dvk_file()
-										.getAbsolutePath(), false);
-						}
-					}
-					//ADD SECOND DVK
-					files.add(dvk.get_dvk_file());
-					indexes.add(Integer.valueOf(k));
-					//PRINT
-					if(start_gui != null) {
-						start_gui.append_console(
-								"    "
-								+ dvk
-									.get_dvk_file()
-									.getAbsolutePath(), false);
+		//TODO SHOW PROGRESS AND ALLOW CANCELLING
+		StringBuilder sql = new StringBuilder("SELECT ");
+		sql.append(DvkHandler.DVK_ID);
+		sql.append(" FROM ");
+		sql.append(DvkHandler.DVKS);
+		sql.append(" GROUP BY ");
+		sql.append(DvkHandler.DVK_ID);
+		sql.append(" HAVING COUNT(");
+		sql.append(DvkHandler.DVK_ID);
+		sql.append(") > 1 ORDER BY ");
+		sql.append(DvkHandler.ARTISTS);
+		sql.append(", ");
+		sql.append(DvkHandler.TITLE);
+		sql.append(';');
+		try (ResultSet rs1 = dvk_handler.get_sql_set(sql.toString())) {
+			File file;
+			ArrayList<File> files = new ArrayList<>();
+			sql = new StringBuilder("SELECT ");
+			sql.append(DvkHandler.DIRECTORY);
+			sql.append(", ");
+			sql.append(DvkHandler.DVK_FILE);
+			sql.append(" FROM ");
+			sql.append(DvkHandler.DVKS);
+			sql.append(" WHERE ");
+			sql.append(DvkHandler.DVK_ID);
+			sql.append(" = '");
+			String start = sql.toString();
+			while(rs1.next()) {
+				sql = new StringBuilder(start);
+				sql.append(rs1.getString(DvkHandler.DVK_ID));
+				sql.append("' ORDER BY ");
+				sql.append(DvkHandler.TITLE);
+				sql.append(";");
+				try(ResultSet rs2 = dvk_handler.get_sql_set(sql.toString())) {
+					while(rs2.next()) {
+						file = new File(rs2.getString(DvkHandler.DIRECTORY),
+								rs2.getString(DvkHandler.DVK_FILE));
+						files.add(file);
 					}
 				}
+				catch(SQLException f) {}
 			}
+			return files;
 		}
-		return files;
+		catch(SQLException e) {}
+		return new ArrayList<>();
 	}
 }
