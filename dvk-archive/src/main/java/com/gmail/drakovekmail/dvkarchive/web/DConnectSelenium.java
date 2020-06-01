@@ -11,6 +11,7 @@ import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gmail.drakovekmail.dvkarchive.file.DvkException;
 import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.compound.DButtonDialog;
 
@@ -19,7 +20,7 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.compound.DButtonDialog;
  * 
  * @author Drakovek
  */
-public class DConnectSelenium {
+public class DConnectSelenium implements AutoCloseable {
 	
 	/**
 	 * Main WebDriver for loading online content.
@@ -36,9 +37,10 @@ public class DConnectSelenium {
 	 * Disables Selenium logs.
 	 * 
 	 * @param headless Whether drivers should be headless.
-	 * @param start_gui GUI to tie message box to if informing user to download Selenium driver.
+	 * @param start_gui GUI to tie message box to if informing user to download Selenium driver
+	 * @exception DvkException DvkException
 	 */
-	public DConnectSelenium(boolean headless, StartGUI start_gui) {
+	public DConnectSelenium(boolean headless, StartGUI start_gui) throws DvkException {
 		//DISABLE LOGS
 		java.util.logging.Logger.getLogger("org.openqa.selenium")
 			.setLevel(java.util.logging.Level.OFF);
@@ -175,14 +177,14 @@ public class DConnectSelenium {
 		return this.driver;
 	}
 	
-	/**
-	 * Closes the current WebDriver, if available.
-	 */
-	public void close_driver() {
+	@Override
+	public void close() throws DvkException {
 		try {
 			this.driver.close();
-			this.connect.close_client();
+			this.connect.close();
 		}
-		catch(Exception e) {}
+		catch(Exception e) {
+			throw new DvkException();
+		}
 	}
 }

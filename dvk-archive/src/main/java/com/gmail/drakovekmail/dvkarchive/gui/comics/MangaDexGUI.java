@@ -8,6 +8,7 @@ import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
+import com.gmail.drakovekmail.dvkarchive.file.DvkException;
 import com.gmail.drakovekmail.dvkarchive.gui.BaseGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.artist.ArtistHostingGUI;
@@ -116,20 +117,20 @@ public class MangaDexGUI extends ArtistHostingGUI {
 	
 	@Override
 	public void get_artists() {
-		close();
-		this.connect = new DConnect(false, false);
-		this.sel = new DConnectSelenium(true, this.start_gui);
+		this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
+		this.start_gui.append_console("sorting_dvks", true);
+		close_connection();
+		try {
+			this.sel = new DConnectSelenium(true, this.start_gui);
+			this.connect = new DConnect(false, false);
+		}
+		catch(DvkException e) {}
 		this.dvks = MangaDex.get_downloaded_titles(this.dvk_handler);
 		ArrayList<String> list = new ArrayList<>();
 		for(int i = 0; i < this.dvks.size(); i++) {
 			list.add(this.dvks.get(i).get_title());
 		}
 		set_list(list);
-	}
-
-	@Override
-	public void sort_dvks() {
-		this.dvk_handler.sort_dvks_title(false, false);
 	}
 
 	@Override
@@ -194,13 +195,28 @@ public class MangaDexGUI extends ArtistHostingGUI {
 
 	@Override
 	public void close() {
+		close_connection();
+		this.close_dvk_handler();
+	}
+	
+	/**
+	 * Closes all web connection objects.
+	 */
+	public void close_connection() {
 		if(this.connect != null) {
-			this.connect.close_client();
+			try {
+				this.connect.close();
+			}
+			catch(DvkException e) {}
 		}
 		if(this.sel != null) {
-			this.sel.close_driver();
+			try {
+				this.sel.close();
+			}
+			catch(DvkException e) {}
 		}
 	}
+		
 
 	@Override
 	public boolean login(String username, String password) {

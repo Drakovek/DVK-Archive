@@ -1,5 +1,7 @@
 package com.gmail.drakovekmail.dvkarchive.reformat;
 
+import java.util.ArrayList;
+
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
 import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
 import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
@@ -21,7 +23,8 @@ public class Reformat {
 	public static void reformat_dvks(
 			DvkHandler dvk_handler,
 			StartGUI start_gui) {
-		int size = dvk_handler.get_size();
+		ArrayList<Dvk> dvks = dvk_handler.get_dvks(0, -1, 'n', false, false);
+		int size = dvks.size();
 		for(int i = 0; i < size; i++) {
 			//UPDATE PROGRESS
 			if(start_gui != null) {
@@ -32,7 +35,7 @@ public class Reformat {
 				}
 			}
 			//REFORMAT DVKS
-			Dvk dvk = dvk_handler.get_dvk(i);
+			Dvk dvk = dvks.get(i);
 			String desc = dvk.get_description();
 			if(desc != null) {
 				desc = DConnect.clean_element(desc, false);
@@ -52,7 +55,8 @@ public class Reformat {
 	public static void rename_files(
 			DvkHandler dvk_handler,
 			StartGUI start_gui) {
-		int size = dvk_handler.get_size();
+		ArrayList<Dvk> dvks = dvk_handler.get_dvks(0, -1, 'n', false, false);
+		int size = dvks.size();
 		for(int i = 0; i < size; i++) {
 			//UPDATE PROGRESS
 			if(start_gui != null) {
@@ -63,9 +67,10 @@ public class Reformat {
 				}
 			}
 			//RENAME FILES
-			Dvk dvk = dvk_handler.get_dvk(i);
+			Dvk dvk = dvks.get(i);
 			dvk.rename_files(dvk.get_filename());
 			dvk.update_extensions();
+			dvk_handler.set_dvk(dvk, dvk.get_sql_id());
 		}
 	}
 }

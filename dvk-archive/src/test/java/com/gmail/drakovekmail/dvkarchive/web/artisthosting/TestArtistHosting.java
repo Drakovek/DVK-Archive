@@ -2,7 +2,6 @@ package com.gmail.drakovekmail.dvkarchive.web.artisthosting;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,6 +10,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
+import com.gmail.drakovekmail.dvkarchive.file.DvkException;
 import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
 import com.gmail.drakovekmail.dvkarchive.file.FilePrefs;
 
@@ -68,12 +68,15 @@ public class TestArtistHosting {
 		dvk.set_id("ID123");
 		dvk.set_title("dvk1");
 		dvk.set_artist("artist1");
-		dvk.set_page_url("www.website.com/view/1");
+		String[] tags = {"Tag1", "Thing", "DVK:Single", "Last"};
+		dvk.set_web_tags(tags);
+		dvk.set_page_url("www.Website.com/view/1");
 		dvk.set_dvk_file(new File(sub1, "dvk1.dvk"));
 		dvk.set_media_file("dvk1.png");
 		dvk.write_dvk();
 		dvk.set_title("dvk2");
 		dvk.set_dvk_file(new File(sub2, "dvk2.dvk"));
+		dvk.set_web_tags(new String[0]);
 		dvk.set_media_file("dvk2.jpg");
 		dvk.write_dvk();
 		//CREATE DVKS - ARTIST 2
@@ -93,6 +96,8 @@ public class TestArtistHosting {
 		//CREATE DVKS - ARTIST 3
 		dvk.set_title("dvk6");
 		dvk.set_artist("artist3");
+		String[] different_tags = {"fine"};
+		dvk.set_web_tags(different_tags);
 		dvk.set_dvk_file(new File(sub2, "dvk6.dvk"));
 		dvk.set_media_file("dvk6.txt");
 		dvk.write_dvk();
@@ -107,7 +112,6 @@ public class TestArtistHosting {
 		dvk.set_title("dvk8");
 		dvk.set_artist("artist5");
 		dvk.set_page_url("www.website.com/view/2");
-		String[] tags = {"Tag1", "Thing", "DVK:Single", "Last"};
 		dvk.set_web_tags(tags);
 		dvk.set_dvk_file(new File(this.test_dir, "dvk8.dvk"));
 		dvk.set_media_file("dvk8.txt");
@@ -116,18 +120,22 @@ public class TestArtistHosting {
 		ArrayList<Dvk> dvks;
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
-		DvkHandler handler = new DvkHandler();
-		handler.read_dvks(dirs, prefs, null, false, false, false);
-		handler.sort_dvks_title(true, false);
-		assertEquals(8, handler.get_size());
-		dvks = ArtistHosting.get_artists(handler, "website.com");
-		assertEquals(3, dvks.size());
-		assertEquals("artist1", dvks.get(0).get_artists()[0]);
-		assertEquals(this.test_dir, dvks.get(0).get_dvk_file());
-		assertEquals("artist2", dvks.get(1).get_artists()[0]);
-		assertEquals(this.test_dir, dvks.get(1).get_dvk_file());
-		assertEquals("artist3", dvks.get(2).get_artists()[0]);
-		assertEquals(sub2, dvks.get(2).get_dvk_file());
+		prefs.set_index_dir(this.test_dir);
+		try(DvkHandler handler = new DvkHandler(prefs)) {
+			handler.read_dvks(dirs, null);
+			assertEquals(8, handler.get_size());
+			dvks = ArtistHosting.get_artists(handler, "website.com");
+			assertEquals(3, dvks.size());
+			assertEquals("artist1", dvks.get(0).get_artists()[0]);
+			assertEquals(sub2, dvks.get(0).get_dvk_file());
+			assertEquals("artist2", dvks.get(1).get_artists()[0]);
+			assertEquals(this.test_dir, dvks.get(1).get_dvk_file());
+			assertEquals("artist3", dvks.get(2).get_artists()[0]);
+			assertEquals(sub2, dvks.get(2).get_dvk_file());
+		}
+		catch(DvkException e) {
+			assertTrue(false);
+		}
 	}
 	
 	/**
@@ -239,20 +247,40 @@ public class TestArtistHosting {
 		//READ DVKS
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
-		DvkHandler handler = new DvkHandler();
-		handler.read_dvks(dirs, prefs, null, false, true, false);
-		//TEST UPDATITNG FAVORITES
-		assertEquals(1, handler.get_size());
-		assertEquals(null, ArtistHosting.update_favorite(handler, "blah", "ID256"));
-		Dvk result = ArtistHosting.update_favorite(handler, "Person", "ID123");
-		assertEquals("Title!", result.get_title());
-		assertEquals(3, result.get_web_tags().length);
-		result = ArtistHosting.update_favorite(handler, "Other", "ID123");
-		assertEquals("Title!", result.get_title());
-		assertEquals(4, result.get_web_tags().length);
-		assertEquals("Something", result.get_web_tags()[0]);
-		assertEquals("blah", result.get_web_tags()[1]);
-		assertEquals("favorite:person", result.get_web_tags()[2]);
-		assertEquals("Favorite:Other", result.get_web_tags()[3]);
+		prefs.set_index_dir(this.test_dir);
+		try(DvkHandler handler = new DvkHandler(prefs)) {
+			handler.read_dvks(dirs, null);
+			//TEST UPDATITNG FAVORITES
+			assertEquals(1, handler.get_size());
+			assertEquals(null, ArtistHosting.update_favorite(handler, "blah", "ID256"));
+			Dvk result = ArtistHosting.update_favorite(handler, "Person", "ID123");
+			assertEquals("Title!", result.get_title());
+			assertEquals(3, result.get_web_tags().length);
+			//TEST WRITEN TO DISK AND SET TO DVK_HANDLER
+			assertTrue(result.get_dvk_file().exists());
+			result = handler.get_dvk(result.get_sql_id());
+			assertEquals("Title!", result.get_title());
+			assertEquals(3, result.get_web_tags().length);
+			//TEST ADDING ANOTHER FAVORITE ARTIST
+			result = ArtistHosting.update_favorite(handler, "Other", "ID123");
+			assertEquals("Title!", result.get_title());
+			assertEquals(4, result.get_web_tags().length);
+			assertEquals("Something", result.get_web_tags()[0]);
+			assertEquals("blah", result.get_web_tags()[1]);
+			assertEquals("favorite:person", result.get_web_tags()[2]);
+			assertEquals("Favorite:Other", result.get_web_tags()[3]);
+			//TEST WRITEN TO DISK AND SET TO DVK_HANDLER
+			assertTrue(result.get_dvk_file().exists());
+			result = handler.get_dvk(result.get_sql_id());
+			assertEquals("Title!", result.get_title());
+			assertEquals(4, result.get_web_tags().length);
+			assertEquals("Something", result.get_web_tags()[0]);
+			assertEquals("blah", result.get_web_tags()[1]);
+			assertEquals("favorite:person", result.get_web_tags()[2]);
+			assertEquals("Favorite:Other", result.get_web_tags()[3]);
+		}
+		catch(DvkException e) {
+			assertTrue(false);
+		}
 	}
 }

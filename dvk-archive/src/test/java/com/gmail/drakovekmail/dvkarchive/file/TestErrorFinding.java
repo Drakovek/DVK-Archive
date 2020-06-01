@@ -1,6 +1,8 @@
 package com.gmail.drakovekmail.dvkarchive.file;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -118,17 +120,23 @@ public class TestErrorFinding {
 	@Test
 	public void test_get_unlinked_media() {
 		FilePrefs prefs = new FilePrefs();
-		prefs.set_use_index(false);
-		File[] dirs = {this.test_dir};
-		ArrayList<File> unlinked;
-		unlinked = ErrorFinding.get_unlinked_media(prefs, dirs, null);
-		assertEquals(2, unlinked.size());
-		String[] names = new String[2];
-		names[0] = unlinked.get(0).getName();
-		names[1] = unlinked.get(1).getName();
-		Arrays.sort(names);
-		assertEquals("u2.jpg", names[0]);
-		assertEquals("u3.jpg", names[1]);
+		prefs.set_index_dir(this.test_dir);
+		try(DvkHandler dvk_handler = new DvkHandler(prefs)) {
+			File[] dirs = {this.test_dir};
+			dvk_handler.read_dvks(dirs, null);
+			ArrayList<File> unlinked;
+			unlinked = ErrorFinding.get_unlinked_media(dvk_handler, dirs, null);
+			assertEquals(2, unlinked.size());
+			String[] names = new String[2];
+			names[0] = unlinked.get(0).getName();
+			names[1] = unlinked.get(1).getName();
+			Arrays.sort(names);
+			assertEquals("u2.jpg", names[0]);
+			assertEquals("u3.jpg", names[1]);
+		}
+		catch(DvkException e) {
+			assertTrue(false);
+		}
 	}
 	
 	/**
@@ -138,18 +146,23 @@ public class TestErrorFinding {
 	public void test_get_missing_media_dvks() {
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
-		DvkHandler dvk_handler = new DvkHandler();
-		dvk_handler.read_dvks(dirs, prefs, null, false, false, false);
-		assertEquals(4, dvk_handler.get_size());
-		ArrayList<File> missing;
-		missing = ErrorFinding.get_missing_media_dvks(dvk_handler, null);
-		assertEquals(2, missing.size());
-		String[] names = new String[2];
-		names[0] = missing.get(0).getName();
-		names[1] = missing.get(1).getName();
-		Arrays.sort(names);
-		assertEquals("dvk3.dvk", names[0]);
-		assertEquals("dvk4.dvk", names[1]);
+		prefs.set_index_dir(this.test_dir);
+		try(DvkHandler dvk_handler = new DvkHandler(prefs)) {
+			dvk_handler.read_dvks(dirs, null);
+			assertEquals(4, dvk_handler.get_size());
+			ArrayList<File> missing;
+			missing = ErrorFinding.get_missing_media_dvks(dvk_handler, null);
+			assertEquals(2, missing.size());
+			String[] names = new String[2];
+			names[0] = missing.get(0).getName();
+			names[1] = missing.get(1).getName();
+			Arrays.sort(names);
+			assertEquals("dvk3.dvk", names[0]);
+			assertEquals("dvk4.dvk", names[1]);
+		}
+		catch(DvkException e) {
+			assertTrue(false);
+		}
 	}
 	
 	/**
@@ -159,19 +172,24 @@ public class TestErrorFinding {
 	public void test_get_same_ids() {
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
-		DvkHandler dvk_handler = new DvkHandler();
-		dvk_handler.read_dvks(dirs, prefs, null, false, false, false);
-		assertEquals(4, dvk_handler.get_size());
-		ArrayList<File> same;
-		same = ErrorFinding.get_same_ids(dvk_handler, null);
-		assertEquals(3, same.size());
-		String[] names = new String[3];
-		names[0] = same.get(0).getName();
-		names[1] = same.get(1).getName();
-		names[2] = same.get(2).getName();
-		Arrays.sort(names);
-		assertEquals("dvk1.dvk", names[0]);
-		assertEquals("dvk2.dvk", names[1]);
-		assertEquals("dvk4.dvk", names[2]);
+		prefs.set_index_dir(this.test_dir);
+		try(DvkHandler dvk_handler = new DvkHandler(prefs)) {
+			dvk_handler.read_dvks(dirs, null);
+			assertEquals(4, dvk_handler.get_size());
+			ArrayList<File> same;
+			same = ErrorFinding.get_same_ids(dvk_handler, null);
+			assertEquals(3, same.size());
+			String[] names = new String[3];
+			names[0] = same.get(0).getName();
+			names[1] = same.get(1).getName();
+			names[2] = same.get(2).getName();
+			Arrays.sort(names);
+			assertEquals("dvk1.dvk", names[0]);
+			assertEquals("dvk2.dvk", names[1]);
+			assertEquals("dvk4.dvk", names[2]);
+		}
+		catch(DvkException e) {
+			assertTrue(false);
+		}
 	}
 }

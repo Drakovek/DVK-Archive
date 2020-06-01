@@ -1,16 +1,17 @@
 package com.gmail.drakovekmail.dvkarchive.reformat;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
+import com.gmail.drakovekmail.dvkarchive.file.DvkException;
 import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
 import com.gmail.drakovekmail.dvkarchive.file.FilePrefs;
 
@@ -88,30 +89,36 @@ public class TestReformat {
 		//REFORMAT DVKS
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
-		DvkHandler handler = new DvkHandler();
-		handler.read_dvks(dirs, prefs, null, false, false, false);
-		Reformat.reformat_dvks(handler, null);
-		//CHECK DVKS STILL VALID
-		handler.read_dvks(dirs, prefs, null, false, false, false);
-		handler.sort_dvks_title(false, false);
-		assertEquals(3, handler.get_size());
-		assertTrue(handler.get_dvk(0).get_dvk_file().exists());
-		assertTrue(handler.get_dvk(1).get_dvk_file().exists());
-		assertTrue(handler.get_dvk(2).get_dvk_file().exists());
-		assertEquals("Title 1", handler.get_dvk(0).get_title());
-		assertEquals("Title 2", handler.get_dvk(1).get_title());
-		assertEquals("Title 3", handler.get_dvk(2).get_title());
-		assertEquals("dvk1.dvk",
-				handler.get_dvk(0).get_dvk_file().getName());
-		assertEquals("dvk2.dvk",
-				handler.get_dvk(1).get_dvk_file().getName());
-		assertEquals("dvk3.dvk",
-				handler.get_dvk(2).get_dvk_file().getName());
-		assertEquals(null, handler.get_dvk(0).get_description());
-		assertEquals("This is fine already.",
-				handler.get_dvk(1).get_description());
-		assertEquals("<a><b>words 'n stuff</b></a>",
-				handler.get_dvk(2).get_description());
+		prefs.set_index_dir(this.test_dir);
+		try (DvkHandler handler = new DvkHandler(prefs)) {
+			handler.read_dvks(dirs,  null);
+			Reformat.reformat_dvks(handler, null);
+			File db = new File(this.test_dir, "dvk_archive.db");
+			assertTrue(db.exists());
+			handler.delete_database();
+			assertFalse(db.exists());
+			handler.initialize_connection();
+			assertTrue(db.exists());
+			handler.read_dvks(dirs, null);
+			//CHECK DVKS STILL VALID
+			ArrayList<Dvk> dvks = handler.get_dvks(0, -1, 'a', false, false);
+			assertEquals(3, dvks.size());
+			assertTrue(dvks.get(0).get_dvk_file().exists());
+			assertTrue(dvks.get(1).get_dvk_file().exists());
+			assertTrue(dvks.get(2).get_dvk_file().exists());
+			assertEquals("Title 1", dvks.get(0).get_title());
+			assertEquals("Title 2", dvks.get(1).get_title());
+			assertEquals("Title 3", dvks.get(2).get_title());
+			assertEquals("dvk1.dvk", dvks.get(0).get_dvk_file().getName());
+			assertEquals("dvk2.dvk", dvks.get(1).get_dvk_file().getName());
+			assertEquals("dvk3.dvk", dvks.get(2).get_dvk_file().getName());
+			assertEquals(null, dvks.get(0).get_description());
+			assertEquals("This is fine already.", dvks.get(1).get_description());
+			assertEquals("<a><b>words 'n stuff</b></a>", dvks.get(2).get_description());
+		}
+		catch(DvkException e) {
+			assertTrue(false);
+		}
 	}
 	
 	/**
@@ -150,27 +157,49 @@ public class TestReformat {
 		//RENAME FILES
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
-		DvkHandler handler = new DvkHandler();
-		handler.read_dvks(dirs, prefs, null, false, false, false);
-		Reformat.rename_files(handler, null);
-		//CHECK FILES READ
-		handler.read_dvks(dirs, prefs, null, false, false, false);
-		handler.sort_dvks_title(false, false);
-		assertEquals(2, handler.get_size());
-		assertTrue(handler.get_dvk(0).get_dvk_file().exists());
-		assertTrue(handler.get_dvk(0).get_media_file().exists());
-		assertTrue(handler.get_dvk(1).get_dvk_file().exists());
-		assertTrue(handler.get_dvk(1).get_media_file().exists());
-		assertTrue(handler.get_dvk(1).get_secondary_file().exists());
-		assertEquals("Title 1_ID1.dvk",
-				handler.get_dvk(0).get_dvk_file().getName());
-		assertEquals("Title 1_ID1.png",
-				handler.get_dvk(0).get_media_file().getName());
-		assertEquals("Title 2_ID2.dvk",
-				handler.get_dvk(1).get_dvk_file().getName());
-		assertEquals("Title 2_ID2.jpg",
-				handler.get_dvk(1).get_media_file().getName());
-		assertEquals("Title 2_ID2.txt",
-				handler.get_dvk(1).get_secondary_file().getName());
+		prefs.set_index_dir(this.test_dir);
+		try(DvkHandler handler = new DvkHandler(prefs)) {
+			handler.read_dvks(dirs, null);
+			Reformat.rename_files(handler, null);
+			//CHECK FILES READ
+			ArrayList<Dvk> dvks = handler.get_dvks(0, -1, 'a', false, false);
+			assertEquals(2, dvks.size());
+			assertTrue(dvks.get(0).get_dvk_file().exists());
+			assertTrue(dvks.get(0).get_media_file().exists());
+			assertTrue(dvks.get(1).get_dvk_file().exists());
+			assertTrue(dvks.get(1).get_media_file().exists());
+			assertTrue(dvks.get(1).get_secondary_file().exists());
+			assertEquals("Title 1_ID1.dvk", dvks.get(0).get_dvk_file().getName());
+			assertEquals("Title 1_ID1.png", dvks.get(0).get_media_file().getName());
+			assertEquals("Title 2_ID2.dvk", dvks.get(1).get_dvk_file().getName());
+			assertEquals("Title 2_ID2.jpg", dvks.get(1).get_media_file().getName());
+			assertEquals("Title 2_ID2.txt", dvks.get(1).get_secondary_file().getName());
+			File db = new File(this.test_dir, "dvk_archive.db");
+			assertTrue(db.exists());
+			handler.delete_database();
+			assertFalse(db.exists());
+		}
+		catch(DvkException e) {
+			assertTrue(false);
+		}
+		//CHECK FILES ACTUALLY WRITTEN
+		try(DvkHandler handler = new DvkHandler(prefs)) {
+			handler.read_dvks(dirs, null);
+			ArrayList<Dvk> dvks = handler.get_dvks(0, -1, 'a', false, false);
+			assertEquals(2, dvks.size());
+			assertTrue(dvks.get(0).get_dvk_file().exists());
+			assertTrue(dvks.get(0).get_media_file().exists());
+			assertTrue(dvks.get(1).get_dvk_file().exists());
+			assertTrue(dvks.get(1).get_media_file().exists());
+			assertTrue(dvks.get(1).get_secondary_file().exists());
+			assertEquals("Title 1_ID1.dvk", dvks.get(0).get_dvk_file().getName());
+			assertEquals("Title 1_ID1.png", dvks.get(0).get_media_file().getName());
+			assertEquals("Title 2_ID2.dvk", dvks.get(1).get_dvk_file().getName());
+			assertEquals("Title 2_ID2.jpg", dvks.get(1).get_media_file().getName());
+			assertEquals("Title 2_ID2.txt", dvks.get(1).get_secondary_file().getName());
+		}
+		catch(DvkException e) {
+			assertTrue(false);
+		}
 	}
 }

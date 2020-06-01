@@ -24,13 +24,14 @@ import com.gargoylesoftware.htmlunit.WebWindow;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.parser.HTMLParser;
+import com.gmail.drakovekmail.dvkarchive.file.DvkException;
 
 /**
  * Class containing methods for dealing with web content.
  * 
  * @author Drakovek
  */
-public class DConnect {
+public class DConnect implements AutoCloseable {
 	
 	/**
 	 * WebClient for accessing web pages
@@ -62,18 +63,18 @@ public class DConnect {
 	 * 
 	 * @param css Whether to use CSS styling when loading pages
 	 * @param javascript Whether to load Javascript when loading pages
+	 * @exception DvkException DvkException
 	 */
-	public DConnect(boolean css, boolean javascript) {
+	public DConnect(boolean css, boolean javascript) throws DvkException {
 		//Turn off HtmlUnit warnings
 		LogFactory.getFactory().setAttribute(
 				"org.apache.commons.logging.Log",
 				"org.apache.commons.logging.impl.NoOpLog");
 		java.util.logging.Logger
-			.getLogger("com.gargoylesoftware.htmlunit")
-			.setLevel(java.util.logging.Level.OFF);
+			.getLogger("com.gargoylesoftware.htmlunit").setLevel(java.util.logging.Level.OFF);
 	    java.util.logging.Logger
-	    	.getLogger("org.apache.http")
-	    	.setLevel(java.util.logging.Level.OFF);
+	    	.getLogger("org.apache.http").setLevel(java.util.logging.Level.OFF);
+	    close();
 		initialize_client(css, javascript);
 		this.timeout = 10;
 	}
@@ -106,21 +107,14 @@ public class DConnect {
 	 * Initializes and opens the web_client.
 	 */
 	public void initialize_client() {
-		this.web_client = new WebClient(
-				BrowserVersion.BEST_SUPPORTED);
-		this.web_client.getOptions()
-			.setCssEnabled(this.css);
-		this.web_client.getOptions()
-			.setJavaScriptEnabled(this.javascript);
-		this.web_client.getOptions()
-			.setThrowExceptionOnFailingStatusCode(false);
-		this.web_client.getOptions()
-			.setThrowExceptionOnScriptError(false);
+		this.web_client = new WebClient(BrowserVersion.BEST_SUPPORTED);
+		this.web_client.getOptions().setCssEnabled(this.css);
+		this.web_client.getOptions().setJavaScriptEnabled(this.javascript);
+		this.web_client.getOptions().setThrowExceptionOnFailingStatusCode(false);
+		this.web_client.getOptions().setThrowExceptionOnScriptError(false);
 		this.web_client.setJavaScriptTimeout(this.timeout * 1000);
-		this.web_client.setAjaxController(
-				new NicelyResynchronizingAjaxController());
-		this.web_client.getOptions().setTimeout(
-				this.timeout * 1000);
+		this.web_client.setAjaxController(new NicelyResynchronizingAjaxController());
+		this.web_client.getOptions().setTimeout(this.timeout * 1000);
 	}
 	
 	/**
@@ -134,24 +128,21 @@ public class DConnect {
 		}
 		else {
 			try {
-				List<WebWindow> windows = this
-						.web_client.getWebWindows();
+				List<WebWindow> windows = this.web_client.getWebWindows();
 				for(WebWindow window: windows) {
 					window.getJobManager().removeAllJobs();
 					window.getJobManager().shutdown();
 					window = null;
 				}
-				close_client();
+				close();
 				System.gc();
 				initialize_client();
 				HTMLParser parser;
-				parser = this.web_client
-						.getPageCreator().getHtmlParser();
+				parser = this.web_client.getPageCreator().getHtmlParser();
 				URL url = new URL("https://www.notreal.com");
 				StringWebResponse r;
 				r = new StringWebResponse(html, url);
-				this.page = parser.parseHtml(
-						r, this.web_client.getCurrentWindow());
+				this.page = parser.parseHtml(r, this.web_client.getCurrentWindow());
 			}
 			catch (Exception e) {
 				this.page = null;
@@ -204,7 +195,10 @@ public class DConnect {
 			window.getJobManager().shutdown();
 			window = null;
 		}
-		close_client();
+		try {
+			close();
+		}
+		catch(DvkException e) {}
 		System.gc();
 		initialize_client();
 		this.web_client.setCookieManager(cookies);
@@ -235,7 +229,10 @@ public class DConnect {
 			window.getJobManager().shutdown();
 			window = null;
 		}
-		close_client();
+		try {
+			close();
+		}
+		catch(DvkException e) {}
 		System.gc();
 		initialize_client();
 		this.web_client.setCookieManager(cookies);
@@ -305,12 +302,12 @@ public class DConnect {
 		return this.web_client;
 	}
 	
-	/**
-	 * Closes the web_client and loaded page.
-	 */
-	public void close_client() {
+	@Override
+	public void close() throws DvkException {
 		this.page = null;
-		this.web_client.close();
+		if(this.web_client != null) {
+			this.web_client.close();
+		}
 		this.web_client = null;
 	}
 	

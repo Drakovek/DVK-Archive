@@ -1,12 +1,15 @@
 package com.gmail.drakovekmail.dvkarchive.web.comics;
 
 import java.io.File;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import com.gargoylesoftware.htmlunit.html.DomAttr;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
+import com.gmail.drakovekmail.dvkarchive.file.DvkException;
 import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
 import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
 import com.gmail.drakovekmail.dvkarchive.processing.StringProcessing;
@@ -292,12 +295,26 @@ public class MangaDex {
 			return chapters.size() - 1;
 		}
 		int chapter;
+		StringBuilder sql = new StringBuilder("SELECT ");
+		sql.append(DvkHandler.PAGE_URL);
+		sql.append(" FROM ");
+		sql.append(DvkHandler.DVKS);
+		sql.append(" WHERE ");
+		sql.append(DvkHandler.PAGE_URL);
+		sql.append(" COLLATE NOCASE LIKE '%mangadex.%';");
+		ArrayList<String> pages = new ArrayList<>();
+		try(ResultSet rs = dvk_handler.get_sql_set(sql.toString())) {
+			while(rs.next()) {
+				pages.add(rs.getString(DvkHandler.PAGE_URL));
+			}
+		}
+		catch(SQLException e) {}
+		int size = pages.size();
 		boolean contains = false;
-		int size = dvk_handler.get_size();
 		for(chapter = 0; !contains && chapter < chapters.size(); chapter++) {
 			String cid = chapters.get(chapter).get_id();
 			for(int k = 0; k < size; k++) {
-				String hid = get_chapter_id(dvk_handler.get_dvk(k).get_page_url());
+				String hid = get_chapter_id(pages.get(k));
 				if(hid.length() > 0 && hid.equals(cid)) {
 					contains = true;
 					break;
@@ -333,102 +350,111 @@ public class MangaDex {
 				|| !directory.isDirectory()) {
 			return new ArrayList<>();
 		}
-		DConnect unit_connect = new DConnect(false, false);
-		int start = get_start_chapter(dvk_handler, chapters, check_all);
-		ArrayList<Dvk> dvks = new ArrayList<>();
-		for(int c = start; c > -1; c--) {
-			if(start_gui != null) {
-				start_gui.get_main_pbar().set_progress(false, true, start - c, start + 1);
-				start_gui.append_console(chapters.get(c).get_title(), false);
-			}
-			int total;
-			int page = 1;
-			for(total = 100000; page <= total; page++) {
-				if(start_gui != null && start_gui.get_base_gui().is_canceled()) {
+		try(DConnect unit_connect = new DConnect(false, false)) {
+			int start = get_start_chapter(dvk_handler, chapters, check_all);
+			ArrayList<Dvk> dvks = new ArrayList<>();
+			for(int c = start; c > -1; c--) {
+				if(start_gui != null) {
+					start_gui.get_main_pbar().set_progress(false, true, start - c, start + 1);
+					start_gui.append_console(chapters.get(c).get_title(), false);
+				}
+				int total;
+				int page = 1;
+				for(total = 100000; page <= total; page++) {
+					if(start_gui != null && start_gui.get_base_gui().is_canceled()) {
+						break;
+					}
+					//SET KNOWN INFO
+					Dvk dvk = new Dvk();
+					dvk.set_id("MDX" + chapters.get(c).get_id() + "-" + Integer.toString(page));
+					dvk.set_title(chapters.get(c).get_title() + " | Pg. " + Integer.toString(page));
+					dvk.set_artists(chapters.get(c).get_artists());
+					dvk.set_time(chapters.get(c).get_time());
+					dvk.set_web_tags(chapters.get(c).get_web_tags());
+					dvk.set_description(chapters.get(c).get_description());
+					dvk.set_page_url(chapters.get(c).get_page_url() + "/" + Integer.toString(page));
+					//CHECK IF ALREADY DOWNLOADED
+					StringBuilder sql = new StringBuilder("SELECT ");
+					sql.append(DvkHandler.SQL_ID);
+					sql.append(" FROM ");
+					sql.append(DvkHandler.DVKS);
+					sql.append(" WHERE ");
+					sql.append(DvkHandler.PAGE_URL);
+					sql.append(" COLLATE NOCASE LIKE '%mangadex.%' AND ");
+					sql.append(DvkHandler.PAGE_URL);
+					sql.append(" COLLATE NOCASE LIKE '%");
+					sql.append('/');
+					sql.append(chapters.get(c).get_id());
+					sql.append('/');
+					sql.append(page);
+					sql.append("';");
+					boolean contains = false;
+					try(ResultSet rs = dvk_handler.get_sql_set(sql.toString())) {
+						contains = rs.next();
+					}
+					catch(SQLException e) {
+						contains = false;
+					}
+					//SKIP IF ALREADY DOWNLOADED
+					if(!contains) {
+						//LOAD PAGE
+						String xpath = "//div[@data-page='" + Integer.toString(page)
+							+ "']//img[@class='noselect nodrag cursor-pointer']";
+						connect.load_page(dvk.get_page_url(), xpath, 1, 10);
+						try {
+							TimeUnit.MILLISECONDS.sleep(2000);
+						} catch (InterruptedException e) {}
+						if(connect.get_page() == null) {
+							break;
+						}
+						//CHECK IF IN RIGHT CHAPTER
+						xpath = "//span[@class='chapter-title']/@data-chapter-id";
+						DomAttr da;
+						da = connect.get_page().getFirstByXPath(xpath);
+						if(da == null
+								|| !da.getNodeValue().equals(chapters.get(c).get_id())) {
+							break;
+						}
+						//GET TOTAL PAGES
+						xpath = "//div[@id='content']/@data-total-pages";
+						da = connect.get_page().getFirstByXPath(xpath);
+						try {
+							int v = Integer.parseInt(da.getNodeValue());
+							total = v;
+						}
+						catch(Exception f) {
+							break;
+						}
+						//GET IMAGE URL
+						xpath = "//div[@data-page='" + Integer.toString(page)
+							+ "']//img[@class='noselect nodrag cursor-pointer']/@src";
+						da = connect.get_page().getFirstByXPath(xpath);
+						if(da == null) {
+							break;
+						}
+						dvk.set_direct_url(da.getNodeValue());
+						//SET FILE
+						String filename = dvk.get_filename();
+						dvk.set_dvk_file(new File(directory, filename + ".dvk"));
+						String extension = StringProcessing.get_extension(
+								dvk.get_direct_url());
+						dvk.set_media_file(filename + extension);
+						//SAVE, IF SPECIFIED
+						if(save) {
+							dvk.write_media(unit_connect);
+						}
+						//APPEND DVK
+						dvks.add(dvk);
+					}
+				}
+				if(total != 100000 && page <= total) {
 					break;
 				}
-				//SET KNOWN INFO
-				Dvk dvk = new Dvk();
-				dvk.set_id("MDX" + chapters.get(c).get_id()
-						+ "-" + Integer.toString(page));
-				dvk.set_title(chapters.get(c).get_title()
-						+ " | Pg. " + Integer.toString(page));
-				dvk.set_artists(chapters.get(c).get_artists());
-				dvk.set_time(chapters.get(c).get_time());
-				dvk.set_web_tags(chapters.get(c).get_web_tags());
-				dvk.set_description(chapters.get(c).get_description());
-				dvk.set_page_url(chapters.get(c).get_page_url()
-						+ "/" + Integer.toString(page));
-				//CHECK IF ALREADY DOWNLOADED
-				boolean contains = false;
-				int size = dvk_handler.get_size();
-				for(int i = 0; i < size; i++) {
-					String url = dvk_handler.get_dvk(i).get_page_url();
-					if(url.contains("/mangadex.")
-							&& url.endsWith(chapters.get(c).get_id()
-									+ "/" + Integer.toString(page))) {
-						contains = true;
-						break;
-					}
-				}
-				//SKIP IF ALREADY DOWNLOADED
-				if(!contains) {
-					//LOAD PAGE
-					String xpath = "//div[@data-page='" + Integer.toString(page)
-						+ "']//img[@class='noselect nodrag cursor-pointer']";
-					connect.load_page(dvk.get_page_url(), xpath, 1, 10);
-					try {
-						TimeUnit.MILLISECONDS.sleep(2000);
-					} catch (InterruptedException e) {}
-					if(connect.get_page() == null) {
-						break;
-					}
-					//CHECK IF IN RIGHT CHAPTER
-					xpath = "//span[@class='chapter-title']/@data-chapter-id";
-					DomAttr da;
-					da = connect.get_page().getFirstByXPath(xpath);
-					if(da == null
-							|| !da.getNodeValue().equals(chapters.get(c).get_id())) {
-						break;
-					}
-					//GET TOTAL PAGES
-					xpath = "//div[@id='content']/@data-total-pages";
-					da = connect.get_page().getFirstByXPath(xpath);
-					try {
-						int v = Integer.parseInt(da.getNodeValue());
-						total = v;
-					}
-					catch(Exception f) {
-						break;
-					}
-					//GET IMAGE URL
-					xpath = "//div[@data-page='" + Integer.toString(page)
-						+ "']//img[@class='noselect nodrag cursor-pointer']/@src";
-					da = connect.get_page().getFirstByXPath(xpath);
-					if(da == null) {
-						break;
-					}
-					dvk.set_direct_url(da.getNodeValue());
-					//SET FILE
-					String filename = dvk.get_filename();
-					dvk.set_dvk_file(new File(directory, filename + ".dvk"));
-					String extension = StringProcessing.get_extension(
-							dvk.get_direct_url());
-					dvk.set_media_file(filename + extension);
-					//SAVE, IF SPECIFIED
-					if(save) {
-						dvk.write_media(unit_connect);
-					}
-					//APPEND DVK
-					dvks.add(dvk);
-				}
 			}
-			if(total != 100000 && page <= total) {
-				break;
-			}
+			return dvks;
 		}
-		unit_connect.close_client();
-		return dvks;
+		catch(DvkException e) {}
+		return new ArrayList<>();
 	}
 	
 	/**
@@ -456,35 +482,41 @@ public class MangaDex {
 	 * @return List of MangaDex Dvks
 	 */
 	public static ArrayList<Dvk> get_downloaded_titles(DvkHandler dvk_handler) {
-		int size = dvk_handler.get_size();
 		ArrayList<String> ids = new ArrayList<>();
 		ArrayList<Dvk> dvks = new ArrayList<>();
-		for(int i = 0; i < size; i++) {
-			Dvk dvk = dvk_handler.get_dvk(i);
-			if(dvk.get_page_url().toLowerCase().contains("mangadex.")) {
-				String id = get_id_from_tags(dvk.get_web_tags());
+		StringBuilder sql = new StringBuilder("SELECT * FROM ");
+		sql.append(DvkHandler.DVKS);
+		sql.append(" WHERE ");
+		sql.append(DvkHandler.PAGE_URL);
+		sql.append(" COLLATE NOCASE LIKE '%mangadex.%' ORDER BY ");
+		sql.append(DvkHandler.TITLE);
+		sql.append(';');
+		try(ResultSet rs = dvk_handler.get_sql_set(sql.toString())) {
+			ArrayList<Dvk> search = DvkHandler.get_dvks(rs);
+			int size = search.size();
+			for(int i = 0; i < size; i++) {
+				String id = get_id_from_tags(search.get(i).get_web_tags());
 				if(id.length() > 0) {
 					int index = ids.indexOf(id);
 					if(index == -1) {
-						String title = dvk.get_title();
+						String title = search.get(i).get_title();
 						int end = title.indexOf('|');
 						if(end == -1) {
 							end = title.length();
 						}
-						dvk = new Dvk();
+						Dvk dvk = new Dvk();
 						dvk.set_title(title.substring(0, end));
 						dvk.set_id(id);
 						dvk.set_dvk_file(
-								dvk_handler.get_dvk(i).get_dvk_file().getParentFile());
+								search.get(i).get_dvk_file().getParentFile());
 						ids.add(id);
 						dvks.add(dvk);
 					}
 					else {
-						dvk = new Dvk();
+						Dvk dvk = new Dvk();
 						dvk.set_title(dvks.get(index).get_title());
 						dvk.set_id(id);
-						File file = dvk_handler.get_dvk(i)
-								.get_dvk_file().getParentFile();
+						File file = search.get(i).get_dvk_file().getParentFile();
 						file = ArtistHosting.get_common_directory(
 								dvks.get(index).get_dvk_file(), file);
 						dvk.set_dvk_file(file);
@@ -493,6 +525,7 @@ public class MangaDex {
 				}
 			}
 		}
+		catch(SQLException e) {}
 		return dvks;
 	}
 }

@@ -2,9 +2,9 @@ package com.gmail.drakovekmail.dvkarchive.gui.error;
 
 import java.io.File;
 
+import com.gmail.drakovekmail.dvkarchive.file.DvkException;
 import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
 import com.gmail.drakovekmail.dvkarchive.file.ErrorFinding;
-import com.gmail.drakovekmail.dvkarchive.file.FilePrefs;
 import com.gmail.drakovekmail.dvkarchive.gui.SimpleServiceGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
 
@@ -35,14 +35,16 @@ public class MissingMediaGUI extends SimpleServiceGUI {
 	 */
 	@Override
 	public void run_process() {
-		this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
-		File[] dirs = {this.start_gui.get_directory()};
-		FilePrefs prefs = this.start_gui.get_file_prefs();
-		DvkHandler handler = new DvkHandler();
-		handler.read_dvks(dirs, prefs, this.start_gui, prefs.use_index(), true, prefs.use_index());
-		this.start_gui.append_console("", false);
-		this.start_gui.append_console("missing_media_console", true);
-		ErrorFinding.get_missing_media_dvks(handler, this.start_gui);
+		try(DvkHandler dvk_handler = new DvkHandler(this.start_gui.get_file_prefs())) {
+			this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
+			File[] dirs = {this.start_gui.get_directory()};
+			dvk_handler.read_dvks(dirs, this.start_gui);
+			this.start_gui.append_console("", false);
+			this.start_gui.append_console("missing_media_console", true);
+			this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
+			ErrorFinding.get_missing_media_dvks(dvk_handler, this.start_gui);
+		}
+		catch(DvkException e) {}
 	}
 
 	@Override
@@ -50,5 +52,4 @@ public class MissingMediaGUI extends SimpleServiceGUI {
 
 	@Override
 	public void close() {}
-
 }

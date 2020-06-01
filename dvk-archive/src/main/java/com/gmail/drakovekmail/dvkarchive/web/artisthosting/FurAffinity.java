@@ -1,6 +1,8 @@
 package com.gmail.drakovekmail.dvkarchive.web.artisthosting;
 
 import java.io.File;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -13,6 +15,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import com.gargoylesoftware.htmlunit.html.DomAttr;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
+import com.gmail.drakovekmail.dvkarchive.file.DvkException;
 import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
 import com.gmail.drakovekmail.dvkarchive.file.FilePrefs;
 import com.gmail.drakovekmail.dvkarchive.file.InOut;
@@ -66,8 +69,13 @@ public class FurAffinity extends ArtistHosting {
 	 * @param headless Whether Selenium driver should be headless
 	 */
 	private void initialize_connect(boolean headless) {
-		this.connect = new DConnectSelenium(headless, this.start_gui);
-		this.downloader = new DConnect(false, true);
+		try {
+			this.connect = new DConnectSelenium(headless, this.start_gui);
+			this.downloader = new DConnect(false, true);
+		}
+		catch(DvkException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -309,36 +317,52 @@ public class FurAffinity extends ArtistHosting {
 		xpath = "//figure//u//a[contains(@href,'/view/')]/@href";
 		das = this.connect.get_page().getByXPath(xpath);
 		boolean check_next = true;
-		int size = dvk_handler.get_size();
+		StringBuilder sql;
+		//RUN THROUGH MEDIA URLS ON GALLERY PAGE
 		for(int i = 0; i < das.size(); i++) {
+			//GET ID OF CURRENT MEDIA URL
 			boolean contains = false;
 			String link = "https://www.furaffinity.net" + das.get(i).getNodeValue();
 			String id = get_page_id(link, true);
-			for(int k = 0; k < size; k++) {
-				if(get_page_id(dvk_handler.get_dvk(k).get_page_url(), true).equals(id)) {
+			//SQL COMMAND TO GET SAVED URLS WITH SAME ID
+			sql = new StringBuilder("SELECT * FROM ");
+			sql.append(DvkHandler.DVKS);
+			sql.append(" WHERE ");
+			sql.append(DvkHandler.PAGE_URL);
+			sql.append(" COLLATE NOCASE LIKE '%.furaffinity.net/view/%' AND ");
+			sql.append(DvkHandler.DVK_ID);
+			sql.append(" = '");
+			sql.append(id);
+			sql.append("';");
+			try(ResultSet rs = dvk_handler.get_sql_set(sql.toString())) {
+				ArrayList<Dvk> dvks = DvkHandler.get_dvks(rs);
+				if(dvks.size() > 0) {
+					//RUNS IF ID ALLREADY DOWNLOADED
 					contains = true;
-					//ENDS IF DOWNLOADED DVK IS NOT A SINGLE DOWNLOAD
-					Dvk dvk = dvk_handler.get_dvk(k);
+					Dvk dvk = dvks.get(0);
 					String[] wts = dvk.get_web_tags();
 					if (type == 'f') {
 						if(!ArrayProcessing.contains(wts, "favorite:" + artist, false)) {
+							//ADDS TO LIST IF NOT A FAVORITE OF THE GIVEN ARTIST
 							contains = false;
 						}
 						else {
+							//STOPS RUNNING IF ALREADY LISTED AS FAVORITE FOR THE GIVEN ARTIST
 							check_next = false;
 						}
 					}
 					else if (!ArrayProcessing.contains(wts, "dvk:single", false)) {
+						//STOPS RUNNING IF DOWNLOADED DVK IS NOT A SINGLE DOWNLOAD
 						check_next = false;
 					}
-					//UPDATE DVK LOCATION AND FAVORITE IF ALREADY DOWNLOADED
+					//UPDATE DVK LOCATION
 					if(type != 'f') {
-						dvk = ArtistHosting.move_dvk(dvk_handler.get_dvk(k), directory);
-						dvk_handler.set_dvk(dvk, k);
+						dvk = ArtistHosting.move_dvk(dvk, directory);
+						dvk_handler.set_dvk(dvk, dvk.get_sql_id());
 					}
-					break;
 				}
 			}
+			catch(SQLException e) {}
 			if(!contains) {
 				pages.add(link);
 			}
@@ -363,6 +387,7 @@ public class FurAffinity extends ArtistHosting {
 				new_url = "https://www.furaffinity.net" + de.getAttribute("href");
 			}
 		}
+		//GET THE NEXT GALLERY PAGE
 		if(new_url != null && (check_all || check_next)) {
 			ArrayList<String> next = get_pages(artist, directory, type,
 					dvk_handler, check_all, check_login, new_url);
@@ -431,25 +456,36 @@ public class FurAffinity extends ArtistHosting {
 		List<DomElement> ds;
 		ds = this.connect.get_page().getByXPath(xpath);
 		boolean check_next = true;
-		int size = dvk_handler.get_size();
+		StringBuilder sql;
 		for(int i = 0; i < ds.size(); i++) {
 			String link = ds.get(i).asText().toLowerCase();
 			if(link.contains("read more") || link.contains("view journal")) {
 				boolean contains = false;
 				link = "https://www.furaffinity.net" + ds.get(i).getAttribute("href");
 				String id = get_page_id(link, true);
-				for(int k = 0; k < size; k++) {
-					if(get_page_id(dvk_handler.get_dvk(k).get_page_url(), true).equals(id)) {
+				//SQL COMMAND TO GET SAVED URLS WITH SAME ID
+				sql = new StringBuilder("SELECT * FROM ");
+				sql.append(DvkHandler.DVKS);
+				sql.append(" WHERE ");
+				sql.append(DvkHandler.PAGE_URL);
+				sql.append(" COLLATE NOCASE LIKE '%.furaffinity.net/journal/%' AND ");
+				sql.append(DvkHandler.DVK_ID);
+				sql.append(" = '");
+				sql.append(id);
+				sql.append("';");
+				try(ResultSet rs = dvk_handler.get_sql_set(sql.toString())) {
+					ArrayList<Dvk> dvks = DvkHandler.get_dvks(rs);
+					if(dvks.size() > 0) {
 						contains = true;
 						//UPDATE DVK LOCATION AND FAVORITE IF ALREADY DOWNLOADED
-						Dvk dvk = ArtistHosting.move_dvk(dvk_handler.get_dvk(k), directory);
-						dvk_handler.set_dvk(dvk, k);
+						Dvk dvk = ArtistHosting.move_dvk(dvks.get(0), directory);
+						dvk_handler.set_dvk(dvk, dvk.get_sql_id());
 						if(!ArrayProcessing.contains(dvk.get_web_tags(), "dvk:single", false)) {
 							check_next = false;
 						}
-						break;
 					}
 				}
+				catch(SQLException e) {}
 				if(!contains) {
 					pages.add(link);
 				}
@@ -509,9 +545,6 @@ public class FurAffinity extends ArtistHosting {
 		if(dvk_handler != null && artist != null) {
 			dvk = ArtistHosting.update_favorite(dvk_handler, artist, id);
 			if(dvk != null) {
-				if(save) {
-					dvk.write_dvk();
-				}
 				return dvk;
 			}
 		}
@@ -729,6 +762,10 @@ public class FurAffinity extends ArtistHosting {
 					dvk.write_dvk();
 				}
 			}
+			//ADD DVK AND RETURN
+			if(dvk_handler != null) {
+				dvk_handler.add_dvk(dvk);
+			}
 			return dvk;
 		}
 		catch(Exception e) {
@@ -741,6 +778,7 @@ public class FurAffinity extends ArtistHosting {
 	 * Returns a Dvk for a given FurAffinity journal page.
 	 * 
 	 * @param page_url URL of FurAffinity journal page
+	 * @param dvk_handler DvkHandler to add to when getting Dvk
 	 * @param directory Directory in which to save Dvk.
 	 * @param save Whether to save Dvk and media
 	 * @param single Whether this is a single download
@@ -748,6 +786,7 @@ public class FurAffinity extends ArtistHosting {
 	 */
 	public Dvk get_journal_dvk(
 			String page_url,
+			DvkHandler dvk_handler,
 			File directory,
 			boolean single,
 			boolean save) {
@@ -827,6 +866,10 @@ public class FurAffinity extends ArtistHosting {
 					return new Dvk();
 				}
 			}
+			//ADD DVK TO DVK_HANDLER
+			if(dvk_handler != null) {
+				dvk_handler.add_dvk(dvk);
+			}
 			return dvk;
 		}
 		catch(Exception e) {
@@ -840,10 +883,16 @@ public class FurAffinity extends ArtistHosting {
 	 */
 	public void close() {
 		if(this.connect != null) {
-			this.connect.close_driver();
+			try {
+				this.connect.close();
+			}
+			catch(DvkException e) {}
 		}
 		if(this.downloader != null) {
-			this.downloader.close_client();
+			try {
+				this.downloader.close();
+			}
+			catch(DvkException e) {}
 		}
 	}
 }
