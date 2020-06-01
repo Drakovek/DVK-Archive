@@ -323,21 +323,17 @@ public class FurAffinity extends ArtistHosting {
 			//GET ID OF CURRENT MEDIA URL
 			boolean contains = false;
 			String link = "https://www.furaffinity.net" + das.get(i).getNodeValue();
-			String id = get_page_id(link, false);
+			String id = get_page_id(link, true);
 			//SQL COMMAND TO GET SAVED URLS WITH SAME ID
 			sql = new StringBuilder("SELECT * FROM ");
 			sql.append(DvkHandler.DVKS);
 			sql.append(" WHERE ");
 			sql.append(DvkHandler.PAGE_URL);
-			sql.append(" COLLATE NOCASE LIKE '%.furaffinity.net/view/%' AND (");
-			sql.append(DvkHandler.PAGE_URL);
-			sql.append(" COLLATE NOCASE LIKE '%/");
+			sql.append(" COLLATE NOCASE LIKE '%.furaffinity.net/view/%' AND ");
+			sql.append(DvkHandler.DVK_ID);
+			sql.append(" = '");
 			sql.append(id);
-			sql.append("' OR ");
-			sql.append(DvkHandler.PAGE_URL);
-			sql.append(" COLLATE NOCASE LIKE '%/");
-			sql.append(id);
-			sql.append("/');");
+			sql.append("';");
 			try(ResultSet rs = dvk_handler.get_sql_set(sql.toString())) {
 				ArrayList<Dvk> dvks = DvkHandler.get_dvks(rs);
 				if(dvks.size() > 0) {
@@ -466,21 +462,17 @@ public class FurAffinity extends ArtistHosting {
 			if(link.contains("read more") || link.contains("view journal")) {
 				boolean contains = false;
 				link = "https://www.furaffinity.net" + ds.get(i).getAttribute("href");
-				String id = get_page_id(link, false);
+				String id = get_page_id(link, true);
 				//SQL COMMAND TO GET SAVED URLS WITH SAME ID
 				sql = new StringBuilder("SELECT * FROM ");
 				sql.append(DvkHandler.DVKS);
 				sql.append(" WHERE ");
 				sql.append(DvkHandler.PAGE_URL);
-				sql.append(" COLLATE NOCASE LIKE '%.furaffinity.net/journal/%' AND (");
-				sql.append(DvkHandler.PAGE_URL);
-				sql.append(" COLLATE NOCASE LIKE '%/");
+				sql.append(" COLLATE NOCASE LIKE '%.furaffinity.net/journal/%' AND ");
+				sql.append(DvkHandler.DVK_ID);
+				sql.append(" = '");
 				sql.append(id);
-				sql.append("' OR ");
-				sql.append(DvkHandler.PAGE_URL);
-				sql.append(" COLLATE NOCASE LIKE '%/");
-				sql.append(id);
-				sql.append("/');");
+				sql.append("';");
 				try(ResultSet rs = dvk_handler.get_sql_set(sql.toString())) {
 					ArrayList<Dvk> dvks = DvkHandler.get_dvks(rs);
 					if(dvks.size() > 0) {

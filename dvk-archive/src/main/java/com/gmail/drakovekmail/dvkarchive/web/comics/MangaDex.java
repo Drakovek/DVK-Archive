@@ -1,7 +1,5 @@
 package com.gmail.drakovekmail.dvkarchive.web.comics;
 
-import static org.junit.Assert.assertTrue;
-
 import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;

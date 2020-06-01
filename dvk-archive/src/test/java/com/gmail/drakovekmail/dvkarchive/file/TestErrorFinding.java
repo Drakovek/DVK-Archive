@@ -121,17 +121,22 @@ public class TestErrorFinding {
 	public void test_get_unlinked_media() {
 		FilePrefs prefs = new FilePrefs();
 		prefs.set_index_dir(this.test_dir);
-		prefs.set_use_index(false);
-		File[] dirs = {this.test_dir};
-		ArrayList<File> unlinked;
-		unlinked = ErrorFinding.get_unlinked_media(prefs, dirs, null);
-		assertEquals(2, unlinked.size());
-		String[] names = new String[2];
-		names[0] = unlinked.get(0).getName();
-		names[1] = unlinked.get(1).getName();
-		Arrays.sort(names);
-		assertEquals("u2.jpg", names[0]);
-		assertEquals("u3.jpg", names[1]);
+		try(DvkHandler dvk_handler = new DvkHandler(prefs)) {
+			File[] dirs = {this.test_dir};
+			dvk_handler.read_dvks(dirs, null);
+			ArrayList<File> unlinked;
+			unlinked = ErrorFinding.get_unlinked_media(dvk_handler, dirs, null);
+			assertEquals(2, unlinked.size());
+			String[] names = new String[2];
+			names[0] = unlinked.get(0).getName();
+			names[1] = unlinked.get(1).getName();
+			Arrays.sort(names);
+			assertEquals("u2.jpg", names[0]);
+			assertEquals("u3.jpg", names[1]);
+		}
+		catch(DvkException e) {
+			assertTrue(false);
+		}
 	}
 	
 	/**

@@ -79,6 +79,7 @@ public class DeviantArt extends ArtistHosting {
 	 * Can be either media page or journal page.
 	 * 
 	 * @param page_url URL of Fur Affinity page
+	 * @param include_ends Whether to include the FurAffinity specific ID header and footer
 	 * @return ID for page
 	 */
 	public static String get_page_id(String page_url, boolean include_ends) {
@@ -498,6 +499,7 @@ public class DeviantArt extends ArtistHosting {
 	 * Returns a Dvk for a given DeviantArt poll page.
 	 * 
 	 * @param info Dvk containing poll info
+	 * @param dvk_handler DvkHandler to add Dvk to when finished
 	 * @param directory Directory in which to save Dvk.
 	 * @param save Whether to save Dvk and media
 	 * @return Dvk of DeviantArt media page
@@ -586,6 +588,7 @@ public class DeviantArt extends ArtistHosting {
 	 * Returns a Dvk for a given DeviantArt status update page.
 	 * 
 	 * @param info Dvk containing status info
+	 * @param dvk_handler DvkHandler to add Dvk to when finished
 	 * @param directory Directory in which to save Dvk.
 	 * @param save Whether to save Dvk and media
 	 * @return Dvk of DeviantArt media page
@@ -639,6 +642,7 @@ public class DeviantArt extends ArtistHosting {
 	 * Defaults to saving DVK and media.
 	 * 
 	 * @param page_url URL of DeviantArt journal page
+	 * @param dvk_handler DvkHandler to add Dvk to when finished
 	 * @param directory Directory in which to save Dvk.
 	 * @param single Whether this is a single download
 	 * @return Dvk of DeviantArt media page
@@ -651,6 +655,7 @@ public class DeviantArt extends ArtistHosting {
 	 * Returns a Dvk for a given DeviantArt journal page.
 	 * 
 	 * @param page_url URL of DeviantArt journal page
+	 * @param dvk_handler DvkHandler to add Dvk to when finished
 	 * @param directory Directory in which to save Dvk
 	 * @param try_num Number of times downloading media has been attempted
 	 * @param single Whether this is a single download
@@ -859,56 +864,53 @@ public class DeviantArt extends ArtistHosting {
 				boolean contains = false;
 				JSONObject obj = arr.getJSONObject(i).getJSONObject("deviation");
 				String link = obj.getString("url");
-				String id = get_page_id(link, false);
+				String id = get_page_id(link, true);
 				sql = new StringBuilder("SELECT * FROM ");
 				sql.append(DvkHandler.DVKS);
 				sql.append(" WHERE ");
 				sql.append(DvkHandler.PAGE_URL);
 				sql.append(" COLLATE NOCASE LIKE '%.deviantart.com/%' AND ");
-				sql.append(DvkHandler.PAGE_URL);
-				sql.append(" COLLATE NOCASE LIKE '%");
+				sql.append(DvkHandler.DVK_ID);
+				sql.append(" = '");
 				sql.append(id);
-				sql.append("%';");
+				sql.append("';");
 				try(ResultSet rs = dvk_handler.get_sql_set(sql.toString())) {
 					ArrayList<Dvk> dvks = DvkHandler.get_dvks(rs);
-					for(int dvk_i = 0; dvk_i < dvks.size(); dvk_i++) {
-						if(get_page_id(dvks.get(dvk_i).get_page_url(), false).equals(id)) {
-							contains = true;
-							//ENDS IF DOWNLOADED DVK IS NOT A SINGLE DOWNLOAD
-							String[] wts = dvks.get(dvk_i).get_web_tags();
-							if (type == 'f') {
-								if(!ArrayProcessing.contains(wts, "favorite:" + artist, false)) {
-									contains = false;
-								}
-								else {
-									check_next = false;
-								}
+					if(dvks.size() > 0) {
+						contains = true;
+						//ENDS IF DOWNLOADED DVK IS NOT A SINGLE DOWNLOAD
+						String[] wts = dvks.get(0).get_web_tags();
+						if (type == 'f') {
+							if(!ArrayProcessing.contains(wts, "favorite:" + artist, false)) {
+								contains = false;
 							}
-							else if (!ArrayProcessing.contains(wts, "dvk:single", false)) {
+							else {
 								check_next = false;
 							}
-							//UPDATE DVK LOCATION AND FAVORITE IF ALREADY DOWNLOADED
-							Dvk dvk = dvks.get(dvk_i);
-							if(type != 'f') {
-								dvk = ArtistHosting.move_dvk(dvk, directory);
-								dvk_handler.set_dvk(dvk, dvk.get_sql_id());
-							}
-							//ADD GALLERY TAG
-							if(type == 'm' && !ArrayProcessing.contains(dvk.get_web_tags(), "gallery:main", false)) {
-								ArrayList<String> tags = ArrayProcessing.array_to_list(dvk.get_web_tags());
-								tags.add(0, "Gallery:Main");
-								dvk.set_web_tags(ArrayProcessing.list_to_array(tags));
-								dvk_handler.set_dvk(dvk, dvk.get_sql_id());
-								dvk.write_dvk();
-							}
-							else if(type == 's' && !ArrayProcessing.contains(dvk.get_web_tags(), "gallery:scraps", false)) {
-								ArrayList<String> tags = ArrayProcessing.array_to_list(dvk.get_web_tags());
-								tags.add(0, "Gallery:Scraps");
-								dvk.set_web_tags(ArrayProcessing.list_to_array(tags));
-								dvk_handler.set_dvk(dvk, dvk.get_sql_id());
-								dvk.write_dvk();
-							}
-							break;
+						}
+						else if (!ArrayProcessing.contains(wts, "dvk:single", false)) {
+							check_next = false;
+						}
+						//UPDATE DVK LOCATION AND FAVORITE IF ALREADY DOWNLOADED
+						Dvk dvk = dvks.get(0);
+						if(type != 'f') {
+							dvk = ArtistHosting.move_dvk(dvk, directory);
+							dvk_handler.set_dvk(dvk, dvk.get_sql_id());
+						}
+						//ADD GALLERY TAG
+						if(type == 'm' && !ArrayProcessing.contains(dvk.get_web_tags(), "gallery:main", false)) {
+							ArrayList<String> tags = ArrayProcessing.array_to_list(dvk.get_web_tags());
+							tags.add(0, "Gallery:Main");
+							dvk.set_web_tags(ArrayProcessing.list_to_array(tags));
+							dvk_handler.set_dvk(dvk, dvk.get_sql_id());
+							dvk.write_dvk();
+						}
+						else if(type == 's' && !ArrayProcessing.contains(dvk.get_web_tags(), "gallery:scraps", false)) {
+							ArrayList<String> tags = ArrayProcessing.array_to_list(dvk.get_web_tags());
+							tags.add(0, "Gallery:Scraps");
+							dvk.set_web_tags(ArrayProcessing.list_to_array(tags));
+							dvk_handler.set_dvk(dvk, dvk.get_sql_id());
+							dvk.write_dvk();
 						}
 					}
 				}
@@ -1064,32 +1066,28 @@ public class DeviantArt extends ArtistHosting {
 				boolean contains = false;
 				JSONObject obj = arr.getJSONObject(i);
 				String link = obj.getString("url");
-				String page_id = get_page_id(link, false);
+				String page_id = get_page_id(link, true);
 				sql = new StringBuilder("SELECT * FROM ");
 				sql.append(DvkHandler.DVKS);
 				sql.append(" WHERE ");
 				sql.append(DvkHandler.PAGE_URL);
 				sql.append(" COLLATE NOCASE LIKE '%.deviantart.com/%' AND ");
-				sql.append(DvkHandler.PAGE_URL);
-				sql.append(" COLLATE NOCASE LIKE '%");
+				sql.append(DvkHandler.DVK_ID);
+				sql.append(" = '");
 				sql.append(page_id);
-				sql.append("%';");
+				sql.append("';");
 				try(ResultSet rs = dvk_handler.get_sql_set(sql.toString())) {
-					page_id = get_page_id(link, true);
 					ArrayList<Dvk> id_dvks = DvkHandler.get_dvks(rs);
-					for(int dvk_i = 0; dvk_i < id_dvks.size(); dvk_i++) {
-						if(get_page_id(id_dvks.get(dvk_i).get_page_url(), true).equals(page_id)) {
-							contains = true;
-							//UPDATE DVK LOCATION IF ALREADY DOWNLOADED
-							Dvk dvk;
-							dvk = ArtistHosting.move_dvk(id_dvks.get(dvk_i), directory);
-							dvk_handler.set_dvk(dvk, dvk.get_sql_id());
-							//ENDS IF DOWNLOADED DVK IS NOT A SINGLE DOWNLOAD
-							String[] tags = dvk.get_web_tags();
-							if(!ArrayProcessing.contains(tags, "dvk:single", false)) {
-								check_next = false;
-							}
-							break;
+					if(id_dvks.size() > 0) {
+						contains = true;
+						//UPDATE DVK LOCATION IF ALREADY DOWNLOADED
+						Dvk dvk;
+						dvk = ArtistHosting.move_dvk(id_dvks.get(0), directory);
+						dvk_handler.set_dvk(dvk, dvk.get_sql_id());
+						//ENDS IF DOWNLOADED DVK IS NOT A SINGLE DOWNLOAD
+						String[] tags = dvk.get_web_tags();
+						if(!ArrayProcessing.contains(tags, "dvk:single", false)) {
+							check_next = false;
 						}
 					}
 				}

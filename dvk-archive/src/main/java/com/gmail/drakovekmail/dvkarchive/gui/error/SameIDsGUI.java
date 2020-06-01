@@ -41,6 +41,7 @@ public class SameIDsGUI extends SimpleServiceGUI {
 			dvk_handler.read_dvks(dirs, this.start_gui);
 			this.start_gui.append_console("", false);
 			this.start_gui.append_console("same_ids_console", true);
+			this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
 			ErrorFinding.get_same_ids(dvk_handler, this.start_gui);
 		}
 		catch(DvkException e) {}

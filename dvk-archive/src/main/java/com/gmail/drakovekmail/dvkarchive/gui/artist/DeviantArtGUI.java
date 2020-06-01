@@ -1,9 +1,12 @@
 package com.gmail.drakovekmail.dvkarchive.gui.artist;
 
 import java.io.File;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.prefs.Preferences;
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
+import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
 import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.compound.DButtonDialog;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.compound.DTextDialog;
@@ -236,19 +239,35 @@ public class DeviantArtGUI extends ArtistHostingGUI {
 		if(id.length() > 0 && !id.endsWith("-P") && !id.endsWith("-S")) {
 			//CHECK DVK IS NOT ALREADY DOWNLOADED
 			boolean download = true;
-			int size = this.dvk_handler.get_size();
-			for(int i = 0; i < size; i++) {
-				if(this.dvk_handler.get_dvk(i).get_id().equals(id)) {
-					download = false;
-					break;
+			StringBuilder sql = new StringBuilder("SELECT ");
+			sql.append(DvkHandler.DVK_FILE);
+			sql.append(", ");
+			sql.append(DvkHandler.DIRECTORY);
+			sql.append(", ");
+			sql.append(DvkHandler.DVK_ID);
+			sql.append(" FROM ");
+			sql.append(DvkHandler.DVKS);
+			sql.append(" WHERE ");
+			sql.append(DvkHandler.PAGE_URL);
+			sql.append(" COLLATE NOCASE LIKE '%deviantart.com%';");
+			try(ResultSet rs = this.dvk_handler.get_sql_set(sql.toString())) {
+				while(rs.next()) {
+					if(rs.getString(DvkHandler.DVK_ID).equals(id)) {
+						download = false;
+						File file = new File(rs.getString(DvkHandler.DIRECTORY), rs.getString(DvkHandler.DVK_FILE));
+						id = file.getAbsolutePath();
+						break;
+					}
 				}
 			}
+			catch(SQLException e) {}
 			//DOWNLOAD PAGE
 			if(download) {
 				download_media_page(url, this.start_gui.get_directory(), null, null, true);
 			}
 			else {
 				this.start_gui.append_console("already_downloaded", true);
+				this.start_gui.append_console(id, false);
 			}
 		}
 		else {

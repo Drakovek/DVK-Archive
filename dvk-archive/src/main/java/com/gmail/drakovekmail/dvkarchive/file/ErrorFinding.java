@@ -18,53 +18,99 @@ public class ErrorFinding {
 	 * Returns list of files not linked to a DVK file.
 	 * Only returns files in the same directories as DVK files.
 	 * 
-	 * @param prefs FilePrefs for getting index settings
+	 * @param dvk_handler DvkHandler with loaded Dvk objects
 	 * @param directories Directories in which to search for files
 	 * @param start_gui Used for displaying progress and results
 	 * @return List of unlinked files
 	 */
 	public static ArrayList<File> get_unlinked_media(
-			FilePrefs prefs,
+			DvkHandler dvk_handler,
 			File[] directories,
 			StartGUI start_gui) {
-		try(DvkHandler handler = new DvkHandler(prefs)) {
-			File[] dirs = new File[0];
-			if(start_gui == null || !start_gui.get_base_gui().is_canceled()) {
-				dirs = DvkHandler.get_directories(directories);
+		int index;
+		File file;
+		File[] dirs = new File[0];
+		if(start_gui == null || !start_gui.get_base_gui().is_canceled()) {
+			dirs = DvkHandler.get_directories(directories, true);
+		}
+		ArrayList<File> missing = new ArrayList<>();
+		//CREATE MAIN SQL COMMAND
+		StringBuilder sql = new StringBuilder("SELECT ");
+		sql.append(DvkHandler.MEDIA_FILE);
+		sql.append(", ");
+		sql.append(DvkHandler.SECONDARY_FILE);
+		sql.append(" FROM ");
+		sql.append(DvkHandler.DVKS);
+		sql.append(" WHERE ");
+		//LIMIT TO OPENED DIRECTORIES
+		if(directories != null && directories.length > 0) {
+			for(int i = 0; i < directories.length; i++) {
+				if(i > 0) {
+					sql.append(" OR ");
+				}
+				sql.append(DvkHandler.DIRECTORY);
+				sql.append(" LIKE '");
+				sql.append(directories[i]);
+				sql.append("%'");
 			}
-			ArrayList<File> missing = new ArrayList<>();
-			for(int i = 0; i < dirs.length; i++) {
-				//BREAK IF CANCELLED
-				if(start_gui != null && start_gui.get_base_gui().is_canceled()) {
-					break;
-				}
-				//UPDATE PROGRESS
-				if(start_gui != null) {
-					start_gui.get_main_pbar().set_progress(false, true, i, dirs.length);
-				}
-				//LOAD DIRECTORY
-				File[] files = {dirs[i]};
-				handler.read_dvks(files, null);
-				files = dirs[i].listFiles();
-				Arrays.sort(files);
-				for(File file: files) {
-					//CHECK IF FILE IS MISSING
-					if(!file.isDirectory()
-							&& !file.getName().endsWith(".dvk")
-							&& !missing.contains(file)
-							&& !handler.contains_file(file)) {
-						missing.add(file);
-						//PRINT PATH
-						if(start_gui != null) {
-							start_gui.append_console(file.getAbsolutePath(), false);
+			sql.append(" AND ");
+		}
+		sql.append(DvkHandler.DIRECTORY);
+		sql.append(" = '");
+		String sql_base = sql.toString();
+		//RUN THROUGH DIRECTORIES
+		for(int i = 0; i < dirs.length; i++) {
+			//BREAK IF CANCELLED
+			if(start_gui != null && start_gui.get_base_gui().is_canceled()) {
+				break;
+			}
+			//UPDATE PROGRESS
+			if(start_gui != null) {
+				start_gui.get_main_pbar().set_progress(false, true, i, dirs.length);
+			}
+			//GET NON-DVKS IN DIRECTORY
+			File[] files = {dirs[i]};
+			dvk_handler.read_dvks(files, null);
+			files = dirs[i].listFiles(new ExtensionFilter(".dvk", false));
+			Arrays.parallelSort(files);
+			ArrayList<File> non_dvks = new ArrayList<>();
+			for(File non_dvk: files) {
+				non_dvks.add(non_dvk);
+			}
+			//REMOVE FILES
+			sql = new StringBuilder(sql_base);
+			sql.append(dirs[i].getAbsolutePath());
+			sql.append("';");
+			try(ResultSet rs = dvk_handler.get_sql_set(sql.toString())) {
+				while(rs.next()) {
+					try {
+						file = new File(dirs[i], rs.getString(DvkHandler.MEDIA_FILE));
+						index = non_dvks.indexOf(file);
+						if(index != -1) {
+							non_dvks.remove(index);
 						}
 					}
+					catch(NullPointerException f) {}
+					try {
+						file = new File(dirs[i], rs.getString(DvkHandler.SECONDARY_FILE));
+						index = non_dvks.indexOf(file);
+						if(index != -1) {
+							non_dvks.remove(index);
+						}
+					}
+					catch(NullPointerException f) {}
 				}
 			}
-			return missing;
+			catch(SQLException e) {}
+			//ADD MISSING FILES TO MISSING LIST
+			missing.addAll(non_dvks);
+			if(start_gui != null) {
+				for(int missingno = 0; missingno < non_dvks.size(); missingno++) {
+					start_gui.append_console(non_dvks.get(missingno).getAbsolutePath(), false);
+				}
+			}
 		}
-		catch(DvkException e) {}
-		return new ArrayList<>();
+		return missing;
 	}
 	
 	/**
@@ -113,7 +159,6 @@ public class ErrorFinding {
 	public static ArrayList<File> get_same_ids(
 			DvkHandler dvk_handler,
 			StartGUI start_gui) {
-		//TODO SHOW PROGRESS AND ALLOW CANCELLING
 		StringBuilder sql = new StringBuilder("SELECT ");
 		sql.append(DvkHandler.DVK_ID);
 		sql.append(" FROM ");
@@ -127,37 +172,67 @@ public class ErrorFinding {
 		sql.append(", ");
 		sql.append(DvkHandler.TITLE);
 		sql.append(';');
-		try (ResultSet rs1 = dvk_handler.get_sql_set(sql.toString())) {
-			File file;
-			ArrayList<File> files = new ArrayList<>();
-			sql = new StringBuilder("SELECT ");
-			sql.append(DvkHandler.DIRECTORY);
-			sql.append(", ");
-			sql.append(DvkHandler.DVK_FILE);
-			sql.append(" FROM ");
-			sql.append(DvkHandler.DVKS);
-			sql.append(" WHERE ");
-			sql.append(DvkHandler.DVK_ID);
-			sql.append(" = '");
-			String start = sql.toString();
-			while(rs1.next()) {
-				sql = new StringBuilder(start);
-				sql.append(rs1.getString(DvkHandler.DVK_ID));
-				sql.append("' ORDER BY ");
-				sql.append(DvkHandler.TITLE);
-				sql.append(";");
-				try(ResultSet rs2 = dvk_handler.get_sql_set(sql.toString())) {
-					while(rs2.next()) {
-						file = new File(rs2.getString(DvkHandler.DIRECTORY),
-								rs2.getString(DvkHandler.DVK_FILE));
-						files.add(file);
-					}
+		//GET LIST OF DUPLICATED DVK IDS
+		ArrayList<String> ids = new ArrayList<>();
+		try (ResultSet rs = dvk_handler.get_sql_set(sql.toString())) {
+			while(rs.next()) {
+				//BREAK IF CANCELLED
+				if(start_gui != null && start_gui.get_base_gui().is_canceled()) {
+					break;
 				}
-				catch(SQLException f) {}
+				ids.add(rs.getString(DvkHandler.DVK_ID));
 			}
-			return files;
 		}
 		catch(SQLException e) {}
-		return new ArrayList<>();
+		File file;
+		boolean first;
+		ArrayList<File> files = new ArrayList<>();
+		sql = new StringBuilder("SELECT ");
+		sql.append(DvkHandler.DIRECTORY);
+		sql.append(", ");
+		sql.append(DvkHandler.DVK_FILE);
+		sql.append(" FROM ");
+		sql.append(DvkHandler.DVKS);
+		sql.append(" WHERE ");
+		sql.append(DvkHandler.DVK_ID);
+		sql.append(" = '");
+		int size = ids.size();
+		String start = sql.toString();
+		for(int i = 0; i < size; i++) {
+			sql = new StringBuilder(start);
+			sql.append(ids.get(i));
+			sql.append("' ORDER BY ");
+			sql.append(DvkHandler.TITLE);
+			sql.append(";");
+			try(ResultSet rs = dvk_handler.get_sql_set(sql.toString())) {
+				//BREAK IF CANCELLED
+				if(start_gui != null) {
+					start_gui.get_main_pbar().set_progress(false, true, i, size);
+					if(start_gui.get_base_gui().is_canceled()) {
+						break;
+					}
+				}
+				first = true;
+				while(rs.next()) {
+					file = new File(rs.getString(DvkHandler.DIRECTORY),
+							rs.getString(DvkHandler.DVK_FILE));
+					//PRINT FILE
+					if(start_gui != null) {
+						if(first) {
+							start_gui.append_console(file.getAbsolutePath(), false);
+						}
+						else {
+							start_gui.append_console("    " + file.getAbsolutePath(), false);
+						}
+					}
+					first = false;
+					files.add(file);
+				}
+			}
+			catch(SQLException f) {
+				return new ArrayList<>();
+			}
+		}
+		return files;
 	}
 }

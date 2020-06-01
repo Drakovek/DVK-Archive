@@ -117,18 +117,20 @@ public class MangaDexGUI extends ArtistHostingGUI {
 	
 	@Override
 	public void get_artists() {
-		close();
+		this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
+		this.start_gui.append_console("sorting_dvks", true);
+		close_connection();
 		try {
-			this.connect = new DConnect(false, false);
 			this.sel = new DConnectSelenium(true, this.start_gui);
-			this.dvks = MangaDex.get_downloaded_titles(this.dvk_handler);
-			ArrayList<String> list = new ArrayList<>();
-			for(int i = 0; i < this.dvks.size(); i++) {
-				list.add(this.dvks.get(i).get_title());
-			}
-			set_list(list);
+			this.connect = new DConnect(false, false);
 		}
 		catch(DvkException e) {}
+		this.dvks = MangaDex.get_downloaded_titles(this.dvk_handler);
+		ArrayList<String> list = new ArrayList<>();
+		for(int i = 0; i < this.dvks.size(); i++) {
+			list.add(this.dvks.get(i).get_title());
+		}
+		set_list(list);
 	}
 
 	@Override
@@ -193,6 +195,14 @@ public class MangaDexGUI extends ArtistHostingGUI {
 
 	@Override
 	public void close() {
+		close_connection();
+		this.close_dvk_handler();
+	}
+	
+	/**
+	 * Closes all web connection objects.
+	 */
+	public void close_connection() {
 		if(this.connect != null) {
 			try {
 				this.connect.close();
@@ -205,8 +215,8 @@ public class MangaDexGUI extends ArtistHostingGUI {
 			}
 			catch(DvkException e) {}
 		}
-		this.close_dvk_handler();
 	}
+		
 
 	@Override
 	public boolean login(String username, String password) {

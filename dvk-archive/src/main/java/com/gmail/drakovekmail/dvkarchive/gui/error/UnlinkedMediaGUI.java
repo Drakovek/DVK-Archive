@@ -1,6 +1,9 @@
 package com.gmail.drakovekmail.dvkarchive.gui.error;
 
 import java.io.File;
+
+import com.gmail.drakovekmail.dvkarchive.file.DvkException;
+import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
 import com.gmail.drakovekmail.dvkarchive.file.ErrorFinding;
 import com.gmail.drakovekmail.dvkarchive.gui.SimpleServiceGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
@@ -32,11 +35,16 @@ public class UnlinkedMediaGUI extends SimpleServiceGUI {
 	 */
 	@Override
 	public void run_process() {
-		this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
-		this.start_gui.append_console("", false);
-		this.start_gui.append_console("unlinked_console", true);
-		File[] dirs = {this.start_gui.get_directory()};
-		ErrorFinding.get_unlinked_media(this.start_gui.get_file_prefs(), dirs, this.start_gui);
+		try(DvkHandler dvk_handler = new DvkHandler(this.start_gui.get_file_prefs())) {
+			this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
+			File[] dirs = {this.start_gui.get_directory()};
+			dvk_handler.read_dvks(dirs, this.start_gui);
+			this.start_gui.append_console("", false);
+			this.start_gui.append_console("unlinked_console", true);
+			this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
+			ErrorFinding.get_unlinked_media( dvk_handler, dirs, this.start_gui);
+		}
+		catch(DvkException e) {}
 	}
 
 	@Override

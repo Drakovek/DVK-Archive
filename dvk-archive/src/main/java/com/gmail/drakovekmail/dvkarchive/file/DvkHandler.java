@@ -1,6 +1,7 @@
 package com.gmail.drakovekmail.dvkarchive.file;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -8,7 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
 import com.gmail.drakovekmail.dvkarchive.processing.ArrayProcessing;
 
@@ -129,6 +130,10 @@ public class DvkHandler implements AutoCloseable{
 		this.prefs = prefs;
 		this.connection = null;
 		initialize_connection();
+		this.modified = 0L;
+		if(this.database.exists()) {
+			this.modified = this.database.lastModified();
+		}
 	}
 	
 	/**
@@ -139,16 +144,13 @@ public class DvkHandler implements AutoCloseable{
 	public void initialize_connection() throws DvkException {
 		close();
 		this.database = new File(this.prefs.get_index_dir(), "dvk_archive.db");
-		this.modified = 0L;
-		if(this.database.exists()) {
-			this.modified = this.database.lastModified();
-		}
 		String url = "jdbc:sqlite:" + this.database.getAbsolutePath();
 		@SuppressWarnings("resource")
 		Statement smt = null;
 		try {
 			//CREATE SQL STATEMENT
 			this.connection = DriverManager.getConnection(url);
+			this.connection.setAutoCommit(true);
 			smt = this.connection.createStatement();
 			StringBuilder sql = new StringBuilder();
 			sql.append("CREATE TABLE IF NOT EXISTS ");
@@ -220,7 +222,7 @@ public class DvkHandler implements AutoCloseable{
 			initialize_connection();
 		}
 		catch(DvkException e) {}
-		File[] dvk_dirs = get_directories(dirs);
+		File[] dvk_dirs = get_directories(dirs, false);
 		int max = dvk_dirs.length;
 		for(int i = 0; i < max; i++) {
 			//SHOW PROGRESS
@@ -234,6 +236,64 @@ public class DvkHandler implements AutoCloseable{
 			//ADD DIRECTORY
 			update_directory(dvk_dirs[i]);
 		}
+		//GET NON-EXISTANT DIRECTORIES IN DATABASE
+		StringBuilder sql = new StringBuilder("SELECT ");
+		sql.append(DvkHandler.DIRECTORY);
+		sql.append(" FROM ");
+		sql.append(DvkHandler.DVKS);
+		sql.append(" GROUP BY ");
+		sql.append(DvkHandler.DIRECTORY);
+		sql.append(";");
+		String filename;
+		ArrayList<String> nix = new ArrayList<>();
+		try(ResultSet rs = get_sql_set(sql.toString())) {
+			while(rs.next()) {
+				filename = rs.getString(DvkHandler.DIRECTORY);
+				//IF DIRECTORY DOESN'T EXIST, GETS ALL ROWS IN DIRECTORY
+				if(!(new File(filename)).exists()) {
+					nix.add(filename);
+				}
+			}
+		}
+		catch(SQLException e) {}
+		//DELETE NON-EXISTANT DIRECTORIES
+		for(int i = 0; i < nix.size(); i++) {
+			sql = new StringBuilder("SELECT ");
+			sql.append(DvkHandler.SQL_ID);
+			sql.append(" FROM ");
+			sql.append(DvkHandler.DVKS);
+			sql.append(" WHERE ");
+			sql.append(DvkHandler.DIRECTORY);
+			sql.append(" = '");
+			sql.append(nix.get(i));
+			sql.append("';");
+			try(ResultSet rs = get_sql_set(sql.toString())) {
+				this.connection.setAutoCommit(false);
+				while(rs.next()) {
+					sql = new StringBuilder();
+					sql.append("DELETE FROM ");
+					sql.append(DVKS);
+					sql.append(" WHERE ");
+					sql.append(SQL_ID);
+					sql.append(" = ");
+					sql.append(rs.getInt(DvkHandler.SQL_ID));
+					sql.append(";");
+					try(Statement smt = this.connection.createStatement()) {
+						smt.execute(sql.toString());
+					}
+				}
+				this.connection.commit();
+				this.connection.setAutoCommit(true);
+			}
+			catch(SQLException e) {
+				try {
+					this.connection.rollback();
+					this.connection.setAutoCommit(true);
+				}
+				catch(SQLException f) {}
+			}
+			
+		}
 	}
 	
 	/**
@@ -243,17 +303,13 @@ public class DvkHandler implements AutoCloseable{
 	 */
 	public void update_directory(File directory) {
 		//GET LIST OF DVK FILES
+		File[] files = directory.listFiles(new ExtensionFilter(".dvk", true));
 		ArrayList<String> dvks = new ArrayList<>();
-		File[] files = directory.listFiles();
-		int size = files.length;
 		for(File file: files) {
-			String name = file.getName();
-			if(name.endsWith(".dvk")) {
-				dvks.add(name);
-			}
+			dvks.add(file.getName());
 		}
 		//CREATE SQL STATEMENT
-		String path = directory.getAbsolutePath();
+		String sql_path = directory.getAbsolutePath();
 		StringBuilder sql = new StringBuilder("SELECT ");
 		sql.append(SQL_ID);
 		sql.append(", ");
@@ -263,32 +319,32 @@ public class DvkHandler implements AutoCloseable{
 		sql.append(" WHERE ");
 		sql.append(DIRECTORY);
 		sql.append(" = '");
-		sql.append(path);
+		sql.append(sql_path);
 		sql.append("';");
 		try (ResultSet rs = get_sql_set(sql.toString())) {
-			int id;
-			File file = new File(this.prefs.get_index_dir(), "dvk_archive.db");
+			int sql_id;
+			File sql_file;
 			ArrayList<Integer> delete = new ArrayList<>();
+			this.connection.setAutoCommit(false);
 			while(rs.next()) {
-				id = rs.getInt(SQL_ID);
-				path = rs.getString(DVK_FILE);
-				file = new File(directory, path);
-				if(file.exists()) {
-					if(this.modified < file.lastModified()) {
+				sql_id = rs.getInt(SQL_ID);
+				sql_path = rs.getString(DVK_FILE);
+				sql_file = new File(directory, sql_path);
+				if(sql_file.exists()) {
+					if(this.modified < sql_file.lastModified()) {
 						//MODIFIES ENTRY IF DVK HAS BEEN MODIFIED
-						Dvk dvk = new Dvk(file);
-						set_dvk(dvk, id);
+						Dvk dvk = new Dvk(sql_file);
+						set_dvk(dvk, sql_id);
 					}
-					//REMOVES ENTRY FROM LIST OF NEW FILES
-					dvks.remove(dvks.indexOf(path));
+					dvks.remove(dvks.indexOf(sql_path));
 				}
 				else {
 					//ADD TO DELETE LIST IF FILE NO LONGER EXISTS
-					delete.add(Integer.valueOf(id));
+					delete.add(Integer.valueOf(sql_id));
 				}
 			}
 			//DELETE NON-EXISTANT ENTRIES
-			size = delete.size();
+			int size = delete.size();
 			for(int i = 0; i < size; i++) {
 				sql = new StringBuilder();
 				sql.append("DELETE FROM ");
@@ -298,8 +354,10 @@ public class DvkHandler implements AutoCloseable{
 				sql.append(" = ");
 				sql.append(Integer.toString(delete.get(i).intValue()));
 				sql.append(";");
-				Statement smt = this.connection.createStatement();
-				smt.execute(sql.toString());
+				try(Statement smt = this.connection.createStatement()) {
+					smt.execute(sql.toString());
+				}
+				catch(SQLException f) {}
 			}
 			//ADDS NEW DVKS
 			size = dvks.size();
@@ -309,8 +367,15 @@ public class DvkHandler implements AutoCloseable{
 					add_dvk(dvk);
 				}
 			}
+			this.connection.commit();
+			this.connection.setAutoCommit(true);
 		}
 		catch(SQLException e) {
+			try {
+				this.connection.rollback();
+				this.connection.setAutoCommit(false);
+			}
+			catch(SQLException f) {}
 			e.printStackTrace();
 		}
 	}
@@ -644,11 +709,15 @@ public class DvkHandler implements AutoCloseable{
 	 * Only lists directories that contain DVK files.
 	 * 
 	 * @param dir Directory to search
+	 * @param with_dvks Whether to only include directories with DVK files
 	 * @return Sub-directories of dir containing DVK files
 	 */
-	public static File[] get_directories(final File dir) {
+	public static File[] get_directories(final File dir, boolean with_dvks) {
+		if(dir == null) {
+			return new File[0];
+		}
 		File[] dirs = {dir};
-		return get_directories(dirs);
+		return get_directories(dirs, with_dvks);
 	}
 	
 	/**
@@ -656,47 +725,59 @@ public class DvkHandler implements AutoCloseable{
 	 * Only lists directories that contain DVK files.
 	 * 
 	 * @param dirs Directories to search
+	 * @param with_dvks Whether to only include directories with DVK files
 	 * @return Sub-directories of dirs containing DVK files
 	 */
-	public static File[] get_directories(final File[] dirs) {
+	public static File[] get_directories(final File[] dirs, boolean with_dvks) {
 		if(dirs == null) {
 			return new File[0];
 		}
+		//GET ALL SUBDIRECTORIES
 		File[] files;
-		ArrayList<File> all_dirs = new ArrayList<>();
-		ArrayList<String> dvk_dirs = new ArrayList<>();
-		for(File file: dirs) {
-			if(file != null && file.exists()) {
-				all_dirs.add(file);
-			}
+		ArrayList<File> directories = new ArrayList<>();
+		ArrayList<File> search_dirs = new ArrayList<>();
+		for(int i = 0; i < dirs.length; i++) {
+			search_dirs.add(dirs[i]);
+			directories.add(dirs[i]);
 		}
-		while(all_dirs.size() > 0) {
-			//TODO NULL POINTER?
-			//SEARCH FOR DVKS AND NEW DIRECTORIES
-			boolean add_dirs = false;
-			files = all_dirs.get(0).listFiles();
-			for(File file: files) {
-				if(file.isDirectory()) {
-					all_dirs.add(file);
-				}
-				else if(file.getName().toLowerCase().endsWith(".dvk")) {
-					add_dirs = true;
+		FileFilter filter = new DirectoryFilter();
+		while(search_dirs.size() > 0) {
+			try {
+				files = search_dirs.get(0).listFiles(filter);
+				for(int i = 0; i < files.length; i++) {
+					search_dirs.add(files[i]);
+					if(!directories.contains(files[i])) {
+						directories.add(files[i]);
+					}
 				}
 			}
-			//ADD DIRECTORY TO LIST IF CONTAINS DVK
-			if(add_dirs) {
-				dvk_dirs.add(all_dirs.get(0).getAbsolutePath());
+			catch(NullPointerException e) {}
+			search_dirs.remove(0);
+		}
+		if(with_dvks) {
+			//REMOVE DIRECTORIES WITHOUT DVKS
+			filter = new ExtensionFilter(".dvk", true);
+			for(int i = 0; i < directories.size(); i++) {
+				try {
+					files = directories.get(i).listFiles(filter);
+					if(files.length == 0) {
+						directories.remove(i);
+						i--;
+					}
+				}
+				catch(NullPointerException e) {
+					directories.remove(i);
+					i--;
+				}
 			}
-			all_dirs.remove(0);
 		}
-		//REMOVE DUPLICATE DIRECTORIES AND CONVERT TO FILE
-		dvk_dirs = ArrayProcessing.clean_list(dvk_dirs);
-		Collections.sort(dvk_dirs);
-		File[] end_dirs = new File[dvk_dirs.size()];
-		for(int i = 0; i < end_dirs.length; i++) {
-			end_dirs[i] = new File(dvk_dirs.get(i));
+		//CONVERT TO ARRAY
+		File[] dir_array = new File[directories.size()];
+		for(int i = 0; i < dir_array.length; i++) {
+			dir_array[i] = directories.get(i);
 		}
-		return end_dirs;
+		Arrays.parallelSort(dir_array);
+		return dir_array;
 	}
 	
 	/**

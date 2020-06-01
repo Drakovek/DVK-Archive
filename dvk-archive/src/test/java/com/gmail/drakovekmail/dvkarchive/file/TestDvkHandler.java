@@ -260,6 +260,36 @@ public class TestDvkHandler {
 		assertEquals(3, this.dvk_handler.get_size());
 		dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
 		assertEquals(3, dvks.size());
+		//TEST DELETING DVKS
+		dirs = new File[1];
+		dirs[0] = this.test_dir;
+		this.dvk_handler.read_dvks(dirs, null);
+		assertEquals(6, this.dvk_handler.get_size());
+		dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
+		dvks.get(0).get_dvk_file().delete();
+		assertFalse(dvks.get(0).get_dvk_file().exists());
+		this.dvk_handler.read_dvks(dirs, null);
+		dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
+		assertEquals(5, dvks.size());
+		assertEquals("New Dvk", dvks.get(0).get_title());
+		assertEquals("Page 1", dvks.get(1).get_title());
+		assertEquals("page 1.05", dvks.get(2).get_title());
+		assertEquals("Page 1.5", dvks.get(3).get_title());
+		assertEquals("Something", dvks.get(4).get_title());
+		//TEST DELETING FOLDER
+		try {
+			FileUtils.deleteDirectory(f3);
+		} catch (IOException e) {
+			assertTrue(false);
+		}
+		assertFalse(f3.exists());
+		this.dvk_handler.read_dvks(dirs, null);
+		dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
+		assertEquals(4, dvks.size());
+		assertEquals("New Dvk", dvks.get(0).get_title());
+		assertEquals("Page 1", dvks.get(1).get_title());
+		assertEquals("page 1.05", dvks.get(2).get_title());
+		assertEquals("Page 1.5", dvks.get(3).get_title());
 	}
 	
 	/**
@@ -466,37 +496,51 @@ public class TestDvkHandler {
 		//TEST INVALID DIRECTORY
 		File dir = null;
 		File[] dirs = null;
-		dirs = DvkHandler.get_directories(dirs);
+		dirs = DvkHandler.get_directories(dirs, true);
 		assertEquals(0, dirs.length);
-		dirs = DvkHandler.get_directories(dir);
+		dirs = DvkHandler.get_directories(dir, true);
 		assertEquals(0, dirs.length);
 		//TEST NON-EXISTANT DIRECTORIES
 		dirs = new File[2];
 		dirs[0] = null;
 		dirs[1] = new File("ljalkdmwner");
-		dirs = DvkHandler.get_directories(dirs);
+		dirs = DvkHandler.get_directories(dirs, true);
 		assertEquals(0, dirs.length);
 		dir = new File("kljasdsf");
-		dirs = DvkHandler.get_directories(dir);
+		dirs = DvkHandler.get_directories(dir, true);
 		assertEquals(0, dirs.length);
 		//TEST SINGLE DIRECTORY
-		dirs = DvkHandler.get_directories(this.test_dir);
+		dirs = DvkHandler.get_directories(this.test_dir, true);
 		assertEquals(4, dirs.length);
 		assertEquals("f1", dirs[0].getName());
 		assertEquals("sub", dirs[1].getName());
 		assertEquals("f2", dirs[2].getName());
 		assertEquals("f3", dirs[3].getName());
+		//TEST GET SINGLE DIRECTORY, INCLUDING DIRECTORIES WITHOUT DVK FILES
+		File new_dir = new File(this.test_dir, "new");
+		new_dir.mkdir();
+		assertTrue(new_dir.exists());
+		dirs = DvkHandler.get_directories(this.test_dir, false);
+		assertEquals(8, dirs.length);
+		assertEquals("handlerdir", dirs[0].getName());
+		assertEquals("f1", dirs[1].getName());
+		assertEquals("sub", dirs[2].getName());
+		assertEquals("f2", dirs[3].getName());
+		assertEquals("f4", dirs[4].getName());
+		assertEquals("f3", dirs[5].getName());
+		assertEquals("indexing", dirs[6].getName());
+		assertEquals("new", dirs[7].getName());
 		//TEST PARTIALLY VALID DIRECTORIES
 		dirs = new File[2];
 		dirs[0] = null;
 		dirs[1] = this.test_dir;
-		dirs = DvkHandler.get_directories(dirs);
+		dirs = DvkHandler.get_directories(dirs, true);
 		assertEquals(4, dirs.length);
 		//TEST MULTIPLE DIRECTORIES
 		dirs = new File[2];
 		dirs[0] = this.f1;
 		dirs[1] = this.f2;
-		dirs = DvkHandler.get_directories(dirs);
+		dirs = DvkHandler.get_directories(dirs, true);
 		assertEquals(3, dirs.length);
 		assertEquals("f1", dirs[0].getName());
 		assertEquals("sub", dirs[1].getName());
@@ -505,7 +549,7 @@ public class TestDvkHandler {
 		dirs = new File[2];
 		dirs[0] = this.f1;
 		dirs[1] = this.sub;
-		dirs = DvkHandler.get_directories(dirs);
+		dirs = DvkHandler.get_directories(dirs, true);
 		assertEquals(2, dirs.length);
 		assertEquals("f1", dirs[0].getName());
 		assertEquals("sub", dirs[1].getName());
