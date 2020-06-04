@@ -373,6 +373,23 @@ public class TestDvkHandler {
 	}
 	
 	/**
+	 * Tests the delete_dvk method.
+	 */
+	@Test
+	public void test_delete_dvk() {
+		File[] dirs = {this.test_dir};
+		this.dvk_handler.read_dvks(dirs, null);
+		assertEquals(5, this.dvk_handler.get_size());
+		ArrayList<Dvk> dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
+		assertEquals(5, dvks.size());
+		assertEquals("Page 1", dvks.get(0).get_title());
+		this.dvk_handler.delete_dvk(dvks.get(0).get_sql_id());
+		dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
+		assertEquals(4, dvks.size());
+		assertEquals("page 1.05", dvks.get(0).get_title());
+	}
+	
+	/**
 	 * Tests the get_sql_text method.
 	 */
 	@Test

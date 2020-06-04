@@ -270,17 +270,7 @@ public class DvkHandler implements AutoCloseable{
 			try(ResultSet rs = get_sql_set(sql.toString())) {
 				this.connection.setAutoCommit(false);
 				while(rs.next()) {
-					sql = new StringBuilder();
-					sql.append("DELETE FROM ");
-					sql.append(DVKS);
-					sql.append(" WHERE ");
-					sql.append(SQL_ID);
-					sql.append(" = ");
-					sql.append(rs.getInt(DvkHandler.SQL_ID));
-					sql.append(";");
-					try(Statement smt = this.connection.createStatement()) {
-						smt.execute(sql.toString());
-					}
+					delete_dvk(rs.getInt(DvkHandler.SQL_ID));
 				}
 				this.connection.commit();
 				this.connection.setAutoCommit(true);
@@ -346,18 +336,7 @@ public class DvkHandler implements AutoCloseable{
 			//DELETE NON-EXISTANT ENTRIES
 			int size = delete.size();
 			for(int i = 0; i < size; i++) {
-				sql = new StringBuilder();
-				sql.append("DELETE FROM ");
-				sql.append(DVKS);
-				sql.append(" WHERE ");
-				sql.append(SQL_ID);
-				sql.append(" = ");
-				sql.append(Integer.toString(delete.get(i).intValue()));
-				sql.append(";");
-				try(Statement smt = this.connection.createStatement()) {
-					smt.execute(sql.toString());
-				}
-				catch(SQLException f) {}
+				delete_dvk(delete.get(i).intValue());
 			}
 			//ADDS NEW DVKS
 			size = dvks.size();
@@ -463,6 +442,25 @@ public class DvkHandler implements AutoCloseable{
 		catch(SQLException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Deletes the Dvk with the given SQL ID from the SQLite database
+	 * 
+	 * @param sql_id SQL ID
+	 */
+	public void delete_dvk(int sql_id) {
+		StringBuilder sql = new StringBuilder("DELETE FROM ");
+		sql.append(DVKS);
+		sql.append(" WHERE ");
+		sql.append(SQL_ID);
+		sql.append(" = '");
+		sql.append(sql_id);
+		sql.append("';");
+		try(Statement smt = this.connection.createStatement()) {
+			smt.execute(sql.toString());
+		}
+		catch(SQLException e) {}
 	}
 	
 	/**

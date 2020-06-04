@@ -234,8 +234,8 @@ public class TestDeviantArt {
 			assertEquals("tgtf", dvk.get_web_tags()[16]);
 			assertEquals("DVK:Single", dvk.get_web_tags()[17]);
 			assertEquals("Favorite:Somebody", dvk.get_web_tags()[18]);
-			String desc = "<div>Magical belt + girl = buff fire cat.</div><div><br/></div><div>"
-					+ "I know Incineroar's kind of anthro already, but shh<br/></div>";
+			String desc = "<div> Magical belt + girl = buff fire cat. </div> <div> <br/> </div> "
+					+ "<div> I know Incineroar's kind of anthro already, but shh <br/> </div>";
 			assertEquals(desc, dvk.get_description());
 			url = "https://www.deviantart.com/download/831012876/ddqrhn0-6ba2165d-854d-42a0-b1bd-f1fa0b57ce01.png?";
 			assertTrue(dvk.get_direct_url().startsWith(url));
@@ -276,9 +276,10 @@ public class TestDeviantArt {
 			assertEquals(null, dvk.get_secondary_file());
 			assertTrue(dvk.get_media_file().exists());
 			String file = InOut.read_file(dvk.get_media_file());
-			assertTrue(file.startsWith("<!DOCTYPE html><html><span><p><span>To say that Lisa enjoyed the outdoors"));
-			assertTrue(file.endsWith("and together they bounded off into the forest."
-					+ "</span></p><div><span><br/></span></div></span></html>"));
+			assertTrue(file.startsWith("<!DOCTYPE html><html><span> <p> <span> "
+					+ "To say that Lisa enjoyed the outdoors"));
+			assertTrue(file.endsWith("bounded off into the forest. </span> </p> <div> <span> "
+					+ "<br/> </span> </div> </span> </html>"));
 			assertTrue(file.contains("A voice in the back of her mind told her this wasn’t normal wolf behavior"));
 			//THIRD DVK - LITERATURE
 			url = "http://www.deviantart.com/pokefan-tf/art/Pokeclipse-TF-RP-700042244";
@@ -311,13 +312,14 @@ public class TestDeviantArt {
 			assertEquals("Pokeclipse TF RP_DVA700042244.html", dvk.get_media_file().getName());
 			assertTrue(dvk.get_media_file().exists());
 			file = InOut.read_file(dvk.get_media_file());
-			desc = "<!DOCTYPE html><html>A solar eclipse is something that is amazing to experience... And we "
-					+ "happen to be able to see the entire thing!<br/><br/>...however, as you (and / or me) soon "
-					+ "find out, this eclipse is different than normal ones.<br/><br/><b>Rules</b><br/><br/>1. "
-					+ "This is a Pokemon TF rp... meaning only pokemon are allowed.<br/>2. Allowed side effects "
-					+ "are TG, AP, AR, MC, and anthro. Anything else, please ask.<br/>3. Tell me the answer to 5 "
-					+ "times 3 in your first comment.<br/>4. Put effort into your replies. No \"...\" or anything "
-					+ "like that.<br/>5. Have fun!</html>";
+			desc = "<!DOCTYPE html><html>A solar eclipse is something that is amazing to experience... "
+					+ "And we happen to be able to see the entire thing! <br/> <br/> ...however, as you "
+					+ "(and / or me) soon find out, this eclipse is different than normal ones. "
+					+ "<br/> <br/> <b> Rules </b> <br/> <br/> 1. This is a Pokemon TF rp... meaning "
+					+ "only pokemon are allowed. <br/> 2. Allowed side effects are TG, AP, AR, MC, "
+					+ "and anthro. Anything else, please ask. <br/> 3. Tell me the answer to 5 "
+					+ "times 3 in your first comment. <br/> 4. Put effort into your replies. No \"...\" "
+					+ "or anything like that. <br/> 5. Have fun! </html>";
 			assertEquals(desc, file);
 			//FOURTH DVK - VIDEO
 			url = "http://www.deviantart.com/fezmangaka/art/Calem-s-Noivern-TF-786108284";
@@ -342,9 +344,10 @@ public class TestDeviantArt {
 			assertEquals("xandy", dvk.get_web_tags()[8]);
 			assertEquals("noivern", dvk.get_web_tags()[9]);
 			assertEquals("Favorite:Person", dvk.get_web_tags()[10]);
-			desc = "[Insert Story Here]<br/><br/>Did a animatic. Doing the whole thing would be too time "
-					+ "consuming so did just the tail instead<br/><br/>For some reason, I can't upload a gif "
-					+ "on DA so looping would be impossible. Unless some kind soul could tell me how to";
+			desc = "[Insert Story Here] <br/> <br/> Did a animatic. Doing the whole thing would be too "
+					+ "time consuming so did just the tail instead <br/> <br/> For some reason, I can't "
+					+ "upload a gif on DA so looping would be impossible. Unless some kind soul could "
+					+ "tell me how to";
 			assertEquals(desc, dvk.get_description());
 			url = "https://wixmp-ed30a86b8c4ca887773594c2.wixmp.com/v/mp4/1d735619-8d85-4a96-a2ee-82852d4551f0/"
 					+ "dd01118-e720f3db-1c53-4545-9e41-889295ea4c6e.720p.50714fd3435c49dba3d67d067bcb076c.mp4";
@@ -377,16 +380,17 @@ public class TestDeviantArt {
 			assertEquals("transformation", dvk.get_web_tags()[6]);
 			assertEquals("dragondragoness", dvk.get_web_tags()[7]);
 			assertEquals("Favorite:Somebody", dvk.get_web_tags()[8]);
-			desc = "<b>Update:</b><i>I improved the background. In the previous version is was just a scribble."
-					+ "</i><br/><br/><br/>Here's an animation of a kind I haven't really made before. I think I "
-					+ "can confidently state that this is my best transformation animation. I've made transformation "
-					+ "animations before, but this one is different. And it's not just because she isn't a wolf.<br/>"
-					+ "<br/>In this animation, the girl doesn't just go through a single long change. Instead, the "
-					+ "changes go happening part by part. You can zoom in and out of the animation, or move the "
-					+ "camera around. I gave the world a bit of depth, too.<br/><br/>And finally, notice the buttons "
-					+ "don't disappear when the transformation happens (they just become transparent). You can pause "
-					+ "the transformation at any time by pressing the button again.<br/><br/>I worked a long time on "
-					+ "this animation. I hope you enjoy it.";
+			desc = "<b> Update: </b> <i> I improved the background. In the previous version is was just a "
+					+ "scribble. </i> <br/> <br/> <br/> Here's an animation of a kind I haven't really made "
+					+ "before. I think I can confidently state that this is my best transformation "
+					+ "animation. I've made transformation animations before, but this one is different. "
+					+ "And it's not just because she isn't a wolf. <br/> <br/> In this animation, the girl "
+					+ "doesn't just go through a single long change. Instead, the changes go happening "
+					+ "part by part. You can zoom in and out of the animation, or move the camera around. "
+					+ "I gave the world a bit of depth, too. <br/> <br/> And finally, notice the buttons "
+					+ "don't disappear when the transformation happens (they just become transparent). You "
+					+ "can pause the transformation at any time by pressing the button again. <br/> <br/> "
+					+ "I worked a long time on this animation. I hope you enjoy it.";
 			assertEquals(desc, dvk.get_description());
 			url = "https://www.deviantart.com/download/298825987/d4xwvlv-f53cf86b-7dfb-4b77-a639-45087a54d165.swf?";
 			assertTrue(dvk.get_direct_url().startsWith(url));
@@ -420,10 +424,11 @@ public class TestDeviantArt {
 			assertEquals("portrait", dvk.get_web_tags()[10]);
 			assertEquals("profile", dvk.get_web_tags()[11]);
 			assertEquals("vectorillustration", dvk.get_web_tags()[12]);
-			desc = "<div>Hey, I actually posted something! How about that?</div><div><br/></div><div>Well, I'm pretty "
-					+ "stubborn, and I held out on making a fursona for years for various reasons, but I finally caved. "
-					+ "Well, sort of at least. I'm not really dedicated to having this be a recurring character or "
-					+ "anything. I just felt like drawing myself as a cat, I suppose.<br/></div>";
+			desc = "<div> Hey, I actually posted something! How about that? </div> <div> <br/> </div> "
+					+ "<div> Well, I'm pretty stubborn, and I held out on making a fursona for years "
+					+ "for various reasons, but I finally caved. Well, sort of at least. I'm not really "
+					+ "dedicated to having this be a recurring character or anything. I just felt like "
+					+ "drawing myself as a cat, I suppose. <br/> </div>";
 			assertEquals(desc, dvk.get_description());
 			url = "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/a5ad25e4-56ef-4e95-88b4-"
 					+ "4c59f7bca389/ddvqaei-cd05fa1d-51f8-4cf1-99b8-27b29ca3e59f.png?";
@@ -450,10 +455,10 @@ public class TestDeviantArt {
 			assertEquals("animation", dvk.get_web_tags()[5]);
 			assertEquals("transformation", dvk.get_web_tags()[6]);
 			assertEquals("DVK:Single", dvk.get_web_tags()[7]);
-			desc = "Commissioned by<span><span class=\"username-with-symbol u\"><a class=\"u regular username\""
-					+ " href=\"https://www.deviantart.com/onyxsteelgray1213\">OnyxSteelGray1213</a><span "
-					+ "class=\"user-symbol regular\" data-quicktip-text=\"\" data-show-tooltip=\"\" "
-					+ "data-gruser-type=\"regular\"></span></span></span>";
+			desc = "Commissioned by <span> <span class=\"username-with-symbol u\"> <a class=\"u regular "
+					+ "username\" href=\"https://www.deviantart.com/onyxsteelgray1213\"> "
+					+ "OnyxSteelGray1213 </a> <span class=\"user-symbol regular\" data-quicktip-"
+					+ "text=\"\" data-show-tooltip=\"\" data-gruser-type=\"regular\"> </span> </span> </span>";
 			assertEquals(desc, dvk.get_description());
 			url = "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/976aef10-4f8c-47ce-8b7c-073393f2b5cc/"
 					+ "dcuqoyp-7e5578c6-e5be-4ba4-889e-6ec8ed373292.swf?";
@@ -502,11 +507,13 @@ public class TestDeviantArt {
 			assertEquals("Journals", dvk.get_web_tags()[2]);
 			assertEquals("Personal", dvk.get_web_tags()[3]);
 			assertEquals("DVK:Single", dvk.get_web_tags()[4]);
-			String desc = "<div>We have wanted to use the money we have gotten to commission more MSF High related stuff";
+			String desc = "<div> We have wanted to use the money we have gotten to commission more "
+					+ "MSF High related stuff";
 			assertTrue(dvk.get_description().startsWith(desc));
-			desc = "It will be posted for free on my youtube channel once done.</q></span></a></span><!-- ^TTT --><!-- TTT$"
-					+ " --></span></div><div><br/></div><br/><div><br/></div><div><br/></div><div><br/></div><div><br/></div>"
-					+ "<div><br/></div><div><br/></div><div><br/></div>";
+			desc = "It will be posted for free on my youtube channel once done. </q> </span> </a> </span> "
+					+ "<!-- ^TTT --> <!-- TTT$ --> </span> </div> <div> <br/> </div> <br/> <div> <br/> "
+					+ "</div> <div> <br/> </div> <div> <br/> </div> <div> <br/> </div> <div> <br/> </div> "
+					+ "<div> <br/> </div> <div> <br/> </div>";
 			assertTrue(dvk.get_description().endsWith(desc));
 			url = "https://www.deviantart.com/akuoreo/journal/Looking-to-hire-3D-modeler-817361421";
 			assertEquals(url, dvk.get_page_url());
@@ -531,9 +538,9 @@ public class TestDeviantArt {
 			assertEquals("Gallery:Journals", dvk.get_web_tags()[1]);
 			assertEquals("Journals", dvk.get_web_tags()[2]);
 			assertEquals("Personal", dvk.get_web_tags()[3]);
-			desc = "<div>I'm having another deal, but for only two people";
+			desc = "<div> I'm having another deal, but for only two people";
 			assertTrue(dvk.get_description().startsWith(desc));
-			desc = "Please give info on what you want.</b><br/></div>";
+			desc = "Please give info on what you want. </b> <br/> </div>";
 			assertTrue(dvk.get_description().endsWith(desc));
 			url = "https://www.deviantart.com/akuoreo/journal/Slime-Girl-TF-TG-Deal-Closed-762225768";
 			assertEquals(url, dvk.get_page_url());
@@ -545,9 +552,9 @@ public class TestDeviantArt {
 			assertTrue(dvk.get_dvk_file().exists());
 			assertTrue(dvk.get_media_file().exists());
 			String text = InOut.read_file(dvk.get_media_file());
-			desc = "<!DOCTYPE html><html><div>I'm having another deal, but for only two people";
+			desc = "<!DOCTYPE html><html><div> I'm having another deal, but for only two people";
 			assertTrue(text.startsWith(desc));
-			desc = "Please give info on what you want.</b><br/></div></html>";
+			desc = "Please give info on what you want. </b> <br/> </div> </html>";
 			assertTrue(text.endsWith(desc));
 			//THIRD DVK
 			url = "deviantart.com/fezmangaka/journal/Important-announcement-Future-of-Commissions-839801217";
@@ -563,25 +570,27 @@ public class TestDeviantArt {
 			assertEquals("Journals", dvk.get_web_tags()[2]);
 			assertEquals("Personal", dvk.get_web_tags()[3]);
 			assertEquals("DVK:Single", dvk.get_web_tags()[4]);
-			desc = "<p class=\"_1tvZk _1iFR7 _3s8-3\">Commission update: what to expect</p>"
-					+ "<div class=\"_1tvZk _1iFR7 _3s8-3\"></div><p class=\"_1tvZk _1iFR7 _3s8-3\">School hasn't   for "
-					+ "me as the start of my 'internship' will begin shortly around May. The thing is that internship "
-					+ "is suspended and we're supposed to undertake Entrepreneurship, Community or Assigned project."
-					+ "</p><div class=\"_1tvZk _1iFR7 _3s8-3\"></div><p class=\"_1tvZk _1iFR7 _3s8-3\">School hasn't "
-					+ "really ended for me as the start of my 'internship' will begin shortly around May. The thing "
-					+ "is that internship is suspended and we're supposed to undertake Entrepreneurship, Community "
-					+ "or Assigned project.</p><p class=\"_1tvZk _1iFR7 _3s8-3\">The school says they'll provide "
-					+ "projects for is to do, which really sucks because you're given no time to really enjoy "
-					+ "yourself. But the good thing is that I'll be able to have time to do commissions as part of the "
-					+ "entrepreneurship (that which I'll ask my lecture if it's a possible option)</p><div "
-					+ "class=\"_1tvZk _1iFR7 _3s8-3\"></div><p class=\"_1tvZk _1iFR7 _3s8-3\">However, here's the catch. "
-					+ "I can't be drawing beans (TFs) all he time. I'll still take some but will not mention that "
-					+ "they're part of the commissions I do unless it's absolutely necessary if there isn't any demand "
-					+ "for illustrations.</p><div class=\"_1tvZk _1iFR7 _3s8-3\"></div><p class=\"_1tvZk _1iFR7 _3s8-3\">"
-					+ "Some possible options of commissions are character illustration, character sheet reference, "
-					+ "storyboarding ideas, animated icons so on and so forth. I hope some of them would be of interest "
-					+ "to you, even thou this account mostly focused on beans. If not, please spread the message as it "
-					+ "would really help to be able to reach a larger audience. Thank you.</p>";
+			desc = "<p class=\"_1tvZk _1iFR7 _3s8-3\"> Commission update: what to expect </p> "
+					+ "<div class=\"_1tvZk _1iFR7 _3s8-3\"> </div> <p class=\"_1tvZk _1iFR7 _3s8-3\"> "
+					+ "School hasn't   for me as the start of my 'internship' will begin shortly around May. "
+					+ "The thing is that internship is suspended and we're supposed to undertake "
+					+ "Entrepreneurship, Community or Assigned project. </p> <div class=\"_1tvZk _1iFR7 _3s8-3\"> "
+					+ "</div> <p class=\"_1tvZk _1iFR7 _3s8-3\"> School hasn't really ended for me as the start "
+					+ "of my 'internship' will begin shortly around May. The thing is that internship is "
+					+ "suspended and we're supposed to undertake Entrepreneurship, Community or Assigned project. "
+					+ "</p> <p class=\"_1tvZk _1iFR7 _3s8-3\"> The school says they'll provide projects for is "
+					+ "to do, which really sucks because you're given no time to really enjoy yourself. But the "
+					+ "good thing is that I'll be able to have time to do commissions as part of the "
+					+ "entrepreneurship (that which I'll ask my lecture if it's a possible option) </p> "
+					+ "<div class=\"_1tvZk _1iFR7 _3s8-3\"> </div> <p class=\"_1tvZk _1iFR7 _3s8-3\"> However, "
+					+ "here's the catch. I can't be drawing beans (TFs) all he time. I'll still take some but "
+					+ "will not mention that they're part of the commissions I do unless it's absolutely "
+					+ "necessary if there isn't any demand for illustrations. </p> <div class=\"_1tvZk _1iFR7 "
+					+ "_3s8-3\"> </div> <p class=\"_1tvZk _1iFR7 _3s8-3\"> Some possible options of "
+					+ "commissions are character illustration, character sheet reference, storyboarding ideas, "
+					+ "animated icons so on and so forth. I hope some of them would be of interest to you, even "
+					+ "thou this account mostly focused on beans. If not, please spread the message as it would "
+					+ "really help to be able to reach a larger audience. Thank you. </p>";
 			assertEquals(desc, dvk.get_description());
 			url = "https://www.deviantart.com/fezmangaka/journal/Important-announcement-Future-of-Commissions-839801217";
 			assertEquals(url, dvk.get_page_url());

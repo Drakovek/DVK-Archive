@@ -119,6 +119,11 @@ public class DEnglish extends LanguageMap{
 		this.lang_keys.put("deviantart_failed", "DeviantArt Failed");
 		this.lang_keys.put("enter_deviantart", "Enter DeviantArt Artist:");
 		this.lang_keys.put("invalid_deviantart", "Invalid DeviantArt URL.");
+		//INKBUNNY
+		this.lang_keys.put("running_inkbunny", "[RUNNING INKBUNNY]");
+		this.lang_keys.put("inkbunny_failed", "Inkbunny Failed");
+		this.lang_keys.put("enter_inkbunny", "Enter Inkbunny Artist:");
+		this.lang_keys.put("invalid_inkbunny", "Invalid Inkbunny URL.");
 		//UNLINKED MEDIA
 		this.lang_keys.put("unlinked_title", "Find Unlinked Media");
 		this.lang_keys.put("unlinked_console", "[FINDING UNLINKED MEDIA]");

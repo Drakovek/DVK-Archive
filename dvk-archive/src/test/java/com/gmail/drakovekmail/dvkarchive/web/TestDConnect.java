@@ -157,12 +157,15 @@ public class TestDConnect {
 	@SuppressWarnings("static-method")
 	public void test_clean_element() {
 		//REMOVE ENDS
-		String el = " <head>  <bleh>  Things and stuff. </bleh>   </head>";
-		assertEquals("<bleh>Things and stuff.</bleh>",
+		String el = " <head>  <bleh>  Things <b>and</b> stuff. </bleh>   </head>";
+		assertEquals("<bleh> Things <b>and</b> stuff. </bleh>",
+				DConnect.clean_element(el, true));
+		el = " <head>  <bleh>  Things and stuff. </bleh>   </head>";
+		assertEquals("<bleh> Things and stuff. </bleh>",
 				DConnect.clean_element(el, true));
 		el = " <head>  <bleh> <other> \n Things and stuff."
 				+ "   </other>   </bleh>   </head>";
-		assertEquals("<bleh><other>Things and stuff.</other></bleh>",
+		assertEquals("<bleh> <other> Things and stuff. </other> </bleh>",
 				DConnect.clean_element(el, true));
 		assertEquals("", DConnect.clean_element("", true));
 		assertEquals("",
@@ -175,21 +178,21 @@ public class TestDConnect {
 				DConnect.clean_element("<p>", true));
 		assertEquals("",
 				DConnect.clean_element("<head><foot>", true));
-		assertEquals("<p>test",
-				DConnect.clean_element("<p>  test", true));
-		assertEquals("test</p>",
+		assertEquals("<p> test",
+				DConnect.clean_element("<p>   test", true));
+		assertEquals("test </p>",
 				DConnect.clean_element("test </p>", true));
 		assertEquals("Things",
 				DConnect.clean_element("<head> \n Things  \n\n </foot>", true));
-		assertEquals("<p>bleh</p>",
+		assertEquals("<p> bleh</p>",
 				DConnect.clean_element("<div><p> bleh</p></div>", true));
 		//DON'T REMOVE ENDS
 		el = " <head>  <bleh>  Things and stuff. </bleh>   </head>";
-		assertEquals("<head><bleh>Things and stuff.</bleh></head>",
+		assertEquals("<head> <bleh> Things and stuff. </bleh> </head>",
 				DConnect.clean_element(el, false));
 		el = " <head>  <bleh> <other> \n Things and stuff."
 				+ "   </other>   </bleh>   </head>";
-		assertEquals("<head><bleh><other>Things and stuff.</other></bleh></head>",
+		assertEquals("<head> <bleh> <other> Things and stuff. </other> </bleh> </head>",
 				DConnect.clean_element(el, false));
 		assertEquals("", DConnect.clean_element("", false));
 		assertEquals("", DConnect.clean_element("  \n\r  ", false));
@@ -198,11 +201,11 @@ public class TestDConnect {
 		assertEquals("<p>", DConnect.clean_element("<p>", false));
 		assertEquals("<head><foot>",
 				DConnect.clean_element("<head><foot>", false));
-		assertEquals("<p>test", DConnect.clean_element("<p>  test", false));
-		assertEquals("test</p>", DConnect.clean_element("test </p>", false));
-		assertEquals("<head>Things</foot>",
+		assertEquals("<p> test", DConnect.clean_element("<p>  test", false));
+		assertEquals("test </p>", DConnect.clean_element("test </p>", false));
+		assertEquals("<head> Things </foot>",
 				DConnect.clean_element("<head> \n Things  \n\n </foot>", false));
-		assertEquals("<div><p>bleh</p></div>",
+		assertEquals("<div><p> bleh</p></div>",
 				DConnect.clean_element("<div><p> bleh</p></div>", false));
 	}
 }

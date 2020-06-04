@@ -438,11 +438,11 @@ public class DConnect implements AutoCloseable {
 		String str = html.replace("\n", "");
 		str = str.replace("\r", "");
 		//REMOVE WHITESPACE BETWEEN TAGS
-		while(str.contains(" <")) {
-			str = str.replace(" <", "<");
+		while(str.contains("  <")) {
+			str = str.replace("  <", " <");
 		}
-		while(str.contains("> ")) {
-			str = str.replace("> ", ">");
+		while(str.contains(">  ")) {
+			str = str.replace(">  ", "> ");
 		}
 		//REMOVE HEADER AND FOOTER
 		if(remove_ends) {

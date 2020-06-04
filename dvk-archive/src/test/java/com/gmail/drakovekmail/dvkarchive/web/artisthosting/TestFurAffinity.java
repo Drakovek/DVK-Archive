@@ -544,9 +544,9 @@ public class TestFurAffinity {
 			value = "https://d.facdn.net/art/tavaer/1544936555/1544936555.tavaer_purero.png";
 			assertEquals(value, dvk.get_direct_url());
 			assertEquals(null, dvk.get_secondary_url());
-			value = "Puro: \"Are you going to eat the peach, Lin-san?\"<br/><br/>Lin: \"Go "
-					+ "right ahead.\"<br/><br/>Puro: \"Thank you...\"<br/><br/>Puro: \"Lick"
-					+ "LickLickLickLick....\"<br/><br/>Lin: *blushing* \"Yare Yare Daze...\"";
+			value = "Puro: \"Are you going to eat the peach, Lin-san?\" <br/> <br/> Lin: \"Go right "
+					+ "ahead.\" <br/> <br/> Puro: \"Thank you...\" <br/> <br/> Puro: \"LickLickLick"
+					+ "LickLick....\" <br/> <br/> Lin: *blushing* \"Yare Yare Daze...\"";
 			assertEquals(value, dvk.get_description());
 			assertEquals(33, dvk.get_web_tags().length);
 			assertEquals("Rating:General", dvk.get_web_tags()[0]);
@@ -591,8 +591,8 @@ public class TestFurAffinity {
 						+ "/1401843083.angrboda_cougars_small_3.jpg";
 				assertEquals(value, dvk.get_direct_url());
 				assertEquals(null, dvk.get_secondary_url());
-				value = "comm 3/3 from last year for<a href=\"/user/talent\" "
-						+ "class=\"linkusername\">talent</a>, who wrote the text.";
+				value = "comm 3/3 from last year for <a href=\"/user/talent\" class=\"linkusername\"> "
+						+ "talent </a> , who wrote the text.";
 				assertEquals(value, dvk.get_description());
 				assertEquals(16, dvk.get_web_tags().length);
 				assertEquals("Rating:Adult", dvk.get_web_tags()[0]);
@@ -645,12 +645,11 @@ public class TestFurAffinity {
 			assertEquals(value, dvk.get_page_url());
 			assertEquals(null, dvk.get_direct_url());
 			assertEquals(null, dvk.get_secondary_url());
-			value = "For those of you who want to help me eat. Copied from my commission "
-					+ "tab.<br/><br/>ART<br/><br/>Lineart/sketch - $15<br/><br/>flat "
-					+ "color - $20<br/><br/>flat color + shade - $25<br/><br/>fully "
-					+ "painted - $30<br/><br/>add background +$5<br/><br/><br/>STORY"
-					+ "<br/><br/><br/>$15 minimum, will negotiate a price based on "
-					+ "anticipated content and length.";
+			value = "For those of you who want to help me eat. Copied from my commission tab. "
+					+ "<br/> <br/> ART <br/> <br/> Lineart/sketch - $15 <br/> <br/> flat color - $20 "
+					+ "<br/> <br/> flat color + shade - $25 <br/> <br/> fully painted - $30 <br/> "
+					+ "<br/> add background +$5 <br/> <br/> <br/> STORY <br/> <br/> <br/> $15 minimum, "
+					+ "will negotiate a price based on anticipated content and length.";
 			assertEquals(value, dvk.get_description());
 			assertEquals(2, dvk.get_web_tags().length);
 			assertEquals("Rating:General", dvk.get_web_tags()[0]);
@@ -676,27 +675,25 @@ public class TestFurAffinity {
 			assertEquals(value, dvk.get_page_url());
 			assertEquals(null, dvk.get_direct_url());
 			assertEquals(null, dvk.get_secondary_url());
-			value = "Edit - closed, thanks everyone. Sorry the spots went so fast!<br/><br/>"
-					+ "<hr class=\"bbcode bbcode_hr\"/><br/><br/>Just finished up a bunch of "
-					+ "big stuff, taking 4 little ones to unwind. Same rules as always:<br/>"
-					+ "<br/>Examples here:<br/><a href=\"http://www.furaffinity.net/view/"
-					+ "10852541/\" title=\"http://www.furaffinity.net/view/10852541/\" "
-					+ "class=\"auto_link\">http://www.furaffinity.net/view/10852541/</a>"
-					+ "<br/><a href=\"http://www.furaffinity.net/view/10546296/\" title=\"http"
-					+ "://www.furaffinity.net/view/10546296/\" class=\"auto_link\">"
-					+ "http://www.furaffinity.net/view/10546296/</a><br/><br/>1 character, "
-					+ "no background, simple colors. No proofs given, final files delivered "
-					+ "via note. As always, regular TOS applies. Minor changes can be made if "
-					+ "necessary.<br/><br/>Can be general to adult (please specify if your "
-					+ "request seems ambiguous)<br/><br/>Please give a link to a visual ref or "
-					+ "a good written descrip, as well as the type of pose you're looking for."
-					+ "<br/><br/>These will be pay on delivery; I will note you when your pic "
-					+ "is complete and give you my payment info, and you will receive the file "
-					+ "after payment clears.<br/><br/>1)<a href=\"/user/rusvul\" class=\""
-					+ "linkusername\">rusvul</a><br/>2)<a href=\"/user/stormkern\" class=\""
-					+ "linkusername\">stormkern</a><br/>3)<a href=\"/user/aryte\" class=\""
-					+ "linkusername\">aryte</a><br/>4)<a href=\"/user/avios\" class=\"linkusername"
-					+ "\">avios</a>";
+			value = "Edit - closed, thanks everyone. Sorry the spots went so fast! <br/> <br/> <hr "
+					+ "class=\"bbcode bbcode_hr\"/> <br/> <br/> Just finished up a bunch of big stuff, "
+					+ "taking 4 little ones to unwind. Same rules as always: <br/> <br/> Examples "
+					+ "here: <br/> <a href=\"http://www.furaffinity.net/view/10852541/\" title=\""
+					+ "http://www.furaffinity.net/view/10852541/\" class=\"auto_link\"> http://www."
+					+ "furaffinity.net/view/10852541/ </a> <br/> <a href=\"http://www.furaffinity.net"
+					+ "/view/10546296/\" title=\"http://www.furaffinity.net/view/10546296/\" "
+					+ "class=\"auto_link\"> http://www.furaffinity.net/view/10546296/ </a> <br/> "
+					+ "<br/> 1 character, no background, simple colors. No proofs given, final files "
+					+ "delivered via note. As always, regular TOS applies. Minor changes can be made "
+					+ "if necessary. <br/> <br/> Can be general to adult (please specify if your "
+					+ "request seems ambiguous) <br/> <br/> Please give a link to a visual ref or a "
+					+ "good written descrip, as well as the type of pose you're looking for. <br/> "
+					+ "<br/> These will be pay on delivery; I will note you when your pic is complete "
+					+ "and give you my payment info, and you will receive the file after payment "
+					+ "clears. <br/> <br/> 1) <a href=\"/user/rusvul\" class=\"linkusername\"> rusvul "
+					+ "</a> <br/> 2) <a href=\"/user/stormkern\" class=\"linkusername\"> stormkern "
+					+ "</a> <br/> 3) <a href=\"/user/aryte\" class=\"linkusername\"> aryte </a> "
+					+ "<br/> 4) <a href=\"/user/avios\" class=\"linkusername\"> avios </a>";
 			assertEquals(value, dvk.get_description());
 			assertEquals(3, dvk.get_web_tags().length);
 			assertEquals("Rating:General", dvk.get_web_tags()[0]);

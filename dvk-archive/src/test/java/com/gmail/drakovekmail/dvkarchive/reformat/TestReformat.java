@@ -114,7 +114,7 @@ public class TestReformat {
 			assertEquals("dvk3.dvk", dvks.get(2).get_dvk_file().getName());
 			assertEquals(null, dvks.get(0).get_description());
 			assertEquals("This is fine already.", dvks.get(1).get_description());
-			assertEquals("<a><b>words 'n stuff</b></a>", dvks.get(2).get_description());
+			assertEquals("<a> <b>words 'n stuff </b> </a>", dvks.get(2).get_description());
 		}
 		catch(DvkException e) {
 			assertTrue(false);
