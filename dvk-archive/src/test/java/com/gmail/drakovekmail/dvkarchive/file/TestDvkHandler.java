@@ -350,8 +350,9 @@ public class TestDvkHandler {
 		sql.append(DvkHandler.DVKS);
 		sql.append(" WHERE ");
 		sql.append(DvkHandler.TITLE);
-		sql.append(" = 'New Title';");
-		try(ResultSet rs = this.dvk_handler.get_sql_set(sql.toString())) {
+		sql.append(" = ?;");
+		String[] params = {"New Title"};
+		try(ResultSet rs = this.dvk_handler.get_sql_set(sql.toString(), params)) {
 			rs.next();
 			assertEquals("ADD1234", rs.getString(DvkHandler.DVK_ID));
 			assertEquals("New Title", rs.getString(DvkHandler.TITLE));
@@ -390,10 +391,10 @@ public class TestDvkHandler {
 	}
 	
 	/**
-	 * Tests the get_sql_text method.
+	 * Tests the get_sql_set method.
 	 */
 	@Test
-	public void test_get_sql_text() {
+	public void test_get_sql_set() {
 		File[] dirs = {this.test_dir};
 		this.dvk_handler.read_dvks(dirs, null);
 		StringBuilder sql = new StringBuilder("SELECT ");
@@ -402,10 +403,11 @@ public class TestDvkHandler {
 		sql.append(DvkHandler.DVKS);
 		sql.append(" WHERE ");
 		sql.append(DvkHandler.TITLE);
-		sql.append(" - 'Page 1';");
-		try (ResultSet rs = this.dvk_handler.get_sql_set(sql.toString())) {
+		sql.append(" = ?;");
+		String[] params = {"Page 1"};
+		try (ResultSet rs = this.dvk_handler.get_sql_set(sql.toString(), params)) {
 			while(rs.next()) {
-				assertEquals("Page 1", rs.getString("dvk_title"));
+				assertEquals("Page 1", rs.getString(DvkHandler.TITLE));
 			}
 		}
 		catch(SQLException e) {
@@ -443,9 +445,10 @@ public class TestDvkHandler {
 		sql.append(DvkHandler.DVKS);
 		sql.append(" WHERE ");
 		sql.append(DvkHandler.TITLE);
-		sql.append(" = 'Page 1';");
+		sql.append(" = ?;");
+		String[] params = {"Page 1"};
 		int id = -1;
-		try(ResultSet rs = this.dvk_handler.get_sql_set(sql.toString())){
+		try(ResultSet rs = this.dvk_handler.get_sql_set(sql.toString(), params)){
 			rs.next();
 			id = rs.getInt(DvkHandler.SQL_ID);
 			this.dvk_handler.set_dvk(dvk, id);
@@ -454,7 +457,7 @@ public class TestDvkHandler {
 			assertTrue(false);
 		}
 		//CHECK OLD DVK NO LONGER EXISTS
-		try(ResultSet rs = this.dvk_handler.get_sql_set(sql.toString())){
+		try(ResultSet rs = this.dvk_handler.get_sql_set(sql.toString(), params)){
 			assertFalse(rs.next());
 		}
 		catch(SQLException e) {
@@ -465,8 +468,9 @@ public class TestDvkHandler {
 		sql.append(DvkHandler.DVKS);
 		sql.append(" WHERE ");
 		sql.append(DvkHandler.TITLE);
-		sql.append(" = 'New Title';");
-		try(ResultSet rs = this.dvk_handler.get_sql_set(sql.toString())) {
+		sql.append(" = ?;");
+		params[0] = "New Title";
+		try(ResultSet rs = this.dvk_handler.get_sql_set(sql.toString(), params)) {
 			rs.next();
 			assertEquals(id, rs.getInt(DvkHandler.SQL_ID));
 			assertEquals("ADD1234", rs.getString(DvkHandler.DVK_ID));
@@ -619,7 +623,7 @@ public class TestDvkHandler {
 		sql.append(" ORDER BY ");
 		sql.append(DvkHandler.TITLE);
 		sql.append(" COLLATE NOCASE ASC;");
-		try(ResultSet rs = this.dvk_handler.get_sql_set(sql.toString())){
+		try(ResultSet rs = this.dvk_handler.get_sql_set(sql.toString(), new String[0])) {
 			rs.next();
 			Dvk dvk = this.dvk_handler.get_dvk(rs.getInt(DvkHandler.SQL_ID));
 			assertEquals("Page 1", dvk.get_title());

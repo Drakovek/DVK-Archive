@@ -42,22 +42,9 @@ public class ErrorFinding {
 		sql.append(" FROM ");
 		sql.append(DvkHandler.DVKS);
 		sql.append(" WHERE ");
-		//LIMIT TO OPENED DIRECTORIES
-		if(directories != null && directories.length > 0) {
-			for(int i = 0; i < directories.length; i++) {
-				if(i > 0) {
-					sql.append(" OR ");
-				}
-				sql.append(DvkHandler.DIRECTORY);
-				sql.append(" LIKE '");
-				sql.append(directories[i]);
-				sql.append("%'");
-			}
-			sql.append(" AND ");
-		}
 		sql.append(DvkHandler.DIRECTORY);
-		sql.append(" = '");
-		String sql_base = sql.toString();
+		sql.append(" = ?;");
+		String[] params = new String[1];
 		//RUN THROUGH DIRECTORIES
 		for(int i = 0; i < dirs.length; i++) {
 			//BREAK IF CANCELLED
@@ -78,10 +65,8 @@ public class ErrorFinding {
 				non_dvks.add(non_dvk);
 			}
 			//REMOVE FILES
-			sql = new StringBuilder(sql_base);
-			sql.append(dirs[i].getAbsolutePath());
-			sql.append("';");
-			try(ResultSet rs = dvk_handler.get_sql_set(sql.toString())) {
+			params[0] = dirs[i].getAbsolutePath();
+			try(ResultSet rs = dvk_handler.get_sql_set(sql.toString(), params)) {
 				while(rs.next()) {
 					try {
 						file = new File(dirs[i], rs.getString(DvkHandler.MEDIA_FILE));
@@ -174,7 +159,7 @@ public class ErrorFinding {
 		sql.append(';');
 		//GET LIST OF DUPLICATED DVK IDS
 		ArrayList<String> ids = new ArrayList<>();
-		try (ResultSet rs = dvk_handler.get_sql_set(sql.toString())) {
+		try (ResultSet rs = dvk_handler.get_sql_set(sql.toString(), new String[0])) {
 			while(rs.next()) {
 				//BREAK IF CANCELLED
 				if(start_gui != null && start_gui.get_base_gui().is_canceled()) {
@@ -195,16 +180,14 @@ public class ErrorFinding {
 		sql.append(DvkHandler.DVKS);
 		sql.append(" WHERE ");
 		sql.append(DvkHandler.DVK_ID);
-		sql.append(" = '");
+		sql.append(" = ? COLLATE NOCASE ORDER BY ");
+		sql.append(DvkHandler.TITLE);
+		sql.append(';');
+		String[] params = new String[1];
 		int size = ids.size();
-		String start = sql.toString();
 		for(int i = 0; i < size; i++) {
-			sql = new StringBuilder(start);
-			sql.append(ids.get(i));
-			sql.append("' ORDER BY ");
-			sql.append(DvkHandler.TITLE);
-			sql.append(";");
-			try(ResultSet rs = dvk_handler.get_sql_set(sql.toString())) {
+			params[0] = ids.get(i);
+			try(ResultSet rs = dvk_handler.get_sql_set(sql.toString(), params)) {
 				//BREAK IF CANCELLED
 				if(start_gui != null) {
 					start_gui.get_main_pbar().set_progress(false, true, i, size);

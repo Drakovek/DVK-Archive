@@ -20,8 +20,6 @@ import com.gmail.drakovekmail.dvkarchive.processing.ArrayProcessing;
  */
 public class DvkHandler implements AutoCloseable {
 	
-	//TODO ONLY ALLOW PREPARED STATEMENTS
-	
 	/**
 	 * Label for the SQLite table used for holding Dvk information
 	 */
@@ -248,7 +246,7 @@ public class DvkHandler implements AutoCloseable {
 		sql.append(";");
 		String filename;
 		ArrayList<String> nix = new ArrayList<>();
-		try(ResultSet rs = get_sql_set(sql.toString())) {
+		try(ResultSet rs = get_sql_set(sql.toString(), new String[0])) {
 			while(rs.next()) {
 				filename = rs.getString(DvkHandler.DIRECTORY);
 				//IF DIRECTORY DOESN'T EXIST, GETS ALL ROWS IN DIRECTORY
@@ -259,17 +257,16 @@ public class DvkHandler implements AutoCloseable {
 		}
 		catch(SQLException e) {}
 		//DELETE NON-EXISTANT DIRECTORIES
+		sql = new StringBuilder("SELECT ");
+		sql.append(DvkHandler.SQL_ID);
+		sql.append(" FROM ");
+		sql.append(DvkHandler.DVKS);
+		sql.append(" WHERE ");
+		sql.append(DvkHandler.DIRECTORY);
+		sql.append(" = ?;");
 		for(int i = 0; i < nix.size(); i++) {
-			sql = new StringBuilder("SELECT ");
-			sql.append(DvkHandler.SQL_ID);
-			sql.append(" FROM ");
-			sql.append(DvkHandler.DVKS);
-			sql.append(" WHERE ");
-			sql.append(DvkHandler.DIRECTORY);
-			sql.append(" = '");
-			sql.append(nix.get(i));
-			sql.append("';");
-			try(ResultSet rs = get_sql_set(sql.toString())) {
+			String[] params = {nix.get(i)};
+			try(ResultSet rs = get_sql_set(sql.toString(), params)) {
 				this.connection.setAutoCommit(false);
 				while(rs.next()) {
 					delete_dvk(rs.getInt(DvkHandler.SQL_ID));
@@ -310,10 +307,9 @@ public class DvkHandler implements AutoCloseable {
 			sql.append(DVKS);
 			sql.append(" WHERE ");
 			sql.append(DIRECTORY);
-			sql.append(" = '");
-			sql.append(sql_path);
-			sql.append("';");
-			try (ResultSet rs = get_sql_set(sql.toString())) {
+			sql.append(" = ?;");
+			String[] params = {sql_path};
+			try (ResultSet rs = get_sql_set(sql.toString(), params)) {
 				int sql_id;
 				File sql_file;
 				ArrayList<Integer> delete = new ArrayList<>();
@@ -366,12 +362,16 @@ public class DvkHandler implements AutoCloseable {
 	 * Returns a ResultSet from a given SQLite statement.
 	 * 
 	 * @param statement SQL statement
+	 * @param params String array of parameters to add to the prepared SQL statement
 	 * @return ResultSet returned from given statement
 	 * @throws SQLException Exception triggered if SQL statement is invalid
 	 */
-	public ResultSet get_sql_set(String statement) throws SQLException {
-		Statement smt = this.connection.createStatement();
-		ResultSet rs = smt.executeQuery(statement);
+	public ResultSet get_sql_set(String statement, String[] params) throws SQLException {
+		PreparedStatement psmt = this.connection.prepareStatement(statement);
+		for(int i = 0; i < params.length; i++) {
+			psmt.setString(i + 1, params[i]);
+		}
+		ResultSet rs = psmt.executeQuery();
 		return rs;
 	}
 	
@@ -605,11 +605,13 @@ public class DvkHandler implements AutoCloseable {
 		sql.append(DVKS);
 		sql.append(" WHERE ");
 		sql.append(SQL_ID);
-		sql.append(" = ");
-		sql.append(sql_id);
-		sql.append(';');
-		try(ResultSet rs = this.get_sql_set(sql.toString())) {
-			return get_dvks(rs).get(0);
+		sql.append(" = ?;");
+		try(PreparedStatement psmt = this.connection.prepareStatement(sql.toString())) {
+			psmt.setInt(1, sql_id);
+			try(ResultSet rs = psmt.executeQuery()) {
+				return get_dvks(rs).get(0);
+			}
+			catch(SQLException f) {}
 		}
 		catch(SQLException e) {}
 		return new Dvk();
@@ -631,6 +633,7 @@ public class DvkHandler implements AutoCloseable {
 			char sort_type,
 			boolean group_artists,
 			boolean reverse) {
+		ArrayList<String> params = new ArrayList<>();
 		StringBuilder sql = new StringBuilder("SELECT * FROM ");
 		sql.append(DVKS);
 		//LIMIT TO OPENED DIRECTORIES
@@ -641,9 +644,8 @@ public class DvkHandler implements AutoCloseable {
 					sql.append(" OR ");
 				}
 				sql.append(DIRECTORY);
-				sql.append(" LIKE '");
-				sql.append(this.directories[i]);
-				sql.append("%'");
+				sql.append(" LIKE ?");
+				params.add(this.directories[i] + "%");
 			}
 		}
 		//ADD ORDER
@@ -696,7 +698,7 @@ public class DvkHandler implements AutoCloseable {
 			sql.append(start);
 		}
 		sql.append(";");
-		try (ResultSet rs = get_sql_set(sql.toString())) {
+		try (ResultSet rs = get_sql_set(sql.toString(), ArrayProcessing.list_to_array(params))) {
 			return get_dvks(rs);
 		}
 		catch(SQLException e) {
@@ -796,19 +798,14 @@ public class DvkHandler implements AutoCloseable {
 		sql.append(DvkHandler.DVKS);
 		sql.append(" WHERE (");
 		sql.append(DvkHandler.MEDIA_FILE);
-		sql.append(" = '");
-		sql.append(name);
-		sql.append("' OR ");
+		sql.append(" = ? OR ");
 		sql.append(DvkHandler.SECONDARY_FILE);
-		sql.append(" = '");
-		sql.append(name);
-		sql.append("') AND (");
+		sql.append(" = ?) AND (");
 		sql.append(DvkHandler.DIRECTORY);
-		sql.append(" = '");
-		sql.append(parent);
-		sql.append("');");
+		sql.append(" = ?);");
+		String[] params = {name, name, parent};
 		boolean result = false;
-		try(ResultSet rs = get_sql_set(sql.toString())) {
+		try(ResultSet rs = get_sql_set(sql.toString(), params)) {
 			result = rs.next();
 		}
 		catch(SQLException e) {

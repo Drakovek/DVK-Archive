@@ -855,22 +855,22 @@ public class DeviantArt extends ArtistHosting {
 			ArrayList<String> pages = new ArrayList<>();
 			arr = json.getJSONArray("results");
 			boolean check_next = true;
-			StringBuilder sql;
+			StringBuilder sql = new StringBuilder("SELECT * FROM ");
+			sql.append(DvkHandler.DVKS);
+			sql.append(" WHERE ");
+			sql.append(DvkHandler.PAGE_URL);
+			sql.append(" COLLATE NOCASE LIKE ? AND ");
+			sql.append(DvkHandler.DVK_ID);
+			sql.append(" = ?;");
+			String[] params = new String[2];
+			params[0] = "%.deviantart.com/%";
 			for(int i = 0; i < arr.length(); i++) {
 				boolean contains = false;
 				JSONObject obj = arr.getJSONObject(i).getJSONObject("deviation");
 				String link = obj.getString("url");
 				String id = get_page_id(link, true);
-				sql = new StringBuilder("SELECT * FROM ");
-				sql.append(DvkHandler.DVKS);
-				sql.append(" WHERE ");
-				sql.append(DvkHandler.PAGE_URL);
-				sql.append(" COLLATE NOCASE LIKE '%.deviantart.com/%' AND ");
-				sql.append(DvkHandler.DVK_ID);
-				sql.append(" = '");
-				sql.append(id);
-				sql.append("';");
-				try(ResultSet rs = dvk_handler.get_sql_set(sql.toString())) {
+				params[1] = id;
+				try(ResultSet rs = dvk_handler.get_sql_set(sql.toString(), params)) {
 					ArrayList<Dvk> dvks = DvkHandler.get_dvks(rs);
 					if(dvks.size() > 0) {
 						contains = true;
@@ -1057,22 +1057,22 @@ public class DeviantArt extends ArtistHosting {
 			ArrayList<Dvk> dvks = new ArrayList<>();
 			arr = json.getJSONArray("results");
 			boolean check_next = true;
-			StringBuilder sql;
+			StringBuilder sql = new StringBuilder("SELECT * FROM ");
+			sql.append(DvkHandler.DVKS);
+			sql.append(" WHERE ");
+			sql.append(DvkHandler.PAGE_URL);
+			sql.append(" COLLATE NOCASE LIKE ? AND ");
+			sql.append(DvkHandler.DVK_ID);
+			sql.append(" = ?;");
+			String[] params = new String[2];
+			params[0] = "%.deviantart.com/%";
 			for(int i = 0; i < arr.length(); i++) {
 				boolean contains = false;
 				JSONObject obj = arr.getJSONObject(i);
 				String link = obj.getString("url");
 				String page_id = get_page_id(link, true);
-				sql = new StringBuilder("SELECT * FROM ");
-				sql.append(DvkHandler.DVKS);
-				sql.append(" WHERE ");
-				sql.append(DvkHandler.PAGE_URL);
-				sql.append(" COLLATE NOCASE LIKE '%.deviantart.com/%' AND ");
-				sql.append(DvkHandler.DVK_ID);
-				sql.append(" = '");
-				sql.append(page_id);
-				sql.append("';");
-				try(ResultSet rs = dvk_handler.get_sql_set(sql.toString())) {
+				params[1] = page_id;
+				try(ResultSet rs = dvk_handler.get_sql_set(sql.toString(), params)) {
 					ArrayList<Dvk> id_dvks = DvkHandler.get_dvks(rs);
 					if(id_dvks.size() > 0) {
 						contains = true;

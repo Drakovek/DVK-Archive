@@ -468,7 +468,7 @@ public class TestDeviantArt {
 			assertEquals(url, dvk.get_secondary_url());
 			assertEquals("TF Mask_DVA777228001.dvk", dvk.get_dvk_file().getName());
 			assertEquals("TF Mask_DVA777228001.swf", dvk.get_media_file().getName());
-			assertEquals("TF Mask_DVA777228001.jpg", dvk.get_secondary_file().getName());
+			assertEquals("TF Mask_DVA777228001_S.jpg", dvk.get_secondary_file().getName());
 			//TEST DVKS ADDED TO DVK HANDLER
 			ArrayList<Dvk> dvks = dvk_handler.get_dvks(0, -1, 'a', false, false);
 			assertEquals(8, dvks.size());
@@ -524,7 +524,7 @@ public class TestDeviantArt {
 			assertTrue(dvk.get_secondary_url().startsWith(url));
 			assertEquals("Looking to hire 3D modeler_DVA817361421-J.dvk", dvk.get_dvk_file().getName());
 			assertEquals("Looking to hire 3D modeler_DVA817361421-J.html", dvk.get_media_file().getName());
-			assertEquals("Looking to hire 3D modeler_DVA817361421-J.jpg", dvk.get_secondary_file().getName());
+			assertEquals("Looking to hire 3D modeler_DVA817361421-J_S.jpg", dvk.get_secondary_file().getName());
 			//SECOND DVK
 			url = "https://www.deviantart.com/akuoreo/journal/Slime-Girl-TF-TG-Deal-Closed-762225768";
 			dvk = this.dev.get_journal_dvk(url, dvk_handler, this.test_dir, false);

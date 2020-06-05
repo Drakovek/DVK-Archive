@@ -248,8 +248,9 @@ public class DeviantArtGUI extends ArtistHostingGUI {
 			sql.append(DvkHandler.DVKS);
 			sql.append(" WHERE ");
 			sql.append(DvkHandler.PAGE_URL);
-			sql.append(" COLLATE NOCASE LIKE '%deviantart.com%';");
-			try(ResultSet rs = this.dvk_handler.get_sql_set(sql.toString())) {
+			sql.append(" COLLATE NOCASE LIKE ?;");
+			String[] params = {"%deviantart.com%"};
+			try(ResultSet rs = this.dvk_handler.get_sql_set(sql.toString(), params)) {
 				while(rs.next()) {
 					if(rs.getString(DvkHandler.DVK_ID).equals(id)) {
 						download = false;

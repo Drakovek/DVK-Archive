@@ -303,7 +303,7 @@ public class MangaDex {
 		sql.append(DvkHandler.PAGE_URL);
 		sql.append(" COLLATE NOCASE LIKE '%mangadex.%';");
 		ArrayList<String> pages = new ArrayList<>();
-		try(ResultSet rs = dvk_handler.get_sql_set(sql.toString())) {
+		try(ResultSet rs = dvk_handler.get_sql_set(sql.toString(), new String[0])) {
 			while(rs.next()) {
 				pages.add(rs.getString(DvkHandler.PAGE_URL));
 			}
@@ -353,6 +353,16 @@ public class MangaDex {
 		try(DConnect unit_connect = new DConnect(false, false)) {
 			int start = get_start_chapter(dvk_handler, chapters, check_all);
 			ArrayList<Dvk> dvks = new ArrayList<>();
+			StringBuilder sql = new StringBuilder("SELECT ");
+			sql.append(DvkHandler.SQL_ID);
+			sql.append(" FROM ");
+			sql.append(DvkHandler.DVKS);
+			sql.append(" WHERE ");
+			sql.append(DvkHandler.PAGE_URL);
+			sql.append(" COLLATE NOCASE LIKE '%mangadex.%' AND ");
+			sql.append(DvkHandler.PAGE_URL);
+			sql.append(" COLLATE NOCASE LIKE ?;");
+			String[] params = new String[1];
 			for(int c = start; c > -1; c--) {
 				if(start_gui != null) {
 					start_gui.get_main_pbar().set_progress(false, true, start - c, start + 1);
@@ -374,22 +384,10 @@ public class MangaDex {
 					dvk.set_description(chapters.get(c).get_description());
 					dvk.set_page_url(chapters.get(c).get_page_url() + "/" + Integer.toString(page));
 					//CHECK IF ALREADY DOWNLOADED
-					StringBuilder sql = new StringBuilder("SELECT ");
-					sql.append(DvkHandler.SQL_ID);
-					sql.append(" FROM ");
-					sql.append(DvkHandler.DVKS);
-					sql.append(" WHERE ");
-					sql.append(DvkHandler.PAGE_URL);
-					sql.append(" COLLATE NOCASE LIKE '%mangadex.%' AND ");
-					sql.append(DvkHandler.PAGE_URL);
-					sql.append(" COLLATE NOCASE LIKE '%");
-					sql.append('/');
-					sql.append(chapters.get(c).get_id());
-					sql.append('/');
-					sql.append(page);
-					sql.append("';");
+					
 					boolean contains = false;
-					try(ResultSet rs = dvk_handler.get_sql_set(sql.toString())) {
+					params[0] = "%/" + chapters.get(c).get_id() + "/" + Integer.toString(page);
+					try(ResultSet rs = dvk_handler.get_sql_set(sql.toString(), params)) {
 						contains = rs.next();
 					}
 					catch(SQLException e) {
@@ -490,7 +488,7 @@ public class MangaDex {
 		sql.append(" COLLATE NOCASE LIKE '%mangadex.%' ORDER BY ");
 		sql.append(DvkHandler.TITLE);
 		sql.append(';');
-		try(ResultSet rs = dvk_handler.get_sql_set(sql.toString())) {
+		try(ResultSet rs = dvk_handler.get_sql_set(sql.toString(), new String[0])) {
 			ArrayList<Dvk> search = DvkHandler.get_dvks(rs);
 			int size = search.size();
 			for(int i = 0; i < size; i++) {

@@ -49,18 +49,17 @@ public abstract class ArtistHosting implements DActionEvent {
 		sql.append(DvkHandler.DVKS);
 		sql.append(" WHERE ");
 		sql.append(DvkHandler.PAGE_URL);
-		sql.append(" COLLATE NOCASE LIKE '%");
-		sql.append(domain);
-		sql.append("%' AND (");
+		sql.append(" COLLATE NOCASE LIKE ? AND (");
 		sql.append(DvkHandler.WEB_TAGS);
 		sql.append(" IS NULL OR ");
 		sql.append(DvkHandler.WEB_TAGS);
-		sql.append(" COLLATE NOCASE NOT LIKE '%dvk&#58;single%') GROUP BY ");
+		sql.append(" COLLATE NOCASE NOT LIKE ?) GROUP BY ");
 		sql.append(DvkHandler.ARTISTS);
 		sql.append(" ORDER BY ");
 		sql.append(DvkHandler.ARTISTS);
 		sql.append(" COLLATE NOCASE ASC;");
-		try(ResultSet rs = handler.get_sql_set(sql.toString())) {
+		String[] params = {"%" + domain + "%", "%dvk&#58;single%"};
+		try(ResultSet rs = handler.get_sql_set(sql.toString(), params)) {
 			ArrayList<Dvk> dvks = DvkHandler.get_dvks(rs);
 			for(int i = 0; i < dvks.size(); i++) {
 				dvks.get(i).set_dvk_file(dvks.get(i).get_dvk_file().getParentFile());
@@ -210,10 +209,9 @@ public abstract class ArtistHosting implements DActionEvent {
 		sql.append(DvkHandler.DVKS);
 		sql.append(" WHERE ");
 		sql.append(DvkHandler.DVK_ID);
-		sql.append(" = '");
-		sql.append(dvk_id);
-		sql.append("';");
-		try(ResultSet rs = dvk_handler.get_sql_set(sql.toString())) {
+		sql.append(" = ?;");
+		String[] params = {dvk_id};
+		try(ResultSet rs = dvk_handler.get_sql_set(sql.toString(), params)) {
 			ArrayList<Dvk> dvks = DvkHandler.get_dvks(rs);
 			if(dvks.size() > 0) {
 				Dvk dvk = dvks.get(0);

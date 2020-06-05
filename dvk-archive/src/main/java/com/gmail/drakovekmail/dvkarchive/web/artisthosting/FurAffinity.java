@@ -319,24 +319,24 @@ public class FurAffinity extends ArtistHosting {
 		xpath = "//figure//u//a[contains(@href,'/view/')]/@href";
 		das = this.connect.get_page().getByXPath(xpath);
 		boolean check_next = true;
-		StringBuilder sql;
+		//SQL COMMAND TO GET SAVED URLS WITH SAME ID
+		StringBuilder sql = new StringBuilder("SELECT * FROM ");
+		sql.append(DvkHandler.DVKS);
+		sql.append(" WHERE ");
+		sql.append(DvkHandler.PAGE_URL);
+		sql.append(" COLLATE NOCASE LIKE ? AND ");
+		sql.append(DvkHandler.DVK_ID);
+		sql.append(" = ?;");
+		String[] params = new String[2];
+		params[0] = "%.furaffinity.net/view/%";
 		//RUN THROUGH MEDIA URLS ON GALLERY PAGE
 		for(int i = 0; i < das.size(); i++) {
 			//GET ID OF CURRENT MEDIA URL
 			boolean contains = false;
 			String link = "https://www.furaffinity.net" + das.get(i).getNodeValue();
 			String id = get_page_id(link, true);
-			//SQL COMMAND TO GET SAVED URLS WITH SAME ID
-			sql = new StringBuilder("SELECT * FROM ");
-			sql.append(DvkHandler.DVKS);
-			sql.append(" WHERE ");
-			sql.append(DvkHandler.PAGE_URL);
-			sql.append(" COLLATE NOCASE LIKE '%.furaffinity.net/view/%' AND ");
-			sql.append(DvkHandler.DVK_ID);
-			sql.append(" = '");
-			sql.append(id);
-			sql.append("';");
-			try(ResultSet rs = dvk_handler.get_sql_set(sql.toString())) {
+			params[1] = id;
+			try(ResultSet rs = dvk_handler.get_sql_set(sql.toString(), params)) {
 				ArrayList<Dvk> dvks = DvkHandler.get_dvks(rs);
 				if(dvks.size() > 0) {
 					//RUNS IF ID ALLREADY DOWNLOADED
@@ -458,24 +458,24 @@ public class FurAffinity extends ArtistHosting {
 		List<DomElement> ds;
 		ds = this.connect.get_page().getByXPath(xpath);
 		boolean check_next = true;
-		StringBuilder sql;
+		//SQL COMMAND TO GET SAVED URLS WITH SAME ID
+		StringBuilder sql = new StringBuilder("SELECT * FROM ");
+		sql.append(DvkHandler.DVKS);
+		sql.append(" WHERE ");
+		sql.append(DvkHandler.PAGE_URL);
+		sql.append(" COLLATE NOCASE LIKE ? AND ");
+		sql.append(DvkHandler.DVK_ID);
+		sql.append(" = ?;");
+		String[] params = new String[2];
+		params[0] = "%.furaffinity.net/journal/%";
 		for(int i = 0; i < ds.size(); i++) {
 			String link = ds.get(i).asText().toLowerCase();
 			if(link.contains("read more") || link.contains("view journal")) {
 				boolean contains = false;
 				link = "https://www.furaffinity.net" + ds.get(i).getAttribute("href");
 				String id = get_page_id(link, true);
-				//SQL COMMAND TO GET SAVED URLS WITH SAME ID
-				sql = new StringBuilder("SELECT * FROM ");
-				sql.append(DvkHandler.DVKS);
-				sql.append(" WHERE ");
-				sql.append(DvkHandler.PAGE_URL);
-				sql.append(" COLLATE NOCASE LIKE '%.furaffinity.net/journal/%' AND ");
-				sql.append(DvkHandler.DVK_ID);
-				sql.append(" = '");
-				sql.append(id);
-				sql.append("';");
-				try(ResultSet rs = dvk_handler.get_sql_set(sql.toString())) {
+				params[1] = id;
+				try(ResultSet rs = dvk_handler.get_sql_set(sql.toString(), params)) {
 					ArrayList<Dvk> dvks = DvkHandler.get_dvks(rs);
 					if(dvks.size() > 0) {
 						contains = true;

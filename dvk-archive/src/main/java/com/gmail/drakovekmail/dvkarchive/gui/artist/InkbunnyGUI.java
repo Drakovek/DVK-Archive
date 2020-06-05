@@ -282,10 +282,9 @@ public class InkbunnyGUI extends ArtistHostingGUI {
 			sql.append(DvkHandler.DVKS);
 			sql.append(" WHERE ");
 			sql.append(DvkHandler.DVK_ID);
-			sql.append(" LIKE '");
-			sql.append(id);
-			sql.append("%';");
-			try(ResultSet rs = this.dvk_handler.get_sql_set(sql.toString())) {
+			sql.append(" LIKE ?;");
+			String[] params = {id + "%"};
+			try(ResultSet rs = this.dvk_handler.get_sql_set(sql.toString(), params)) {
 				ArrayList<Dvk> results = DvkHandler.get_dvks(rs);
 				if(results.size() == 0) {
 					//DOWNLOAD MEDIA

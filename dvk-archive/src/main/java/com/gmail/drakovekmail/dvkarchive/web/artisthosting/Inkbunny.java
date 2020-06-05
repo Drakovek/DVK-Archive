@@ -285,7 +285,6 @@ public class Inkbunny extends ArtistHosting {
 		int page_count;
 		JSONObject json;
 		boolean contains;
-		StringBuilder sql;
 		ArrayList<Dvk> dvks;
 		ArrayList<Dvk> submissions = new ArrayList<>();
 		JSONObject base = json_post("https://inkbunny.net/api_search.php", params);
@@ -305,23 +304,24 @@ public class Inkbunny extends ArtistHosting {
 				return new ArrayList<>();
 			}
 			String new_rid = base.getString("rid");
+			//SQL COMMAND TO GET SAVED URLS WITH SAME ID
+			StringBuilder sql = new StringBuilder("SELECT * FROM ");
+			sql.append(DvkHandler.DVKS);
+			sql.append(" WHERE ");
+			sql.append(DvkHandler.DVK_ID);
+			sql.append(" LIKE ? AND ");
+			sql.append(DvkHandler.DVK_ID);
+			sql.append(" NOT LIKE ?;");
+			String[] sql_params = new String[2];
+			sql_params[1] = "%-J";
 			for(int i = 0; i < array.length(); i++) {
 				contains = false;
 				//GET ID CURRENT MEDIA URL
 				json = array.getJSONObject(i);
 				id = json.getString("submission_id");
 				page_count = Integer.parseInt(json.getString("pagecount"));
-				//SQL COMMAND TO GET SAVED URLS WITH SAME ID
-				sql = new StringBuilder("SELECT * FROM ");
-				sql.append(DvkHandler.DVKS);
-				sql.append(" WHERE ");
-				sql.append(DvkHandler.DVK_ID);
-				sql.append(" LIKE 'INK");
-				sql.append(id);
-				sql.append("-%' AND ");
-				sql.append(DvkHandler.DVK_ID);
-				sql.append(" NOT LIKE '%-J';");
-				try(ResultSet rs = this.dvk_handler.get_sql_set(sql.toString())) {
+				sql_params[0] = "INK" + id + "-%";
+				try(ResultSet rs = this.dvk_handler.get_sql_set(sql.toString(), sql_params)) {
 					dvks = DvkHandler.get_dvks(rs);
 					if(dvks.size() >= page_count) {
 						//RUNS IF ID ALREADY DOWNLOADED
@@ -414,23 +414,22 @@ public class Inkbunny extends ArtistHosting {
 		} catch (InterruptedException e1) {}
 		xpath = xpath + "/@href";
 		String id;
-		StringBuilder sql;
 		boolean contains;
 		boolean check_next = true;
 		ArrayList<String> ids = new ArrayList<>();
 		try {
 			List<DomAttr> das = this.connect.get_page().getByXPath(xpath);
+			StringBuilder sql = new StringBuilder("SELECT * FROM ");
+			sql.append(DvkHandler.DVKS);
+			sql.append(" WHERE ");
+			sql.append(DvkHandler.DVK_ID);
+			sql.append(" = ?;");
+			String[] sql_params = new String[1];
 			for(int i = 0; i < das.size(); i++) {
 				contains = false;
 				id = get_page_id("inkbunny.net" + das.get(i).getNodeValue(), true);
-				sql = new StringBuilder("SELECT * FROM ");
-				sql.append(DvkHandler.DVKS);
-				sql.append(" WHERE ");
-				sql.append(DvkHandler.DVK_ID);
-				sql.append(" = '");
-				sql.append(id);
-				sql.append("';");
-				try(ResultSet rs = this.dvk_handler.get_sql_set(sql.toString())) {
+				sql_params[0] = id;
+				try(ResultSet rs = this.dvk_handler.get_sql_set(sql.toString(), sql_params)) {
 					ArrayList<Dvk> dvks = DvkHandler.get_dvks(rs);
 					if(dvks.size() > 0) {
 						contains = true;
@@ -505,12 +504,11 @@ public class Inkbunny extends ArtistHosting {
 		sql.append(DvkHandler.DVKS);
 		sql.append(" WHERE ");
 		sql.append(DvkHandler.DVK_ID);
-		sql.append(" LIKE 'INK");
-		sql.append(sub_id);
-		sql.append("-%' AND ");
+		sql.append(" LIKE ? AND ");
 		sql.append(DvkHandler.DVK_ID);
-		sql.append(" NOT LIKE '%-J';");
-		try(ResultSet rs = this.dvk_handler.get_sql_set(sql.toString())) {
+		sql.append(" NOT LIKE ?;");
+		String[] sql_params = {"INK" + sub_id + "-%", "%-J"};
+		try(ResultSet rs = this.dvk_handler.get_sql_set(sql.toString(), sql_params)) {
 			ArrayList<Dvk> search_dvks = DvkHandler.get_dvks(rs);
 			if(search_dvks.size() > 0) {
 				if(search_dvks.size() < page_count) {
