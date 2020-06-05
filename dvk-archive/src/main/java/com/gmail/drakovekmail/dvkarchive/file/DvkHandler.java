@@ -18,7 +18,9 @@ import com.gmail.drakovekmail.dvkarchive.processing.ArrayProcessing;
  * 
  * @author Drakovek
  */
-public class DvkHandler implements AutoCloseable{
+public class DvkHandler implements AutoCloseable {
+	
+	//TODO ONLY ALLOW PREPARED STATEMENTS
 	
 	/**
 	 * Label for the SQLite table used for holding Dvk information
@@ -161,7 +163,7 @@ public class DvkHandler implements AutoCloseable{
 			sql.append(DVK_ID);
 			sql.append(" TEXT NOT NULL, ");
 			sql.append(TITLE);
-			sql.append(" TEXT NOT NULL COLLATE NOCASE, ");
+			sql.append(" TEXT NOT NULL, ");
 			sql.append(ARTISTS);
 			sql.append(" TEXT NOT NULL, ");
 			sql.append(TIME);
@@ -282,7 +284,6 @@ public class DvkHandler implements AutoCloseable{
 				}
 				catch(SQLException f) {}
 			}
-			
 		}
 	}
 	
@@ -292,70 +293,72 @@ public class DvkHandler implements AutoCloseable{
 	 * @param directory Directory in which to load DVK files
 	 */
 	public void update_directory(File directory) {
-		//GET LIST OF DVK FILES
-		File[] files = directory.listFiles(new ExtensionFilter(".dvk", true));
-		ArrayList<String> dvks = new ArrayList<>();
-		for(File file: files) {
-			dvks.add(file.getName());
-		}
-		//CREATE SQL STATEMENT
-		String sql_path = directory.getAbsolutePath();
-		StringBuilder sql = new StringBuilder("SELECT ");
-		sql.append(SQL_ID);
-		sql.append(", ");
-		sql.append(DVK_FILE);
-		sql.append(" FROM ");
-		sql.append(DVKS);
-		sql.append(" WHERE ");
-		sql.append(DIRECTORY);
-		sql.append(" = '");
-		sql.append(sql_path);
-		sql.append("';");
-		try (ResultSet rs = get_sql_set(sql.toString())) {
-			int sql_id;
-			File sql_file;
-			ArrayList<Integer> delete = new ArrayList<>();
-			this.connection.setAutoCommit(false);
-			while(rs.next()) {
-				sql_id = rs.getInt(SQL_ID);
-				sql_path = rs.getString(DVK_FILE);
-				sql_file = new File(directory, sql_path);
-				if(sql_file.exists()) {
-					if(this.modified < sql_file.lastModified()) {
-						//MODIFIES ENTRY IF DVK HAS BEEN MODIFIED
-						Dvk dvk = new Dvk(sql_file);
-						set_dvk(dvk, sql_id);
-					}
-					dvks.remove(dvks.indexOf(sql_path));
-				}
-				else {
-					//ADD TO DELETE LIST IF FILE NO LONGER EXISTS
-					delete.add(Integer.valueOf(sql_id));
-				}
+		if(directory != null) {
+			//GET LIST OF DVK FILES
+			File[] files = directory.listFiles(new ExtensionFilter(".dvk", true));
+			ArrayList<String> dvks = new ArrayList<>();
+			for(File file: files) {
+				dvks.add(file.getName());
 			}
-			//DELETE NON-EXISTANT ENTRIES
-			int size = delete.size();
-			for(int i = 0; i < size; i++) {
-				delete_dvk(delete.get(i).intValue());
-			}
-			//ADDS NEW DVKS
-			size = dvks.size();
-			for(int i = 0; i < size; i++) {
-				Dvk dvk = new Dvk(new File(directory, dvks.get(i)));
-				if(dvk.get_title() != null) {
-					add_dvk(dvk);
-				}
-			}
-			this.connection.commit();
-			this.connection.setAutoCommit(true);
-		}
-		catch(SQLException e) {
-			try {
-				this.connection.rollback();
+			//CREATE SQL STATEMENT
+			String sql_path = directory.getAbsolutePath();
+			StringBuilder sql = new StringBuilder("SELECT ");
+			sql.append(SQL_ID);
+			sql.append(", ");
+			sql.append(DVK_FILE);
+			sql.append(" FROM ");
+			sql.append(DVKS);
+			sql.append(" WHERE ");
+			sql.append(DIRECTORY);
+			sql.append(" = '");
+			sql.append(sql_path);
+			sql.append("';");
+			try (ResultSet rs = get_sql_set(sql.toString())) {
+				int sql_id;
+				File sql_file;
+				ArrayList<Integer> delete = new ArrayList<>();
 				this.connection.setAutoCommit(false);
+				while(rs.next()) {
+					sql_id = rs.getInt(SQL_ID);
+					sql_path = rs.getString(DVK_FILE);
+					sql_file = new File(directory, sql_path);
+					if(sql_file.exists()) {
+						if(this.modified < sql_file.lastModified()) {
+							//MODIFIES ENTRY IF DVK HAS BEEN MODIFIED
+							Dvk dvk = new Dvk(sql_file);
+							set_dvk(dvk, sql_id);
+						}
+						dvks.remove(dvks.indexOf(sql_path));
+					}
+					else {
+						//ADD TO DELETE LIST IF FILE NO LONGER EXISTS
+						delete.add(Integer.valueOf(sql_id));
+					}
+				}
+				//DELETE NON-EXISTANT ENTRIES
+				int size = delete.size();
+				for(int i = 0; i < size; i++) {
+					delete_dvk(delete.get(i).intValue());
+				}
+				//ADDS NEW DVKS
+				size = dvks.size();
+				for(int i = 0; i < size; i++) {
+					Dvk dvk = new Dvk(new File(directory, dvks.get(i)));
+					if(dvk.get_title() != null) {
+						add_dvk(dvk);
+					}
+				}
+				this.connection.commit();
+				this.connection.setAutoCommit(true);
 			}
-			catch(SQLException f) {}
-			e.printStackTrace();
+			catch(SQLException e) {
+				try {
+					this.connection.rollback();
+					this.connection.setAutoCommit(false);
+				}
+				catch(SQLException f) {}
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -653,7 +656,7 @@ public class DvkHandler implements AutoCloseable{
 			sql.append(" ORDER BY ");
 			if(group_artists) {
 				sql.append(ARTISTS);
-				sql.append(' ');
+				sql.append(" COLLATE NOCASE ");
 				sql.append(direction);
 				sql.append(", ");
 			}
@@ -662,7 +665,7 @@ public class DvkHandler implements AutoCloseable{
 			sql.append(direction);
 			sql.append(", ");
 			sql.append(TITLE);
-			sql.append(' ');
+			sql.append(" COLLATE NOCASE ");
 			sql.append(direction);
 		}
 		else if(sort_type == 'a') {
@@ -670,12 +673,12 @@ public class DvkHandler implements AutoCloseable{
 			sql.append(" ORDER BY ");
 			if(group_artists) {
 				sql.append(ARTISTS);
-				sql.append(' ');
+				sql.append(" COLLATE NOCASE ");
 				sql.append(direction);
 				sql.append(", ");
 			}
 			sql.append(TITLE);
-			sql.append(' ');
+			sql.append(" COLLATE NOCASE ");
 			sql.append(direction);
 			sql.append(", ");
 			sql.append(TIME);

@@ -449,19 +449,18 @@ public class DeviantArt extends ArtistHosting {
 			}
 			//SET FILES
 			String ext;
-			String filename = dvk.get_filename();
-			dvk.set_dvk_file(new File(directory, filename + ".dvk"));
+			dvk.set_dvk_file(new File(directory, dvk.get_filename(false) + ".dvk"));
 			if(type.equals("rich")) {
-				dvk.set_media_file(filename + ".html");
+				dvk.set_media_file(dvk.get_filename(false) + ".html");
 			}
 			else {
 				ext = StringProcessing.get_extension(dvk.get_direct_url());
-				dvk.set_media_file(filename + ext);
+				dvk.set_media_file(dvk.get_filename(false) + ext);
 			}
 			//SET SECONDARY FILE
 			if(dvk.get_secondary_url() != null) {
 				ext = StringProcessing.get_extension(dvk.get_secondary_url());
-				dvk.set_secondary_file(filename + ext);
+				dvk.set_secondary_file(dvk.get_filename(true) + ext);
 			}
 			//SAVE FILES
 			if(save) {
@@ -571,9 +570,8 @@ public class DeviantArt extends ArtistHosting {
 		text.insert(0, "<!DOCTYPE html><html>");
 		text.append("</html>");
 		//SET FILENAMES
-		String filename = dvk.get_filename();
-		dvk.set_dvk_file(new File(directory, filename + ".dvk"));
-		dvk.set_media_file(filename + ".html");
+		dvk.set_dvk_file(new File(directory, dvk.get_filename(false) + ".dvk"));
+		dvk.set_media_file(dvk.get_filename(false) + ".html");
 		if(save) {
 			dvk.write_dvk();
 			InOut.write_file(dvk.get_media_file(), text.toString());
@@ -623,9 +621,8 @@ public class DeviantArt extends ArtistHosting {
 		title.append(" Update");
 		dvk.set_title(title.toString());
 		//SET FILES
-		String filename = dvk.get_filename();
-		dvk.set_dvk_file(new File(directory, filename + ".dvk"));
-		dvk.set_media_file(filename + ".html");
+		dvk.set_dvk_file(new File(directory, dvk.get_filename(false) + ".dvk"));
+		dvk.set_media_file(dvk.get_filename(false) + ".html");
 		//SAVE
 		if(save) {
 			dvk.write_dvk();
@@ -761,14 +758,13 @@ public class DeviantArt extends ArtistHosting {
 				catch (JSONException f) {}
 			}
 			//SET FILES
-			String filename = dvk.get_filename();
-			dvk.set_dvk_file(new File(directory, filename + ".dvk"));
-			dvk.set_media_file(filename + ".html");
+			dvk.set_dvk_file(new File(directory, dvk.get_filename(false) + ".dvk"));
+			dvk.set_media_file(dvk.get_filename(false) + ".html");
 			//SET SECONDARY FILE
 			if(dvk.get_secondary_url() != null) {
 				String ext;
 				ext = StringProcessing.get_extension(dvk.get_secondary_url());
-				dvk.set_secondary_file(filename + ext);
+				dvk.set_secondary_file(dvk.get_filename(true) + ext);
 			}
 			//SAVE
 			if(save) {

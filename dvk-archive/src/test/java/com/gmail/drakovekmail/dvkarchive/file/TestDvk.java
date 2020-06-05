@@ -545,16 +545,18 @@ public class TestDvk {
 	@SuppressWarnings("static-method")
 	public void test_get_filename() {
 		Dvk dvk = new Dvk();
-		assertEquals("", dvk.get_filename());
+		assertEquals("", dvk.get_filename(false));
 		dvk.set_title("Title");
-		assertEquals("", dvk.get_filename());
+		assertEquals("", dvk.get_filename(false));
 		dvk.set_id("ID123");
 		dvk.set_title(null);
-		assertEquals("", dvk.get_filename());
+		assertEquals("", dvk.get_filename(false));
 		dvk.set_title("a   B-cd!");
-		assertEquals("a B-cd_ID123", dvk.get_filename());
+		assertEquals("a B-cd_ID123", dvk.get_filename(false));
+		assertEquals("a B-cd_ID123_S", dvk.get_filename(true));
 		dvk.set_title("");
-		assertEquals("0_ID123", dvk.get_filename());
+		assertEquals("0_ID123", dvk.get_filename(false));
+		assertEquals("0_ID123_S", dvk.get_filename(true));
 	}
 	
 	/**
@@ -581,12 +583,12 @@ public class TestDvk {
 		assertTrue(dvk.get_media_file().exists());
 		assertTrue(dvk.get_secondary_file().exists());
 		//RENAME FILES
-		dvk.rename_files("New");
+		dvk.rename_files("New", "Other");
 		file = dvk.get_dvk_file();
 		dvk = new Dvk(file);
 		assertEquals("New.dvk", dvk.get_dvk_file().getName());
 		assertEquals("New.png", dvk.get_media_file().getName());
-		assertEquals("New.txt", dvk.get_secondary_file().getName());
+		assertEquals("Other.txt", dvk.get_secondary_file().getName());
 		assertTrue(dvk.get_dvk_file().exists());
 		assertTrue(dvk.get_media_file().exists());
 		assertTrue(dvk.get_secondary_file().exists());

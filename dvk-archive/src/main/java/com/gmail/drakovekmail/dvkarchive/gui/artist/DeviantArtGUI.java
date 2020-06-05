@@ -15,7 +15,7 @@ import com.gmail.drakovekmail.dvkarchive.web.artisthosting.ArtistHosting;
 import com.gmail.drakovekmail.dvkarchive.web.artisthosting.DeviantArt;
 
 /**
- * GUI for downloading files from DeviantArt.net
+ * GUI for downloading files from DeviantArt.com
  * 
  * @author Drakovek
  */
@@ -128,8 +128,7 @@ public class DeviantArtGUI extends ArtistHostingGUI {
 	@Override
 	public void print_start() {
 		this.start_gui.append_console("", false);
-		this.start_gui.append_console(
-				"running_deviantart", true);
+		this.start_gui.append_console("running_deviantart", true);
 	}
 
 	@Override

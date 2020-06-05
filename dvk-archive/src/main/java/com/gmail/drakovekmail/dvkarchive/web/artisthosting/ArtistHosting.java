@@ -59,7 +59,7 @@ public abstract class ArtistHosting implements DActionEvent {
 		sql.append(DvkHandler.ARTISTS);
 		sql.append(" ORDER BY ");
 		sql.append(DvkHandler.ARTISTS);
-		sql.append(';');
+		sql.append(" COLLATE NOCASE ASC;");
 		try(ResultSet rs = handler.get_sql_set(sql.toString())) {
 			ArrayList<Dvk> dvks = DvkHandler.get_dvks(rs);
 			for(int i = 0; i < dvks.size(); i++) {

@@ -107,6 +107,18 @@ public class TestInkbunny {
 	}
 	
 	/**
+	 * Tests the login and is_logged_in methods.
+	 */
+	@Test
+	public void test_login() {
+		assertFalse(this.ink.is_logged_in());
+		assertFalse(this.ink.login("bleh", "kajkwkeoriqpz39222ojv"));
+		assertFalse(this.ink.is_logged_in());
+		assertTrue(this.ink.login("guest", ""));
+		assertTrue(this.ink.is_logged_in());
+	}
+	
+	/**
 	 * Tests the get_user_id method.
 	 */
 	@Test
@@ -321,7 +333,7 @@ public class TestInkbunny {
 		assertEquals(this.test_dir, dvk.get_dvk_file().getParentFile());
 		assertEquals("Shrek And The Risers Chapter 1_INK2163805-1.dvk", dvk.get_dvk_file().getName());
 		assertEquals("Shrek And The Risers Chapter 1_INK2163805-1.html", dvk.get_media_file().getName());
-		assertEquals("Shrek And The Risers Chapter 1_INK2163805-1.png", dvk.get_secondary_file().getName());
+		assertEquals("Shrek And The Risers Chapter 1_INK2163805-1_S.png", dvk.get_secondary_file().getName());
 		assertTrue(dvk.get_dvk_file().exists());
 		assertTrue(dvk.get_media_file().exists());
 		assertTrue(dvk.get_secondary_file().exists());

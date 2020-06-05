@@ -618,7 +618,7 @@ public class TestDvkHandler {
 		sql.append(DvkHandler.DVKS);
 		sql.append(" ORDER BY ");
 		sql.append(DvkHandler.TITLE);
-		sql.append(';');
+		sql.append(" COLLATE NOCASE ASC;");
 		try(ResultSet rs = this.dvk_handler.get_sql_set(sql.toString())){
 			rs.next();
 			Dvk dvk = this.dvk_handler.get_dvk(rs.getInt(DvkHandler.SQL_ID));

@@ -173,7 +173,7 @@ public class TestReformat {
 			assertEquals("Title 1_ID1.png", dvks.get(0).get_media_file().getName());
 			assertEquals("Title 2_ID2.dvk", dvks.get(1).get_dvk_file().getName());
 			assertEquals("Title 2_ID2.jpg", dvks.get(1).get_media_file().getName());
-			assertEquals("Title 2_ID2.txt", dvks.get(1).get_secondary_file().getName());
+			assertEquals("Title 2_ID2_S.txt", dvks.get(1).get_secondary_file().getName());
 			File db = new File(this.test_dir, "dvk_archive.db");
 			assertTrue(db.exists());
 			handler.delete_database();
@@ -196,7 +196,7 @@ public class TestReformat {
 			assertEquals("Title 1_ID1.png", dvks.get(0).get_media_file().getName());
 			assertEquals("Title 2_ID2.dvk", dvks.get(1).get_dvk_file().getName());
 			assertEquals("Title 2_ID2.jpg", dvks.get(1).get_media_file().getName());
-			assertEquals("Title 2_ID2.txt", dvks.get(1).get_secondary_file().getName());
+			assertEquals("Title 2_ID2_S.txt", dvks.get(1).get_secondary_file().getName());
 		}
 		catch(DvkException e) {
 			assertTrue(false);

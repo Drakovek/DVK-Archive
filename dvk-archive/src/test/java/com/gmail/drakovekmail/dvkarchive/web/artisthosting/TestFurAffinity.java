@@ -521,7 +521,7 @@ public class TestFurAffinity {
 			assertEquals(this.test_dir, dvk.get_dvk_file().getParentFile());
 			assertEquals("Affinity Ch 1_FAF15301779.txt", dvk.get_media_file().getName());
 			assertEquals(this.test_dir, dvk.get_media_file().getParentFile());
-			assertEquals("Affinity Ch 1_FAF15301779.jpg", dvk.get_secondary_file().getName());
+			assertEquals("Affinity Ch 1_FAF15301779_S.jpg", dvk.get_secondary_file().getName());
 			assertEquals(this.test_dir, dvk.get_secondary_file().getParentFile());
 			assertTrue(dvk.get_dvk_file().exists());
 			assertTrue(dvk.get_media_file().exists());

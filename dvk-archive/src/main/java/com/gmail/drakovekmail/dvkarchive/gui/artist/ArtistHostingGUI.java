@@ -32,7 +32,7 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DCheckEvent;
  * @author Drakovek
  */
 public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEvent, DCheckEvent {
-
+	
 	/**
 	 * SerialVersionUID
 	 */
@@ -163,6 +163,11 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	 */
 	public ArtistHostingGUI(StartGUI start_gui, String name_id, String list_label, boolean simple) {
 		super(start_gui);
+		FilePrefs prefs = this.start_gui.get_file_prefs();
+		try {
+			this.dvk_handler = new DvkHandler(prefs);
+		}
+		catch(DvkException e) {}
 		this.list_label = list_label;
 		this.simple = simple;
 		this.dvks = new ArrayList<>();
@@ -462,15 +467,10 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	 * Reads all dvks in base_gui's selected directory.
 	 */
 	protected void read_dvks() {
-		FilePrefs prefs = this.start_gui.get_file_prefs();
 		close_dvk_handler();
-		try {
-			this.dvk_handler = new DvkHandler(prefs);
-			File[] dirs = {this.start_gui.get_directory()};
-			this.dvk_handler.read_dvks(dirs, this.start_gui);
-			get_artists();
-		}
-		catch(DvkException e) {}
+		File[] dirs = {this.start_gui.get_directory()};
+		this.dvk_handler.read_dvks(dirs, this.start_gui);
+		get_artists();
 	}
 	
 	/**

@@ -39,8 +39,6 @@ import com.gmail.drakovekmail.dvkarchive.web.DConnect;
  */
 public class Inkbunny extends ArtistHosting {
 	
-	//TODO CHECK CANCELLING WORKS
-	
 	/**
 	 * Milliseconds to wait after connection events for rate limiting.
 	 */
@@ -155,6 +153,15 @@ public class Inkbunny extends ArtistHosting {
 		catch(IOException e) {}
 		catch(JSONException f) {}
 		return new JSONObject();
+	}
+	
+	/**
+	 * Returns if object is logged in to the Inkbunny API.
+	 * 
+	 * @return Whether object is logged in.
+	 */
+	public boolean is_logged_in() {
+		return this.sid.length() > 0;
 	}
 	
 	/**
@@ -371,7 +378,6 @@ public class Inkbunny extends ArtistHosting {
 			return submissions;
 		}
 		catch(JSONException e) {
-			e.printStackTrace();
 			if(page_num == 1) {
 				return new ArrayList<>();
 			}
@@ -403,60 +409,74 @@ public class Inkbunny extends ArtistHosting {
 		}
 		String xpath = "//div[@class='content']//div[contains(@style,'font-family')]//a[contains(@href,'/j/')]";
 		this.connect.load_page(url.toString(), xpath, 2);
+		try {
+			TimeUnit.MILLISECONDS.sleep(SLEEP);
+		} catch (InterruptedException e1) {}
 		xpath = xpath + "/@href";
 		String id;
 		StringBuilder sql;
 		boolean contains;
 		boolean check_next = true;
 		ArrayList<String> ids = new ArrayList<>();
-		List<DomAttr> das = this.connect.get_page().getByXPath(xpath);
-		for(int i = 0; i < das.size(); i++) {
-			contains = false;
-			id = get_page_id("inkbunny.net" + das.get(i).getNodeValue(), true);
-			sql = new StringBuilder("SELECT * FROM ");
-			sql.append(DvkHandler.DVKS);
-			sql.append(" WHERE ");
-			sql.append(DvkHandler.DVK_ID);
-			sql.append(" = '");
-			sql.append(id);
-			sql.append("';");
-			try(ResultSet rs = this.dvk_handler.get_sql_set(sql.toString())) {
-				ArrayList<Dvk> dvks = DvkHandler.get_dvks(rs);
-				if(dvks.size() > 0) {
-					contains = true;
-					//UPDATE DVK LOCATION AND FAVORITE IF ALREADY DOWNLOADED
-					Dvk dvk = ArtistHosting.move_dvk(dvks.get(0), directory);
-					this.dvk_handler.set_dvk(dvk, dvk.get_sql_id());
-					if(!ArrayProcessing.contains(dvk.get_web_tags(), "dvk:single", false)) {
-						check_next = false;
+		try {
+			List<DomAttr> das = this.connect.get_page().getByXPath(xpath);
+			for(int i = 0; i < das.size(); i++) {
+				contains = false;
+				id = get_page_id("inkbunny.net" + das.get(i).getNodeValue(), true);
+				sql = new StringBuilder("SELECT * FROM ");
+				sql.append(DvkHandler.DVKS);
+				sql.append(" WHERE ");
+				sql.append(DvkHandler.DVK_ID);
+				sql.append(" = '");
+				sql.append(id);
+				sql.append("';");
+				try(ResultSet rs = this.dvk_handler.get_sql_set(sql.toString())) {
+					ArrayList<Dvk> dvks = DvkHandler.get_dvks(rs);
+					if(dvks.size() > 0) {
+						contains = true;
+						//UPDATE DVK LOCATION AND FAVORITE IF ALREADY DOWNLOADED
+						Dvk dvk = ArtistHosting.move_dvk(dvks.get(0), directory);
+						this.dvk_handler.set_dvk(dvk, dvk.get_sql_id());
+						if(!ArrayProcessing.contains(dvk.get_web_tags(), "dvk:single", false)) {
+							check_next = false;
+						}
 					}
 				}
-			}
-			catch(SQLException e) {}
-			if(!contains) {
-				id = get_page_id("inkbunny.net" + das.get(i).getNodeValue(), false);
-				ids.add(id);
-			}
-		}
-		//SEARCH FOR NEXT BUTTON
-		xpath = "//table[@class='bottomPaginatorBox']//a[@title='next page']";
-		DomElement de = this.connect.get_page().getFirstByXPath(xpath);
-		//GET NEXT JOURNAL GALLERY PAGES
-		if(de != null && (check_next || check_all)) {
-			ArrayList<String> next = get_journal_pages(artist, directory, check_all, page_num + 1);
-			if(next == null) {
-				if(page_num == 1) {
-					if(this.start_gui != null) {
-						this.start_gui.append_console("inkbunny_failed", true);
-						this.start_gui.get_base_gui().set_canceled(true);
-					}
-					return new ArrayList<>();
+				catch(SQLException e) {}
+				if(!contains) {
+					id = get_page_id("inkbunny.net" + das.get(i).getNodeValue(), false);
+					ids.add(id);
 				}
-				return null;
 			}
-			ids.addAll(next);
+			//SEARCH FOR NEXT BUTTON
+			xpath = "//table[@class='bottomPaginatorBox']//a[@title='next page']";
+			DomElement de = this.connect.get_page().getFirstByXPath(xpath);
+			//GET NEXT JOURNAL GALLERY PAGES
+			if(de != null && (check_next || check_all)) {
+				ArrayList<String> next = get_journal_pages(artist, directory, check_all, page_num + 1);
+				if(next == null) {
+					if(page_num == 1) {
+						if(this.start_gui != null) {
+							this.start_gui.append_console("inkbunny_failed", true);
+							this.start_gui.get_base_gui().set_canceled(true);
+						}
+						return new ArrayList<>();
+					}
+					return null;
+				}
+				ids.addAll(next);
+			}
+			return ids;
 		}
-		return ids;
+		catch(Exception e) {}
+		if(page_num == 1) {
+			if(this.start_gui != null) {
+				this.start_gui.append_console("inkbunny_failed", true);
+				this.start_gui.get_base_gui().set_canceled(true);
+			}
+			return new ArrayList<>();
+		}
+		return null;
 	}
 	
 	/**
@@ -671,7 +691,7 @@ public class Inkbunny extends ArtistHosting {
 				dvk.set_page_url(page_url);
 				dvk.set_direct_url(media_urls[i]);
 				dvk.set_secondary_url(s_urls[i]);
-				filename = dvk.get_filename();
+				filename = dvk.get_filename(false);
 				dvk.set_dvk_file(new File(directory, filename + ".dvk"));
 				ext = StringProcessing.get_extension(dvk.get_direct_url());
 				if(ext.length() == 0) {
@@ -680,7 +700,7 @@ public class Inkbunny extends ArtistHosting {
 				dvk.set_media_file(filename + ext);
 				if(dvk.get_secondary_url() != null) {
 					ext = StringProcessing.get_extension(dvk.get_secondary_url());
-					dvk.set_secondary_file(filename + ext);
+					dvk.set_secondary_file(dvk.get_filename(true) + ext);
 				}
 				if(save) {
 					if(writing == null) {
@@ -787,6 +807,7 @@ public class Inkbunny extends ArtistHosting {
 		try {
 			//GET TITLE
 			this.connect.load_page(url.toString(), xpath, 2);
+			TimeUnit.MILLISECONDS.sleep(SLEEP);
 			Dvk dvk = new Dvk();
 			DomElement de = this.connect.get_page().getFirstByXPath(xpath);
 			dvk.set_title(de.asText());
@@ -815,7 +836,7 @@ public class Inkbunny extends ArtistHosting {
 			}
 			dvk.set_web_tags(tags);
 			//SET FILES
-			String filename = dvk.get_filename();
+			String filename = dvk.get_filename(false);
 			dvk.set_dvk_file(new File(directory, filename + ".dvk"));
 			dvk.set_media_file(filename + ".html");
 			if(save) {
@@ -837,6 +858,9 @@ public class Inkbunny extends ArtistHosting {
 	 * Closes all connections used when downloading Inkbunny info.
 	 */
 	public void close() {
+		List<NameValuePair> params = new ArrayList<>();
+		params.add(new BasicNameValuePair("sid", this.sid));
+		json_post("https://inkbunny.net/api_logout.php", params);
 		if(this.connect != null) {
 			try {
 				this.connect.close();

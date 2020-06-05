@@ -434,11 +434,10 @@ public class MangaDex {
 						}
 						dvk.set_direct_url(da.getNodeValue());
 						//SET FILE
-						String filename = dvk.get_filename();
-						dvk.set_dvk_file(new File(directory, filename + ".dvk"));
+						dvk.set_dvk_file(new File(directory, dvk.get_filename(false) + ".dvk"));
 						String extension = StringProcessing.get_extension(
 								dvk.get_direct_url());
-						dvk.set_media_file(filename + extension);
+						dvk.set_media_file(dvk.get_filename(false) + extension);
 						//SAVE, IF SPECIFIED
 						if(save) {
 							dvk.write_media(unit_connect);

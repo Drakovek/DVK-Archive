@@ -56,9 +56,10 @@ public class TestStartGUI {
 		//TEST ARTIST HOSTING
 		String[] services;
 		services = StartGUI.get_services("artist_hosting");
-		assertEquals(2, services.length);
+		assertEquals(3, services.length);
 		assertEquals("deviantart", services[0]);
 		assertEquals("fur_affinity", services[1]);
+		assertEquals("inkbunny", services[2]);
 		//TEST ERROR FINDING
 		services = StartGUI.get_services("error_finding");
 		assertEquals(3, services.length);

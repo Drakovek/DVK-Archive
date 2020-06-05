@@ -358,7 +358,7 @@ public class TestDeviantArt {
 			assertEquals(url, dvk.get_secondary_url());
 			assertEquals("Calem-s Noivern TF_DVA786108284.dvk", dvk.get_dvk_file().getName());
 			assertEquals("Calem-s Noivern TF_DVA786108284.mp4", dvk.get_media_file().getName());
-			assertEquals("Calem-s Noivern TF_DVA786108284.jpg", dvk.get_secondary_file().getName());
+			assertEquals("Calem-s Noivern TF_DVA786108284_S.jpg", dvk.get_secondary_file().getName());
 			//FIFTH DVK - SWF
 			url = "deviantart.com/doom-the-wolf/art/Interactive-dragoness-transformation-298825987";
 			dvk = this.dev.get_dvk(
@@ -399,7 +399,7 @@ public class TestDeviantArt {
 			assertEquals(url, dvk.get_secondary_url());
 			assertEquals("Interactive dragoness transformation_DVA298825987.dvk", dvk.get_dvk_file().getName());
 			assertEquals("Interactive dragoness transformation_DVA298825987.swf", dvk.get_media_file().getName());
-			assertEquals("Interactive dragoness transformation_DVA298825987.jpg", dvk.get_secondary_file().getName());
+			assertEquals("Interactive dragoness transformation_DVA298825987_S.jpg", dvk.get_secondary_file().getName());
 			//SIXTH DVK - UNDOWNLOADABLE
 			url = "https://www.deviantart.com/drakovek/art/Drakovek-839354922";
 			dvk = this.dev.get_dvk(url, dvk_handler, "Gallery:Main", this.test_dir, null, 0, false, false);

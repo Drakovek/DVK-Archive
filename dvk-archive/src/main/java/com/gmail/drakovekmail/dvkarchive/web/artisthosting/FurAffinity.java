@@ -32,6 +32,8 @@ import com.gmail.drakovekmail.dvkarchive.web.DConnectSelenium;
  */
 public class FurAffinity extends ArtistHosting {
 	
+	//TODO SEE IF SCANNING GALLERIES CAN BE SPED UP
+	
 	/**
 	 * Milliseconds to wait after connection events for rate limiting.
 	 */
@@ -748,12 +750,11 @@ public class FurAffinity extends ArtistHosting {
 			}
 			dvk.set_web_tags(ArrayProcessing.list_to_array(tags));
 			//SET MEDIA FILES
-			String filename = dvk.get_filename();
-			dvk.set_dvk_file(new File(directory, filename + ".dvk"));
-			dvk.set_media_file(filename + m_ext);
+			dvk.set_dvk_file(new File(directory, dvk.get_filename(false) + ".dvk"));
+			dvk.set_media_file(dvk.get_filename(false) + m_ext);
 			if(dvk.get_secondary_url() != null) {
 				String s_ext = StringProcessing.get_extension(dvk.get_secondary_url());
-				dvk.set_secondary_file(filename + s_ext);
+				dvk.set_secondary_file(dvk.get_filename(true) + s_ext);
 			}
 			//SAVE DVK
 			if(save) {
@@ -850,9 +851,8 @@ public class FurAffinity extends ArtistHosting {
 			}
 			dvk.set_web_tags(tags);
 			//SET FILE
-			String filename = dvk.get_filename();
-			dvk.set_dvk_file(new File(directory, filename + ".dvk"));
-			dvk.set_media_file(filename + ".html");
+			dvk.set_dvk_file(new File(directory, dvk.get_filename(false) + ".dvk"));
+			dvk.set_media_file(dvk.get_filename(false) + ".html");
 			//SAVE FILE
 			if(save) {
 				dvk.write_dvk();

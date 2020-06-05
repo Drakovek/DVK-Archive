@@ -68,7 +68,7 @@ public class Reformat {
 			}
 			//RENAME FILES
 			Dvk dvk = dvks.get(i);
-			dvk.rename_files(dvk.get_filename());
+			dvk.rename_files(dvk.get_filename(false), dvk.get_filename(true));
 			dvk.update_extensions();
 			dvk_handler.set_dvk(dvk, dvk.get_sql_id());
 		}

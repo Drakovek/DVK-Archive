@@ -2,7 +2,6 @@ package com.gmail.drakovekmail.dvkarchive.file;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 
 import org.apache.tika.Tika;
 import org.json.JSONArray;
@@ -19,7 +18,7 @@ import com.google.common.io.Files;
  * 
  * @author Drakovek
  */
-public class Dvk implements Serializable {
+public class Dvk {
 	
 	/**
 	 * Array of Tika data types and associated extensions. 
@@ -42,11 +41,6 @@ public class Dvk implements Serializable {
 			{"video/mp4", ".mp4"},
 			{"video/webm", ".webm"},
 			{"audio/mpeg", ".mp3"}};
-	
-	/**
-	 * SerialversionUID
-	 */
-	private static final long serialVersionUID = -3671753710612154210L;
 
 	/**
 	 * File object for the Dvk
@@ -694,14 +688,21 @@ public class Dvk implements Serializable {
 	 * Returns a filename for the Dvk based on title and id.
 	 * Doesn't include extension.
 	 * 
+	 * @param secondary Whether this is for a secondary file
 	 * @return Dvk filename
 	 */
-	public String get_filename() {
+	public String get_filename(boolean secondary) {
 		if(get_id() == null || get_title() == null) {
 			return new String();
 		}
-		String t = StringProcessing.get_filename(get_title());
-		return t + '_' + get_id();
+		StringBuilder filename = new StringBuilder();
+		filename.append(StringProcessing.get_filename(get_title()));
+		filename.append("_");
+		filename.append(get_id());
+		if(secondary) {
+			filename.append("_S");
+		}
+		return filename.toString();
 	}
 	
 	/**
@@ -709,8 +710,9 @@ public class Dvk implements Serializable {
 	 * Retains all media file extensions.
 	 * 
 	 * @param filename Filename to use when renaming
+	 * @param secondary Filename to use for secondary media
 	 */
-	public void rename_files(String filename) {
+	public void rename_files(String filename, String secondary) {
 		//RENAME DVK
 		get_dvk_file().delete();
 		File file = get_dvk_file().getParentFile();
@@ -740,7 +742,7 @@ public class Dvk implements Serializable {
 					Files.move(file, get_secondary_file());
 				}
 				file = get_secondary_file();
-				set_secondary_file(filename + ext);
+				set_secondary_file(secondary + ext);
 				Files.move(file, get_secondary_file());
 			} catch (IOException e) {}
 		}
