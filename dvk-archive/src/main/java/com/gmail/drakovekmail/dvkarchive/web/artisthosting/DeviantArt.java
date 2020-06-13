@@ -29,8 +29,6 @@ import com.gmail.drakovekmail.dvkarchive.web.DConnect;
  * @author Drakovek
  */
 public class DeviantArt extends ArtistHosting {
-
-	//TODO DEAL WITH PREMIUM CONTENT
 	
 	/**
 	 * Milliseconds to wait after loading page for rate limiting.
@@ -412,7 +410,6 @@ public class DeviantArt extends ArtistHosting {
 			if(artist != null) {
 				tags.add("Favorite:" + artist);
 			}
-			dvk.set_web_tags(ArrayProcessing.list_to_array(tags));
 			//SET DIRECT URL
 			String type = json.getString("type");
 			if(type.equals("rich")) {
@@ -427,9 +424,14 @@ public class DeviantArt extends ArtistHosting {
 			else if (download == null && swf != null) {
 				dvk.set_direct_url(swf);
 			}
-			else {
+			else if (download != null) {
 				dvk.set_direct_url(download);
 			}
+			else if(image !=null && type.equals("link")){
+				dvk.set_direct_url(image);
+				tags.add("Premium Content");
+			}
+			dvk.set_web_tags(ArrayProcessing.list_to_array(tags));
 			//SET SECONDARY URL
 			try {
 				String second = json.getString("fullsize_url");

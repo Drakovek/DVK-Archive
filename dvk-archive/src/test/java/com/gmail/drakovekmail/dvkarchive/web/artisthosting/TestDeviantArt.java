@@ -158,7 +158,15 @@ public class TestDeviantArt {
 		this.dev.login(info[0], info[1]);
 		info = null;
 		assertTrue(this.dev.is_logged_in());
+		//TEST GETTING MEDIA DVK
+		test_get_dvk();
+		remove_directory();
+		//TEST GETTING JOURNAL DVK
+		create_directory();
+		test_get_journal_dvk();
+		remove_directory();
 		//TEST GETTING MODULE PAGES
+		create_directory();
 		test_get_module_pages();
 		remove_directory();
 		//TEST GETTING FAVORITES
@@ -168,14 +176,6 @@ public class TestDeviantArt {
 		//TEST GETTING GALLERY PAGES
 		create_directory();
 		test_get_pages();
-		remove_directory();
-		//TEST GETTING MEDIA DVK
-		create_directory();
-		test_get_dvk();
-		remove_directory();
-		//TEST GETTING JOURNAL DVK
-		create_directory();
-		test_get_journal_dvk();
 	}
 	
 	/**
@@ -469,17 +469,72 @@ public class TestDeviantArt {
 			assertEquals("TF Mask_DVA777228001.dvk", dvk.get_dvk_file().getName());
 			assertEquals("TF Mask_DVA777228001.swf", dvk.get_media_file().getName());
 			assertEquals("TF Mask_DVA777228001_S.jpg", dvk.get_secondary_file().getName());
+			//TEST PREMIUM CONTENT
+			url = "https://www.deviantart.com/treehousecharms/art/TC-Natural-Wield-536148032";
+			dvk = this.dev.get_dvk(url, dvk_handler, "Gallery:Main", this.test_dir, null, 0, false, false);
+			assertEquals(url, dvk.get_page_url());
+			assertEquals("DVA536148032", dvk.get_id());
+			assertEquals("TC ~ Natural Wield", dvk.get_title());
+			assertEquals(1, dvk.get_artists().length);
+			assertEquals("TreehouseCharms", dvk.get_artists()[0]);
+			assertEquals("2015/05/29|10:38", dvk.get_time());
+			assertEquals(23, dvk.get_web_tags().length);
+			assertEquals("Rating:General", dvk.get_web_tags()[0]);
+			assertEquals("Gallery:Main", dvk.get_web_tags()[1]);
+			assertEquals("Resources & Stock Images", dvk.get_web_tags()[2]);
+			assertEquals("Application Resources", dvk.get_web_tags()[3]);
+			assertEquals("Photoshop Brushes", dvk.get_web_tags()[4]);
+			assertEquals("application", dvk.get_web_tags()[5]);
+			assertEquals("brushes", dvk.get_web_tags()[6]);
+			assertEquals("charms", dvk.get_web_tags()[7]);
+			assertEquals("clouds", dvk.get_web_tags()[8]);
+			assertEquals("effects", dvk.get_web_tags()[9]);
+			assertEquals("fantasy", dvk.get_web_tags()[10]);
+			assertEquals("fog", dvk.get_web_tags()[11]);
+			assertEquals("gimp", dvk.get_web_tags()[12]);
+			assertEquals("green", dvk.get_web_tags()[13]);
+			assertEquals("lining", dvk.get_web_tags()[14]);
+			assertEquals("mist", dvk.get_web_tags()[15]);
+			assertEquals("nature", dvk.get_web_tags()[16]);
+			assertEquals("photoshop", dvk.get_web_tags()[17]);
+			assertEquals("resources", dvk.get_web_tags()[18]);
+			assertEquals("soft", dvk.get_web_tags()[19]);
+			assertEquals("textures", dvk.get_web_tags()[20]);
+			assertEquals("treehouse", dvk.get_web_tags()[21]);
+			assertEquals("Premium Content", dvk.get_web_tags()[22]);
+			desc = "TC ~ Natural Wield is an artistic brushset with 10 HD Brushes made all "
+					+ "by me Andi of Treehouse Charms with PS 7. <br/> <br/> These brushes are for "
+					+ "brushing and smudging and are extraordinary good to do cloudy structures <img "
+					+ "src=\"https://e.deviantart.net/emoticons/b/biggrin.gif\" width=\"15\" height=\""
+					+ "15\" alt=\":D\" data-embed-type=\"emoticon\" data-embed-id=\"366\" title=\":D "
+					+ "(Big Grin)\"/> <br/> <br/> Compatibility should be 100% with all CS Versions and "
+					+ "GIMP also. <br/> <br/> <b> This brushset costs now 40 Points. After purchasing "
+					+ "it you may use it for your comercial and noncomercial artworks.&#160; <br/> </b> "
+					+ "<br/> 29th May, 2015 <br/> Andi of Treehouse Charms";
+			assertEquals(desc, dvk.get_description());
+			url = "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/i/ce2d8d7b-af23-47db-"
+					+ "bb11-2157baa4f248/d8v7igw-a6880f9f-5160-4afd-9354-4f36eef50528.jpg";
+			assertEquals(url, dvk.get_direct_url());
+			url = "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/i/ce2d8d7b-af23-47db-"
+					+ "bb11-2157baa4f248/d8v7igw-a6880f9f-5160-4afd-9354-4f36eef50528.jpg/v1/"
+					+ "fill/w_559,h_1429,q_70,strp/tc___natural_wield_by_treehousecharms_d8v7igw"
+					+ "-pre.jpg";
+			assertEquals(url, dvk.get_secondary_url());
+			assertEquals("TC - Natural Wield_DVA536148032.dvk", dvk.get_dvk_file().getName());
+			assertEquals("TC - Natural Wield_DVA536148032.jpg", dvk.get_media_file().getName());
+			assertEquals("TC - Natural Wield_DVA536148032_S.jpg", dvk.get_secondary_file().getName());
 			//TEST DVKS ADDED TO DVK HANDLER
 			ArrayList<Dvk> dvks = dvk_handler.get_dvks(0, -1, 'a', false, false);
-			assertEquals(8, dvks.size());
+			assertEquals(9, dvks.size());
 			assertEquals("Anthro Incineroar TF/TG", dvks.get(0).get_title());
 			assertEquals("Calem's Noivern TF", dvks.get(1).get_title());
 			assertEquals("Drakovek", dvks.get(2).get_title());
 			assertEquals("Finding One's True Self", dvks.get(3).get_title());
 			assertEquals("Interactive dragoness transformation", dvks.get(4).get_title());
 			assertEquals("Pokeclipse! (TF RP)", dvks.get(5).get_title());
-			assertEquals("Test", dvks.get(6).get_title());
-			assertEquals("TF: Mask", dvks.get(7).get_title());
+			assertEquals("TC ~ Natural Wield", dvks.get(6).get_title());
+			assertEquals("Test", dvks.get(7).get_title());
+			assertEquals("TF: Mask", dvks.get(8).get_title());
 		}
 		catch(DvkException e) {
 			assertTrue(false);

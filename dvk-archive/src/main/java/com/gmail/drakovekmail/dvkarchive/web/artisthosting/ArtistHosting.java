@@ -261,7 +261,7 @@ public abstract class ArtistHosting implements DActionEvent {
 	 * 
 	 * @param dvk_handler DvkHandler with loaded Dvk objects
 	 * @param ids IDs of Dvk objects to return
-	 * @return Dvks matching one of the ids
+	 * @return Dvks matching one of the IDs
 	 */
 	public static ArrayList<Dvk> get_dvks_from_ids(DvkHandler dvk_handler, ArrayList<String> ids) {
 		ArrayList<String> params = new ArrayList<>();

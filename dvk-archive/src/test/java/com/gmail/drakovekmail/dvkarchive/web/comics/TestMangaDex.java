@@ -358,9 +358,8 @@ public class TestMangaDex {
 			assertEquals("Desc", dvks.get(2).get_description());
 			value = "https://mangadex.org/chapter/770792/4";
 			assertEquals(value, dvks.get(2).get_page_url());
-			value = "https://s2.mangadex.org/data-saver/"
-					+ "2d60025d419442a4d56d58a7bbcdc6db/M4.jpg";
-			assertEquals(value, dvks.get(2).get_direct_url());
+			value = "/2d60025d419442a4d56d58a7bbcdc6db/M4.jpg";
+			assertTrue(dvks.get(2).get_direct_url().endsWith(value));
 			value = "Randomphilia - Ch 75 - Pg 4_MDX770792-4.dvk";
 			File file = new File(this.test_dir, value);
 			assertEquals(file, dvks.get(2).get_dvk_file());
@@ -373,9 +372,8 @@ public class TestMangaDex {
 			assertEquals(value, dvks.get(0).get_title());
 			value = "https://mangadex.org/chapter/770792/1";
 			assertEquals(value, dvks.get(0).get_page_url());
-			value = "https://s2.mangadex.org/data-saver/"
-					+ "2d60025d419442a4d56d58a7bbcdc6db/M1.jpg";
-			assertEquals(value, dvks.get(0).get_direct_url());
+			value = "/2d60025d419442a4d56d58a7bbcdc6db/M1.jpg";
+			assertTrue(dvks.get(0).get_direct_url().startsWith(value));
 			value = "Randomphilia - Ch 75 - Pg 1_MDX770792-1.dvk";
 			file = new File(this.test_dir, value);
 			assertEquals(file, dvks.get(0).get_dvk_file());
