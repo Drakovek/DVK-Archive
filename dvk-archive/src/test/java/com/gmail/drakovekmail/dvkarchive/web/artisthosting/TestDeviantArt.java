@@ -883,7 +883,8 @@ public class TestDeviantArt {
 				sub.mkdir();
 			}
 			//GET FAVORITES GALLERY
-			ArrayList<String> links = this.dev.get_pages(null, "Pokefan-Tf", sub, 'f', handler, false, 0);
+			ArrayList<String> links = this.dev.get_pages(
+					null, "Pokefan-Tf", sub, 'f', handler, false, 0);
 			assertTrue(links.size() > 39);
 			url = "https://www.deviantart.com/tomek1000/art/Power-of-Greatsword-commission-702065308";
 			assertFalse(links.contains(url));

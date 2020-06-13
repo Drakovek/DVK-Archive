@@ -19,7 +19,7 @@ public abstract class ServiceGUI extends JPanel implements Disabler, DWorker {
 	/**
 	 * BaseGUI for getting UI settings
 	 */
-	protected StartGUI start_gui;
+	private StartGUI start_gui;
 	
 	/**
 	 * SwingWorker for running threads
@@ -72,5 +72,14 @@ public abstract class ServiceGUI extends JPanel implements Disabler, DWorker {
 		//START PROCESS
 		this.sw = new DSwingWorker(this, id);
 		this.sw.execute();
+	}
+	
+	/**
+	 * Returns the parent StartGUI.
+	 * 
+	 * @return Parent StartGUI
+	 */
+	public StartGUI get_start_gui() {
+		return this.start_gui;
 	}
 }

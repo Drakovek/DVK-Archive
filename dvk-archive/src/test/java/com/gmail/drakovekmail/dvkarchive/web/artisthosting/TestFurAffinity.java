@@ -154,10 +154,10 @@ public class TestFurAffinity {
 	}
 	
 	/**
-	 * Tests the get_pages method.
+	 * Tests the get_gallery_ids method.
 	 */
 	@Test
-	public void test_get_pages() {
+	public void test_get_gallery_ids() {
 		//CREATE DVK 1
 		Dvk dvk = new Dvk();
 		dvk.set_dvk_file(new File(this.test_dir, "shortcut.dvk"));
@@ -190,25 +190,23 @@ public class TestFurAffinity {
 			}
 			handler.read_dvks(dirs, null);
 			//TEST SMALL SAMPLE
-			ArrayList<String> links = this.fur.get_pages(
-					"drakovek", sub, 'm', handler, true, false, null);
+			ArrayList<String> links = this.fur.get_gallery_ids("drakovek", sub, 'm',
+					handler, true, false, null);
 			assertEquals(2, links.size());
-			url = "https://www.furaffinity.net/view/32521285/";
-			assertEquals(url, links.get(1));
-			links = this.fur.get_pages("drakovek", sub, 's', handler, false, false, null);
+			assertEquals("FAF32521285", links.get(1));
+			links = this.fur.get_gallery_ids("drakovek", sub, 's', handler, false, false, null);
 			assertEquals(1, links.size());
-			url = "https://www.furaffinity.net/view/31071186/";
-			assertEquals(url, links.get(0));
+			assertEquals("FAF31071186", links.get(0));
 			//TEST ALREADY DOWNLOADED
-			links = this.fur.get_pages("mrsparta", sub, 'm', handler, false, false, null);
+			links = this.fur.get_gallery_ids("mrsparta", sub, 'm', handler, false, false, null);
 			assertTrue(links.size() > 0);
-			assertFalse(links.contains("https://www.furaffinity.net/view/13982138/"));
-			assertTrue(links.contains("https://www.furaffinity.net/view/14019897/"));
-			assertTrue(links.contains("https://www.furaffinity.net/view/14202184/"));
-			assertTrue(links.contains("https://www.furaffinity.net/view/14354843/"));
-			assertTrue(links.contains("https://www.furaffinity.net/view/14664720/"));
-			assertTrue(links.contains("https://www.furaffinity.net/view/15593400/"));
-			assertTrue(links.contains("https://www.furaffinity.net/view/34790877/"));
+			assertFalse(links.contains("FAF13982138"));
+			assertTrue(links.contains("FAF14019897"));
+			assertTrue(links.contains("FAF14202184"));
+			assertTrue(links.contains("FAF14354843"));
+			assertTrue(links.contains("FAF14664720"));
+			assertTrue(links.contains("FAF15593400"));
+			assertTrue(links.contains("FAF34790877"));
 			//TEST IF DOWNLOADED DVK MOVED
 			assertEquals(2, handler.get_size());
 			ArrayList<Dvk> dvks = handler.get_dvks(0, -1, 'a', false, false);
@@ -231,7 +229,7 @@ public class TestFurAffinity {
 			assertTrue(dvk.get_dvk_file().exists());
 			//TEST LOGIN
 			if(!this.fur.is_logged_in()) { 
-				links = this.fur.get_pages("mrsparta", sub, 'm', handler, false, true, null);
+				links = this.fur.get_gallery_ids("mrsparta", sub, 'm', handler, false, true, null);
 				assertEquals(0, links.size());
 			}
 		}
@@ -241,10 +239,10 @@ public class TestFurAffinity {
 	}
 	
 	/**
-	 * Tests the get_pages method for getting favorites pages.
+	 * Tests the get_gallery_ids method for getting favorites pages.
 	 */
 	@Test
-	public void test_get_pages_favorites() {
+	public void test_get_gallery_ids_favorites() {
 		//DVK 1 - STOPS SCANNING DUE TO FAVORITES TAG
 		Dvk dvk = new Dvk();
 		dvk.set_dvk_file(new File(this.test_dir, "assistance.dvk"));
@@ -283,13 +281,13 @@ public class TestFurAffinity {
 			}
 			//TEST ALREADY DOWNLOADED
 			ArrayList<String> links;
-			links = this.fur.get_pages("Thundergonian", sub, 'f', handler, false, false, null);
-			assertFalse(links.contains("https://www.furaffinity.net/view/33314829/"));
-			assertTrue(links.contains("https://www.furaffinity.net/view/35881631/"));
-			assertTrue(links.contains("https://www.furaffinity.net/view/35442825/"));
-			assertTrue(links.contains("https://www.furaffinity.net/view/34082375/"));
-			assertTrue(links.contains("https://www.furaffinity.net/view/35470135/"));
-			assertTrue(links.contains("https://www.furaffinity.net/view/35496095/"));
+			links = this.fur.get_gallery_ids("Thundergonian", sub, 'f', handler, false, false, null);
+			assertFalse(links.contains("FAF33314829"));
+			assertTrue(links.contains("FAF35881631"));
+			assertTrue(links.contains("FAF35442825"));
+			assertTrue(links.contains("FAF34082375"));
+			assertTrue(links.contains("FAF35470135"));
+			assertTrue(links.contains("FAF35496095"));
 			//TEST ADDING FAVORITES TAG
 			assertEquals(2, handler.get_size());
 			ArrayList<Dvk> dvks = handler.get_dvks(0, -1, 'a', false, false);
@@ -319,10 +317,10 @@ public class TestFurAffinity {
 	}
 	
 	/**
-	 * Tests the get_journal_pages method.
+	 * Tests the get_journal_ids method.
 	 */
 	@Test
-	public void test_get_journal_pages() {
+	public void test_get_journal_ids() {
 		//CREATE DVK 1
 		Dvk dvk = new Dvk();
 		dvk.set_dvk_file(new File(this.test_dir, "might.dvk"));
@@ -355,20 +353,21 @@ public class TestFurAffinity {
 		try(DvkHandler handler = new DvkHandler(prefs)) {
 			handler.read_dvks(dirs, null);
 			//TEST SMALL SAMPLE
-			ArrayList<String> links = this.fur.get_journal_pages(
+			ArrayList<String> links = this.fur.get_journal_ids(
 					"mr_sparta", sub, handler, true, false, 1);
-			assertTrue(links.contains("https://www.furaffinity.net/journal/9485924/"));
+			assertTrue(links.size() > 0);
+			assertTrue(links.contains("FAF9485924-J"));
 			//TEST ALREADY DOWNLOADED
-			links = this.fur.get_journal_pages("angrboda", sub, handler, false, false, 1);
+			links = this.fur.get_journal_ids("angrboda", sub, handler, false, false, 1);
 			assertTrue(links.size() > 47);
-			assertFalse(links.contains("https://www.furaffinity.net/journal/8104946/"));
-			assertFalse(links.contains("https://www.furaffinity.net/journal/4030490/"));
-			assertTrue(links.contains("https://www.furaffinity.net/journal/4193757/"));
-			assertTrue(links.contains("https://www.furaffinity.net/journal/4247934/"));
-			assertTrue(links.contains("https://www.furaffinity.net/journal/4355518/"));
-			assertTrue(links.contains("https://www.furaffinity.net/journal/4405644/"));
-			assertTrue(links.contains("https://www.furaffinity.net/journal/7546586/"));
-			assertTrue(links.contains("https://www.furaffinity.net/journal/7207073/"));
+			assertFalse(links.contains("FAF8104946-J"));
+			assertFalse(links.contains("FAF4030490-J"));
+			assertTrue(links.contains("FAF4193757-J"));
+			assertTrue(links.contains("FAF4247934-J"));
+			assertTrue(links.contains("FAF4355518-J"));
+			assertTrue(links.contains("FAF4405644-J"));
+			assertTrue(links.contains("FAF7546586-J"));
+			assertTrue(links.contains("FAF7207073-J"));
 			//CHECK FILES MOVED
 			assertEquals(2, handler.get_size());
 			ArrayList<Dvk> dvks = handler.get_dvks(0, -1, 'a', false, false);
@@ -384,7 +383,7 @@ public class TestFurAffinity {
 			assertTrue(dvk.get_dvk_file().exists());
 			//TEST LOGIN
 			if(!this.fur.is_logged_in()) {
-				links = this.fur.get_journal_pages("mrsparta", sub, handler, false, true, 1);
+				links = this.fur.get_journal_ids("mrsparta", sub, handler, false, true, 1);
 				assertEquals(0, links.size());
 			}
 		}
@@ -401,15 +400,15 @@ public class TestFurAffinity {
 		this.fur.login();
 		assertTrue(this.fur.is_logged_in());
 		//GET PAGES
-		test_get_pages();
+		test_get_gallery_ids();
 		//GET FAVORITES PAGES
 		delete_directory();
 		create_directory();
-		test_get_pages_favorites();
+		test_get_gallery_ids_favorites();
 		//GET JOURNAL PAGES
 		delete_directory();
 		create_directory();
-		test_get_journal_pages();
+		test_get_journal_ids();
 		//GET DVK
 		delete_directory();
 		create_directory();
@@ -440,15 +439,13 @@ public class TestFurAffinity {
 		try(DvkHandler dvk_handler = new DvkHandler(prefs)) {
 			dvk_handler.read_dvks(dirs, null);
 			//TEST FAVORITING ALREADY DOWNLOADED DVK
-			String url = "http://www.furaffinity.net/view/1234567/";
-			dvk = this.fur.get_dvk(url, dvk_handler, this.test_dir, "Somebody", true, true);
+			dvk = this.fur.get_dvk("FAF1234567", dvk_handler, this.test_dir, "Somebody", true, true);
 			assertEquals("Test", dvk.get_title());
 			assertEquals(1, dvk.get_web_tags().length);
 			assertEquals("Favorite:Somebody", dvk.get_web_tags()[0]);
 			assertTrue(dvk.get_dvk_file().exists());
 			//FIRST DVK
-			url = "http://www.furaffinity.net/view/32521285/";
-			dvk = this.fur.get_dvk(url, dvk_handler, this.test_dir, null, false, false);
+			dvk = this.fur.get_dvk("FAF32521285", dvk_handler, this.test_dir, null, false, false);
 			assertEquals("FAF32521285", dvk.get_id());
 			assertEquals("Robin the Bobcat", dvk.get_title());
 			assertEquals(1, dvk.get_artists().length);
@@ -480,8 +477,7 @@ public class TestFurAffinity {
 			assertEquals(this.test_dir, dvk.get_media_file().getParentFile());
 			assertEquals(null, dvk.get_secondary_file());
 			//SECOND DVK
-			url = "furaffinity.net/view/15301779";
-			dvk = this.fur.get_dvk(url, dvk_handler, this.test_dir, "ArtDude", true, true);
+			dvk = this.fur.get_dvk("FAF15301779", dvk_handler, this.test_dir, "ArtDude", true, true);
 			assertEquals("FAF15301779", dvk.get_id());
 			assertEquals("Affinity Ch. 1", dvk.get_title());
 			assertEquals(1, dvk.get_artists().length);
@@ -531,8 +527,7 @@ public class TestFurAffinity {
 			assertTrue(value.contains("To Be Continued!!???"));
 			assertTrue(value.contains("It was always the same dream for me."));
 			//THIRD DVK
-			url = "www.furaffinity.net/view/29756524/";
-			dvk = this.fur.get_dvk(url, dvk_handler, this.test_dir, null, false, false);
+			dvk = this.fur.get_dvk("FAF29756524", dvk_handler, this.test_dir, null, false, false);
 			assertEquals("FAF29756524", dvk.get_id());
 			value = "[Changed fanart] Are you going to eat that Peach, human?";
 			assertEquals(value, dvk.get_title());
@@ -578,8 +573,7 @@ public class TestFurAffinity {
 			assertEquals("Test", dvks.get(3).get_title());
 			if(this.fur.is_logged_in()) {
 				//MATURE DVK
-				url = "www.furaffinity.net/view/13634433/";
-				dvk = this.fur.get_dvk(url, null, this.test_dir, "Person", false, false);
+				dvk = this.fur.get_dvk("FAF13634433", null, this.test_dir, "Person", false, false);
 				assertEquals("FAF13634433", dvk.get_id());
 				assertEquals("spiritual feedback - 3", dvk.get_title());
 				assertEquals(1, dvk.get_artists().length);
@@ -634,8 +628,7 @@ public class TestFurAffinity {
 		prefs.set_index_dir(this.test_dir);
 		try(DvkHandler dvk_handler = new DvkHandler(prefs)) {
 			//FIRST DVK
-			String url = "www.furaffinity.net/journal/9485924/";
-			Dvk dvk = this.fur.get_journal_dvk(url, dvk_handler, this.test_dir, false, true);
+			Dvk dvk = this.fur.get_journal_dvk("FAF9485924-J", dvk_handler, this.test_dir, false, true);
 			assertEquals("FAF9485924-J", dvk.get_id());
 			assertEquals("Commission Information", dvk.get_title());
 			assertEquals(1, dvk.get_artists().length);
@@ -664,8 +657,7 @@ public class TestFurAffinity {
 			String text = InOut.read_file(dvk.get_media_file());
 			assertEquals("<!DOCTYPE html><html>" + value + "</html>", text);
 			//SECOND DVK
-			url = "https://www.furaffinity.net/journal/4743500/";
-			dvk = this.fur.get_journal_dvk(url, dvk_handler, this.test_dir, true, true);
+			dvk = this.fur.get_journal_dvk("FAF4743500-J", dvk_handler, this.test_dir, true, true);
 			assertEquals("FAF4743500-J", dvk.get_id());
 			assertEquals("CLOSED $35 quick color pinups - 4 spots", dvk.get_title());
 			assertEquals(1, dvk.get_artists().length);

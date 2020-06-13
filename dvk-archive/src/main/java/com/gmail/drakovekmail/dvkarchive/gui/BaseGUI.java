@@ -23,27 +23,27 @@ public class BaseGUI {
 	/**
 	 * Key for font size in preferences
 	 */
-	private static final String FONT_SIZE = "font_size";
+	private static final String FONT_SIZE = "dvk_font_size";
 	
 	/**
 	 * Key for font family in preferences
 	 */
-	private static final String FONT_FAMILY = "font_family";
+	private static final String FONT_FAMILY = "dvk_font_family";
 	
 	/**
 	 * Key for whether the font is bold in preferences
 	 */
-	private static final String FONT_BOLD = "font_bold";
+	private static final String FONT_BOLD = "dvk_font_bold";
 	
 	/**
 	 * Key for whether fonts should be anti-aliased
 	 */
-	private static final String AA = "aa";
+	private static final String AA = "dvk_aa";
 	
 	/**
 	 * Key for the look and feel(theme) of the GUI
 	 */
-	private static final String THEME = "theme";
+	private static final String THEME = "dvk_theme";
 	
 	/**
 	 * Default font for the program

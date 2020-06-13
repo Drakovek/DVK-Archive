@@ -1,8 +1,6 @@
 package com.gmail.drakovekmail.dvkarchive.web.artisthosting;
 
 import java.io.File;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -32,6 +30,8 @@ import com.gmail.drakovekmail.dvkarchive.web.DConnect;
  */
 public class DeviantArt extends ArtistHosting {
 
+	//TODO DEAL WITH PREMIUM CONTENT
+	
 	/**
 	 * Milliseconds to wait after loading page for rate limiting.
 	 */
@@ -852,73 +852,66 @@ public class DeviantArt extends ArtistHosting {
 			}
 			//GET PAGES
 			JSONArray arr;
-			ArrayList<String> pages = new ArrayList<>();
 			arr = json.getJSONArray("results");
 			boolean check_next = true;
-			StringBuilder sql = new StringBuilder("SELECT * FROM ");
-			sql.append(DvkHandler.DVKS);
-			sql.append(" WHERE ");
-			sql.append(DvkHandler.PAGE_URL);
-			sql.append(" COLLATE NOCASE LIKE ? AND ");
-			sql.append(DvkHandler.DVK_ID);
-			sql.append(" = ?;");
-			String[] params = new String[2];
-			params[0] = "%.deviantart.com/%";
-			for(int i = 0; i < arr.length(); i++) {
-				boolean contains = false;
-				JSONObject obj = arr.getJSONObject(i).getJSONObject("deviation");
+			//RUN THROUGH MEDIA URLS ON GALLERY PAGE, GETTING IDS
+			ArrayList<String> ids = new ArrayList<>();
+			ArrayList<String> pages = new ArrayList<>();
+			for(int arr_num = 0; arr_num < arr.length(); arr_num++) {
+				JSONObject obj = arr.getJSONObject(arr_num).getJSONObject("deviation");
 				String link = obj.getString("url");
-				String id = get_page_id(link, true);
-				params[1] = id;
-				try(ResultSet rs = dvk_handler.get_sql_set(sql.toString(), params)) {
-					ArrayList<Dvk> dvks = DvkHandler.get_dvks(rs);
-					if(dvks.size() > 0) {
-						contains = true;
-						//ENDS IF DOWNLOADED DVK IS NOT A SINGLE DOWNLOAD
-						String[] wts = dvks.get(0).get_web_tags();
-						if (type == 'f') {
-							if(!ArrayProcessing.contains(wts, "favorite:" + artist, false)) {
-								contains = false;
-							}
-							else {
-								check_next = false;
-							}
-						}
-						else if (!ArrayProcessing.contains(wts, "dvk:single", false)) {
-							check_next = false;
-						}
-						//UPDATE DVK LOCATION AND FAVORITE IF ALREADY DOWNLOADED
-						Dvk dvk = dvks.get(0);
-						if(type != 'f') {
-							dvk = ArtistHosting.move_dvk(dvk, directory);
-							dvk_handler.set_dvk(dvk, dvk.get_sql_id());
-						}
-						//ADD GALLERY TAG
-						if(type == 'm' && !ArrayProcessing.contains(dvk.get_web_tags(), "gallery:main", false)) {
-							ArrayList<String> tags = ArrayProcessing.array_to_list(dvk.get_web_tags());
-							tags.add(0, "Gallery:Main");
-							dvk.set_web_tags(ArrayProcessing.list_to_array(tags));
-							dvk_handler.set_dvk(dvk, dvk.get_sql_id());
-							dvk.write_dvk();
-						}
-						else if(type == 's' && !ArrayProcessing.contains(dvk.get_web_tags(), "gallery:scraps", false)) {
-							ArrayList<String> tags = ArrayProcessing.array_to_list(dvk.get_web_tags());
-							tags.add(0, "Gallery:Scraps");
-							dvk.set_web_tags(ArrayProcessing.list_to_array(tags));
-							dvk_handler.set_dvk(dvk, dvk.get_sql_id());
-							dvk.write_dvk();
-						}
+				pages.add(link);
+				ids.add(get_page_id(link, true));
+			}
+			ArrayList<Dvk> id_dvks = get_dvks_from_ids(dvk_handler, ids);
+			//REMOVE ALREADY DOWNLOADED IDS
+			for(int dvk_num = 0; dvk_num < id_dvks.size(); dvk_num++) {
+				boolean remove = true;
+				//ENDS IF DOWNLOADED DVK IS NOT A SINGLE DOWNLOAD
+				Dvk dvk = id_dvks.get(dvk_num);
+				String[] wts = dvk.get_web_tags();
+				if (type == 'f') {
+					if(!ArrayProcessing.contains(wts, "favorite:" + artist, false)) {
+						remove = false;
+					}
+					else {
+						check_next = false;
 					}
 				}
-				catch(SQLException e) {}
-				if(!contains) {
-					pages.add(link);
+				else if (!ArrayProcessing.contains(wts, "dvk:single", false)) {
+					check_next = false;
+				}
+				//UPDATE DVK LOCATION AND FAVORITE IF ALREADY DOWNLOADED
+				if(type != 'f') {
+					dvk = ArtistHosting.move_dvk(dvk, directory);
+					dvk_handler.set_dvk(dvk, dvk.get_sql_id());
+				}
+				//ADD GALLERY TAG
+				if(type == 'm' && !ArrayProcessing.contains(dvk.get_web_tags(), "gallery:main", false)) {
+					ArrayList<String> tags = ArrayProcessing.array_to_list(dvk.get_web_tags());
+					tags.add(0, "Gallery:Main");
+					dvk.set_web_tags(ArrayProcessing.list_to_array(tags));
+					dvk_handler.set_dvk(dvk, dvk.get_sql_id());
+					dvk.write_dvk();
+				}
+				else if(type == 's' && !ArrayProcessing.contains(dvk.get_web_tags(), "gallery:scraps", false)) {
+					ArrayList<String> tags = ArrayProcessing.array_to_list(dvk.get_web_tags());
+					tags.add(0, "Gallery:Scraps");
+					dvk.set_web_tags(ArrayProcessing.list_to_array(tags));
+					dvk_handler.set_dvk(dvk, dvk.get_sql_id());
+					dvk.write_dvk();
+				}
+				if(remove) {
+					int index = ids.indexOf(dvk.get_id());
+					ids.remove(index);
+					pages.remove(index);
 				}
 			}
 			//GET NEXT PAGES
 			boolean more = json.getBoolean("hasMore");
 			if(more && (check_all || check_next)) {
-				ArrayList<String> next = get_pages(start_gui, artist, directory, type, dvk_handler, check_all, offset + 24);
+				ArrayList<String> next = get_pages(start_gui, artist, directory, type,
+						dvk_handler, check_all, offset + 24);
 				if(next == null) {
 					if(offset == 0) {
 						if(start_gui != null) {
@@ -1054,70 +1047,59 @@ public class DeviantArt extends ArtistHosting {
 			}
 			//GET PAGES
 			JSONArray arr;
-			ArrayList<Dvk> dvks = new ArrayList<>();
+			ArrayList<Dvk> return_dvks = new ArrayList<>();
 			arr = json.getJSONArray("results");
 			boolean check_next = true;
-			StringBuilder sql = new StringBuilder("SELECT * FROM ");
-			sql.append(DvkHandler.DVKS);
-			sql.append(" WHERE ");
-			sql.append(DvkHandler.PAGE_URL);
-			sql.append(" COLLATE NOCASE LIKE ? AND ");
-			sql.append(DvkHandler.DVK_ID);
-			sql.append(" = ?;");
-			String[] params = new String[2];
-			params[0] = "%.deviantart.com/%";
-			for(int i = 0; i < arr.length(); i++) {
-				boolean contains = false;
-				JSONObject obj = arr.getJSONObject(i);
+			//RUN THROUGH MEDIA URLS ON GALLERY PAGE, GETTING IDS
+			ArrayList<String> ids = new ArrayList<>();
+			for(int arr_num = 0; arr_num < arr.length(); arr_num++) {
+				JSONObject obj = arr.getJSONObject(arr_num);
 				String link = obj.getString("url");
-				String page_id = get_page_id(link, true);
-				params[1] = page_id;
-				try(ResultSet rs = dvk_handler.get_sql_set(sql.toString(), params)) {
-					ArrayList<Dvk> id_dvks = DvkHandler.get_dvks(rs);
-					if(id_dvks.size() > 0) {
-						contains = true;
-						//UPDATE DVK LOCATION IF ALREADY DOWNLOADED
-						Dvk dvk;
-						dvk = ArtistHosting.move_dvk(id_dvks.get(0), directory);
-						dvk_handler.set_dvk(dvk, dvk.get_sql_id());
-						//ENDS IF DOWNLOADED DVK IS NOT A SINGLE DOWNLOAD
-						String[] tags = dvk.get_web_tags();
-						if(!ArrayProcessing.contains(tags, "dvk:single", false)) {
-							check_next = false;
-						}
+				ids.add(get_page_id(link, true));
+				//GET INFO FOR SUBMISSIONS
+				Dvk summary = new Dvk();
+				summary.set_page_url(link);
+				summary.set_artist(obj.getJSONObject("author").getString("username"));
+				summary.set_time(obj.getString("publishedTime").substring(0, 16));
+				if(type == 'p') {
+					summary.set_title(obj.getString("title"));
+					//GET POLL RESULTS
+					JSONArray poll = obj.getJSONObject("poll").getJSONArray("answers");
+					StringBuilder results = new StringBuilder();
+					for(int r = 0; r < poll.length(); r++) {
+						results.append(Integer.toString(poll.getJSONObject(r).getInt("votes")));
+						results.append("<DVK-POLL-SEP>");
+						results.append(poll.getJSONObject(r)
+								.getJSONObject("textContent").getString("excerpt"));
+						results.append("<DVK-POLL-SEP>");
 					}
+					summary.set_description(results.toString());
 				}
-				catch(SQLException e) {};
-				if(!contains) {
-					Dvk summary = new Dvk();
-					summary.set_page_url(link);
-					summary.set_artist(obj.getJSONObject("author").getString("username"));
-					summary.set_time(obj.getString("publishedTime").substring(0, 16));
-					if(type == 'p') {
-						summary.set_title(obj.getString("title"));
-						//GET POLL RESULTS
-						JSONArray poll = obj.getJSONObject("poll").getJSONArray("answers");
-						StringBuilder results = new StringBuilder();
-						for(int r = 0; r < poll.length(); r++) {
-							results.append(Integer.toString(poll.getJSONObject(r).getInt("votes")));
-							results.append("<DVK-POLL-SEP>");
-							results.append(poll.getJSONObject(r)
-									.getJSONObject("textContent").getString("excerpt"));
-							results.append("<DVK-POLL-SEP>");
-						}
-						summary.set_description(results.toString());
-					}
-					else if(type == 's') {
-						summary.set_description(obj.getJSONObject("textContent").getString("excerpt"));
-					}
-					dvks.add(summary);
+				else if(type == 's') {
+					summary.set_description(obj.getJSONObject("textContent").getString("excerpt"));
 				}
+				return_dvks.add(summary);
+			}
+			ArrayList<Dvk> id_dvks = get_dvks_from_ids(dvk_handler, ids);
+			//REMOVE ALREADY DOWNLOADED IDS
+			for(int dvk_num = 0; dvk_num < id_dvks.size(); dvk_num++) {
+				//UPDATE DVK LOCATION IF ALREADY DOWNLOADED
+				Dvk dvk = ArtistHosting.move_dvk(id_dvks.get(dvk_num), directory);
+				dvk_handler.set_dvk(dvk, dvk.get_sql_id());
+				//ENDS IF DOWNLOADED DVK IS NOT A SINGLE DOWNLOAD
+				String[] tags = dvk.get_web_tags();
+				if(!ArrayProcessing.contains(tags, "dvk:single", false)) {
+					check_next = false;
+				}
+				int index = ids.indexOf(dvk.get_id());
+				ids.remove(index);
+				return_dvks.remove(index);
 			}
 			//GET NEXT PAGES
 			boolean more = json.getBoolean("hasMore");
 			if(more && (check_all || check_next)) {
-				ArrayList<Dvk> next = get_module_pages(
-						start_gui, artist, mod_id, directory, type, dvk_handler, check_all, offset + 24);
+				ArrayList<Dvk> next = get_module_pages(start_gui, artist, mod_id, directory,
+						type, dvk_handler, check_all, offset + 24);
 				if(next == null) {
 					if(offset == 0) {
 						if(start_gui != null) {
@@ -1128,18 +1110,18 @@ public class DeviantArt extends ArtistHosting {
 					}
 					return null;
 				}
-				dvks.addAll(next);
+				return_dvks.addAll(next);
 			}
 			//REMOVE DUPLICATE ENTRIES
-			for(int i = 0; i < dvks.size(); i++) {
-				for(int k = i + 1; k < dvks.size(); k++) {
-					if(dvks.get(i).get_page_url().equals(dvks.get(k).get_page_url())) {
-						dvks.remove(k);
+			for(int i = 0; i < return_dvks.size(); i++) {
+				for(int k = i + 1; k < return_dvks.size(); k++) {
+					if(return_dvks.get(i).get_page_url().equals(return_dvks.get(k).get_page_url())) {
+						return_dvks.remove(k);
 						k--;
 					}
 				}
 			}
-			return dvks;
+			return return_dvks;
 		}
 		catch(Exception e) {}
 		//RETURN BLANK IF FAILED

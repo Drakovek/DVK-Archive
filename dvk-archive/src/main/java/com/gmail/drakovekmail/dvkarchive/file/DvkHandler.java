@@ -537,6 +537,7 @@ public class DvkHandler implements AutoCloseable {
 	 */
 	public int get_size() {
 		int size = 0;
+		ArrayList<String> params = new ArrayList<>();
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT COUNT(");
 		sql.append(SQL_ID);
@@ -550,12 +551,14 @@ public class DvkHandler implements AutoCloseable {
 					sql.append(" OR ");
 				}
 				sql.append(DIRECTORY);
-				sql.append(" LIKE '");
-				sql.append(this.directories[i]);
-				sql.append("%'");
+				sql.append(" LIKE ?");
+				params.add(this.directories[i] + "%");
 			}
 		}
 		try (PreparedStatement ps = this.connection.prepareStatement(sql.toString())) {
+			for(int i = 0; i < params.size(); i++) {
+				ps.setString(i + 1, params.get(i));
+			}
 			ResultSet rs = ps.executeQuery();
 			size = rs.getInt(1);
 		}
@@ -705,6 +708,15 @@ public class DvkHandler implements AutoCloseable {
 			e.printStackTrace();
 			return new ArrayList<>();
 		}
+	}
+	
+	/**
+	 * Returns a list of directories from which Dvk objects have been loaded.
+	 * 
+	 * @return Loaded directories
+	 */
+	public File[] get_directories() {
+		return this.directories;
 	}
 	
 	/**

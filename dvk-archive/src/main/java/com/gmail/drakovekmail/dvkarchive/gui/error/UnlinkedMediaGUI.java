@@ -35,14 +35,14 @@ public class UnlinkedMediaGUI extends SimpleServiceGUI {
 	 */
 	@Override
 	public void run_process() {
-		try(DvkHandler dvk_handler = new DvkHandler(this.start_gui.get_file_prefs())) {
-			this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
-			File[] dirs = {this.start_gui.get_directory()};
-			dvk_handler.read_dvks(dirs, this.start_gui);
-			this.start_gui.append_console("", false);
-			this.start_gui.append_console("unlinked_console", true);
-			this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
-			ErrorFinding.get_unlinked_media( dvk_handler, dirs, this.start_gui);
+		try(DvkHandler dvk_handler = new DvkHandler(get_start_gui().get_file_prefs())) {
+			get_start_gui().get_main_pbar().set_progress(true, false, 0, 0);
+			File[] dirs = {get_start_gui().get_directory()};
+			dvk_handler.read_dvks(dirs, get_start_gui());
+			get_start_gui().append_console("", false);
+			get_start_gui().append_console("unlinked_console", true);
+			get_start_gui().get_main_pbar().set_progress(true, false, 0, 0);
+			ErrorFinding.get_unlinked_media( dvk_handler, dirs, get_start_gui());
 		}
 		catch(DvkException e) {}
 	}

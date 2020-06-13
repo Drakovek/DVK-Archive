@@ -36,14 +36,14 @@ public class RenameFilesGUI extends SimpleServiceGUI {
 	 */
 	@Override
 	public void run_process() {
-		this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
-		File[] dirs = {this.start_gui.get_directory()};
-		FilePrefs prefs = this.start_gui.get_file_prefs();
+		get_start_gui().get_main_pbar().set_progress(true, false, 0, 0);
+		File[] dirs = {get_start_gui().get_directory()};
+		FilePrefs prefs = get_start_gui().get_file_prefs();
 		try(DvkHandler dvk_handler = new DvkHandler(prefs)) {
-			dvk_handler.read_dvks(dirs, this.start_gui);
-			this.start_gui.append_console("", false);
-			this.start_gui.append_console("rename_console", true);
-			Reformat.rename_files(dvk_handler, this.start_gui);
+			dvk_handler.read_dvks(dirs, get_start_gui());
+			get_start_gui().append_console("", false);
+			get_start_gui().append_console("rename_console", true);
+			Reformat.rename_files(dvk_handler, get_start_gui());
 		}
 		catch(DvkException e) {}
 	}

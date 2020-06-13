@@ -1,8 +1,6 @@
 package com.gmail.drakovekmail.dvkarchive.web.artisthosting;
 
 import java.io.File;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -31,8 +29,6 @@ import com.gmail.drakovekmail.dvkarchive.web.DConnectSelenium;
  * @author Drakovek
  */
 public class FurAffinity extends ArtistHosting {
-	
-	//TODO SEE IF SCANNING GALLERIES CAN BE SPED UP
 	
 	/**
 	 * Milliseconds to wait after connection events for rate limiting.
@@ -115,7 +111,8 @@ public class FurAffinity extends ArtistHosting {
 					wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(xpath)));
 					//HIDE WINDOW
 					driver.manage().window().setPosition(new Point(-4000, 0));
-					this.connect.load_page("https://www.furaffinity.net/", xpath, 1, 10);
+					TimeUnit.MILLISECONDS.sleep(SLEEP);
+					this.connect.load_page("https://www.furaffinity.net/tos", xpath, 1, 10);
 				}
 				catch(Exception e) {}
 			}
@@ -254,7 +251,7 @@ public class FurAffinity extends ArtistHosting {
 	}
 	
 	/**
-	 * Returns a list of FurAffinity media page URLs for a given artist.
+	 * Returns a list of FurAffinity media page IDs for a given artist.
 	 * 
 	 * @param artist Fur Affinity artist (in URL form)
 	 * @param directory Directory to move DVKs to, if specified
@@ -263,9 +260,9 @@ public class FurAffinity extends ArtistHosting {
 	 * @param check_all Whether to check all gallery pages
 	 * @param check_login Whether to check if still logged in
 	 * @param url Page to scan. If null, scans first gallery page
-	 * @return List of FurAffinity media page URLs
+	 * @return List of FurAffinity media page IDs
 	 */
-	public ArrayList<String> get_pages(
+	public ArrayList<String> get_gallery_ids(
 			String artist,
 			File directory,
 			char type,
@@ -314,59 +311,45 @@ public class FurAffinity extends ArtistHosting {
 			return null;
 		}
 		//GET PAGES
-		ArrayList<String> pages = new ArrayList<>();
 		List<DomAttr> das;
 		xpath = "//figure//u//a[contains(@href,'/view/')]/@href";
 		das = this.connect.get_page().getByXPath(xpath);
 		boolean check_next = true;
-		//SQL COMMAND TO GET SAVED URLS WITH SAME ID
-		StringBuilder sql = new StringBuilder("SELECT * FROM ");
-		sql.append(DvkHandler.DVKS);
-		sql.append(" WHERE ");
-		sql.append(DvkHandler.PAGE_URL);
-		sql.append(" COLLATE NOCASE LIKE ? AND ");
-		sql.append(DvkHandler.DVK_ID);
-		sql.append(" = ?;");
-		String[] params = new String[2];
-		params[0] = "%.furaffinity.net/view/%";
-		//RUN THROUGH MEDIA URLS ON GALLERY PAGE
-		for(int i = 0; i < das.size(); i++) {
-			//GET ID OF CURRENT MEDIA URL
-			boolean contains = false;
-			String link = "https://www.furaffinity.net" + das.get(i).getNodeValue();
-			String id = get_page_id(link, true);
-			params[1] = id;
-			try(ResultSet rs = dvk_handler.get_sql_set(sql.toString(), params)) {
-				ArrayList<Dvk> dvks = DvkHandler.get_dvks(rs);
-				if(dvks.size() > 0) {
-					//RUNS IF ID ALLREADY DOWNLOADED
-					contains = true;
-					Dvk dvk = dvks.get(0);
-					String[] wts = dvk.get_web_tags();
-					if (type == 'f') {
-						if(!ArrayProcessing.contains(wts, "favorite:" + artist, false)) {
-							//ADDS TO LIST IF NOT A FAVORITE OF THE GIVEN ARTIST
-							contains = false;
-						}
-						else {
-							//STOPS RUNNING IF ALREADY LISTED AS FAVORITE FOR THE GIVEN ARTIST
-							check_next = false;
-						}
-					}
-					else if (!ArrayProcessing.contains(wts, "dvk:single", false)) {
-						//STOPS RUNNING IF DOWNLOADED DVK IS NOT A SINGLE DOWNLOAD
-						check_next = false;
-					}
-					//UPDATE DVK LOCATION
-					if(type != 'f') {
-						dvk = ArtistHosting.move_dvk(dvk, directory);
-						dvk_handler.set_dvk(dvk, dvk.get_sql_id());
-					}
+		//RUN THROUGH MEDIA URLS ON GALLERY PAGE, GETTING IDS
+		ArrayList<String> ids = new ArrayList<>();
+		for(int att_num = 0; att_num < das.size(); att_num++) {
+			ids.add(get_page_id("furaffinity.net/" + das.get(att_num).getNodeValue(), true));
+		}
+		ArrayList<Dvk> dvks = get_dvks_from_ids(dvk_handler, ids);
+		//REMOVE ALREADY DOWNLOADED IDS
+		int size = dvks.size();
+		for(int dvk_num = 0; dvk_num < size; dvk_num++) {
+			boolean remove = true;
+			//RUNS IF ID ALLREADY DOWNLOADED
+			Dvk dvk = dvks.get(dvk_num);
+			String[] wts = dvk.get_web_tags();
+			if (type == 'f') {
+				if(!ArrayProcessing.contains(wts, "favorite:" + artist, false)) {
+					//ADDS TO LIST IF NOT A FAVORITE OF THE GIVEN ARTIST
+					remove = false;
+				}
+				else {
+					//STOPS RUNNING IF ALREADY LISTED AS FAVORITE FOR THE GIVEN ARTIST
+					check_next = false;
 				}
 			}
-			catch(SQLException e) {}
-			if(!contains) {
-				pages.add(link);
+			else if (!ArrayProcessing.contains(wts, "dvk:single", false)) {
+				//STOPS RUNNING IF DOWNLOADED DVK IS NOT A SINGLE DOWNLOAD
+				check_next = false;
+			}
+			//UPDATE DVK LOCATION
+			if(type != 'f') {
+				dvk = ArtistHosting.move_dvk(dvk, directory);
+				dvk_handler.set_dvk(dvk, dvk.get_sql_id());
+			}
+			//REMOVE ID FROM LIST
+			if(remove) {
+				ids.remove(ids.indexOf(dvk.get_id()));
 			}
 		}
 		//GET NEXT PAGES
@@ -391,7 +374,7 @@ public class FurAffinity extends ArtistHosting {
 		}
 		//GET THE NEXT GALLERY PAGE
 		if(new_url != null && (check_all || check_next)) {
-			ArrayList<String> next = get_pages(artist, directory, type,
+			ArrayList<String> next = get_gallery_ids(artist, directory, type,
 					dvk_handler, check_all, check_login, new_url);
 			if(next == null) {
 				if(url == null) {
@@ -403,13 +386,13 @@ public class FurAffinity extends ArtistHosting {
 				}
 				return null;
 			}
-			pages.addAll(next);
+			ids.addAll(next);
 		}
-		return ArrayProcessing.clean_list(pages);
+		return ArrayProcessing.clean_list(ids);
 	}
 	
 	/**
-	 * Returns a list of FurAffinity journal page URLs
+	 * Returns a list of FurAffinity journal page IDs
 	 * for a given artist.
 	 *
 	 * @param artist Fur Affinity artist (in URL form)
@@ -418,9 +401,9 @@ public class FurAffinity extends ArtistHosting {
 	 * @param check_all Whether to check all gallery pages
 	 * @param check_login Whether to check if still logged in
 	 * @param page Gallery page to scan
-	 * @return List of FurAffinity media page URLs
+	 * @return List of FurAffinity media page IDs
 	 */
-	public ArrayList<String> get_journal_pages(
+	public ArrayList<String> get_journal_ids(
 			String artist,
 			File directory,
 			DvkHandler dvk_handler,
@@ -454,44 +437,27 @@ public class FurAffinity extends ArtistHosting {
 		//GET PAGES
 		xpath = "//section[contains(@id,'jid')]//a[contains(@href,'/journal/')]|"
 				+ "//table[contains(@id,'jid')]//a[contains(@href,'/journal/')]";
-		ArrayList<String> pages = new ArrayList<>();
 		List<DomElement> ds;
 		ds = this.connect.get_page().getByXPath(xpath);
 		boolean check_next = true;
-		//SQL COMMAND TO GET SAVED URLS WITH SAME ID
-		StringBuilder sql = new StringBuilder("SELECT * FROM ");
-		sql.append(DvkHandler.DVKS);
-		sql.append(" WHERE ");
-		sql.append(DvkHandler.PAGE_URL);
-		sql.append(" COLLATE NOCASE LIKE ? AND ");
-		sql.append(DvkHandler.DVK_ID);
-		sql.append(" = ?;");
-		String[] params = new String[2];
-		params[0] = "%.furaffinity.net/journal/%";
-		for(int i = 0; i < ds.size(); i++) {
-			String link = ds.get(i).asText().toLowerCase();
+		//RUN THROUGH MEDIA URLS ON GALLERY PAGE, GETTING IDS
+		ArrayList<String> ids = new ArrayList<>();
+		for(int el_num = 0; el_num < ds.size(); el_num++) {
+			String link = ds.get(el_num).asText().toLowerCase();
 			if(link.contains("read more") || link.contains("view journal")) {
-				boolean contains = false;
-				link = "https://www.furaffinity.net" + ds.get(i).getAttribute("href");
-				String id = get_page_id(link, true);
-				params[1] = id;
-				try(ResultSet rs = dvk_handler.get_sql_set(sql.toString(), params)) {
-					ArrayList<Dvk> dvks = DvkHandler.get_dvks(rs);
-					if(dvks.size() > 0) {
-						contains = true;
-						//UPDATE DVK LOCATION AND FAVORITE IF ALREADY DOWNLOADED
-						Dvk dvk = ArtistHosting.move_dvk(dvks.get(0), directory);
-						dvk_handler.set_dvk(dvk, dvk.get_sql_id());
-						if(!ArrayProcessing.contains(dvk.get_web_tags(), "dvk:single", false)) {
-							check_next = false;
-						}
-					}
-				}
-				catch(SQLException e) {}
-				if(!contains) {
-					pages.add(link);
-				}
+				ids.add(get_page_id("furaffinity.net/" + ds.get(el_num).getAttribute("href"), true));
+			}	
+		}
+		ArrayList<Dvk> dvks = get_dvks_from_ids(dvk_handler, ids);
+		//REMOVE IDS THAT ARE ALREADY DOWNLOADED
+		for(int dvk_num = 0; dvk_num < dvks.size(); dvk_num++) {
+			//UPDATE DVK LOCATION AND FAVORITE IF ALREADY DOWNLOADED
+			Dvk dvk = ArtistHosting.move_dvk(dvks.get(dvk_num), directory);
+			dvk_handler.set_dvk(dvk, dvk.get_sql_id());
+			if(!ArrayProcessing.contains(dvk.get_web_tags(), "dvk:single", false)) {
+				check_next = false;
 			}
+			ids.remove(ids.indexOf(dvk.get_id()));
 		}
 		//GET NEXT PAGES
 		DomElement de;
@@ -505,7 +471,7 @@ public class FurAffinity extends ArtistHosting {
 			de = this.connect.get_page().getFirstByXPath(xpath);
 		}
 		if(de != null && (check_all || check_next)) {
-			ArrayList<String> next = get_journal_pages(
+			ArrayList<String> next = get_journal_ids(
 					artist, directory, dvk_handler, check_all, check_login, page + 1);
 			if(next == null) {
 				if(page == 1) {
@@ -517,15 +483,15 @@ public class FurAffinity extends ArtistHosting {
 				}
 				return null;
 			}
-			pages.addAll(next);
+			ids.addAll(next);
 		}
-		return ArrayProcessing.clean_list(pages);
+		return ArrayProcessing.clean_list(ids);
 	}
 	
 	/**
 	 * Returns a Dvk for a given FurAffinity media page.
 	 * 
-	 * @param page_url URL of FurAffinity media page
+	 * @param id ID of FurAffinity media page
 	 * @param dvk_handler Used for checking already downloaded favorites pages
 	 * @param directory Directory in which to save Dvk.
 	 * @param artist Artist to use when adding favorite tag.
@@ -535,14 +501,13 @@ public class FurAffinity extends ArtistHosting {
 	 * @return Dvk of FurAffinity media page
 	 */
 	public Dvk get_dvk(
-			String page_url,
+			String id,
 			DvkHandler dvk_handler,
 			File directory,
 			String artist,
 			boolean single,
 			boolean save) {
 		//ADD FAVORITES IF DVK ALREADY EXISTS
-		String id = get_page_id(page_url, true);
 		Dvk dvk = null;
 		if(dvk_handler != null && artist != null) {
 			dvk = ArtistHosting.update_favorite(dvk_handler, artist, id);
@@ -553,7 +518,7 @@ public class FurAffinity extends ArtistHosting {
 		//GET NEW DVK
 		dvk = new Dvk();
 		dvk.set_id(id);
-		String url = "https://www.furaffinity.net/view/" + get_page_id(page_url, false) + "/";
+		String url = "https://www.furaffinity.net/view/" + id.replace("FAF", "") + "/";
 		dvk.set_page_url(url);
 		//LOAD PAGE
 		if(this.connect == null || this.downloader == null) {
@@ -778,7 +743,7 @@ public class FurAffinity extends ArtistHosting {
 	/**
 	 * Returns a Dvk for a given FurAffinity journal page.
 	 * 
-	 * @param page_url URL of FurAffinity journal page
+	 * @param id ID of FurAffinity journal page
 	 * @param dvk_handler DvkHandler to add to when getting Dvk
 	 * @param directory Directory in which to save Dvk.
 	 * @param save Whether to save Dvk and media
@@ -786,14 +751,15 @@ public class FurAffinity extends ArtistHosting {
 	 * @return Dvk of FurAffinity media page
 	 */
 	public Dvk get_journal_dvk(
-			String page_url,
+			String id,
 			DvkHandler dvk_handler,
 			File directory,
 			boolean single,
 			boolean save) {
 		Dvk dvk = new Dvk();
-		dvk.set_id(get_page_id(page_url, true));
-		String url = "https://www.furaffinity.net/journal/" + get_page_id(page_url, false) + "/";
+		dvk.set_id(id);
+		String url = "https://www.furaffinity.net/journal/"
+				+ id.replace("FAF", "").replace("-J", "") + "/";
 		dvk.set_page_url(url);
 		//LOAD PAGE
 		if(this.connect == null) {

@@ -3,6 +3,8 @@ package com.gmail.drakovekmail.dvkarchive.gui.artist;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.io.File;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
@@ -25,6 +27,7 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DTextField;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.compound.DTextDialog;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DCheckEvent;
+import com.gmail.drakovekmail.dvkarchive.processing.ArrayProcessing;
 
 /**
  * GUI for downloading files from artist-hosting websites.
@@ -81,12 +84,12 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	/**
 	 * DVK handler for loading existing DVK files.
 	 */
-	protected DvkHandler dvk_handler;
+	private DvkHandler dvk_handler;
 	
 	/**
 	 * Dvks with title/artist and directory info.
 	 */
-	protected ArrayList<Dvk> dvks;
+	private ArrayList<Dvk> list_dvks;
 	
 	/**
 	 * List for holding artists/titles.
@@ -163,14 +166,14 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	 */
 	public ArtistHostingGUI(StartGUI start_gui, String name_id, String list_label, boolean simple) {
 		super(start_gui);
-		FilePrefs prefs = this.start_gui.get_file_prefs();
+		FilePrefs prefs = get_start_gui().get_file_prefs();
 		try {
 			this.dvk_handler = new DvkHandler(prefs);
 		}
 		catch(DvkException e) {}
 		this.list_label = list_label;
 		this.simple = simple;
-		this.dvks = new ArrayList<>();
+		set_list_dvks(new ArrayList<>());
 		this.name = start_gui.get_base_gui().get_language_string(name_id);
 		this.setLayout(new GridLayout(1, 1));
 		//INITIALIZE COMPONENTS
@@ -202,13 +205,40 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	}
 	
 	/**
+	 * Returns Dvk objects with title/artist and directory info to show in GUI list.
+	 * 
+	 * @return Dvks to show in list
+	 */
+	public ArrayList<Dvk> get_list_dvks() {
+		return this.list_dvks;
+	}
+	
+	/**
+	 * Sets the Dvk objects to show in the GUI list.
+	 * 
+	 * @param list_dvks List Dvk objects
+	 */
+	public void set_list_dvks(ArrayList<Dvk> list_dvks) {
+		this.list_dvks = list_dvks;
+	}
+	
+	/**
+	 * Returns the loaded DvkHandler object.
+	 * 
+	 * @return DvkHandler
+	 */
+	public DvkHandler get_dvk_handler() {
+		return this.dvk_handler;
+	}
+	
+	/**
 	 * Creates and displays a login GUI.
 	 * 
 	 * @param allow_skipping Whether to allow skipping login
 	 * @param captcha Whether to include CAPTCHA dialog in the GUI
 	 */
 	protected void create_login_gui(boolean allow_skipping) {
-		BaseGUI base_gui = this.start_gui.get_base_gui();
+		BaseGUI base_gui = get_start_gui().get_base_gui();
 		this.u_txt = new DTextField(base_gui, this, "nothing");
 		this.p_txt = new DPasswordField(base_gui);
 		DLabel u_lbl = new DLabel(base_gui, this.u_txt, "username");
@@ -266,8 +296,8 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	 * Starts the process of logging in to website.
 	 */
 	private void start_login() {
-		this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
-		this.start_gui.append_console("attempt_login", true);
+		get_start_gui().get_main_pbar().set_progress(true, false, 0, 0);
+		get_start_gui().append_console("attempt_login", true);
 		String user = null;
 		String pass = null;
 		try {
@@ -284,11 +314,11 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 				this.p_txt.setText("");
 			}
 			catch(NullPointerException e) {};
-			this.start_gui.append_console("login_success", true);
+			get_start_gui().append_console("login_success", true);
 			this.skipped = false;
 		}
 		else {
-			this.start_gui.append_console("login_failed", true);
+			get_start_gui().append_console("login_failed", true);
 		}
 	}
 	
@@ -305,7 +335,7 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	 * Creates the main artist hosting GUI.
 	 */
 	public void create_main_gui() {
-		BaseGUI base_gui = this.start_gui.get_base_gui();
+		BaseGUI base_gui = get_start_gui().get_base_gui();
 		//CREATE BUTTON PANEL
 		JPanel btn_pnl = new JPanel();
 		btn_pnl.setLayout(new GridLayout(3, 1, 0, base_gui.get_space_size()));
@@ -451,7 +481,7 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	 */
 	public void set_list(ArrayList<String> list) {
 		String[] array = new String[list.size() + 1];
-		array[0] = this.start_gui.get_base_gui().get_language_string("select_all");
+		array[0] = get_start_gui().get_base_gui().get_language_string("select_all");
 		for(int i = 0; i < list.size(); i++) {
 			array[i + 1] = list.get(i);
 		}
@@ -466,10 +496,10 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	/**
 	 * Reads all dvks in base_gui's selected directory.
 	 */
-	protected void read_dvks() {
+	public void read_dvks() {
 		close_dvk_handler();
-		File[] dirs = {this.start_gui.get_directory()};
-		this.dvk_handler.read_dvks(dirs, this.start_gui);
+		File[] dirs = {get_start_gui().get_directory()};
+		this.dvk_handler.read_dvks(dirs, get_start_gui());
 		get_artists();
 	}
 	
@@ -482,7 +512,7 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		int[] sel = this.lst.getSelectedIndices();
 		//IF ALL SELECTED, RETURN ALL
 		if(sel.length > 0 && sel[0] == 0) {
-			sel = new int[this.dvks.size()];
+			sel = new int[get_list_dvks().size()];
 			for(int i = 0; i < sel.length; i++) {
 				sel[i] = i;
 			}
@@ -505,9 +535,9 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		print_start();
 		int[] sel = get_selected();
 		for(int i = 0; i < sel.length; i++) {
-			this.start_gui.get_secondary_pbar().set_progress(false, true, i, sel.length);
-			if(!this.start_gui.get_base_gui().is_canceled()) {
-				get_pages(this.dvks.get(sel[i]), check_all);
+			get_start_gui().get_secondary_pbar().set_progress(false, true, i, sel.length);
+			if(!get_start_gui().get_base_gui().is_canceled()) {
+				get_pages(get_list_dvks().get(sel[i]), check_all);
 			}
 		}
 	}
@@ -520,6 +550,66 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	private void run_download_single(String url) {
 		print_start();
 		download_page(url);
+	}
+	
+	/**
+	 * Returns whether a DVK with a given ID has already been downloaded.
+	 * 
+	 * @param id ID to search for
+	 * @param like Whether to use SQL "LIKE" to search for IDs. Otherwise, looks for exact ID match.
+	 * @param exclude_journals Whether to exclude Journal IDs (IDs that end with "-J")
+	 * @return If DVK is already downloaded
+	 */
+	public boolean is_already_downloaded(
+			String id,
+			boolean like,
+			boolean exclude_journals) {
+		ArrayList<String> params = new ArrayList<>();
+		params.add(id);
+		StringBuilder sql = new StringBuilder("SELECT * FROM ");
+		sql.append(DvkHandler.DVKS);
+		sql.append(" WHERE ");
+		sql.append(DvkHandler.DVK_ID);
+		if(like) {
+			sql.append(" LIKE ?");
+		}
+		else {
+			sql.append(" = ?");
+		}
+		if(exclude_journals) {
+			sql.append(" AND ");
+			sql.append(DvkHandler.DVK_ID);
+			sql.append(" NOT LIKE ?");
+			params.add("%-J");
+		}
+		//LIMIT TO OPENED DIRECTORIES
+		sql.append(" AND (");
+		File[] dirs = this.dvk_handler.get_directories();
+		for(int i = 0; i < dirs.length; i++) {
+			if(i > 0) {
+				sql.append(" OR ");
+			}
+			sql.append(DvkHandler.DIRECTORY);
+			sql.append(" LIKE ?");
+			params.add(dirs[i] + "%");
+		}
+		sql.append(");");
+		try(ResultSet rs = this.dvk_handler.get_sql_set(sql.toString(),
+				ArrayProcessing.list_to_array(params))) {
+			ArrayList<Dvk> result_dvks = DvkHandler.get_dvks(rs);
+			if(result_dvks.size() > 0) {
+				//ALREADY DOWNLOADED
+				get_start_gui().append_console("already_downloaded", true);
+				for(int i = 0; i < result_dvks.size(); i++) {
+					get_start_gui().append_console(
+							result_dvks.get(i).get_dvk_file().getAbsolutePath(), false);
+				}
+				return true;
+			}
+			return false;
+		}
+		catch(SQLException e) {}
+		return false;
 	}
 	
 	/**
@@ -549,7 +639,7 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	
 	@Override
 	public void enable_all() {
-		if(!this.start_gui.get_base_gui().is_canceled()) {
+		if(!get_start_gui().get_base_gui().is_canceled()) {
 			this.new_btn.setEnabled(true);
 			this.all_btn.setEnabled(true);
 			this.single_btn.setEnabled(true);
@@ -606,8 +696,8 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 					String[] messages = {"enter_page_url"};
 					DTextDialog dialog = new DTextDialog();
 					String url = dialog.open(
-							this.start_gui.get_base_gui(),
-							this.start_gui.get_frame(),
+							get_start_gui().get_base_gui(),
+							get_start_gui().get_frame(),
 							"download_single",
 							messages);
 					if(url != null) {
@@ -660,15 +750,15 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 
 	@Override
 	public void done(String id) {
-		this.start_gui.get_main_pbar().set_progress(false, false, 0, 0);
-		this.start_gui.get_secondary_pbar().set_progress(false, false, 0, 0);
-		if(this.start_gui.get_base_gui().is_canceled()) {
-			this.start_gui.append_console("canceled", true);
+		get_start_gui().get_main_pbar().set_progress(false, false, 0, 0);
+		get_start_gui().get_secondary_pbar().set_progress(false, false, 0, 0);
+		if(get_start_gui().get_base_gui().is_canceled()) {
+			get_start_gui().append_console("canceled", true);
 			this.skipped = true;
 			create_initial_gui();
 		}
 		else {
-			this.start_gui.append_console("finished", true);
+			get_start_gui().append_console("finished", true);
 		}
 		if(id.equals("login")) {
 			if(!get_skipped()) {
@@ -677,14 +767,14 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 			}
 			else {
 				enable_all();
-				this.start_gui.get_base_gui().set_running(false);
-				this.start_gui.enable_all();
+				get_start_gui().get_base_gui().set_running(false);
+				get_start_gui().enable_all();
 			}
 		}
 		else {
 			enable_all();
-			this.start_gui.get_base_gui().set_running(false);
-			this.start_gui.enable_all();
+			get_start_gui().get_base_gui().set_running(false);
+			get_start_gui().enable_all();
 		}
 	}
 	

@@ -34,7 +34,7 @@ public abstract class SimpleServiceGUI extends ServiceGUI implements DActionEven
 	 */
 	public SimpleServiceGUI(StartGUI start_gui, String title, String desc) {
 		super(start_gui);
-		BaseGUI base_gui = this.start_gui.get_base_gui();
+		BaseGUI base_gui = get_start_gui().get_base_gui();
 		//CREATE TITLE PANEL
 		DLabel title_lbl = new DLabel(base_gui, null, title);
 		title_lbl.setHorizontalAlignment(SwingConstants.CENTER);
@@ -72,15 +72,15 @@ public abstract class SimpleServiceGUI extends ServiceGUI implements DActionEven
 	
 	@Override
 	public void done(String id) {
-		this.start_gui.get_main_pbar().set_progress(false, false, 0, 0);
-		if(this.start_gui.get_base_gui().is_canceled()) {
-			this.start_gui.append_console("canceled", true);
+		get_start_gui().get_main_pbar().set_progress(false, false, 0, 0);
+		if(get_start_gui().get_base_gui().is_canceled()) {
+			get_start_gui().append_console("canceled", true);
 		}
 		else {
-			this.start_gui.append_console("finished", true);
+			get_start_gui().append_console("finished", true);
 		}
-		this.start_gui.get_base_gui().set_running(false);
-		this.start_gui.enable_all();
+		get_start_gui().get_base_gui().set_running(false);
+		get_start_gui().enable_all();
 		enable_all();
 	}
 	

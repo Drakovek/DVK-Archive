@@ -58,7 +58,7 @@ public class MangaDexGUI extends ArtistHostingGUI {
 	
 	@Override
 	public void create_initial_gui() {
-		BaseGUI base_gui = this.start_gui.get_base_gui();
+		BaseGUI base_gui = get_start_gui().get_base_gui();
 		//CREATE TITLE PANEL
 		DLabel title_lbl = new DLabel(base_gui, null, "mangadex");
 		title_lbl.setHorizontalAlignment(SwingConstants.CENTER);
@@ -101,63 +101,63 @@ public class MangaDexGUI extends ArtistHostingGUI {
 		Preferences prefs = Preferences.userNodeForPackage(MangaDexGUI.class);
 		if(directory != null && directory.isDirectory()) {
 			prefs.put(DIRECTORY, directory.getAbsolutePath());
-			this.start_gui.set_directory(directory);
+			get_start_gui().set_directory(directory);
 		}
 		else {
 			prefs.put(DIRECTORY, "");
-			this.start_gui.reset_directory();
+			get_start_gui().reset_directory();
 		}
 	}
 	
 	@Override
 	public void directory_opened() {
-		save_directory(this.start_gui.get_directory());
+		save_directory(get_start_gui().get_directory());
 		start_process("read_dvks", true);
 	}
 	
 	@Override
 	public void get_artists() {
-		this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
-		this.start_gui.append_console("sorting_dvks", true);
+		get_start_gui().get_main_pbar().set_progress(true, false, 0, 0);
+		get_start_gui().append_console("sorting_dvks", true);
 		close_connection();
 		try {
-			this.sel = new DConnectSelenium(true, this.start_gui);
+			this.sel = new DConnectSelenium(true, get_start_gui());
 			this.connect = new DConnect(false, false);
 		}
 		catch(DvkException e) {}
-		this.dvks = MangaDex.get_downloaded_titles(this.dvk_handler);
+		set_list_dvks(MangaDex.get_downloaded_titles(get_dvk_handler()));
 		ArrayList<String> list = new ArrayList<>();
-		for(int i = 0; i < this.dvks.size(); i++) {
-			list.add(this.dvks.get(i).get_title());
+		for(int i = 0; i < get_list_dvks().size(); i++) {
+			list.add(get_list_dvks().get(i).get_title());
 		}
 		set_list(list);
 	}
 
 	@Override
 	public void get_pages(Dvk dvk, boolean check_all) {
-		this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
+		get_start_gui().get_main_pbar().set_progress(true, false, 0, 0);
 		File dir = dvk.get_dvk_file();
 		Dvk title = MangaDex.get_title_info(
 				this.connect, dvk.get_id());
-		this.start_gui.append_console(
-				this.start_gui.get_base_gui()
+		get_start_gui().append_console(
+				get_start_gui().get_base_gui()
 					.get_language_string("getting_title")
 						+ " - " + title.get_title(), false);
 		download_title(title, dir, check_all);
-		this.start_gui.append_console("", false);
+		get_start_gui().append_console("", false);
 	}
 
 	@Override
 	public void download_page(String url) {
 		String id = MangaDex.get_title_id(url);
 		if(id.length() > 0) {
-			this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
+			get_start_gui().get_main_pbar().set_progress(true, false, 0, 0);
 			Dvk title = MangaDex.get_title_info(this.connect, id);
-			this.start_gui.append_console(
-					this.start_gui.get_base_gui().get_language_string("getting_title")
+			get_start_gui().append_console(
+					get_start_gui().get_base_gui().get_language_string("getting_title")
 						+ " - " + title.get_title(), false);
 			File dir = new File(
-					this.start_gui.get_directory(),
+					get_start_gui().get_directory(),
 					StringProcessing.get_filename(title.get_title()));
 			if(!dir.exists()) {
 				dir.mkdir();
@@ -175,21 +175,21 @@ public class MangaDexGUI extends ArtistHostingGUI {
 	 */
 	private void download_title(Dvk title, File directory, boolean check_all) {
 		//TODO CHANGE ENGLISH DEFAULT
-		this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
-		this.start_gui.append_console("getting_chapters", true);
+		get_start_gui().get_main_pbar().set_progress(true, false, 0, 0);
+		get_start_gui().append_console("getting_chapters", true);
 		ArrayList<Dvk> chapters = MangaDex.get_chapters(
-				this.connect, title, this.start_gui, "English", 1);
-		this.start_gui.append_console("downloading_pages", true);
+				this.connect, title, get_start_gui(), "English", 1);
+		get_start_gui().append_console("downloading_pages", true);
 		ArrayList<Dvk> downloaded = MangaDex.get_dvks(
 				this.sel,
-				this.dvk_handler,
-				this.start_gui,
+				get_dvk_handler(),
+				get_start_gui(),
 				directory,
 				chapters,
 				check_all,
 				true);
 		for(int i = 0; i < downloaded.size(); i++) {
-			this.dvk_handler.add_dvk(downloaded.get(i));
+			get_dvk_handler().add_dvk(downloaded.get(i));
 		}
 	}
 
@@ -225,8 +225,8 @@ public class MangaDexGUI extends ArtistHostingGUI {
 
 	@Override
 	public void print_start() {
-		this.start_gui.append_console("", false);
-		this.start_gui.append_console("running_mangadex", true);
+		get_start_gui().append_console("", false);
+		get_start_gui().append_console("running_mangadex", true);
 	}
 
 	@Override

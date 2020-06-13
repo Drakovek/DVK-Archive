@@ -37,12 +37,14 @@ public abstract class ArtistHosting implements DActionEvent {
 	 * Returns a list of Dvks of different artist's work from a given domain.
 	 * Used for determining which artists to download from and to which directories.
 	 * 
-	 * @param handler DvkHandler containing loaded Dvks
+	 * @param dvk_handler DvkHandler containing loaded Dvks
 	 * @param domain Domain in which to check for artists
 	 * @return List of Dvks from different artists of a domain
 	 */
-	public static ArrayList<Dvk> get_artists(DvkHandler handler, String domain) {
-		if(handler == null) {
+	public static ArrayList<Dvk> get_artists(
+			DvkHandler dvk_handler,
+			String domain) {
+		if(dvk_handler == null) {
 			return new ArrayList<>();
 		}
 		StringBuilder sql = new StringBuilder("SELECT * FROM ");
@@ -53,13 +55,28 @@ public abstract class ArtistHosting implements DActionEvent {
 		sql.append(DvkHandler.WEB_TAGS);
 		sql.append(" IS NULL OR ");
 		sql.append(DvkHandler.WEB_TAGS);
-		sql.append(" COLLATE NOCASE NOT LIKE ?) GROUP BY ");
+		sql.append(" COLLATE NOCASE NOT LIKE ?)");
+		ArrayList<String> params = new ArrayList<>();
+		params.add("%" + domain + "%");
+		params.add("%dvk&#58;single%");
+		//LIMIT TO OPENED DIRECTORIES
+		sql.append(" AND (");
+		File[] dirs = dvk_handler.get_directories();
+		for(int i = 0; i < dirs.length; i++) {
+			if(i > 0) {
+				sql.append(" OR ");
+			}
+			sql.append(DvkHandler.DIRECTORY);
+			sql.append(" LIKE ?");
+			params.add(dirs[i] + "%");
+		}
+		sql.append(") GROUP BY ");
 		sql.append(DvkHandler.ARTISTS);
 		sql.append(" ORDER BY ");
 		sql.append(DvkHandler.ARTISTS);
 		sql.append(" COLLATE NOCASE ASC;");
-		String[] params = {"%" + domain + "%", "%dvk&#58;single%"};
-		try(ResultSet rs = handler.get_sql_set(sql.toString(), params)) {
+		try(ResultSet rs = dvk_handler.get_sql_set(sql.toString(),
+				ArrayProcessing.list_to_array(params))) {
 			ArrayList<Dvk> dvks = DvkHandler.get_dvks(rs);
 			for(int i = 0; i < dvks.size(); i++) {
 				dvks.get(i).set_dvk_file(dvks.get(i).get_dvk_file().getParentFile());
@@ -237,6 +254,54 @@ public abstract class ArtistHosting implements DActionEvent {
 		}
 		catch(SQLException e) {}
 		return null;
+	}
+	
+	/**
+	 * Returns Dvk objects that match one of a given list of DVK IDs.
+	 * 
+	 * @param dvk_handler DvkHandler with loaded Dvk objects
+	 * @param ids IDs of Dvk objects to return
+	 * @return Dvks matching one of the ids
+	 */
+	public static ArrayList<Dvk> get_dvks_from_ids(DvkHandler dvk_handler, ArrayList<String> ids) {
+		ArrayList<String> params = new ArrayList<>();
+		StringBuilder sql = new StringBuilder("SELECT * FROM ");
+		sql.append(DvkHandler.DVKS);
+		sql.append(" WHERE ");
+		//ADD IDS
+		int size = ids.size();
+		if(size > 0) {
+			sql.append("(");
+			for(int id_num = 0; id_num < ids.size(); id_num++) {
+				if(id_num > 0) {
+					sql.append(" OR ");
+				}
+				sql.append(DvkHandler.DVK_ID);
+				sql.append(" = ?");
+				params.add(ids.get(id_num));
+			}
+			sql.append(") AND (");
+		}
+		File[] dirs = dvk_handler.get_directories();
+		//LIMIT TO OPENED DIRECTORIES
+		for(int dir_num = 0; dir_num < dirs.length; dir_num++) {
+			if(dir_num > 0) {
+				sql.append(" OR ");
+			}
+			sql.append(DvkHandler.DIRECTORY);
+			sql.append(" LIKE ?");
+			params.add(dirs[dir_num] + "%");
+		}
+		sql.append(");");
+		//GET DVKS
+		ArrayList<Dvk> dvks;
+		try(ResultSet rs = dvk_handler.get_sql_set(sql.toString(), ArrayProcessing.list_to_array(params))) {
+			dvks = DvkHandler.get_dvks(rs);
+			return dvks;
+		}
+		catch(SQLException e) {
+			return new ArrayList<>();
+		}
 	}
 	
 	@Override

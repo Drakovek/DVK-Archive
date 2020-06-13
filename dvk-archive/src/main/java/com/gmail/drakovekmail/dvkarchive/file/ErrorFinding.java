@@ -27,6 +27,7 @@ public class ErrorFinding {
 			DvkHandler dvk_handler,
 			File[] directories,
 			StartGUI start_gui) {
+		//TODO FIX POTENTIAL MEMORY ISSUES
 		int index;
 		File file;
 		File[] dirs = new File[0];

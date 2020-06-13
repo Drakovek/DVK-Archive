@@ -1,8 +1,11 @@
 package com.gmail.drakovekmail.dvkarchive.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.io.File;
+
+import javax.swing.Box;
 import javax.swing.JFileChooser;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
@@ -30,6 +33,8 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DProgressBar;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DScrollPane;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DTextArea;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
+import com.gmail.drakovekmail.dvkarchive.gui.work.DSwingWorker;
+import com.gmail.drakovekmail.dvkarchive.gui.work.DWorker;
 
 /**
  * Class dealing with the main GUI.
@@ -38,9 +43,7 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
  * @author Drakovek
  *
  */
-public class StartGUI implements DActionEvent, Disabler {
-	
-	//TODO SET CLOSE EVENT TO RUN ON THREAD
+public class StartGUI implements DActionEvent, Disabler, DWorker {
 	
 	/**
 	 * Current directory for the StartGUI
@@ -134,7 +137,7 @@ public class StartGUI implements DActionEvent, Disabler {
 		this.base_gui = base_gui;
 		this.file_prefs = new FilePrefs();
 		this.current_service = new String();
-		this.frame = new DFrame(this.base_gui, this, "dvk-data");
+		this.frame = new DFrame(this.base_gui, this, "dvk_archive");
 		//CREATE SETTINGS BAR
 		this.settings_bar = new SettingsBarGUI(this);
 		this.frame.getContentPane().add(this.settings_bar,
@@ -184,6 +187,8 @@ public class StartGUI implements DActionEvent, Disabler {
 		//CREATE CENTER PANEL
 		this.content_pnl = new JPanel();
 		this.content_pnl.setLayout(new GridLayout(1, 1));
+		Dimension space = new Dimension(1, base_gui.get_space_size() * 30);
+		this.content_pnl.add(Box.createRigidArea(space));
 		JSplitPane spl = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
 				this.content_pnl, log_pnl);
 		this.frame.getContentPane().add(
@@ -201,10 +206,10 @@ public class StartGUI implements DActionEvent, Disabler {
 		this.frame.setJMenuBar(menu_bar);
 		//PACK AND CREATE FRAME
 		reset_directory();
-		this.service_list.setSelectedIndex(0);
-		this.frame.pack_restricted();
-		this.frame.setLocationRelativeTo(null);
 		if(show_gui) {
+			this.service_list.setSelectedIndex(0);
+			this.frame.pack_restricted();
+			this.frame.setLocationRelativeTo(null);
 			this.frame.setVisible(true);
 		}
 	}
@@ -289,47 +294,14 @@ public class StartGUI implements DActionEvent, Disabler {
 			cat = get_categories(false)[index];
 			String service = get_services(cat)[selected];
 			if(!this.current_service.equals(service)) {
-				//CHANGE SERVICE GUI
+				this.base_gui.set_running(true);
+				disable_all();
 				if(this.service_pnl != null) {
-					this.service_pnl.close();
+					this.service_pnl.disable_all();
 				}
-				this.service_pnl = null;
-				this.base_gui.set_canceled(true);
-				switch(service) {
-					case "fur_affinity":
-						this.service_pnl = new FurAffinityGUI(this);
-						break;
-					case "deviantart":
-						this.service_pnl = new DeviantArtGUI(this);
-						break;
-					case "inkbunny":
-						this.service_pnl = new InkbunnyGUI(this);
-						break;
-					case "mangadex":
-						this.service_pnl = new MangaDexGUI(this);
-						break;
-					case "unlinked_media":
-						this.service_pnl = new UnlinkedMediaGUI(this);
-						break;
-					case "same_ids":
-						this.service_pnl = new SameIDsGUI(this);
-						break;
-					case "missing_media":
-						this.service_pnl = new MissingMediaGUI(this);
-						break;
-					case "reformat_dvks":
-						this.service_pnl = new ReformatDvksGUI(this);
-						break;
-					case "rename_files":
-						this.service_pnl = new RenameFilesGUI(this);
-						break;
-				}
-				JPanel spaced = this.base_gui.get_spaced_panel(this.service_pnl);
-				this.content_pnl.removeAll();
-				this.content_pnl.add(spaced);
-				this.content_pnl.revalidate();
-				this.content_pnl.repaint();
-				this.current_service = service;
+				this.main_pbar.set_progress(true, false, 0, 0);
+				DSwingWorker worker = new DSwingWorker(this, service);
+				worker.execute();
 			}
 		}
 	}
@@ -478,12 +450,19 @@ public class StartGUI implements DActionEvent, Disabler {
 				cancel_clear();
 				break;
 			case "close_frame":
-				if(this.service_pnl != null) {
-					this.service_pnl.close();
-				}
-				this.frame.close();
+				close();
 				break;
 		}
+	}
+	
+	/**
+	 * Closes the StartGUI.
+	 */
+	public void close() {
+		if(this.service_pnl != null) {
+			this.service_pnl.close();
+		}
+		this.frame.close();
 	}
 
 	@Override
@@ -502,5 +481,58 @@ public class StartGUI implements DActionEvent, Disabler {
 		this.service_list.setEnabled(false);
 		this.file_menu.setEnabled(false);
 		this.cancel_btn.set_text_id("cancel");
+	}
+
+	@Override
+	public void run(String id) {
+		//CHANGE SERVICE GUI
+		if(this.service_pnl != null) {
+			this.service_pnl.close();
+		}
+		this.service_pnl = null;
+		this.base_gui.set_canceled(true);
+		switch(id) {
+			case "fur_affinity":
+				this.service_pnl = new FurAffinityGUI(this);
+				break;
+			case "deviantart":
+				this.service_pnl = new DeviantArtGUI(this);
+				break;
+			case "inkbunny":
+				this.service_pnl = new InkbunnyGUI(this);
+				break;
+			case "mangadex":
+				this.service_pnl = new MangaDexGUI(this);
+				break;
+			case "unlinked_media":
+				this.service_pnl = new UnlinkedMediaGUI(this);
+				break;
+			case "same_ids":
+				this.service_pnl = new SameIDsGUI(this);
+				break;
+			case "missing_media":
+				this.service_pnl = new MissingMediaGUI(this);
+				break;
+			case "reformat_dvks":
+				this.service_pnl = new ReformatDvksGUI(this);
+				break;
+			case "rename_files":
+				this.service_pnl = new RenameFilesGUI(this);
+				break;
+		}
+		JPanel spaced = this.base_gui.get_spaced_panel(this.service_pnl);
+		this.content_pnl.removeAll();
+		this.content_pnl.add(spaced);
+		this.content_pnl.revalidate();
+		this.content_pnl.repaint();
+		this.current_service = id;
+	}
+
+	@Override
+	public void done(String id) {
+		enable_all();
+		this.service_pnl.enable_all();
+		this.main_pbar.set_progress(false, false, 0, 0);
+		this.base_gui.set_running(false);
 	}
 }

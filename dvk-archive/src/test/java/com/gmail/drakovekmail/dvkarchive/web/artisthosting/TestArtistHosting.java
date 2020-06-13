@@ -1,6 +1,7 @@
 package com.gmail.drakovekmail.dvkarchive.web.artisthosting;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
@@ -278,6 +279,58 @@ public class TestArtistHosting {
 			assertEquals("blah", result.get_web_tags()[1]);
 			assertEquals("favorite:person", result.get_web_tags()[2]);
 			assertEquals("Favorite:Other", result.get_web_tags()[3]);
+		}
+		catch(DvkException e) {
+			assertTrue(false);
+		}
+	}
+	
+	/**
+	 * Tests the get_dvks_from_ids method.
+	 */
+	@Test
+	public void test_get_dvks_from_ids() {
+		//CREATE DVK 1
+		Dvk dvk = new Dvk();
+		dvk.set_id("ID1");
+		dvk.set_title("Unimportant");
+		dvk.set_artist("Artist");
+		dvk.set_page_url("/page/");
+		dvk.set_dvk_file(new File(this.test_dir, "dvk1.dvk"));
+		dvk.set_media_file("dvk1.png");
+		dvk.write_dvk();
+		//CREATE DVK 2
+		dvk.set_id("ID123");
+		dvk.set_dvk_file(new File(this.test_dir, "dvk2.dvk"));
+		dvk.write_dvk();
+		//CREATE DVK3
+		dvk.set_id("NEW35");
+		dvk.set_dvk_file(new File(this.test_dir, "dvk3.dvk"));
+		dvk.write_dvk();
+		//READ DVKS FROM FILE
+		FilePrefs prefs = new FilePrefs();
+		prefs.set_index_dir(this.test_dir);
+		try(DvkHandler dvk_handler = new DvkHandler(prefs)) {
+			File[] dirs = {this.test_dir};
+			dvk_handler.read_dvks(dirs, null);
+			assertEquals(3, dvk_handler.get_size());
+			//TEST NO VALID IDS
+			ArrayList<String> ids = new ArrayList<>();
+			ids.add("nope");
+			ArrayList<Dvk> dvks = ArtistHosting.get_dvks_from_ids(dvk_handler, ids);
+			assertEquals(0, dvks.size());
+			//TEST GETTING IDS
+			ids.add("ID123");
+			ids.add("NEW35");
+			dvks = ArtistHosting.get_dvks_from_ids(dvk_handler, ids);
+			assertEquals(2, dvks.size());
+			String id = dvks.get(0).get_id();
+			assertNotEquals("ID1", id);
+			assertTrue(id.equals("ID123") || id.equals("NEW35"));
+			assertNotEquals("ID1", dvks.get(1).get_id());
+			assertTrue(dvks.get(1).get_id().equals("ID123") || dvks.get(1).get_id().equals("NEW35"));
+			assertNotEquals(id, dvks.get(1).get_id());
+		
 		}
 		catch(DvkException e) {
 			assertTrue(false);
