@@ -239,8 +239,7 @@ public class TestMangaDex {
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
 		prefs.set_index_dir(this.test_dir);
-		try(DvkHandler dvk_handler = new DvkHandler(prefs)) {
-			dvk_handler.read_dvks(dirs, null);
+		try(DvkHandler dvk_handler = new DvkHandler(prefs, dirs, null)) {
 			//CREATE TEST CHAPTER DVKS
 			ArrayList<Dvk> cps = new ArrayList<>();
 			Dvk dvk = new Dvk();
@@ -276,7 +275,7 @@ public class TestMangaDex {
 			dvk.set_media_file("media.jpg");
 			dvk.write_dvk();
 			//CHECK START CHAPTER WITH EXISTING FILES
-			dvk_handler.read_dvks(dirs, null);
+			dvk_handler.read_dvks(dirs);
 			chapter = MangaDex.get_start_chapter(dvk_handler, cps, false);
 			assertEquals(2, chapter);
 			chapter = MangaDex.get_start_chapter(dvk_handler, cps, true);
@@ -289,7 +288,7 @@ public class TestMangaDex {
 			dvk.set_media_file("media.jpg");
 			dvk.write_dvk();
 			//CHECK START CHAPTER WITH LATEST CHAPTER DOWNLOADED
-			dvk_handler.read_dvks(dirs, null);
+			dvk_handler.read_dvks(dirs);
 			chapter = MangaDex.get_start_chapter(dvk_handler, cps, false);
 			assertEquals(0, chapter);
 		}
@@ -306,7 +305,7 @@ public class TestMangaDex {
 		FilePrefs prefs = new FilePrefs();
 		prefs.set_index_dir(this.test_dir);
 		try (DConnectSelenium s_connect = new DConnectSelenium(true, null);
-				DvkHandler handler = new DvkHandler(prefs)) {
+				DvkHandler handler = new DvkHandler(prefs, null, null)) {
 			//CREATE DVK
 			Dvk dvk = new Dvk();
 			dvk.set_id("MDX770792-3");
@@ -340,7 +339,7 @@ public class TestMangaDex {
 			cps.add(dvk);
 			//GET DVKS
 			File[] dirs = {this.test_dir};
-			handler.read_dvks(dirs, null);
+			handler.read_dvks(dirs);
 			ArrayList<Dvk> dvks = MangaDex.get_dvks(
 					s_connect, handler, null,
 					this.test_dir, cps, false, false);
@@ -373,7 +372,7 @@ public class TestMangaDex {
 			value = "https://mangadex.org/chapter/770792/1";
 			assertEquals(value, dvks.get(0).get_page_url());
 			value = "/2d60025d419442a4d56d58a7bbcdc6db/M1.jpg";
-			assertTrue(dvks.get(0).get_direct_url().startsWith(value));
+			assertTrue(dvks.get(0).get_direct_url().endsWith(value));
 			value = "Randomphilia - Ch 75 - Pg 1_MDX770792-1.dvk";
 			file = new File(this.test_dir, value);
 			assertEquals(file, dvks.get(0).get_dvk_file());
@@ -485,8 +484,7 @@ public class TestMangaDex {
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
 		prefs.set_index_dir(this.test_dir);
-		try(DvkHandler handler = new DvkHandler(prefs)) {
-			handler.read_dvks(dirs, null);
+		try(DvkHandler handler = new DvkHandler(prefs, dirs, null)) {
 			assertEquals(7, handler.get_size());
 			dvks = MangaDex.get_downloaded_titles(handler);
 			assertEquals(3, dvks.size());

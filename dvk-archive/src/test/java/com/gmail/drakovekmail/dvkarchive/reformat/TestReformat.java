@@ -90,8 +90,7 @@ public class TestReformat {
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
 		prefs.set_index_dir(this.test_dir);
-		try (DvkHandler handler = new DvkHandler(prefs)) {
-			handler.read_dvks(dirs,  null);
+		try (DvkHandler handler = new DvkHandler(prefs, dirs, null)) {
 			Reformat.reformat_dvks(handler, null);
 			File db = new File(this.test_dir, "dvk_archive.db");
 			assertTrue(db.exists());
@@ -99,7 +98,7 @@ public class TestReformat {
 			assertFalse(db.exists());
 			handler.initialize_connection();
 			assertTrue(db.exists());
-			handler.read_dvks(dirs, null);
+			handler.read_dvks(dirs);
 			//CHECK DVKS STILL VALID
 			ArrayList<Dvk> dvks = handler.get_dvks(0, -1, 'a', false, false);
 			assertEquals(3, dvks.size());
@@ -158,8 +157,7 @@ public class TestReformat {
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
 		prefs.set_index_dir(this.test_dir);
-		try(DvkHandler handler = new DvkHandler(prefs)) {
-			handler.read_dvks(dirs, null);
+		try(DvkHandler handler = new DvkHandler(prefs, dirs, null)) {
 			Reformat.rename_files(handler, null);
 			//CHECK FILES READ
 			ArrayList<Dvk> dvks = handler.get_dvks(0, -1, 'a', false, false);
@@ -183,8 +181,7 @@ public class TestReformat {
 			assertTrue(false);
 		}
 		//CHECK FILES ACTUALLY WRITTEN
-		try(DvkHandler handler = new DvkHandler(prefs)) {
-			handler.read_dvks(dirs, null);
+		try(DvkHandler handler = new DvkHandler(prefs, dirs, null)) {
 			ArrayList<Dvk> dvks = handler.get_dvks(0, -1, 'a', false, false);
 			assertEquals(2, dvks.size());
 			assertTrue(dvks.get(0).get_dvk_file().exists());

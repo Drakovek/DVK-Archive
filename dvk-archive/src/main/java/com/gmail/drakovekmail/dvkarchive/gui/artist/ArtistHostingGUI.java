@@ -27,7 +27,6 @@ import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DTextField;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.compound.DTextDialog;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DCheckEvent;
-import com.gmail.drakovekmail.dvkarchive.processing.ArrayProcessing;
 
 /**
  * GUI for downloading files from artist-hosting websites.
@@ -168,7 +167,7 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		super(start_gui);
 		FilePrefs prefs = get_start_gui().get_file_prefs();
 		try {
-			this.dvk_handler = new DvkHandler(prefs);
+			this.dvk_handler = new DvkHandler(prefs, null, get_start_gui());
 		}
 		catch(DvkException e) {}
 		this.list_label = list_label;
@@ -499,7 +498,7 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	public void read_dvks() {
 		close_dvk_handler();
 		File[] dirs = {get_start_gui().get_directory()};
-		this.dvk_handler.read_dvks(dirs, get_start_gui());
+		this.dvk_handler.read_dvks(dirs);
 		get_artists();
 	}
 	
@@ -582,20 +581,7 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 			sql.append(" NOT LIKE ?");
 			params.add("%-J");
 		}
-		//LIMIT TO OPENED DIRECTORIES
-		sql.append(" AND (");
-		File[] dirs = this.dvk_handler.get_directories();
-		for(int i = 0; i < dirs.length; i++) {
-			if(i > 0) {
-				sql.append(" OR ");
-			}
-			sql.append(DvkHandler.DIRECTORY);
-			sql.append(" LIKE ?");
-			params.add(dirs[i] + "%");
-		}
-		sql.append(");");
-		try(ResultSet rs = this.dvk_handler.get_sql_set(sql.toString(),
-				ArrayProcessing.list_to_array(params))) {
+		try(ResultSet rs = this.dvk_handler.sql_select(sql.toString(), params, true)) {
 			ArrayList<Dvk> result_dvks = DvkHandler.get_dvks(rs);
 			if(result_dvks.size() > 0) {
 				//ALREADY DOWNLOADED

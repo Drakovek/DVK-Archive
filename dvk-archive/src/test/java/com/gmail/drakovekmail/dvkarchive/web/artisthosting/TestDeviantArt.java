@@ -194,8 +194,7 @@ public class TestDeviantArt {
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
 		prefs.set_index_dir(this.test_dir);
-		try(DvkHandler dvk_handler = new DvkHandler(prefs)) {
-			dvk_handler.read_dvks(dirs, null);
+		try(DvkHandler dvk_handler = new DvkHandler(prefs, dirs, null)) {
 			//TEST FAVORITING ALREADY DOWNLOADED DVK
 			String url = "deviantart.com/artist/art/Thing-1234567";
 			dvk = this.dev.get_dvk(url, dvk_handler, null, this.test_dir, "Somebody", true);
@@ -547,21 +546,24 @@ public class TestDeviantArt {
 	public void test_get_journal_dvk() {
 		FilePrefs prefs = new FilePrefs();
 		prefs.set_index_dir(this.test_dir);
-		try(DvkHandler dvk_handler = new DvkHandler(prefs)) {
+		File[] dirs = {this.test_dir};
+		try(DvkHandler dvk_handler = new DvkHandler(prefs, dirs, null)) {
 			//FIRST DVK
 			String url = "deviantart.com/akuoreo/journal/Looking-to-hire-3D-modeler-817361421";
-			Dvk dvk = this.dev.get_journal_dvk(url, dvk_handler, this.test_dir, 0, true, false);
+			Dvk dvk = this.dev.get_journal_dvk(
+					url, dvk_handler, this.test_dir, "ArtGuy", 0, true, false);
 			assertEquals("DVA817361421-J", dvk.get_id());
 			assertEquals("Looking to hire 3D modeler", dvk.get_title());
 			assertEquals(1, dvk.get_artists().length);
 			assertEquals("AkuOreo", dvk.get_artists()[0]);
 			assertEquals("2019/10/19|11:53", dvk.get_time());
-			assertEquals(5, dvk.get_web_tags().length);
+			assertEquals(6, dvk.get_web_tags().length);
 			assertEquals("Rating:General", dvk.get_web_tags()[0]);
 			assertEquals("Gallery:Journals", dvk.get_web_tags()[1]);
 			assertEquals("Journals", dvk.get_web_tags()[2]);
 			assertEquals("Personal", dvk.get_web_tags()[3]);
 			assertEquals("DVK:Single", dvk.get_web_tags()[4]);
+			assertEquals("Favorite:ArtGuy", dvk.get_web_tags()[5]);
 			String desc = "<div> We have wanted to use the money we have gotten to commission more "
 					+ "MSF High related stuff";
 			assertTrue(dvk.get_description().startsWith(desc));
@@ -582,7 +584,7 @@ public class TestDeviantArt {
 			assertEquals("Looking to hire 3D modeler_DVA817361421-J_S.jpg", dvk.get_secondary_file().getName());
 			//SECOND DVK
 			url = "https://www.deviantart.com/akuoreo/journal/Slime-Girl-TF-TG-Deal-Closed-762225768";
-			dvk = this.dev.get_journal_dvk(url, dvk_handler, this.test_dir, false);
+			dvk = this.dev.get_journal_dvk(url, dvk_handler, this.test_dir, null, false);
 			assertEquals("DVA762225768-J", dvk.get_id());
 			assertEquals("Slime Girl TF TG Deal (Closed)", dvk.get_title());
 			assertEquals(1, dvk.get_artists().length);
@@ -613,18 +615,19 @@ public class TestDeviantArt {
 			assertTrue(text.endsWith(desc));
 			//THIRD DVK
 			url = "deviantart.com/fezmangaka/journal/Important-announcement-Future-of-Commissions-839801217";
-			dvk = this.dev.get_journal_dvk(url, dvk_handler, this.test_dir, 0, true, true);
+			dvk = this.dev.get_journal_dvk(url, dvk_handler, this.test_dir, "thing", 0, true, true);
 			assertEquals("DVA839801217-J", dvk.get_id());
 			assertEquals("Important announcement!! (Future of Commissions)", dvk.get_title());
 			assertEquals(1, dvk.get_artists().length);
 			assertEquals("FezMangaka", dvk.get_artists()[0]);
 			assertEquals("2020/04/28|18:40", dvk.get_time());
-			assertEquals(5, dvk.get_web_tags().length);
+			assertEquals(6, dvk.get_web_tags().length);
 			assertEquals("Rating:General", dvk.get_web_tags()[0]);
 			assertEquals("Gallery:Journals", dvk.get_web_tags()[1]);
 			assertEquals("Journals", dvk.get_web_tags()[2]);
 			assertEquals("Personal", dvk.get_web_tags()[3]);
 			assertEquals("DVK:Single", dvk.get_web_tags()[4]);
+			assertEquals("Favorite:thing", dvk.get_web_tags()[5]);
 			desc = "<p class=\"_1tvZk _1iFR7 _3s8-3\"> Commission update: what to expect </p> "
 					+ "<div class=\"_1tvZk _1iFR7 _3s8-3\"> </div> <p class=\"_1tvZk _1iFR7 _3s8-3\"> "
 					+ "School hasn't   for me as the start of my 'internship' will begin shortly around May. "
@@ -685,7 +688,8 @@ public class TestDeviantArt {
 		//TEST DVK
 		FilePrefs prefs = new FilePrefs();
 		prefs.set_index_dir(this.test_dir);
-		try(DvkHandler dvk_handler = new DvkHandler(prefs)) {
+		File[] dirs = {this.test_dir};
+		try(DvkHandler dvk_handler = new DvkHandler(prefs, dirs, null)) {
 			Dvk result = DeviantArt.get_status_dvk(dvk, dvk_handler, this.test_dir, true);
 			assertEquals("DVA15696838-S", result.get_id());
 			assertEquals("27 April 2020 | Pokefan-Tf Update", result.get_title());
@@ -732,7 +736,8 @@ public class TestDeviantArt {
 		//TEST DVK
 		FilePrefs prefs = new FilePrefs();
 		prefs.set_index_dir(this.test_dir);
-		try(DvkHandler dvk_handler = new DvkHandler(prefs)) {
+		File[] dirs = {this.test_dir};
+		try(DvkHandler dvk_handler = new DvkHandler(prefs, dirs, null)) {
 			Dvk result = DeviantArt.get_poll_dvk(dvk, dvk_handler, this.test_dir, true);
 			assertEquals("DVA58635424-P", result.get_id());
 			assertEquals("What do you think?", result.get_title());
@@ -818,12 +823,11 @@ public class TestDeviantArt {
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
 		prefs.set_index_dir(this.test_dir);
-		try(DvkHandler handler = new DvkHandler(prefs)) {
+		try(DvkHandler handler = new DvkHandler(prefs, dirs, null)) {
 			File sub = new File(this.test_dir, "sub");
 			if(!sub.isDirectory()) {
 				sub.mkdir();
 			}
-			handler.read_dvks(dirs, null);
 			//TEST SMALL SAMPLE
 			ArrayList<String> links = this.dev.get_pages(null, "drakovek", sub, 'm', handler, true, 0);
 			assertEquals(1, links.size());
@@ -931,8 +935,7 @@ public class TestDeviantArt {
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
 		prefs.set_index_dir(this.test_dir);
-		try(DvkHandler handler = new DvkHandler(prefs)) {
-			handler.read_dvks(dirs, null);
+		try(DvkHandler handler = new DvkHandler(prefs, dirs, null)) {
 			File sub = new File(this.test_dir, "sub");
 			if(!sub.isDirectory()) {
 				sub.mkdir();
@@ -1025,8 +1028,7 @@ public class TestDeviantArt {
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
 		prefs.set_index_dir(this.test_dir);
-		try(DvkHandler handler = new DvkHandler(prefs)) {
-			handler.read_dvks(dirs, null);
+		try(DvkHandler handler = new DvkHandler(prefs, dirs, null)) {
 			File sub = new File(this.test_dir, "sub");
 			if(!sub.isDirectory()) {
 				sub.mkdir();

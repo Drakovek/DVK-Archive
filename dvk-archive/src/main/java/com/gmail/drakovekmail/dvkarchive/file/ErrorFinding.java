@@ -58,16 +58,17 @@ public class ErrorFinding {
 			}
 			//GET NON-DVKS IN DIRECTORY
 			File[] files = {dirs[i]};
-			dvk_handler.read_dvks(files, null);
+			dvk_handler.read_dvks(files);
 			files = dirs[i].listFiles(new ExtensionFilter(".dvk", false));
 			Arrays.parallelSort(files);
 			ArrayList<File> non_dvks = new ArrayList<>();
 			for(File non_dvk: files) {
 				non_dvks.add(non_dvk);
 			}
+			files = null;
 			//REMOVE FILES
 			params[0] = dirs[i].getAbsolutePath();
-			try(ResultSet rs = dvk_handler.get_sql_set(sql.toString(), params)) {
+			try(ResultSet rs = dvk_handler.sql_select(sql.toString(), params, false)) {
 				while(rs.next()) {
 					try {
 						file = new File(dirs[i], rs.getString(DvkHandler.MEDIA_FILE));
@@ -160,7 +161,7 @@ public class ErrorFinding {
 		sql.append(';');
 		//GET LIST OF DUPLICATED DVK IDS
 		ArrayList<String> ids = new ArrayList<>();
-		try (ResultSet rs = dvk_handler.get_sql_set(sql.toString(), new String[0])) {
+		try (ResultSet rs = dvk_handler.sql_select(sql.toString(), new String[0], true)) {
 			while(rs.next()) {
 				//BREAK IF CANCELLED
 				if(start_gui != null && start_gui.get_base_gui().is_canceled()) {
@@ -188,7 +189,7 @@ public class ErrorFinding {
 		int size = ids.size();
 		for(int i = 0; i < size; i++) {
 			params[0] = ids.get(i);
-			try(ResultSet rs = dvk_handler.get_sql_set(sql.toString(), params)) {
+			try(ResultSet rs = dvk_handler.sql_select(sql.toString(), params, true)) {
 				//BREAK IF CANCELLED
 				if(start_gui != null) {
 					start_gui.get_main_pbar().set_progress(false, true, i, size);

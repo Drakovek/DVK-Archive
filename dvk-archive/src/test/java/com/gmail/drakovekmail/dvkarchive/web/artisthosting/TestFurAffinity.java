@@ -183,12 +183,11 @@ public class TestFurAffinity {
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
 		prefs.set_index_dir(this.test_dir);
-		try(DvkHandler handler = new DvkHandler(prefs)) {
+		try(DvkHandler handler = new DvkHandler(prefs, dirs, null)) {
 			File sub = new File(this.test_dir, "sub");
 			if(!sub.isDirectory()) {
 				sub.mkdir();
 			}
-			handler.read_dvks(dirs, null);
 			//TEST SMALL SAMPLE
 			ArrayList<String> links = this.fur.get_gallery_ids("drakovek", sub, 'm',
 					handler, true, false, null);
@@ -273,8 +272,7 @@ public class TestFurAffinity {
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
 		prefs.set_index_dir(this.test_dir);
-		try(DvkHandler handler = new DvkHandler(prefs)) {
-			handler.read_dvks(dirs, null);
+		try(DvkHandler handler = new DvkHandler(prefs, dirs, null)) {
 			File sub = new File(this.test_dir, "sub");
 			if(!sub.isDirectory()) {
 				sub.mkdir();
@@ -350,8 +348,7 @@ public class TestFurAffinity {
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
 		prefs.set_index_dir(this.test_dir);
-		try(DvkHandler handler = new DvkHandler(prefs)) {
-			handler.read_dvks(dirs, null);
+		try(DvkHandler handler = new DvkHandler(prefs, dirs, null)) {
 			//TEST SMALL SAMPLE
 			ArrayList<String> links = this.fur.get_journal_ids(
 					"mr_sparta", sub, handler, true, false, 1);
@@ -436,8 +433,7 @@ public class TestFurAffinity {
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
 		prefs.set_index_dir(this.test_dir);
-		try(DvkHandler dvk_handler = new DvkHandler(prefs)) {
-			dvk_handler.read_dvks(dirs, null);
+		try(DvkHandler dvk_handler = new DvkHandler(prefs, dirs, null)) {
 			//TEST FAVORITING ALREADY DOWNLOADED DVK
 			dvk = this.fur.get_dvk("FAF1234567", dvk_handler, this.test_dir, "Somebody", true, true);
 			assertEquals("Test", dvk.get_title());
@@ -624,9 +620,10 @@ public class TestFurAffinity {
 	 */
 	@Test
 	public void test_get_journal_dvk() {
+		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
 		prefs.set_index_dir(this.test_dir);
-		try(DvkHandler dvk_handler = new DvkHandler(prefs)) {
+		try(DvkHandler dvk_handler = new DvkHandler(prefs, dirs, null)) {
 			//FIRST DVK
 			Dvk dvk = this.fur.get_journal_dvk("FAF9485924-J", dvk_handler, this.test_dir, false, true);
 			assertEquals("FAF9485924-J", dvk.get_id());

@@ -62,7 +62,7 @@ public class TestInkbunny {
 		FilePrefs prefs = new FilePrefs();
 		prefs.set_index_dir(this.test_dir);
 		try {
-			this.dvk_handler = new DvkHandler(prefs);
+			this.dvk_handler = new DvkHandler(prefs, null, null);
 		}
 		catch(DvkException e) {}
 		this.ink = new Inkbunny(null, this.dvk_handler);
@@ -223,7 +223,7 @@ public class TestInkbunny {
 		File[] dirs = {this.test_dir};
 		assertTrue(this.ink.login("guest", ""));
 		//TEST ADDING FAVORITES TAGS - EQUAL PAGES
-		this.dvk_handler.read_dvks(dirs, null);
+		this.dvk_handler.read_dvks(dirs);
 		assertEquals(4, this.dvk_handler.get_size());
 		ArrayList<String> favorites = new ArrayList<>();
 		favorites.add("Favorite:New Artist");
@@ -432,7 +432,7 @@ public class TestInkbunny {
 		assertTrue(dvk2.get_dvk_file().exists());
 		//TEST GETTING EMPTY FAVORITES GALLERY
 		File[] dirs = {this.test_dir};
-		this.dvk_handler.read_dvks(dirs, null);
+		this.dvk_handler.read_dvks(dirs);
 		assertTrue(this.ink.login("guest", ""));
 		assertEquals(0, this.ink.get_pages("544679", sub, 'f', "biobasher", true).size());
 		//TEST GETTING FAVORITES
@@ -501,7 +501,7 @@ public class TestInkbunny {
 		assertTrue(this.ink.login("guest", ""));
 		//TEST EMPTY SCRAPS DIRECTORY
 		File[] dirs = {this.test_dir};
-		this.dvk_handler.read_dvks(dirs, null);
+		this.dvk_handler.read_dvks(dirs);
 		ArrayList<Dvk> dvks = this.ink.get_pages("159684", sub, 's', "LittleNapoleon", true);
 		assertEquals(0, dvks.size());
 		dvks = this.ink.get_pages("159684", sub, 'm', "LittleNapoleon", false, 10, null, 1);
@@ -583,7 +583,7 @@ public class TestInkbunny {
 		assertTrue(sub.exists());
 		//CHECK SKIPS SINGLE
 		File[] dirs = {this.test_dir};
-		this.dvk_handler.read_dvks(dirs, null);
+		this.dvk_handler.read_dvks(dirs);
 		ArrayList<String> ids = this.ink.get_journal_pages("SonicSpirit", sub, false, 1);
 		assertTrue(ids.size() > 25);
 		assertFalse(ids.contains("386752"));
@@ -608,7 +608,7 @@ public class TestInkbunny {
 		dvk2.write_dvk();
 		assertTrue(dvk2.get_dvk_file().exists());
 		//CHECKS STOPS ON JOURNAL GALLERY PAGE
-		this.dvk_handler.read_dvks(dirs, null);
+		this.dvk_handler.read_dvks(dirs);
 		ids = this.ink.get_journal_pages("SonicSpirit", sub, false, 1);
 		assertTrue(ids.size() > 1);
 		assertFalse(ids.contains("389024"));
@@ -623,7 +623,7 @@ public class TestInkbunny {
 	@Test
 	public void test_get_journal_dvk() {
 		File[] dirs = {this.test_dir};
-		this.dvk_handler.read_dvks(dirs, null);
+		this.dvk_handler.read_dvks(dirs);
 		//TEST INVALID
 		Dvk dvk = this.ink.get_journal_dvk("nwD135ajkds", this.test_dir, true, true);
 		assertEquals(null, dvk.get_title());

@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -86,7 +87,7 @@ public class TestDvkHandler {
 		FilePrefs prefs = new FilePrefs();
 		prefs.set_index_dir(index_dir);
 		try {
-			this.dvk_handler = new DvkHandler(prefs);
+			this.dvk_handler = new DvkHandler(prefs, null, null);
 		}
 		catch(DvkException e) {}
 		//CREATE DVK0
@@ -169,7 +170,7 @@ public class TestDvkHandler {
 		prefs.set_index_dir(this.test_dir);
 		File db = new File(this.test_dir, "dvk_archive.db");
 		assertFalse(db.exists());
-		try (DvkHandler handler = new DvkHandler(prefs)) {
+		try (DvkHandler handler = new DvkHandler(prefs, null, null)) {
 			handler.initialize_connection();
 			assertTrue(db.exists());
 		}
@@ -184,12 +185,12 @@ public class TestDvkHandler {
 	@Test
 	public void test_read_dvks() {
 		//TEST INVALID DIRECTORIES
-		this.dvk_handler.read_dvks(null, null);
+		this.dvk_handler.read_dvks(null);
 		assertEquals(0, this.dvk_handler.get_size());
 		assertEquals(0, this.dvk_handler.get_size());
 		//LOAD FROM MAIN TEST DIRECTORY
 		File[] dirs = {this.test_dir};
-		this.dvk_handler.read_dvks(dirs, null);
+		this.dvk_handler.read_dvks(dirs);
 		assertEquals(5, this.dvk_handler.get_size());
 		ArrayList<Dvk> dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
 		assertEquals(5, dvks.size());
@@ -242,7 +243,7 @@ public class TestDvkHandler {
 		dvk.set_media_file("mod.png");
 		dvk.write_dvk();
 		//TEST UPDATING DVK INFO
-		this.dvk_handler.read_dvks(dirs, null);
+		this.dvk_handler.read_dvks(dirs);
 		assertEquals(6, this.dvk_handler.get_size());
 		dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
 		assertEquals(6, dvks.size());
@@ -256,19 +257,19 @@ public class TestDvkHandler {
 		dirs = new File[2];
 		dirs[0] = this.f1;
 		dirs[1] = this.f2;
-		this.dvk_handler.read_dvks(dirs, null);
+		this.dvk_handler.read_dvks(dirs);
 		assertEquals(3, this.dvk_handler.get_size());
 		dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
 		assertEquals(3, dvks.size());
 		//TEST DELETING DVKS
 		dirs = new File[1];
 		dirs[0] = this.test_dir;
-		this.dvk_handler.read_dvks(dirs, null);
+		this.dvk_handler.read_dvks(dirs);
 		assertEquals(6, this.dvk_handler.get_size());
 		dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
 		dvks.get(0).get_dvk_file().delete();
 		assertFalse(dvks.get(0).get_dvk_file().exists());
-		this.dvk_handler.read_dvks(dirs, null);
+		this.dvk_handler.read_dvks(dirs);
 		dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
 		assertEquals(5, dvks.size());
 		assertEquals("New Dvk", dvks.get(0).get_title());
@@ -283,7 +284,7 @@ public class TestDvkHandler {
 			assertTrue(false);
 		}
 		assertFalse(f3.exists());
-		this.dvk_handler.read_dvks(dirs, null);
+		this.dvk_handler.read_dvks(dirs);
 		dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
 		assertEquals(4, dvks.size());
 		assertEquals("New Dvk", dvks.get(0).get_title());
@@ -293,12 +294,64 @@ public class TestDvkHandler {
 	}
 	
 	/**
+	 * Tests the remove_duplicates method.
+	 */
+	@Test
+	public void test_remove_duplicates() {
+		File[] dirs = {this.test_dir};
+		this.dvk_handler.read_dvks(dirs);
+		assertEquals(5, this.dvk_handler.get_size());
+		//ADD DVKS
+		StringBuilder sql = new StringBuilder("INSERT INTO ");
+		sql.append(DvkHandler.DVKS);
+		sql.append(" (");
+		sql.append(DvkHandler.DVK_ID);
+		sql.append(',');
+		sql.append(DvkHandler.TITLE);
+		sql.append(',');
+		sql.append(DvkHandler.ARTISTS);
+		sql.append(',');
+		sql.append(DvkHandler.PAGE_URL);
+		sql.append(',');
+		sql.append(DvkHandler.DIRECTORY);
+		sql.append(',');
+		sql.append(DvkHandler.DVK_FILE);
+		sql.append(") VALUES (?,?,?,?,?,?);");
+		try(PreparedStatement psmt = this.dvk_handler.get_sql_connection().prepareStatement(sql.toString())) {
+			psmt.setString(1, "ID256");
+			psmt.setString(2, "DifferentDir");
+			psmt.setString(3, "ARTIST");
+			psmt.setString(4, "/page");
+			psmt.setString(5, this.test_dir.getAbsolutePath());
+			psmt.setString(6, "dvk0.dvk");
+			psmt.executeUpdate();
+			psmt.executeUpdate();
+			psmt.setString(5, this.sub.getAbsolutePath());
+			psmt.setString(6, "dvk1.dvk");
+			psmt.executeUpdate();
+		}
+		catch(SQLException e) {
+			assertTrue(false);
+		}
+		assertEquals(8, this.dvk_handler.get_size());
+		//TEST REMOVING DUPLICATES
+		this.dvk_handler.remove_duplicates();
+		ArrayList<Dvk> dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
+		assertEquals(4, this.dvk_handler.get_size());
+		assertEquals(4, dvks.size());
+		assertEquals("Page 1", dvks.get(0).get_title());
+		assertEquals("Page 1.5", dvks.get(1).get_title());
+		assertEquals("Page 10", dvks.get(2).get_title());
+		assertEquals("Something", dvks.get(3).get_title());
+	}
+	
+	/**
 	 * Tests the get_dvks method while limiting results.
 	 */
 	@Test
 	public void test_get_dvks_limit() {
 		File[] dirs = {this.test_dir};
-		this.dvk_handler.read_dvks(dirs, null);
+		this.dvk_handler.read_dvks(dirs);
 		//TEST NO LIMIT
 		ArrayList<Dvk> dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
 		assertEquals(5, dvks.size());
@@ -326,7 +379,7 @@ public class TestDvkHandler {
 	@Test
 	public void test_add_dvk() {
 		File[] dirs = {this.test_dir};
-		this.dvk_handler.read_dvks(dirs, null);
+		this.dvk_handler.read_dvks(dirs);
 		assertEquals(5, this.dvk_handler.get_size());
 		//ADD DVK
 		Dvk dvk = new Dvk();
@@ -350,9 +403,9 @@ public class TestDvkHandler {
 		sql.append(DvkHandler.DVKS);
 		sql.append(" WHERE ");
 		sql.append(DvkHandler.TITLE);
-		sql.append(" = ?;");
+		sql.append(" = ?");
 		String[] params = {"New Title"};
-		try(ResultSet rs = this.dvk_handler.get_sql_set(sql.toString(), params)) {
+		try(ResultSet rs = this.dvk_handler.sql_select(sql.toString(), params, true)) {
 			rs.next();
 			assertEquals("ADD1234", rs.getString(DvkHandler.DVK_ID));
 			assertEquals("New Title", rs.getString(DvkHandler.TITLE));
@@ -379,7 +432,7 @@ public class TestDvkHandler {
 	@Test
 	public void test_delete_dvk() {
 		File[] dirs = {this.test_dir};
-		this.dvk_handler.read_dvks(dirs, null);
+		this.dvk_handler.read_dvks(dirs);
 		assertEquals(5, this.dvk_handler.get_size());
 		ArrayList<Dvk> dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
 		assertEquals(5, dvks.size());
@@ -391,21 +444,21 @@ public class TestDvkHandler {
 	}
 	
 	/**
-	 * Tests the get_sql_set method.
+	 * Tests the sql_select method.
 	 */
 	@Test
-	public void test_get_sql_set() {
+	public void test_sql_select() {
 		File[] dirs = {this.test_dir};
-		this.dvk_handler.read_dvks(dirs, null);
+		this.dvk_handler.read_dvks(dirs);
 		StringBuilder sql = new StringBuilder("SELECT ");
 		sql.append(DvkHandler.TITLE);
 		sql.append(" FROM ");
 		sql.append(DvkHandler.DVKS);
 		sql.append(" WHERE ");
 		sql.append(DvkHandler.TITLE);
-		sql.append(" = ?;");
+		sql.append(" = ?");
 		String[] params = {"Page 1"};
-		try (ResultSet rs = this.dvk_handler.get_sql_set(sql.toString(), params)) {
+		try (ResultSet rs = this.dvk_handler.sql_select(sql.toString(), params, true)) {
 			while(rs.next()) {
 				assertEquals("Page 1", rs.getString(DvkHandler.TITLE));
 			}
@@ -438,17 +491,17 @@ public class TestDvkHandler {
 		dvk.set_secondary_file("new.jpg");
 		//SET DVK
 		File[] dirs = {this.test_dir};
-		this.dvk_handler.read_dvks(dirs, null);
+		this.dvk_handler.read_dvks(dirs);
 		StringBuilder sql = new StringBuilder("SELECT ");
 		sql.append(DvkHandler.SQL_ID);
 		sql.append(" FROM ");
 		sql.append(DvkHandler.DVKS);
 		sql.append(" WHERE ");
 		sql.append(DvkHandler.TITLE);
-		sql.append(" = ?;");
+		sql.append(" = ?");
 		String[] params = {"Page 1"};
 		int id = -1;
-		try(ResultSet rs = this.dvk_handler.get_sql_set(sql.toString(), params)){
+		try(ResultSet rs = this.dvk_handler.sql_select(sql.toString(), params, true)){
 			rs.next();
 			id = rs.getInt(DvkHandler.SQL_ID);
 			this.dvk_handler.set_dvk(dvk, id);
@@ -457,7 +510,7 @@ public class TestDvkHandler {
 			assertTrue(false);
 		}
 		//CHECK OLD DVK NO LONGER EXISTS
-		try(ResultSet rs = this.dvk_handler.get_sql_set(sql.toString(), params)){
+		try(ResultSet rs = this.dvk_handler.sql_select(sql.toString(), params, false)){
 			assertFalse(rs.next());
 		}
 		catch(SQLException e) {
@@ -468,9 +521,9 @@ public class TestDvkHandler {
 		sql.append(DvkHandler.DVKS);
 		sql.append(" WHERE ");
 		sql.append(DvkHandler.TITLE);
-		sql.append(" = ?;");
+		sql.append(" = ?");
 		params[0] = "New Title";
-		try(ResultSet rs = this.dvk_handler.get_sql_set(sql.toString(), params)) {
+		try(ResultSet rs = this.dvk_handler.sql_select(sql.toString(), params, true)) {
 			rs.next();
 			assertEquals(id, rs.getInt(DvkHandler.SQL_ID));
 			assertEquals("ADD1234", rs.getString(DvkHandler.DVK_ID));
@@ -499,13 +552,13 @@ public class TestDvkHandler {
 	public void test_get_size() {
 		assertEquals(0, this.dvk_handler.get_size());
 		File[] dirs = {this.test_dir};
-		this.dvk_handler.read_dvks(dirs, null);
+		this.dvk_handler.read_dvks(dirs);
 		assertEquals(5, this.dvk_handler.get_size());
 		//LOAD FROM MULTIPLE DIRECTORIES
 		dirs = new File[2];
 		dirs[0] = this.f1;
 		dirs[1] = this.f2;
-		this.dvk_handler.read_dvks(dirs, null);
+		this.dvk_handler.read_dvks(dirs);
 		assertEquals(3, this.dvk_handler.get_size());
 	}
 	
@@ -582,7 +635,7 @@ public class TestDvkHandler {
 	@Test
 	public void test_sort_title() {
 		File[] dirs = {this.test_dir};
-		this.dvk_handler.read_dvks(dirs, null);
+		this.dvk_handler.read_dvks(dirs);
 		//TEST STANDARD TITLE SORT
 		ArrayList<Dvk> dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
 		assertEquals(5, dvks.size());
@@ -615,7 +668,7 @@ public class TestDvkHandler {
 	@Test
 	public void test_get_dvk() {
 		File[] dirs = {this.test_dir};
-		this.dvk_handler.read_dvks(dirs, null);
+		this.dvk_handler.read_dvks(dirs);
 		StringBuilder sql = new StringBuilder("SELECT ");
 		sql.append(DvkHandler.SQL_ID);
 		sql.append(" FROM ");
@@ -623,7 +676,7 @@ public class TestDvkHandler {
 		sql.append(" ORDER BY ");
 		sql.append(DvkHandler.TITLE);
 		sql.append(" COLLATE NOCASE ASC;");
-		try(ResultSet rs = this.dvk_handler.get_sql_set(sql.toString(), new String[0])) {
+		try(ResultSet rs = this.dvk_handler.sql_select(sql.toString(), new String[0], true)) {
 			rs.next();
 			Dvk dvk = this.dvk_handler.get_dvk(rs.getInt(DvkHandler.SQL_ID));
 			assertEquals("Page 1", dvk.get_title());
@@ -652,7 +705,7 @@ public class TestDvkHandler {
 	@Test
 	public void test_sort_time() {
 		File[] dirs = {this.test_dir};
-		this.dvk_handler.read_dvks(dirs, null);
+		this.dvk_handler.read_dvks(dirs);
 		//TEST STANDARD TIME SORT
 		ArrayList<Dvk> dvks = this.dvk_handler.get_dvks(0, -1, 't', false, false);
 		assertEquals(5, dvks.size());
@@ -685,7 +738,7 @@ public class TestDvkHandler {
 	@Test
 	public void test_contains_file() {
 		File[] dirs = {this.test_dir};
-		this.dvk_handler.read_dvks(dirs, null);
+		this.dvk_handler.read_dvks(dirs);
 		assertEquals(5, this.dvk_handler.get_size());
 		File file = new File(this.test_dir, "noFile.txt");
 		assertFalse(this.dvk_handler.contains_file(file));
@@ -707,7 +760,7 @@ public class TestDvkHandler {
 	public void test_delete_database() {
 		FilePrefs prefs = new FilePrefs();
 		prefs.set_index_dir(this.test_dir);
-		try(DvkHandler handler = new DvkHandler(prefs)) {
+		try(DvkHandler handler = new DvkHandler(prefs, null, null)) {
 			File file = new File(this.test_dir, "dvk_archive.db");
 			assertTrue(file.exists());
 			handler.delete_database();

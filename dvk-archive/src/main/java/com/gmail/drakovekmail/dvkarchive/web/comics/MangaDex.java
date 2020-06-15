@@ -303,7 +303,7 @@ public class MangaDex {
 		sql.append(DvkHandler.PAGE_URL);
 		sql.append(" COLLATE NOCASE LIKE '%mangadex.%';");
 		ArrayList<String> pages = new ArrayList<>();
-		try(ResultSet rs = dvk_handler.get_sql_set(sql.toString(), new String[0])) {
+		try(ResultSet rs = dvk_handler.sql_select(sql.toString(), new String[0], true)) {
 			while(rs.next()) {
 				pages.add(rs.getString(DvkHandler.PAGE_URL));
 			}
@@ -384,10 +384,9 @@ public class MangaDex {
 					dvk.set_description(chapters.get(c).get_description());
 					dvk.set_page_url(chapters.get(c).get_page_url() + "/" + Integer.toString(page));
 					//CHECK IF ALREADY DOWNLOADED
-					
 					boolean contains = false;
 					params[0] = "%/" + chapters.get(c).get_id() + "/" + Integer.toString(page);
-					try(ResultSet rs = dvk_handler.get_sql_set(sql.toString(), params)) {
+					try(ResultSet rs = dvk_handler.sql_select(sql.toString(), params, true)) {
 						contains = rs.next();
 					}
 					catch(SQLException e) {
@@ -398,7 +397,7 @@ public class MangaDex {
 						//LOAD PAGE
 						String xpath = "//div[@data-page='" + Integer.toString(page)
 							+ "']//img[@class='noselect nodrag cursor-pointer']";
-						connect.load_page(dvk.get_page_url(), xpath, 1, 10);
+						connect.load_page(dvk.get_page_url(), xpath, 1, 20);
 						try {
 							TimeUnit.MILLISECONDS.sleep(2000);
 						} catch (InterruptedException e) {}
@@ -488,7 +487,7 @@ public class MangaDex {
 		sql.append(" COLLATE NOCASE LIKE '%mangadex.%' ORDER BY ");
 		sql.append(DvkHandler.TITLE);
 		sql.append(';');
-		try(ResultSet rs = dvk_handler.get_sql_set(sql.toString(), new String[0])) {
+		try(ResultSet rs = dvk_handler.sql_select(sql.toString(), new String[0], true)) {
 			ArrayList<Dvk> search = DvkHandler.get_dvks(rs);
 			int size = search.size();
 			for(int i = 0; i < size; i++) {

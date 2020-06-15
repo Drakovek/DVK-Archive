@@ -119,11 +119,10 @@ public class TestErrorFinding {
 	 */
 	@Test
 	public void test_get_unlinked_media() {
+		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
 		prefs.set_index_dir(this.test_dir);
-		try(DvkHandler dvk_handler = new DvkHandler(prefs)) {
-			File[] dirs = {this.test_dir};
-			dvk_handler.read_dvks(dirs, null);
+		try(DvkHandler dvk_handler = new DvkHandler(prefs, dirs, null)) {
 			ArrayList<File> unlinked;
 			unlinked = ErrorFinding.get_unlinked_media(dvk_handler, dirs, null);
 			assertEquals(2, unlinked.size());
@@ -147,8 +146,7 @@ public class TestErrorFinding {
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
 		prefs.set_index_dir(this.test_dir);
-		try(DvkHandler dvk_handler = new DvkHandler(prefs)) {
-			dvk_handler.read_dvks(dirs, null);
+		try(DvkHandler dvk_handler = new DvkHandler(prefs, dirs, null)) {
 			assertEquals(4, dvk_handler.get_size());
 			ArrayList<File> missing;
 			missing = ErrorFinding.get_missing_media_dvks(dvk_handler, null);
@@ -173,8 +171,7 @@ public class TestErrorFinding {
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
 		prefs.set_index_dir(this.test_dir);
-		try(DvkHandler dvk_handler = new DvkHandler(prefs)) {
-			dvk_handler.read_dvks(dirs, null);
+		try(DvkHandler dvk_handler = new DvkHandler(prefs, dirs, null)) {
 			assertEquals(4, dvk_handler.get_size());
 			ArrayList<File> same;
 			same = ErrorFinding.get_same_ids(dvk_handler, null);

@@ -122,8 +122,7 @@ public class TestArtistHosting {
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
 		prefs.set_index_dir(this.test_dir);
-		try(DvkHandler handler = new DvkHandler(prefs)) {
-			handler.read_dvks(dirs, null);
+		try(DvkHandler handler = new DvkHandler(prefs, dirs, null)) {
 			assertEquals(8, handler.get_size());
 			dvks = ArtistHosting.get_artists(handler, "website.com");
 			assertEquals(3, dvks.size());
@@ -249,8 +248,7 @@ public class TestArtistHosting {
 		File[] dirs = {this.test_dir};
 		FilePrefs prefs = new FilePrefs();
 		prefs.set_index_dir(this.test_dir);
-		try(DvkHandler handler = new DvkHandler(prefs)) {
-			handler.read_dvks(dirs, null);
+		try(DvkHandler handler = new DvkHandler(prefs, dirs, null)) {
 			//TEST UPDATITNG FAVORITES
 			assertEquals(1, handler.get_size());
 			assertEquals(null, ArtistHosting.update_favorite(handler, "blah", "ID256"));
@@ -310,9 +308,8 @@ public class TestArtistHosting {
 		//READ DVKS FROM FILE
 		FilePrefs prefs = new FilePrefs();
 		prefs.set_index_dir(this.test_dir);
-		try(DvkHandler dvk_handler = new DvkHandler(prefs)) {
-			File[] dirs = {this.test_dir};
-			dvk_handler.read_dvks(dirs, null);
+		File[] dirs = {this.test_dir};
+		try(DvkHandler dvk_handler = new DvkHandler(prefs, dirs, null)) {
 			assertEquals(3, dvk_handler.get_size());
 			//TEST NO VALID IDS
 			ArrayList<String> ids = new ArrayList<>();

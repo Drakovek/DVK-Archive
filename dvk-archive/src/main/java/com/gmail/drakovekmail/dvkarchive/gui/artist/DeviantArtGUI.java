@@ -256,7 +256,7 @@ public class DeviantArtGUI extends ArtistHostingGUI {
 	 * 
 	 * @param url URL of DeviantArt page
 	 * @param directory Directory in which to save media
-	 * @param artist Artist to use when adding favorite tag.
+	 * @param fav_artist Artist to use when adding favorite tag.
 	 * Doesn't create favorite tag if null.
 	 * @param gallery Gallery tag to add to Dvk
 	 * @param single Whether this is a single download
@@ -266,7 +266,7 @@ public class DeviantArtGUI extends ArtistHostingGUI {
 	public Dvk download_media_page(
 			String url,
 			File directory,
-			String artist,
+			String fav_artist,
 			String gallery,
 			boolean single,
 			boolean cancel) {
@@ -276,11 +276,11 @@ public class DeviantArtGUI extends ArtistHostingGUI {
 			Dvk dvk = null;
 			if(id.endsWith("-J")) {
 				//DOWNLOAD JOURNAL PAGE
-				dvk = this.dev.get_journal_dvk(url, get_dvk_handler(), directory, single);
+				dvk = this.dev.get_journal_dvk(url, get_dvk_handler(), directory, fav_artist, single);
 			}
 			else {
 				//DOWNLOAD GALLERY PAGE
-				dvk = this.dev.get_dvk(url, get_dvk_handler(), gallery, directory, artist, single);
+				dvk = this.dev.get_dvk(url, get_dvk_handler(), gallery, directory, fav_artist, single);
 			}
 			//CANCEL IF DOWNLOAD FAILED
 			if(dvk == null || dvk.get_title() == null) {

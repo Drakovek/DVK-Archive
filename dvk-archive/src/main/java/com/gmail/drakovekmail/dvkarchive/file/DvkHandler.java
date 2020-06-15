@@ -19,7 +19,7 @@ import com.gmail.drakovekmail.dvkarchive.processing.ArrayProcessing;
  * @author Drakovek
  */
 public class DvkHandler implements AutoCloseable {
-	
+
 	/**
 	 * Label for the SQLite table used for holding Dvk information
 	 */
@@ -96,6 +96,11 @@ public class DvkHandler implements AutoCloseable {
 	public static final String SECONDARY_FILE = "secondary_file";
 	
 	/**
+	 * StartGUI used for displaying progress
+	 */
+	private StartGUI start_gui;
+	
+	/**
 	 * Connection object for connecting to SQLite database
 	 */
 	private Connection connection;
@@ -124,9 +129,11 @@ public class DvkHandler implements AutoCloseable {
 	 * Initializes DvkHandler with empty Dvk list.
 	 * 
 	 * @param prefs FilePrefs for getting directory in which to store SQLite database
+	 * @param dirs Directories in which to search for files
+	 * @param start_gui Used for displaying progress.
 	 * @exception DvkException DvkException
 	 */
-	public DvkHandler(FilePrefs prefs) throws DvkException {
+	public DvkHandler(FilePrefs prefs, final File[] dirs, StartGUI start_gui) throws DvkException {
 		this.prefs = prefs;
 		this.connection = null;
 		initialize_connection();
@@ -134,6 +141,8 @@ public class DvkHandler implements AutoCloseable {
 		if(this.database.exists()) {
 			this.modified = this.database.lastModified();
 		}
+		this.start_gui = start_gui;
+		read_dvks(dirs);
 	}
 	
 	/**
@@ -205,83 +214,124 @@ public class DvkHandler implements AutoCloseable {
 	 * Includes sub-directories.
 	 * 
 	 * @param dirs Directories in which to search for files
-	 * @param prefs FilePrefs for getting index directory
-	 * @param start_gui Used for displaying progress.
-	 * @param use_index Whether to load from index files
-	 * @param check_new Whether to update list when loading from index
-	 * @param save_index Whether to save index files
 	 */
-	public void read_dvks(final File[] dirs, StartGUI start_gui) {
-		if(start_gui != null) {
-			start_gui.append_console("", false);
-			start_gui.append_console("reading_dvks", true);
-			start_gui.get_main_pbar().set_progress(true, false, 0, 0);
-		}
-		this.directories = dirs;
-		try {
-			initialize_connection();
-		}
-		catch(DvkException e) {}
-		File[] dvk_dirs = get_directories(dirs, false);
-		int max = dvk_dirs.length;
-		for(int i = 0; i < max; i++) {
-			//SHOW PROGRESS
-			if(start_gui != null) {
-				start_gui.get_main_pbar().set_progress(false, true, i, max);
-				//BREAK IF CANCELLED
-				if(start_gui.get_base_gui().is_canceled()) {
-					break;
+	public void read_dvks(final File[] dirs) {
+		if(dirs != null) {
+			if(this.start_gui != null) {
+				this.start_gui.append_console("", false);
+				this.start_gui.append_console("reading_dvks", true);
+				this.start_gui.get_main_pbar().set_progress(true, false, 0, 0);
+			}
+			this.directories = dirs;
+			try {
+				initialize_connection();
+			}
+			catch(DvkException e) {}
+			remove_duplicates();
+			File[] dvk_dirs = get_directories(dirs, false);
+			int max = dvk_dirs.length;
+			for(int i = 0; i < max; i++) {
+				//SHOW PROGRESS
+				if(this.start_gui != null) {
+					this.start_gui.get_main_pbar().set_progress(false, true, i, max);
+					//BREAK IF CANCELLED
+					if(this.start_gui.get_base_gui().is_canceled()) {
+						break;
+					}
+				}
+				//ADD DIRECTORY
+				update_directory(dvk_dirs[i]);
+			}
+			//GET NON-EXISTANT DIRECTORIES IN DATABASE
+			StringBuilder sql = new StringBuilder("SELECT ");
+			sql.append(DvkHandler.DIRECTORY);
+			sql.append(" FROM ");
+			sql.append(DvkHandler.DVKS);
+			sql.append(" GROUP BY ");
+			sql.append(DvkHandler.DIRECTORY);
+			String filename;
+			ArrayList<String> nix = new ArrayList<>();
+			try(ResultSet rs = sql_select(sql.toString(), new String[0], false)) {
+				while(rs.next()) {
+					filename = rs.getString(DvkHandler.DIRECTORY);
+					//IF DIRECTORY DOESN'T EXIST, GETS ALL ROWS IN DIRECTORY
+					if(!(new File(filename)).exists()) {
+						nix.add(filename);
+					}
 				}
 			}
-			//ADD DIRECTORY
-			update_directory(dvk_dirs[i]);
+			catch(SQLException e) {}
+			//DELETE NON-EXISTANT DIRECTORIES
+			sql = new StringBuilder("SELECT ");
+			sql.append(DvkHandler.SQL_ID);
+			sql.append(" FROM ");
+			sql.append(DvkHandler.DVKS);
+			sql.append(" WHERE ");
+			sql.append(DvkHandler.DIRECTORY);
+			sql.append(" = ?");
+			for(int i = 0; i < nix.size(); i++) {
+				String[] params = {nix.get(i)};
+				try(ResultSet rs = sql_select(sql.toString(), params, false)) {
+					this.connection.setAutoCommit(false);
+					while(rs.next()) {
+						delete_dvk(rs.getInt(DvkHandler.SQL_ID));
+					}
+					this.connection.commit();
+					this.connection.setAutoCommit(true);
+				}
+				catch(SQLException e) {
+					try {
+						this.connection.rollback();
+						this.connection.setAutoCommit(true);
+					}
+					catch(SQLException f) {}
+				}
+			}
 		}
-		//GET NON-EXISTANT DIRECTORIES IN DATABASE
+	}
+	
+	/**
+	 * Removes duplicate DVK files from the SQLite database.
+	 */
+	public void remove_duplicates() {
+		//SELECT IDENTICAL DVK FILE NAMES
 		StringBuilder sql = new StringBuilder("SELECT ");
-		sql.append(DvkHandler.DIRECTORY);
+		sql.append(DVK_FILE);
 		sql.append(" FROM ");
-		sql.append(DvkHandler.DVKS);
+		sql.append(DVKS);
 		sql.append(" GROUP BY ");
-		sql.append(DvkHandler.DIRECTORY);
-		sql.append(";");
-		String filename;
-		ArrayList<String> nix = new ArrayList<>();
-		try(ResultSet rs = get_sql_set(sql.toString(), new String[0])) {
-			while(rs.next()) {
-				filename = rs.getString(DvkHandler.DIRECTORY);
-				//IF DIRECTORY DOESN'T EXIST, GETS ALL ROWS IN DIRECTORY
-				if(!(new File(filename)).exists()) {
-					nix.add(filename);
+		sql.append(DVK_FILE);
+		sql.append(" HAVING COUNT(");
+		sql.append(DVK_FILE);
+		sql.append(") > 1");
+		try(ResultSet rs1 = sql_select(sql.toString(), new String[0], false)) {
+			sql = new StringBuilder("SELECT * FROM ");
+			sql.append(DVKS);
+			sql.append(" WHERE ");
+			sql.append(DVK_FILE);
+			sql.append(" = ?;");
+			String[] params = new String[1];
+			while(rs1.next()) {
+				params[0] = rs1.getString(DVK_FILE);
+				try(ResultSet rs2 = this.sql_select(sql.toString(), params, false)) {
+					//REMOVE DVKS WITH IDENDICAL FILES FROM SQL DATABASE
+					ArrayList<Dvk> dvks = get_dvks(rs2);
+					while(dvks.size() > 0) {
+						Dvk dvk = dvks.get(0);
+						dvks.remove(0);
+						for(int i = 0; i < dvks.size(); i++) {
+							if(dvks.get(i).get_dvk_file().equals(dvk.get_dvk_file())) {
+								delete_dvk(dvk.get_sql_id());
+								delete_dvk(dvks.get(i).get_sql_id());
+								dvks.remove(i);
+								i--;
+							}
+						}
+					}
 				}
 			}
 		}
 		catch(SQLException e) {}
-		//DELETE NON-EXISTANT DIRECTORIES
-		sql = new StringBuilder("SELECT ");
-		sql.append(DvkHandler.SQL_ID);
-		sql.append(" FROM ");
-		sql.append(DvkHandler.DVKS);
-		sql.append(" WHERE ");
-		sql.append(DvkHandler.DIRECTORY);
-		sql.append(" = ?;");
-		for(int i = 0; i < nix.size(); i++) {
-			String[] params = {nix.get(i)};
-			try(ResultSet rs = get_sql_set(sql.toString(), params)) {
-				this.connection.setAutoCommit(false);
-				while(rs.next()) {
-					delete_dvk(rs.getInt(DvkHandler.SQL_ID));
-				}
-				this.connection.commit();
-				this.connection.setAutoCommit(true);
-			}
-			catch(SQLException e) {
-				try {
-					this.connection.rollback();
-					this.connection.setAutoCommit(true);
-				}
-				catch(SQLException f) {}
-			}
-		}
 	}
 	
 	/**
@@ -294,8 +344,8 @@ public class DvkHandler implements AutoCloseable {
 			//GET LIST OF DVK FILES
 			File[] files = directory.listFiles(new ExtensionFilter(".dvk", true));
 			ArrayList<String> dvks = new ArrayList<>();
-			for(File file: files) {
-				dvks.add(file.getName());
+			for(int file_num = 0; file_num < files.length; file_num++) {
+				dvks.add(files[file_num].getName());
 			}
 			//CREATE SQL STATEMENT
 			String sql_path = directory.getAbsolutePath();
@@ -307,9 +357,9 @@ public class DvkHandler implements AutoCloseable {
 			sql.append(DVKS);
 			sql.append(" WHERE ");
 			sql.append(DIRECTORY);
-			sql.append(" = ?;");
+			sql.append(" = ?");
 			String[] params = {sql_path};
-			try (ResultSet rs = get_sql_set(sql.toString(), params)) {
+			try (ResultSet rs = sql_select(sql.toString(), params, false)) {
 				int sql_id;
 				File sql_file;
 				ArrayList<Integer> delete = new ArrayList<>();
@@ -324,7 +374,10 @@ public class DvkHandler implements AutoCloseable {
 							Dvk dvk = new Dvk(sql_file);
 							set_dvk(dvk, sql_id);
 						}
-						dvks.remove(dvks.indexOf(sql_path));
+						int index = dvks.indexOf(sql_path);
+						if(index != -1) {
+							dvks.remove(index);
+						}
 					}
 					else {
 						//ADD TO DELETE LIST IF FILE NO LONGER EXISTS
@@ -359,17 +412,80 @@ public class DvkHandler implements AutoCloseable {
 	}
 	
 	/**
-	 * Returns a ResultSet from a given SQLite statement.
+	 * Returns the Connection object linking to the SQLite database.
+	 * 
+	 * @return Connection object
+	 */
+	public Connection get_sql_connection() {
+		return this.connection;
+	}
+	
+	/**
+	 * Returns a ResultSet from a given SQLite SELECT statement.
 	 * 
 	 * @param statement SQL statement
-	 * @param params String array of parameters to add to the prepared SQL statement
+	 * @param parameters String array of parameters to add to the prepared SQL statement
+	 * @param limit_directories Whether to limit selection to loaded directories
 	 * @return ResultSet returned from given statement
 	 * @throws SQLException Exception triggered if SQL statement is invalid
 	 */
-	public ResultSet get_sql_set(String statement, String[] params) throws SQLException {
-		PreparedStatement psmt = this.connection.prepareStatement(statement);
-		for(int i = 0; i < params.length; i++) {
-			psmt.setString(i + 1, params[i]);
+	public ResultSet sql_select(
+			String statement,
+			String[] parameters,
+			boolean limit_directories) throws SQLException {
+		return sql_select(statement, ArrayProcessing.array_to_list(parameters), limit_directories);
+	}
+	
+	/**
+	 * Returns a ResultSet from a given SQLite SELECT statement.
+	 * 
+	 * @param statement SQL statement
+	 * @param parameters ArrayList<String> of parameters to add to the prepared SQL statement
+	 * @param limit_directories Whether to limit selection to loaded directories
+	 * @return ResultSet returned from given statement
+	 * @throws SQLException Exception triggered if SQL statement is invalid
+	 */
+	public ResultSet sql_select(
+			String statement,
+			ArrayList<String> parameters,
+			boolean limit_directories) throws SQLException {
+		ArrayList<String> params = new ArrayList<>();
+		StringBuilder sql = new StringBuilder(statement);
+		//LIMIT DIRECTORIES
+		if(limit_directories) {
+			//LIMIT TO OPENED DIRECTORIES
+			StringBuilder limit = new StringBuilder("(");
+			for(int dir_num = 0; dir_num < this.directories.length; dir_num++) {
+				if(dir_num > 0) {
+					limit.append(" OR ");
+				}
+				limit.append(DvkHandler.DIRECTORY);
+				limit.append(" LIKE ?");
+				params.add(this.directories[dir_num] + "%");
+			}
+			limit.append(") ");
+			int insert = sql.indexOf("WHERE ");
+			if(insert == -1) {
+				insert = sql.indexOf("FROM ") + 5;
+				limit.insert(0, " WHERE ");
+			}
+			else {
+				limit.append("AND ");
+			}
+			insert = sql.indexOf(" ", insert);
+			if(insert != -1) {
+				sql.insert(insert, limit);
+			}
+			else {
+				sql.append(limit);
+			}
+		}
+		sql.append(';');
+		params.addAll(parameters);
+		//CREATE PREPARED STATEMENT
+		PreparedStatement psmt = this.connection.prepareStatement(sql.toString());
+		for(int i = 0; i < params.size(); i++) {
+			psmt.setString(i + 1, params.get(i));
 		}
 		ResultSet rs = psmt.executeQuery();
 		return rs;
@@ -457,11 +573,10 @@ public class DvkHandler implements AutoCloseable {
 		sql.append(DVKS);
 		sql.append(" WHERE ");
 		sql.append(SQL_ID);
-		sql.append(" = '");
-		sql.append(sql_id);
-		sql.append("';");
-		try(Statement smt = this.connection.createStatement()) {
-			smt.execute(sql.toString());
+		sql.append(" = ?;");
+		try(PreparedStatement smt = this.connection.prepareStatement(sql.toString())) {
+			smt.setInt(1, sql_id);
+			smt.execute();
 		}
 		catch(SQLException e) {}
 	}
@@ -636,21 +751,8 @@ public class DvkHandler implements AutoCloseable {
 			char sort_type,
 			boolean group_artists,
 			boolean reverse) {
-		ArrayList<String> params = new ArrayList<>();
 		StringBuilder sql = new StringBuilder("SELECT * FROM ");
 		sql.append(DVKS);
-		//LIMIT TO OPENED DIRECTORIES
-		if(this.directories != null && this.directories.length > 0) {
-			sql.append(" WHERE ");
-			for(int i = 0; i < this.directories.length; i++) {
-				if(i > 0) {
-					sql.append(" OR ");
-				}
-				sql.append(DIRECTORY);
-				sql.append(" LIKE ?");
-				params.add(this.directories[i] + "%");
-			}
-		}
 		//ADD ORDER
 		String direction = "ASC";
 		if(reverse) {
@@ -700,23 +802,13 @@ public class DvkHandler implements AutoCloseable {
 			sql.append(" OFFSET ");
 			sql.append(start);
 		}
-		sql.append(";");
-		try (ResultSet rs = get_sql_set(sql.toString(), ArrayProcessing.list_to_array(params))) {
+		try (ResultSet rs = sql_select(sql.toString(), new String[0], true)) {
 			return get_dvks(rs);
 		}
 		catch(SQLException e) {
 			e.printStackTrace();
 			return new ArrayList<>();
 		}
-	}
-	
-	/**
-	 * Returns a list of directories from which Dvk objects have been loaded.
-	 * 
-	 * @return Loaded directories
-	 */
-	public File[] get_directories() {
-		return this.directories;
 	}
 	
 	/**
@@ -814,10 +906,13 @@ public class DvkHandler implements AutoCloseable {
 		sql.append(DvkHandler.SECONDARY_FILE);
 		sql.append(" = ?) AND (");
 		sql.append(DvkHandler.DIRECTORY);
-		sql.append(" = ?);");
-		String[] params = {name, name, parent};
+		sql.append(" = ?)");
+		ArrayList<String> params = new ArrayList<>();
+		params.add(name);
+		params.add(name);
+		params.add(parent);
 		boolean result = false;
-		try(ResultSet rs = get_sql_set(sql.toString(), params)) {
+		try(ResultSet rs = sql_select(sql.toString(), params, false)) {
 			result = rs.next();
 		}
 		catch(SQLException e) {

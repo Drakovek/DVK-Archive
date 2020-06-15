@@ -37,8 +37,7 @@ public class SameIDsGUI extends SimpleServiceGUI {
 	public void run_process() {
 		get_start_gui().get_main_pbar().set_progress(true, false, 0, 0);
 		File[] dirs = {get_start_gui().get_directory()};
-		try(DvkHandler dvk_handler = new DvkHandler(get_start_gui().get_file_prefs())) {
-			dvk_handler.read_dvks(dirs, get_start_gui());
+		try(DvkHandler dvk_handler = new DvkHandler(get_start_gui().get_file_prefs(), dirs, get_start_gui())) {
 			get_start_gui().append_console("", false);
 			get_start_gui().append_console("same_ids_console", true);
 			get_start_gui().get_main_pbar().set_progress(true, false, 0, 0);

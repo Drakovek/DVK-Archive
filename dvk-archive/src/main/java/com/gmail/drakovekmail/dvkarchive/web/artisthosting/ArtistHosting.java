@@ -56,27 +56,14 @@ public abstract class ArtistHosting implements DActionEvent {
 		sql.append(" IS NULL OR ");
 		sql.append(DvkHandler.WEB_TAGS);
 		sql.append(" COLLATE NOCASE NOT LIKE ?)");
-		ArrayList<String> params = new ArrayList<>();
-		params.add("%" + domain + "%");
-		params.add("%dvk&#58;single%");
+		String[] params = {"%" + domain + "%", "%dvk&#58;single%"};
 		//LIMIT TO OPENED DIRECTORIES
-		sql.append(" AND (");
-		File[] dirs = dvk_handler.get_directories();
-		for(int i = 0; i < dirs.length; i++) {
-			if(i > 0) {
-				sql.append(" OR ");
-			}
-			sql.append(DvkHandler.DIRECTORY);
-			sql.append(" LIKE ?");
-			params.add(dirs[i] + "%");
-		}
-		sql.append(") GROUP BY ");
+		sql.append(" GROUP BY ");
 		sql.append(DvkHandler.ARTISTS);
 		sql.append(" ORDER BY ");
 		sql.append(DvkHandler.ARTISTS);
 		sql.append(" COLLATE NOCASE ASC;");
-		try(ResultSet rs = dvk_handler.get_sql_set(sql.toString(),
-				ArrayProcessing.list_to_array(params))) {
+		try(ResultSet rs = dvk_handler.sql_select(sql.toString(), params, true)) {
 			ArrayList<Dvk> dvks = DvkHandler.get_dvks(rs);
 			for(int i = 0; i < dvks.size(); i++) {
 				dvks.get(i).set_dvk_file(dvks.get(i).get_dvk_file().getParentFile());
@@ -228,7 +215,7 @@ public abstract class ArtistHosting implements DActionEvent {
 		sql.append(DvkHandler.DVK_ID);
 		sql.append(" = ?;");
 		String[] params = {dvk_id};
-		try(ResultSet rs = dvk_handler.get_sql_set(sql.toString(), params)) {
+		try(ResultSet rs = dvk_handler.sql_select(sql.toString(), params, true)) {
 			ArrayList<Dvk> dvks = DvkHandler.get_dvks(rs);
 			if(dvks.size() > 0) {
 				Dvk dvk = dvks.get(0);
@@ -280,22 +267,11 @@ public abstract class ArtistHosting implements DActionEvent {
 				sql.append(" = ?");
 				params.add(ids.get(id_num));
 			}
-			sql.append(") AND (");
+			sql.append(")");
 		}
-		File[] dirs = dvk_handler.get_directories();
-		//LIMIT TO OPENED DIRECTORIES
-		for(int dir_num = 0; dir_num < dirs.length; dir_num++) {
-			if(dir_num > 0) {
-				sql.append(" OR ");
-			}
-			sql.append(DvkHandler.DIRECTORY);
-			sql.append(" LIKE ?");
-			params.add(dirs[dir_num] + "%");
-		}
-		sql.append(");");
 		//GET DVKS
 		ArrayList<Dvk> dvks;
-		try(ResultSet rs = dvk_handler.get_sql_set(sql.toString(), ArrayProcessing.list_to_array(params))) {
+		try(ResultSet rs = dvk_handler.sql_select(sql.toString(), params, true)) {
 			dvks = DvkHandler.get_dvks(rs);
 			return dvks;
 		}

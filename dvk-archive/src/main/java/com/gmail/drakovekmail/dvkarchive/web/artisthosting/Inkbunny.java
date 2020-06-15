@@ -321,7 +321,7 @@ public class Inkbunny extends ArtistHosting {
 				id = json.getString("submission_id");
 				page_count = Integer.parseInt(json.getString("pagecount"));
 				sql_params[0] = "INK" + id + "-%";
-				try(ResultSet rs = this.dvk_handler.get_sql_set(sql.toString(), sql_params)) {
+				try(ResultSet rs = this.dvk_handler.sql_select(sql.toString(), sql_params, true)) {
 					dvks = DvkHandler.get_dvks(rs);
 					if(dvks.size() >= page_count) {
 						//RUNS IF ID ALREADY DOWNLOADED
@@ -429,7 +429,7 @@ public class Inkbunny extends ArtistHosting {
 				contains = false;
 				id = get_page_id("inkbunny.net" + das.get(i).getNodeValue(), true);
 				sql_params[0] = id;
-				try(ResultSet rs = this.dvk_handler.get_sql_set(sql.toString(), sql_params)) {
+				try(ResultSet rs = this.dvk_handler.sql_select(sql.toString(), sql_params, true)) {
 					ArrayList<Dvk> dvks = DvkHandler.get_dvks(rs);
 					if(dvks.size() > 0) {
 						contains = true;
@@ -508,7 +508,7 @@ public class Inkbunny extends ArtistHosting {
 		sql.append(DvkHandler.DVK_ID);
 		sql.append(" NOT LIKE ?;");
 		String[] sql_params = {"INK" + sub_id + "-%", "%-J"};
-		try(ResultSet rs = this.dvk_handler.get_sql_set(sql.toString(), sql_params)) {
+		try(ResultSet rs = this.dvk_handler.sql_select(sql.toString(), sql_params, true)) {
 			ArrayList<Dvk> search_dvks = DvkHandler.get_dvks(rs);
 			if(search_dvks.size() > 0) {
 				if(search_dvks.size() < page_count) {

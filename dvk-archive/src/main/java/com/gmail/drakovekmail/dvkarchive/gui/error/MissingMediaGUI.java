@@ -35,10 +35,9 @@ public class MissingMediaGUI extends SimpleServiceGUI {
 	 */
 	@Override
 	public void run_process() {
-		try(DvkHandler dvk_handler = new DvkHandler(get_start_gui().get_file_prefs())) {
+		File[] dirs = {get_start_gui().get_directory()};
+		try(DvkHandler dvk_handler = new DvkHandler(get_start_gui().get_file_prefs(), dirs, get_start_gui())) {
 			get_start_gui().get_main_pbar().set_progress(true, false, 0, 0);
-			File[] dirs = {get_start_gui().get_directory()};
-			dvk_handler.read_dvks(dirs, get_start_gui());
 			get_start_gui().append_console("", false);
 			get_start_gui().append_console("missing_media_console", true);
 			get_start_gui().get_main_pbar().set_progress(true, false, 0, 0);

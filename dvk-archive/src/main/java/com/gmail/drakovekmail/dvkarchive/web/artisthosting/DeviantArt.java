@@ -196,7 +196,7 @@ public class DeviantArt extends ArtistHosting {
 	 * @param dvk_handler Used for checking already downloaded favorites pages
 	 * @param gallery Gallery tag to add to Dvk
 	 * @param directory Directory in which to save Dvk.
-	 * @param artist Artist to use when adding favorite tag.
+	 * @param fav_artist Artist to use when adding favorite tag
 	 * Doesn't create favorite tag if null.
 	 * @param single Whether this is a single download
 	 * @return Dvk of DeviantArt media page
@@ -206,9 +206,9 @@ public class DeviantArt extends ArtistHosting {
 			DvkHandler dvk_handler,
 			String gallery,
 			File directory,
-			String artist,
+			String fav_artist,
 			boolean single) {
-		return this.get_dvk(page_url, dvk_handler, gallery, directory, artist, 0, single, true);
+		return this.get_dvk(page_url, dvk_handler, gallery, directory, fav_artist, 0, single, true);
 	}
 	
 	/**
@@ -218,7 +218,7 @@ public class DeviantArt extends ArtistHosting {
 	 * @param dvk_handler Used for checking already downloaded favorites pages
 	 * @param gallery Gallery tag to add to Dvk
 	 * @param directory Directory in which to save Dvk.
-	 * @param artist Artist to use when adding favorite tag.
+	 * @param fav_artist Artist to use when adding favorite tag
 	 * Doesn't create favorite tag if null.
 	 * @param try_num Number of times downloading media has been attempted
 	 * @param single Whether this is a single download
@@ -230,15 +230,15 @@ public class DeviantArt extends ArtistHosting {
 			DvkHandler dvk_handler,
 			String gallery,
 			File directory,
-			String artist,
+			String fav_artist,
 			int try_num,
 			boolean single,
 			boolean save) {
 		//ADD FAVORITES IF DVK ALREADY EXISTS
 		String id = get_page_id(page_url, true);
 		Dvk dvk = null;
-		if(dvk_handler != null && artist != null) {
-			dvk = ArtistHosting.update_favorite(dvk_handler, artist, id);
+		if(dvk_handler != null && fav_artist != null) {
+			dvk = ArtistHosting.update_favorite(dvk_handler, fav_artist, id);
 			if(dvk != null) {
 				return dvk;
 			}
@@ -283,14 +283,17 @@ public class DeviantArt extends ArtistHosting {
 			//GET TEXT IF LITERATURE PAGE
 			int end;
 			String text = null;
-			xpath = "//div[contains(@class,'legacy-journal')]//script/parent::div";
+			xpath = "//div[contains(@class,'legacy-journal')]//script/parent::div|"
+					+ "//div[@class='da-editor-journal']//div[contains(@class,'da-editor')]";
 			de = this.connect.get_page().getFirstByXPath(xpath);
 			if(de != null) {
 				text = DConnect.clean_element(de.asXml(), true);
 				start = text.indexOf("<script");
 				end = text.indexOf("</script>", start);
 				end = text.indexOf('>', end) + 1;
-				text = text.substring(0, start) + text.substring(end);
+				if(start != -1 && end != -1) {
+					text = text.substring(0, start) + text.substring(end);
+				}
 				text = "<!DOCTYPE html><html>" + text + "</html>";
 			}
 			//GET VIDEO LINK
@@ -407,8 +410,8 @@ public class DeviantArt extends ArtistHosting {
 			if(single) {
 				tags.add("DVK:Single");
 			}
-			if(artist != null) {
-				tags.add("Favorite:" + artist);
+			if(fav_artist != null) {
+				tags.add("Favorite:" + fav_artist);
 			}
 			//SET DIRECT URL
 			String type = json.getString("type");
@@ -481,7 +484,7 @@ public class DeviantArt extends ArtistHosting {
 						throw new Exception();
 					}
 					dvk = this.get_dvk(page_url, dvk_handler, gallery, directory,
-							artist, try_num + 1, single, save);
+							fav_artist, try_num + 1, single, save);
 				}
 			}
 			if(dvk_handler != null) {
@@ -643,11 +646,17 @@ public class DeviantArt extends ArtistHosting {
 	 * @param page_url URL of DeviantArt journal page
 	 * @param dvk_handler DvkHandler to add Dvk to when finished
 	 * @param directory Directory in which to save Dvk.
+	 * @param fav_artist Artist to use when adding favorite tag
 	 * @param single Whether this is a single download
 	 * @return Dvk of DeviantArt media page
 	 */
-	public Dvk get_journal_dvk(String page_url, DvkHandler dvk_handler, File directory, boolean single) {
-		return get_journal_dvk(page_url, dvk_handler, directory, 0, single, true);
+	public Dvk get_journal_dvk(
+			String page_url,
+			DvkHandler dvk_handler,
+			File directory,
+			String fav_artist,
+			boolean single) {
+		return get_journal_dvk(page_url, dvk_handler, directory, fav_artist, 0, single, true);
 	}
 	
 	/**
@@ -656,6 +665,7 @@ public class DeviantArt extends ArtistHosting {
 	 * @param page_url URL of DeviantArt journal page
 	 * @param dvk_handler DvkHandler to add Dvk to when finished
 	 * @param directory Directory in which to save Dvk
+	 * @param fav_artist Artist to use when adding favorite tag
 	 * @param try_num Number of times downloading media has been attempted
 	 * @param single Whether this is a single download
 	 * @param save Whether to save Dvk and media
@@ -665,6 +675,7 @@ public class DeviantArt extends ArtistHosting {
 			String page_url,
 			DvkHandler dvk_handler,
 			File directory,
+			String fav_artist,
 			int try_num,
 			boolean single,
 			boolean save) {
@@ -745,6 +756,9 @@ public class DeviantArt extends ArtistHosting {
 			if(single) {
 				tags.add("DVK:Single");
 			}
+			if(fav_artist != null) {
+				tags.add("Favorite:" + fav_artist);
+			}
 			dvk.set_web_tags(ArrayProcessing.list_to_array(tags));
 			//SET SECONDARY URL
 			try {
@@ -781,7 +795,8 @@ public class DeviantArt extends ArtistHosting {
 					if(try_num > 0) {
 						throw new Exception();
 					}
-					dvk = this.get_journal_dvk(page_url, dvk_handler, directory, try_num + 1, single, save);
+					dvk = this.get_journal_dvk(
+							page_url, dvk_handler, directory, fav_artist,try_num + 1, single, save);
 				}
 			}
 			//ADD DVK TO DVK HANDLER

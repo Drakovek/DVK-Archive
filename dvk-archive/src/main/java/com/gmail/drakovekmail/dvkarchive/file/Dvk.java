@@ -20,6 +20,8 @@ import com.google.common.io.Files;
  */
 public class Dvk {
 	
+	//TODO ADD PARAMETERS FOR LOCAL IMAGES TO USE IN HTML DESCRIPTIONS AND MEDIA.
+	
 	/**
 	 * Array of Tika data types and associated extensions. 
 	 */
