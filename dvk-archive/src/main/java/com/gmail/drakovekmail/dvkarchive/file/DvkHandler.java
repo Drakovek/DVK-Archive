@@ -539,7 +539,7 @@ public class DvkHandler implements AutoCloseable {
 		sql.append(SECONDARY_FILE);
 		sql.append(") VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?);");
 		try (PreparedStatement psmt = this.connection.prepareStatement(sql.toString())) {
-			psmt.setString(1, dvk.get_id());
+			psmt.setString(1, dvk.get_dvk_id());
 			psmt.setString(2, dvk.get_title());
 			psmt.setString(3, ArrayProcessing.array_to_string(dvk.get_artists(), 0, true));
 			psmt.setString(4, dvk.get_time());
@@ -620,7 +620,7 @@ public class DvkHandler implements AutoCloseable {
 		sql.append(SQL_ID);
 		sql.append(" = ?");
 		try(PreparedStatement psmt = this.connection.prepareStatement(sql.toString())) {
-			psmt.setString(1, dvk.get_id());
+			psmt.setString(1, dvk.get_dvk_id());
 			psmt.setString(2, dvk.get_title());
 			psmt.setString(3, ArrayProcessing.array_to_string(dvk.get_artists(), 0, true));
 			psmt.setString(4, dvk.get_time());
@@ -695,7 +695,7 @@ public class DvkHandler implements AutoCloseable {
 		while(rs.next()) {
 			Dvk dvk = new Dvk();
 			dvk.set_sql_id(rs.getInt(SQL_ID));
-			dvk.set_id(rs.getString(DVK_ID));
+			dvk.set_dvk_id(rs.getString(DVK_ID));
 			dvk.set_title(rs.getString(TITLE));
 			dvk.set_artists(ArrayProcessing.string_to_array(rs.getString(ARTISTS)));
 			dvk.set_time(rs.getString(TIME));

@@ -167,7 +167,7 @@ public class TestInkbunny {
 	public void test_get_dvks() {
 		//CREATE DVK 1 TO BE FAVORITED
 		Dvk dvk1 = new Dvk();
-		dvk1.set_id("INK2110302-1");
+		dvk1.set_dvk_id("INK2110302-1");
 		dvk1.set_title("title 1");
 		dvk1.set_artist("artist");
 		dvk1.set_page_url("/page/");
@@ -178,7 +178,7 @@ public class TestInkbunny {
 		dvk1.write_dvk();
 		//CREATE DVK 2 TO BE FAVORITED
 		Dvk dvk2 = new Dvk();
-		dvk2.set_id("INK2110302-2");
+		dvk2.set_dvk_id("INK2110302-2");
 		dvk2.set_title("Title 2");
 		dvk2.set_artist("artist");
 		dvk2.set_page_url("/page/");
@@ -188,7 +188,7 @@ public class TestInkbunny {
 		dvk2.write_dvk();
 		//CREATE DVK 3 WITH FAVORITES, NOT TO BE FAVORITED
 		Dvk dvk3 = new Dvk();
-		dvk3.set_id("INK1095495-2");
+		dvk3.set_dvk_id("INK1095495-2");
 		dvk3.set_title("Title 3");
 		dvk3.set_artist("artist");
 		dvk3.set_page_url("/page/");
@@ -198,7 +198,7 @@ public class TestInkbunny {
 		dvk3.write_dvk();
 		//CREATE DVK 4, DECOY JOURNAL PAGE
 		Dvk dvk4 = new Dvk();
-		dvk4.set_id("INK1095495-J");
+		dvk4.set_dvk_id("INK1095495-J");
 		dvk4.set_title("Title 4");
 		dvk4.set_artist("artist");
 		dvk4.set_page_url("/page/");
@@ -227,7 +227,14 @@ public class TestInkbunny {
 		assertEquals(4, this.dvk_handler.get_size());
 		ArrayList<String> favorites = new ArrayList<>();
 		favorites.add("Favorite:New Artist");
-		ArrayList<Dvk> dvks = this.ink.get_dvks("2110302", this.test_dir, 2, true, favorites, false);
+		ArrayList<Dvk> dvks = new ArrayList<>();
+		try {
+			dvks = this.ink.get_dvks("INK2110302-2", this.test_dir, true, favorites, false);
+		}
+		catch(DvkException e) {
+			assertTrue(false);
+		}
+		assertNotEquals(null, dvks);
 		assertTrue(dvk2.get_media_file().exists());
 		assertTrue(dvk2.get_secondary_file().exists());
 		assertEquals(2, dvks.size());
@@ -244,14 +251,20 @@ public class TestInkbunny {
 		assertEquals("Favorite:New Artist", dvks.get(1).get_web_tags()[0]);
 		//TEST ADDING FAVORITES TAGS - FEWER PAGES
 		favorites.add("Favorite:Another");
-		dvks = this.ink.get_dvks("2110302", this.test_dir, 3, true, favorites, false);
+		try {
+			dvks = this.ink.get_dvks("INK2110302-3", this.test_dir, true, favorites, false);
+		}
+		catch(DvkException e) {
+			assertTrue(false);
+		}
+		assertNotEquals(null, dvks);
 		assertFalse(dvk2.get_media_file().exists());
 		assertFalse(dvk2.get_secondary_file().exists());
 		assertEquals(1, dvks.size());
 		dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
 		assertEquals(3, dvks.size());
 		Dvk dvk = dvks.get(0);
-		assertEquals("INK2110302-1", dvk.get_id());
+		assertEquals("INK2110302-1", dvk.get_dvk_id());
 		assertEquals("Flying magic toaster NOT required.", dvk.get_title());
 		assertEquals(1, dvk.get_artists().length);
 		assertEquals("BlueShark", dvk.get_artists()[0]);
@@ -284,11 +297,17 @@ public class TestInkbunny {
 		assertEquals("Flying magic toaster NOT required_INK2110302-1.mp4", dvk.get_media_file().getName());
 		assertEquals(null, dvk.get_secondary_file());
 		//TEST STORY
-		dvks = this.ink.get_dvks("2163805", this.test_dir, 3, false, null, true);
+		try {
+			dvks = this.ink.get_dvks("INK2163805-3", this.test_dir, false, null, true);
+		}
+		catch(DvkException e) {
+			assertTrue(false);
+		}
+		assertNotEquals(null, dvks);
 		assertEquals(1, dvks.size());
 		dvk = dvks.get(0);
 		assertEquals(4, this.dvk_handler.get_size());
-		assertEquals("INK2163805-1", dvk.get_id());
+		assertEquals("INK2163805-1", dvk.get_dvk_id());
 		assertEquals("Shrek And The Risers: Chapter 1", dvk.get_title());
 		assertEquals(1, dvk.get_artists().length);
 		assertEquals("Suneverse", dvk.get_artists()[0]);
@@ -344,12 +363,17 @@ public class TestInkbunny {
 		desc = "Our story continues in Chapter 2: Bard From Showbiz.</html>";
 		assertTrue(read.endsWith(desc));
 		//TEST MULTIPLE PAGES, THUMBNAIL
-		dvks = this.ink.get_dvks("1095495", this.test_dir, 3, false, null, true);
+		try {
+			dvks = this.ink.get_dvks("INK1095495-3", this.test_dir, false, null, true);
+		}
+		catch(DvkException e) {
+			assertTrue(false);
+		}
 		assertEquals(2, dvks.size());
 		assertEquals(5, this.dvk_handler.get_size());
 		assertFalse(dvk3.get_media_file().exists());
 		dvk = dvks.get(0);
-		assertEquals("INK1095495-1", dvk.get_id());
+		assertEquals("INK1095495-1", dvk.get_dvk_id());
 		assertEquals("Double Duty (2013) [1/2]", dvk.get_title());
 		assertEquals(1, dvk.get_artists().length);
 		assertEquals("LittleNapoleon", dvk.get_artists()[0]);
@@ -386,7 +410,7 @@ public class TestInkbunny {
 		assertEquals("Double Duty 2013 1-2_INK1095495-1.jpg", dvk.get_media_file().getName());
 		assertEquals(null, dvk.get_secondary_file());
 		dvk = dvks.get(1);
-		assertEquals("INK1095495-2", dvk.get_id());
+		assertEquals("INK1095495-2", dvk.get_dvk_id());
 		assertEquals("Double Duty (2013) [2/2]", dvk.get_title());
 		url = "https://us.ib.metapix.net/files/full/1516/1516216_LittleNapoleon"
 				+ "_1371773588.littlenapoleon_carmen-volleyball-small.jpg";
@@ -396,6 +420,11 @@ public class TestInkbunny {
 		assertEquals("Double Duty 2013 2-2_INK1095495-2.dvk", dvk.get_dvk_file().getName());
 		assertEquals("Double Duty 2013 2-2_INK1095495-2.jpg", dvk.get_media_file().getName());
 		assertEquals(null, dvk.get_secondary_file());
+		//TEST INVALID
+		try {
+			dvks = this.ink.get_dvks("jsdja-1", this.test_dir, true, null, false);
+			assertTrue(false);
+		}catch(DvkException e) {}
 	}
 	
 	/**
@@ -405,7 +434,7 @@ public class TestInkbunny {
 	public void test_get_pages_favorites() {
 		//CREATE DVK 1
 		Dvk dvk1 = new Dvk();
-		dvk1.set_id("INK406592-1");
+		dvk1.set_dvk_id("INK406592-1");
 		dvk1.set_title("Shark bird");
 		dvk1.set_artist("KyteFoxBunny");
 		String[] tags1 = {"Other", "Favorite:Tyroo", "Next"};
@@ -416,7 +445,7 @@ public class TestInkbunny {
 		dvk1.write_dvk();
 		//CREATE DVK 2
 		Dvk dvk2 = new Dvk();
-		dvk2.set_id("INK419741-1");
+		dvk2.set_dvk_id("INK419741-1");
 		dvk2.set_title("Let's Dance");
 		dvk2.set_artist("Snofu");
 		String[] tags2 = {"Thing", "Favorite:SomeoneElse"};
@@ -434,29 +463,44 @@ public class TestInkbunny {
 		File[] dirs = {this.test_dir};
 		this.dvk_handler.read_dvks(dirs);
 		assertTrue(this.ink.login("guest", ""));
-		assertEquals(0, this.ink.get_pages("544679", sub, 'f', "biobasher", true).size());
+		ArrayList<String> ids = new ArrayList<>();
+		try {
+			ids = this.ink.get_pages("544679", sub, 'f', "biobasher", true, 100);
+		}
+		catch(DvkException e) {
+			assertTrue(false);
+		}
+		assertNotEquals(null, ids);
+		assertEquals(0, ids.size());
 		//TEST GETTING FAVORITES
-		ArrayList<Dvk> dvks = this.ink.get_pages("123706", sub, 'f', "Tyroo", false, 1, null, 1);
-		assertTrue(dvks.size() > 1);
-		int index = dvks.size() - 1;
-		assertEquals("419741", dvks.get(index).get_page_url());
-		assertEquals("1", dvks.get(index).get_id());
-		assertEquals("1265360", dvks.get(index - 1).get_page_url());
-		assertEquals("1", dvks.get(index - 1).get_id());
+		try {
+			ids = this.ink.get_pages("123706", sub, 'f', "Tyroo", false, 1);
+		}
+		catch(DvkException e) {
+			assertTrue(false);
+		}
+		assertNotEquals(null, ids);
+		assertTrue(ids.size() > 1);
+		int index = ids.size() - 1;
+		assertEquals("INK419741-1", ids.get(index));
+		assertEquals("INK1265360-1", ids.get(index - 1));
 		//TEST DIDN'T MOVE
-		dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
+		ArrayList<Dvk> dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
 		assertEquals(2, dvks.size());
 		assertEquals(this.test_dir, dvks.get(0).get_dvk_file().getParentFile());
 		assertEquals(this.test_dir, dvks.get(1).get_dvk_file().getParentFile());
 		//TEST GET ALL
-		dvks = this.ink.get_pages("123706", sub, 'f', "Tyroo", true, 2, null, 1);
-		assertTrue(dvks.size() > 3);
-		for(int i = 0; i < dvks.size(); i++) {
-			assertNotEquals("406592", dvks.get(i).get_page_url());
-			assertEquals("1", dvks.get(i).get_id());
+		try {
+			ids = this.ink.get_pages("123706", sub, 'f', "Tyroo", true, 2);
 		}
-		index = dvks.size() - 1;
-		assertEquals("343043", dvks.get(index).get_page_url());
+		catch(DvkException e) {
+			assertTrue(false);
+		}
+		assertNotEquals(null, ids);
+		assertTrue(ids.size() > 3);
+		assertFalse(ids.contains("INK406592-1"));
+		index = ids.size() - 1;
+		assertEquals("INK343043-1", ids.get(index));
 	}
 	
 	/**
@@ -466,7 +510,7 @@ public class TestInkbunny {
 	public void test_get_pages() {
 		//CREATE DVK 1
 		Dvk dvk1 = new Dvk();
-		dvk1.set_id("INK1095485-1");
+		dvk1.set_dvk_id("INK1095485-1");
 		dvk1.set_title("Nightsparrow");
 		dvk1.set_artist("LittleNapoleon");
 		dvk1.set_page_url("https://inkbunny.net/s/1095485");
@@ -475,7 +519,7 @@ public class TestInkbunny {
 		dvk1.write_dvk();
 		//CREATE DVK 2
 		Dvk dvk2 = new Dvk();
-		dvk2.set_id("INK1095495-1");
+		dvk2.set_dvk_id("INK1095495-1");
 		dvk2.set_title("Double Duty");
 		dvk2.set_artist("LittleNapoleon");
 		dvk2.set_page_url("https://inkbunny.net/s/1095495");
@@ -484,7 +528,7 @@ public class TestInkbunny {
 		dvk2.write_dvk();
 		//CREATE DVK 3
 		Dvk dvk3 = new Dvk();
-		dvk3.set_id("INK1874284-1");
+		dvk3.set_dvk_id("INK1874284-1");
 		dvk3.set_title("To the West!");
 		dvk3.set_artist("LittleNapoleon");
 		String[] tags = {"Test", "Dvk:Single"};
@@ -502,29 +546,32 @@ public class TestInkbunny {
 		//TEST EMPTY SCRAPS DIRECTORY
 		File[] dirs = {this.test_dir};
 		this.dvk_handler.read_dvks(dirs);
-		ArrayList<Dvk> dvks = this.ink.get_pages("159684", sub, 's', "LittleNapoleon", true);
-		assertEquals(0, dvks.size());
-		dvks = this.ink.get_pages("159684", sub, 'm', "LittleNapoleon", false, 10, null, 1);
-		assertTrue(dvks.size() > 60);
-		int index = -1;
-		for(int i = 0; i < dvks.size(); i++) {
-			assertNotEquals("1095485", dvks.get(i).get_page_url());
-			assertNotEquals("1874284", dvks.get(i).get_page_url());
-			assertNotEquals("1095394", dvks.get(i).get_page_url());
-			if(dvks.get(i).get_page_url().equals("1095490")) {
-				assertEquals("1", dvks.get(i).get_id());
-				index = i;
-			}
+		ArrayList<String> ids = new ArrayList<>();
+		try {
+			ids = this.ink.get_pages("159684", sub, 's', "LittleNapoleon", true, 50);
 		}
-		assertNotEquals(-1, index);
-		assertEquals("1095495", dvks.get(index - 1).get_page_url());
-		assertEquals("2", dvks.get(index - 1).get_id());
-		assertEquals("1095532", dvks.get(index - 2).get_page_url());
-		assertEquals("1", dvks.get(index - 2).get_id());
-		assertEquals("1095540", dvks.get(index - 3).get_page_url());
-		assertEquals("1", dvks.get(index - 3).get_id());
+		catch(DvkException e) {
+			assertTrue(false);
+		}
+		assertNotEquals(null, ids);
+		assertEquals(0, ids.size());
+		try {
+			ids = this.ink.get_pages("159684", sub, 'm', "LittleNapoleon", false, 10);
+		}
+		catch(DvkException e) {
+			assertTrue(false);
+		}
+		assertNotEquals(null, ids);
+		assertTrue(ids.size() > 60);
+		assertFalse(ids.contains("INK1095485-1"));
+		assertFalse(ids.contains("INK1874284-1"));
+		assertFalse(ids.contains("INK1095394-1"));
+		assertTrue(ids.contains("INK1095490-1"));
+		assertTrue(ids.contains("INK1095495-2"));
+		assertTrue(ids.contains("INK1095532-1"));
+		assertTrue(ids.contains("INK1095540-1"));
 		//CHECK FILES MOVED
-		dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
+		ArrayList<Dvk> dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
 		assertEquals(3, dvks.size());
 		assertEquals("Double Duty", dvks.get(0).get_title());
 		assertEquals(this.test_dir, dvks.get(0).get_dvk_file().getParentFile());
@@ -542,23 +589,27 @@ public class TestInkbunny {
 		assertEquals("Test", dvks.get(2).get_web_tags()[0]);
 		assertEquals("Dvk:Single", dvks.get(2).get_web_tags()[1]);
 		//TEST GETTING ALL PAGES
-		dvks = this.ink.get_pages("159684", sub, 'm', "LittleNapoleon", true);
-		assertTrue(dvks.size() > 70);
-		index = dvks.size() - 1;
-		assertEquals("1095394", dvks.get(index).get_page_url());
-		assertEquals("1", dvks.get(index).get_id());
-		assertEquals("1095397", dvks.get(index - 1).get_page_url());
-		assertEquals("1", dvks.get(index - 1).get_id());
-		assertEquals("1095404", dvks.get(index - 2).get_page_url());
-		assertEquals("1", dvks.get(index - 2).get_id());
-		index = -1;
-		for(int i = 0; i < dvks.size(); i++) {
-			if(dvks.get(i).get_page_url().equals("1095400")) {
-				assertEquals("2", dvks.get(i).get_id());
-				index = i;
-			}
+		try {
+			ids = this.ink.get_pages("159684", sub, 'm', "LittleNapoleon", true, 100);
 		}
-		assertNotEquals(-1, index);
+		catch(DvkException e) {
+			assertTrue(false);
+		}
+		assertNotEquals(null, ids);
+		assertTrue(ids.size() > 70);
+		int index = ids.size() - 1;
+		assertEquals("INK1095394-1", ids.get(index));
+		assertEquals("INK1095397-1", ids.get(index - 1));
+		assertEquals("INK1095404-1", ids.get(index - 2));
+		assertTrue(ids.contains("INK1095400-2"));
+		//TEST INVALID
+		try {
+			ids = this.ink.get_pages("ksjdkfksfk", this.test_dir, 'm', null, true, 50);
+			assertEquals(0, ids.size());
+		}
+		catch(DvkException e) {
+			assertTrue(false);
+		}
 	}
 	
 	/**
@@ -568,7 +619,7 @@ public class TestInkbunny {
 	public void test_get_journal_pages() {
 		//CREATE DVK1
 		Dvk dvk1 = new Dvk();
-		dvk1.set_id("INK386752-J");
+		dvk1.set_dvk_id("INK386752-J");
 		dvk1.set_title("Streaming");
 		dvk1.set_artist("SonicSpirit");
 		String[] tags = {"blah", "Dvk:Single", "other"};
@@ -584,13 +635,20 @@ public class TestInkbunny {
 		//CHECK SKIPS SINGLE
 		File[] dirs = {this.test_dir};
 		this.dvk_handler.read_dvks(dirs);
-		ArrayList<String> ids = this.ink.get_journal_pages("SonicSpirit", sub, false, 1);
+		ArrayList<String> ids = new ArrayList<>();
+		try {
+			ids = this.ink.get_journal_pages("SonicSpirit", sub, false);
+		}
+		catch(DvkException e) {
+			assertTrue(false);
+		}
+		assertNotEquals(null, ids);
 		assertTrue(ids.size() > 25);
-		assertFalse(ids.contains("386752"));
-		assertTrue(ids.contains("389024"));
-		assertTrue(ids.contains("377566"));
-		assertTrue(ids.contains("125294"));
-		assertEquals("4165", ids.get(ids.size() - 1));
+		assertFalse(ids.contains("INK386752-J"));
+		assertTrue(ids.contains("INK389024-J"));
+		assertTrue(ids.contains("INK377566-J"));
+		assertTrue(ids.contains("INK125294-J"));
+		assertEquals("INK4165-J", ids.get(ids.size() - 1));
 		//CHECK SINGLE DVK MOVED
 		ArrayList<Dvk> dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
 		assertEquals(1, dvks.size());
@@ -599,7 +657,7 @@ public class TestInkbunny {
 		assertTrue(dvks.get(0).get_dvk_file().exists());
 		//CREATE DVK2
 		Dvk dvk2 = new Dvk();
-		dvk2.set_id("INK389024-J");
+		dvk2.set_dvk_id("INK389024-J");
 		dvk2.set_title("Doop");
 		dvk2.set_artist("SonicSpirit");
 		dvk2.set_page_url("https://inkbunny.net/j/389024-SonicSpirit-doop-doop-it-doesnt-matter-update");
@@ -607,14 +665,37 @@ public class TestInkbunny {
 		dvk2.set_media_file("doop.dvk");
 		dvk2.write_dvk();
 		assertTrue(dvk2.get_dvk_file().exists());
-		//CHECKS STOPS ON JOURNAL GALLERY PAGE
 		this.dvk_handler.read_dvks(dirs);
-		ids = this.ink.get_journal_pages("SonicSpirit", sub, false, 1);
+		assertEquals(2, this.dvk_handler.get_size());
+		//CHECKS STOPS ON JOURNAL GALLERY PAGE
+		try {
+			ids = this.ink.get_journal_pages("SonicSpirit", sub, false);
+		}
+		catch(DvkException e) {
+			assertTrue(false);
+		}
+		assertNotEquals(null, ids);
 		assertTrue(ids.size() > 1);
-		assertFalse(ids.contains("389024"));
-		assertFalse(ids.contains("386752"));
-		assertFalse(ids.contains("4165"));
-		assertTrue(ids.contains("388107"));
+		assertFalse(ids.contains("INK389024-J"));
+		assertFalse(ids.contains("INK386752-J"));
+		assertFalse(ids.contains("INK4165-J"));
+		assertTrue(ids.contains("INK388107-J"));
+		//CHECK EMPTY PAGE
+		try {
+			ids = this.ink.get_journal_pages("Proxer", sub, false);
+			assertEquals(0, ids.size());
+		}
+		catch(DvkException e) {
+			assertTrue(false);
+		}
+		//CHECK INVALLID
+		try {
+			ids = this.ink.get_journal_pages("jkq0a2i3jc", this.test_dir, false);
+			assertEquals(0, ids.size());
+		}
+		catch(DvkException e) {
+			assertTrue(false);
+		}
 	}
 	
 	/**
@@ -625,11 +706,23 @@ public class TestInkbunny {
 		File[] dirs = {this.test_dir};
 		this.dvk_handler.read_dvks(dirs);
 		//TEST INVALID
-		Dvk dvk = this.ink.get_journal_dvk("nwD135ajkds", this.test_dir, true, true);
-		assertEquals(null, dvk.get_title());
+		Dvk dvk = new Dvk();
+		try {
+			dvk = this.ink.get_journal_dvk("nwD135ajkds", this.test_dir, true, true);
+			assertTrue(false);
+		}
+		catch(DvkException e) {
+			assertTrue(true);
+		}
 		//TEST GETTING JOURNAL PAGE
-		dvk = this.ink.get_journal_dvk("387688", this.test_dir, true, true);
-		assertEquals("INK387688-J", dvk.get_id());
+		try {
+			dvk = this.ink.get_journal_dvk("INK387688-J", this.test_dir, true, true);
+		}
+		catch(DvkException e) {
+			assertTrue(false);
+		}
+		assertNotEquals(null, dvk);
+		assertEquals("INK387688-J", dvk.get_dvk_id());
 		assertEquals("It's an \"It Doesn't Matter\" Week!", dvk.get_title());
 		assertEquals(1, dvk.get_artists().length);
 		assertEquals("SonicSpirit", dvk.get_artists()[0]);
@@ -662,8 +755,14 @@ public class TestInkbunny {
 		String journal = InOut.read_file(dvk.get_media_file());
 		assertEquals("<!DOCTYPE html><html>" + desc + "</html>", journal);
 		//TEST GETTING SECOND JOURNAL PAGE
-		dvk = this.ink.get_journal_dvk("382279", this.test_dir, false, true);
-		assertEquals("INK382279-J", dvk.get_id());
+		try {
+			dvk = this.ink.get_journal_dvk("INK382279-J", this.test_dir, false, true);
+		}
+		catch(DvkException e) {
+			assertTrue(false);
+		}
+		assertNotEquals(null, dvk);
+		assertEquals("INK382279-J", dvk.get_dvk_id());
 		assertEquals("“Alteration” is a Pretty Generic Name, Help Me Do Better?", dvk.get_title());
 		assertEquals(1, dvk.get_artists().length);
 		assertEquals("SonicSpirit", dvk.get_artists()[0]);

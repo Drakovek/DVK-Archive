@@ -31,6 +31,7 @@ public class DEnglish extends LanguageMap{
 		this.lang_keys.put("no", "^No");
 		this.lang_keys.put("finished", "[FINISHED]");
 		this.lang_keys.put("canceled", "[CANCELED]");
+		this.lang_keys.put("failed", "[FAILED]");
 		this.lang_keys.put("reading_dvks", "Reading DVK Files...");
 		this.lang_keys.put("sorting_dvks", "Sorting DVK Objects...");
 		this.lang_keys.put("select_all", "[SELECT_ALL]");

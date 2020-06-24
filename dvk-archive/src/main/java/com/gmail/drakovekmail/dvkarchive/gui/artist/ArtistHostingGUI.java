@@ -81,6 +81,11 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	private boolean favorites;
 	
 	/**
+	 * Whether the current downloading process has failed
+	 */
+	private boolean failed;
+	
+	/**
 	 * DVK handler for loading existing DVK files.
 	 */
 	private DvkHandler dvk_handler;
@@ -165,6 +170,7 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	 */
 	public ArtistHostingGUI(StartGUI start_gui, String name_id, String list_label, boolean simple) {
 		super(start_gui);
+		this.failed = false;
 		FilePrefs prefs = get_start_gui().get_file_prefs();
 		try {
 			this.dvk_handler = new DvkHandler(prefs, null, get_start_gui());
@@ -473,6 +479,15 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	}
 	
 	/**
+	 * Sets whether the current running process has failed.
+	 * 
+	 * @param failed Whether the current process has failed.
+	 */
+	public void set_failed(boolean failed) {
+		this.failed = failed;
+	}
+	
+	/**
 	 * Sets the main list to show the given ArrayList.
 	 * Adds additional item for selecting all items.
 	 * 
@@ -533,9 +548,10 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	private void run_get_pages(boolean check_all) {
 		print_start();
 		int[] sel = get_selected();
+		get_start_gui().get_base_gui().set_canceled(false);
 		for(int i = 0; i < sel.length; i++) {
 			get_start_gui().get_secondary_pbar().set_progress(false, true, i, sel.length);
-			if(!get_start_gui().get_base_gui().is_canceled()) {
+			if(!get_start_gui().get_base_gui().is_canceled() && !this.failed) {
 				get_pages(get_list_dvks().get(sel[i]), check_all);
 			}
 		}
@@ -548,6 +564,7 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	 */
 	private void run_download_single(String url) {
 		print_start();
+		get_start_gui().get_base_gui().set_canceled(false);
 		download_page(url);
 	}
 	
@@ -625,7 +642,7 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	
 	@Override
 	public void enable_all() {
-		if(!get_start_gui().get_base_gui().is_canceled()) {
+		if(!this.failed) {
 			this.new_btn.setEnabled(true);
 			this.all_btn.setEnabled(true);
 			this.single_btn.setEnabled(true);
@@ -662,9 +679,11 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 				start_process("refresh_captcha", true);
 				break;
 			case "login":
+				this.failed = false;
 				start_process("login", true);
 				break;
 			case "skip_login":
+				this.failed = false;
 				create_main_gui();
 				start_process("read_dvks", true);
 				break;
@@ -740,6 +759,13 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 		get_start_gui().get_secondary_pbar().set_progress(false, false, 0, 0);
 		if(get_start_gui().get_base_gui().is_canceled()) {
 			get_start_gui().append_console("canceled", true);
+			if(id.equals("read_dvks")) {
+				this.skipped = true;
+				create_initial_gui();
+			}
+		}
+		else if(this.failed) {
+			get_start_gui().append_console("failed", true);
 			this.skipped = true;
 			create_initial_gui();
 		}

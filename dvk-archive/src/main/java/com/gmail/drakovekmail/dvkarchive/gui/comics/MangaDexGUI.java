@@ -138,7 +138,7 @@ public class MangaDexGUI extends ArtistHostingGUI {
 		get_start_gui().get_main_pbar().set_progress(true, false, 0, 0);
 		File dir = dvk.get_dvk_file();
 		Dvk title = MangaDex.get_title_info(
-				this.connect, dvk.get_id());
+				this.connect, dvk.get_dvk_id());
 		get_start_gui().append_console(
 				get_start_gui().get_base_gui()
 					.get_language_string("getting_title")

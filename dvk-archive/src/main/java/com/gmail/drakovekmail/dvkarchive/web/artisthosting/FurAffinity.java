@@ -261,6 +261,7 @@ public class FurAffinity extends ArtistHosting {
 	 * @param check_login Whether to check if still logged in
 	 * @param url Page to scan. If null, scans first gallery page
 	 * @return List of FurAffinity media page IDs
+	 * @throws DvkException Throws DvkException if loading gallery page fails
 	 */
 	public ArrayList<String> get_gallery_ids(
 			String artist,
@@ -268,127 +269,126 @@ public class FurAffinity extends ArtistHosting {
 			char type,
 			DvkHandler dvk_handler,
 			boolean check_all,
-			boolean check_login,
-			String url) {
-		//GET URL
-		StringBuilder c_url = new StringBuilder();
-		String url_artist = get_url_artist(artist);
-		if(url == null) {
-			c_url.append("https://www.furaffinity.net/");
-			if(type == 's') {
-				c_url.append("scraps/");
-			}
-			else if(type == 'm') {
-				c_url.append("gallery/");
-			}
-			else if(type == 'f') {
-				c_url.append("favorites/");
-			}
-			c_url.append(url_artist);
-			c_url.append("/1/");
-		}
-		else {
-			c_url.append(url);
-		}
-		//LOAD PAGE
+			boolean check_login) throws DvkException {
+		//INITIALIZE VARIABLES
 		if(this.connect == null) {
 			initialize_connect(true);
 		}
-		String xpath = "//a[contains(@href,'/journals/" + url_artist + "')]";
-		if(this.start_gui != null && this.start_gui.get_base_gui().is_canceled()) {
-			this.connect.set_page(null);
+		String xpath;
+		String new_url;
+		List<DomAttr> das;
+		boolean check_next;
+		List<DomElement> des;
+		ArrayList<String> cur_ids;
+		ArrayList<String> return_ids = new ArrayList<>();
+		//GET URL
+		StringBuilder c_url = new StringBuilder();
+		String url_artist = get_url_artist(artist);
+		c_url.append("https://www.furaffinity.net/");
+		if(type == 's') {
+			c_url.append("scraps/");
 		}
-		else {
-			this.connect.load_page(c_url.toString(), xpath, 2, 10);
+		else if(type == 'm') {
+			c_url.append("gallery/");
 		}
-		try {
-			TimeUnit.MILLISECONDS.sleep(SLEEP);
-		} catch (InterruptedException e) {}
-		if(this.connect.get_page() == null || (check_login && !is_logged_in())) {
-			if(url == null) {
+		else if(type == 'f') {
+			c_url.append("favorites/");
+		}
+		c_url.append(url_artist);
+		c_url.append("/1/");
+		String url = c_url.toString();
+		//LOOP THROUGH PAGES
+		for(int page = 0; page < 50000; page++) {
+			//STOP IF CANCELED
+			if(this.start_gui != null && this.start_gui.get_base_gui().is_canceled()) {
 				return new ArrayList<>();
 			}
-			return null;
-		}
-		//GET PAGES
-		List<DomAttr> das;
-		xpath = "//figure//u//a[contains(@href,'/view/')]/@href";
-		das = this.connect.get_page().getByXPath(xpath);
-		boolean check_next = true;
-		//RUN THROUGH MEDIA URLS ON GALLERY PAGE, GETTING IDS
-		ArrayList<String> ids = new ArrayList<>();
-		for(int att_num = 0; att_num < das.size(); att_num++) {
-			ids.add(get_page_id("furaffinity.net/" + das.get(att_num).getNodeValue(), true));
-		}
-		ArrayList<Dvk> dvks = get_dvks_from_ids(dvk_handler, ids);
-		//REMOVE ALREADY DOWNLOADED IDS
-		int size = dvks.size();
-		for(int dvk_num = 0; dvk_num < size; dvk_num++) {
-			boolean remove = true;
-			//RUNS IF ID ALLREADY DOWNLOADED
-			Dvk dvk = dvks.get(dvk_num);
-			String[] wts = dvk.get_web_tags();
-			if (type == 'f') {
-				if(!ArrayProcessing.contains(wts, "favorite:" + artist, false)) {
-					//ADDS TO LIST IF NOT A FAVORITE OF THE GIVEN ARTIST
-					remove = false;
-				}
-				else {
-					//STOPS RUNNING IF ALREADY LISTED AS FAVORITE FOR THE GIVEN ARTIST
-					check_next = false;
-				}
-			}
-			else if (!ArrayProcessing.contains(wts, "dvk:single", false)) {
-				//STOPS RUNNING IF DOWNLOADED DVK IS NOT A SINGLE DOWNLOAD
-				check_next = false;
-			}
-			//UPDATE DVK LOCATION
-			if(type != 'f') {
-				dvk = ArtistHosting.move_dvk(dvk, directory);
-				dvk_handler.set_dvk(dvk, dvk.get_sql_id());
-			}
-			//REMOVE ID FROM LIST
-			if(remove) {
-				ids.remove(ids.indexOf(dvk.get_id()));
-			}
-		}
-		//GET NEXT PAGES
-		List<DomElement> des;
-		String new_url = null;
-		xpath = "//button[@class='button standard'][@type='submit']/parent::form";
-		des = this.connect.get_page().getByXPath(xpath);
-		for(int i = 0; i < des.size(); i++) {
-			if(des.get(i).asText().equals("Next")) {
-				new_url = "https://www.furaffinity.net" + des.get(i).getAttribute("action");
-			}
-		}
-		DomElement de;
-		if(new_url == null) {
-			xpath = "//a[@class='button-link right'][contains(@href,'/gallery/')]|"
-					+ "//a[@class='button-link right'][contains(@href,'/scraps/')]|"
-					+ "//a[contains(@class, 'button')][contains(@class, 'right')][contains(@href, '/favorites/')]";
-			de = this.connect.get_page().getFirstByXPath(xpath);
-			if(de != null) {
-				new_url = "https://www.furaffinity.net" + de.getAttribute("href");
-			}
-		}
-		//GET THE NEXT GALLERY PAGE
-		if(new_url != null && (check_all || check_next)) {
-			ArrayList<String> next = get_gallery_ids(artist, directory, type,
-					dvk_handler, check_all, check_login, new_url);
-			if(next == null) {
-				if(url == null) {
-					if(this.start_gui != null) {
-						this.start_gui.append_console("fur_affinity_failed", true);
-						this.start_gui.get_base_gui().set_canceled(true);
-					}
+			//LOAD PAGE
+			xpath = "//div[@id='main-window']//div[@id='header']//div[contains(@class, 'site-banner')]|"
+					+ "//div[contains(@class, 'block-banners')]//a[@id='fa_header']";
+			this.connect.load_page(url, xpath, 2, 10);
+			boolean failed = this.connect.get_page() == null;
+			xpath = "//a[contains(@href,'/journals/" + url_artist + "')]";
+			this.connect.wait_for_element(xpath, 10);
+			if(this.connect.get_page() == null) {
+				if(!failed) {
 					return new ArrayList<>();
 				}
-				return null;
+				throw new DvkException();
 			}
-			ids.addAll(next);
+			if(check_login && !is_logged_in()) {
+				throw new DvkException();
+			}
+			try {
+				TimeUnit.MILLISECONDS.sleep(SLEEP);
+			} catch (InterruptedException e) {}
+			//GET PAGES
+			xpath = "//figure//u//a[contains(@href,'/view/')]/@href";
+			das = this.connect.get_page().getByXPath(xpath);
+			check_next = true;
+			//RUN THROUGH MEDIA URLS ON GALLERY PAGE, GETTING IDS
+			cur_ids = new ArrayList<>();
+			for(int att_num = 0; att_num < das.size(); att_num++) {
+				cur_ids.add(get_page_id("furaffinity.net/" + das.get(att_num).getNodeValue(), true));
+			}
+			ArrayList<Dvk> dvks = get_dvks_from_ids(dvk_handler, cur_ids);
+			//REMOVE ALREADY DOWNLOADED IDS
+			int size = dvks.size();
+			for(int dvk_num = 0; dvk_num < size; dvk_num++) {
+				boolean remove = true;
+				//RUNS IF ID ALLREADY DOWNLOADED
+				Dvk dvk = dvks.get(dvk_num);
+				String[] wts = dvk.get_web_tags();
+				if (type == 'f') {
+					if(!ArrayProcessing.contains(wts, "favorite:" + artist, false)) {
+						//ADDS TO LIST IF NOT A FAVORITE OF THE GIVEN ARTIST
+						remove = false;
+					}
+					else {
+						//STOPS RUNNING IF ALREADY LISTED AS FAVORITE FOR THE GIVEN ARTIST
+						check_next = false;
+					}
+				}
+				else if (!ArrayProcessing.contains(wts, "dvk:single", false)) {
+					//STOPS RUNNING IF DOWNLOADED DVK IS NOT A SINGLE DOWNLOAD
+					check_next = false;
+				}
+				//UPDATE DVK LOCATION
+				if(type != 'f') {
+					dvk = ArtistHosting.move_dvk(dvk, directory);
+					dvk_handler.set_dvk(dvk, dvk.get_sql_id());
+				}
+				//REMOVE ID FROM LIST
+				if(remove) {
+					cur_ids.remove(cur_ids.indexOf(dvk.get_dvk_id()));
+				}
+			}
+			return_ids.addAll(cur_ids);
+			//GET NEXT URL
+			new_url = null;
+			xpath = "//button[@class='button standard'][@type='submit']/parent::form";
+			des = this.connect.get_page().getByXPath(xpath);
+			for(int i = 0; i < des.size(); i++) {
+				if(des.get(i).asText().equals("Next")) {
+					new_url = "https://www.furaffinity.net" + des.get(i).getAttribute("action");
+				}
+			}
+			DomElement de;
+			if(new_url == null) {
+				xpath = "//a[@class='button-link right'][contains(@href,'/gallery/')]|"
+						+ "//a[@class='button-link right'][contains(@href,'/scraps/')]|"
+						+ "//a[contains(@class, 'button')][contains(@class, 'right')][contains(@href, '/favorites/')]";
+				de = this.connect.get_page().getFirstByXPath(xpath);
+				if(de != null) {
+					new_url = "https://www.furaffinity.net" + de.getAttribute("href");
+				}
+			}
+			if(new_url == null || (!check_all && !check_next)) {
+				return ArrayProcessing.clean_list(return_ids);
+			}
+			url = new_url;
 		}
-		return ArrayProcessing.clean_list(ids);
+		throw new DvkException();
 	}
 	
 	/**
@@ -402,90 +402,93 @@ public class FurAffinity extends ArtistHosting {
 	 * @param check_login Whether to check if still logged in
 	 * @param page Gallery page to scan
 	 * @return List of FurAffinity media page IDs
+	 * @throws DvkException Throws DvkException if loading gallery page fails
 	 */
 	public ArrayList<String> get_journal_ids(
 			String artist,
 			File directory,
 			DvkHandler dvk_handler,
 			boolean check_all,
-			boolean check_login,
-			int page) {
-		//GET URL
+			boolean check_login) throws DvkException {
+		//INITIALIZE VARIABLES
+		String url;
+		String xpath;
+		boolean check_next;
+		List<DomElement> ds;
+		ArrayList<String> cur_ids;
+		ArrayList<String> return_ids = new ArrayList<>();
 		String url_artist = get_url_artist(artist);
-		String url = "https://www.furaffinity.net/journals/" + url_artist + 
-				"/" + Integer.toString(page) + "/";
-		//LOAD PAGE
 		if(this.connect == null) {
 			initialize_connect(true);
 		}
-		String xpath = "//a[contains(@href,'/gallery/" + url_artist + "')]";
-		if(this.start_gui != null && this.start_gui.get_base_gui().is_canceled()) {
-			this.connect.set_page(null);
-		}
-		else {
-			this.connect.load_page(url.toString(), xpath, 2, 10);
-		}
-		try {
-			TimeUnit.MILLISECONDS.sleep(SLEEP);
-		} catch (InterruptedException e) {}
-		if(this.connect.get_page() == null || (check_login && !is_logged_in())) {
-			if(page == 1) {
+		//LOOP THROUGH PAGES
+		for(int page = 1; page < 50000; page++) {
+			//STOP IF CANCELLED
+			if(this.start_gui != null && this.start_gui.get_base_gui().is_canceled()) {
 				return new ArrayList<>();
 			}
-			return null;
-		}
-		//GET PAGES
-		xpath = "//section[contains(@id,'jid')]//a[contains(@href,'/journal/')]|"
-				+ "//table[contains(@id,'jid')]//a[contains(@href,'/journal/')]";
-		List<DomElement> ds;
-		ds = this.connect.get_page().getByXPath(xpath);
-		boolean check_next = true;
-		//RUN THROUGH MEDIA URLS ON GALLERY PAGE, GETTING IDS
-		ArrayList<String> ids = new ArrayList<>();
-		for(int el_num = 0; el_num < ds.size(); el_num++) {
-			String link = ds.get(el_num).asText().toLowerCase();
-			if(link.contains("read more") || link.contains("view journal")) {
-				ids.add(get_page_id("furaffinity.net/" + ds.get(el_num).getAttribute("href"), true));
-			}	
-		}
-		ArrayList<Dvk> dvks = get_dvks_from_ids(dvk_handler, ids);
-		//REMOVE IDS THAT ARE ALREADY DOWNLOADED
-		for(int dvk_num = 0; dvk_num < dvks.size(); dvk_num++) {
-			//UPDATE DVK LOCATION AND FAVORITE IF ALREADY DOWNLOADED
-			Dvk dvk = ArtistHosting.move_dvk(dvks.get(dvk_num), directory);
-			dvk_handler.set_dvk(dvk, dvk.get_sql_id());
-			if(!ArrayProcessing.contains(dvk.get_web_tags(), "dvk:single", false)) {
-				check_next = false;
-			}
-			ids.remove(ids.indexOf(dvk.get_id()));
-		}
-		//GET NEXT PAGES
-		DomElement de;
-		xpath = "//button[@class='button standard']";
-		de = this.connect.get_page().getFirstByXPath(xpath);
-		if(de != null && !de.asText().equals("Older")) {
-			de = null;
-		}
-		if(de == null) {
-			xpath = "//a[@class='button older']";
-			de = this.connect.get_page().getFirstByXPath(xpath);
-		}
-		if(de != null && (check_all || check_next)) {
-			ArrayList<String> next = get_journal_ids(
-					artist, directory, dvk_handler, check_all, check_login, page + 1);
-			if(next == null) {
-				if(page == 1) {
-					if(this.start_gui != null) {
-						this.start_gui.append_console("fur_affinity_failed", true);
-						this.start_gui.get_base_gui().set_canceled(true);
-					}
+			//GET URL
+			url = "https://www.furaffinity.net/journals/" + url_artist + 
+					"/" + Integer.toString(page) + "/";
+			xpath = "//div[@id='main-window']//div[@id='header']//div[contains(@class, 'site-banner')]|"
+					+ "//div[contains(@class, 'block-banners')]//a[@id='fa_header']";
+			this.connect.load_page(url.toString(), xpath, 2, 10);
+			boolean failed = this.connect.get_page() == null;
+			try {
+				TimeUnit.MILLISECONDS.sleep(SLEEP);
+			} catch (InterruptedException e) {}
+			xpath = "//a[contains(@href,'/gallery/" + url_artist + "')]";
+			this.connect.wait_for_element(xpath, 10);
+			if(this.connect.get_page() == null) {
+				if(!failed) {
 					return new ArrayList<>();
 				}
-				return null;
+				throw new DvkException();
 			}
-			ids.addAll(next);
+			if(check_login && !is_logged_in()) {
+				throw new DvkException();
+			}
+			//GET PAGES
+			xpath = "//section[contains(@id,'jid')]//a[contains(@href,'/journal/')]|"
+					+ "//table[contains(@id,'jid')]//a[contains(@href,'/journal/')]";
+			ds = this.connect.get_page().getByXPath(xpath);
+			check_next = true;
+			//RUN THROUGH MEDIA URLS ON GALLERY PAGE, GETTING IDS
+			cur_ids = new ArrayList<>();
+			for(int el_num = 0; el_num < ds.size(); el_num++) {
+				String link = ds.get(el_num).asText().toLowerCase();
+				if(link.contains("read more") || link.contains("view journal")) {
+					cur_ids.add(get_page_id("furaffinity.net/" + ds.get(el_num).getAttribute("href"), true));
+				}	
+			}
+			ArrayList<Dvk> dvks = get_dvks_from_ids(dvk_handler, cur_ids);
+			//REMOVE IDS THAT ARE ALREADY DOWNLOADED
+			for(int dvk_num = 0; dvk_num < dvks.size(); dvk_num++) {
+				//UPDATE DVK LOCATION AND FAVORITE IF ALREADY DOWNLOADED
+				Dvk dvk = ArtistHosting.move_dvk(dvks.get(dvk_num), directory);
+				dvk_handler.set_dvk(dvk, dvk.get_sql_id());
+				if(!ArrayProcessing.contains(dvk.get_web_tags(), "dvk:single", false)) {
+					check_next = false;
+				}
+				cur_ids.remove(cur_ids.indexOf(dvk.get_dvk_id()));
+			}
+			return_ids.addAll(cur_ids);
+			//CHECK WHETHER TO GET NEW PAGES
+			DomElement de;
+			xpath = "//button[@class='button standard']";
+			de = this.connect.get_page().getFirstByXPath(xpath);
+			if(de != null && !de.asText().equals("Older")) {
+				de = null;
+			}
+			if(de == null) {
+				xpath = "//a[@class='button older']";
+				de = this.connect.get_page().getFirstByXPath(xpath);
+			}
+			if(de == null || (!check_all && !check_next)) {
+				return ArrayProcessing.clean_list(return_ids);
+			}
 		}
-		return ArrayProcessing.clean_list(ids);
+		throw new DvkException();
 	}
 	
 	/**
@@ -499,6 +502,7 @@ public class FurAffinity extends ArtistHosting {
 	 * @param save Whether to save Dvk and media
 	 * @param single Whether this is a single download
 	 * @return Dvk of FurAffinity media page
+	 * @throws DvkException Throws DvkException if loading page fails
 	 */
 	public Dvk get_dvk(
 			String id,
@@ -506,7 +510,7 @@ public class FurAffinity extends ArtistHosting {
 			File directory,
 			String artist,
 			boolean single,
-			boolean save) {
+			boolean save) throws DvkException {
 		//ADD FAVORITES IF DVK ALREADY EXISTS
 		Dvk dvk = null;
 		if(dvk_handler != null && artist != null) {
@@ -517,7 +521,7 @@ public class FurAffinity extends ArtistHosting {
 		}
 		//GET NEW DVK
 		dvk = new Dvk();
-		dvk.set_id(id);
+		dvk.set_dvk_id(id);
 		String url = "https://www.furaffinity.net/view/" + id.replace("FAF", "") + "/";
 		dvk.set_page_url(url);
 		//LOAD PAGE
@@ -530,7 +534,7 @@ public class FurAffinity extends ArtistHosting {
 			TimeUnit.MILLISECONDS.sleep(SLEEP);
 		} catch (InterruptedException e1) {}
 		if(this.connect.get_page() == null) {
-			return new Dvk();
+			throw new DvkException();
 		}
 		try {
 			//GET TITLE
@@ -734,10 +738,8 @@ public class FurAffinity extends ArtistHosting {
 			}
 			return dvk;
 		}
-		catch(Exception e) {
-			e.printStackTrace();
-			return new Dvk();
-		}
+		catch(Exception e) {}
+		throw new DvkException();
 	}
 	
 	/**
@@ -749,15 +751,16 @@ public class FurAffinity extends ArtistHosting {
 	 * @param save Whether to save Dvk and media
 	 * @param single Whether this is a single download
 	 * @return Dvk of FurAffinity media page
+	 * @exception DvkException Throws DvkException if loading page fails
 	 */
 	public Dvk get_journal_dvk(
 			String id,
 			DvkHandler dvk_handler,
 			File directory,
 			boolean single,
-			boolean save) {
+			boolean save) throws DvkException {
 		Dvk dvk = new Dvk();
-		dvk.set_id(id);
+		dvk.set_dvk_id(id);
 		String url = "https://www.furaffinity.net/journal/"
 				+ id.replace("FAF", "").replace("-J", "") + "/";
 		dvk.set_page_url(url);
@@ -772,7 +775,7 @@ public class FurAffinity extends ArtistHosting {
 			TimeUnit.MILLISECONDS.sleep(SLEEP);
 		} catch (InterruptedException e1) {}
 		if(this.connect.get_page() == null) {
-			return new Dvk();
+			throw new DvkException();
 		}
 		try {
 			//GET TITLE
@@ -823,13 +826,13 @@ public class FurAffinity extends ArtistHosting {
 			if(save) {
 				dvk.write_dvk();
 				if(!dvk.get_dvk_file().exists()) {
-					return new Dvk();
+					throw new DvkException();
 				}
 				InOut.write_file(dvk.get_media_file(),
 						"<!DOCTYPE html><html>" + description + "</html>");
 				if(!dvk.get_media_file().exists()) {
 					dvk.get_dvk_file().delete();
-					return new Dvk();
+					throw new DvkException();
 				}
 			}
 			//ADD DVK TO DVK_HANDLER
@@ -838,10 +841,8 @@ public class FurAffinity extends ArtistHosting {
 			}
 			return dvk;
 		}
-		catch(Exception e) {
-			e.printStackTrace();
-			return new Dvk();
-		}
+		catch(Exception e) {}
+		throw new DvkException();
 	}
 	
 	/**

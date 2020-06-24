@@ -135,18 +135,38 @@ public class DConnectSelenium implements AutoCloseable {
 	 * @param element XPath element to wait for
 	 * @param timeout How long to wait in seconds for element before timing out
 	 */
-	private void load_page(String url, String element, int timeout) {
+	public void load_page(String url, String element, int timeout) {
 		try {
 			this.driver.get(url);
+			boolean loaded = true;
 			if(element != null) {
-				WebDriverWait wait = new WebDriverWait(this.driver, timeout);
-				wait.until(ExpectedConditions
-						.presenceOfAllElementsLocatedBy(By.xpath(element)));
+				loaded = wait_for_element(element, timeout);
 			}
-			this.connect.load_from_string(this.driver.getPageSource());
+			if(loaded) {
+				this.connect.load_from_string(this.driver.getPageSource());
+			}
 		}
 		catch(Exception e) {
 			this.connect.set_page(null);
+		}
+	}
+	
+	/**
+	 * Waits for a given element to appear on the loaded page
+	 * 
+	 * @param element XPath element to wait for
+	 * @param timeout How long to wait in seconds for element before timing out
+	 * @return Whether the function succeeded in finding the given element 
+	 */
+	public boolean wait_for_element(String element, int timeout) {
+		try {
+			WebDriverWait wait = new WebDriverWait(this.driver, timeout);
+			wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(element)));
+			return true;
+		}
+		catch(Exception e) {
+			this.connect.set_page(null);
+			return false;
 		}
 	}
 	

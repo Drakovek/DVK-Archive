@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.prefs.Preferences;
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
+import com.gmail.drakovekmail.dvkarchive.file.DvkException;
 import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.compound.DButtonDialog;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.compound.DTextDialog;
@@ -134,94 +135,100 @@ public class DeviantArtGUI extends ArtistHostingGUI {
 		get_start_gui().append_console(
 				get_start_gui().get_base_gui().get_language_string("getting_artist")
 				+ " - " + dvk.get_artists()[0], false);
-		//GET MAIN GALLERY PAGES
-		ArrayList<String> main_pages = new ArrayList<>();
-		String artist = dvk.get_artists()[0];
-		if(get_main()) {
-			get_start_gui().append_console("getting_gallery", true);
-			main_pages = this.dev.get_pages(get_start_gui(), artist, dir, 'm',
-					get_dvk_handler(), check_all, 0);
-		}
-		//GET SCRAP PAGES
-		ArrayList<String> scrap_pages = new ArrayList<>();
-		if(get_scraps()) {
-			get_start_gui().append_console("getting_scraps", true);
-			scrap_pages = this.dev.get_pages(get_start_gui(), artist, dir, 's',
-					get_dvk_handler(), check_all, 0);
-		}
-		//GET MODULE PAGES
-		ArrayList<String> journal_pages = new ArrayList<>();
-		ArrayList<Dvk> mod_pages = new ArrayList<>();
-		if(get_journals()) {
-			//GET JOURNAL PAGES
-			ArrayList<Dvk> jp = new ArrayList<>();
-			get_start_gui().append_console("getting_journals", true);
-			jp = this.dev.get_module_pages(
-					get_start_gui(), artist, null, dir, 'j', get_dvk_handler(), check_all, 0);
-			for(int i = 0; i < jp.size(); i++) {
-				journal_pages.add(jp.get(i).get_page_url());
+		try {
+			//GET MAIN GALLERY PAGES
+			ArrayList<String> main_pages = new ArrayList<>();
+			String artist = dvk.get_artists()[0];
+			if(get_main()) {
+				get_start_gui().append_console("getting_gallery", true);
+				main_pages = this.dev.get_pages(get_start_gui(), artist, dir, 'm',
+						get_dvk_handler(), check_all);
 			}
-			//GET STATUS UPDATES
-			mod_pages = this.dev.get_module_pages(get_start_gui(), artist, null, dir, 's',
-					get_dvk_handler(), check_all, 0);
-			//GET POLLS
-			mod_pages.addAll(this.dev.get_module_pages(get_start_gui(), artist, null, dir, 'p',
-					get_dvk_handler(), check_all, 0));
-		}
-		//GET FAVORITES
-		ArrayList<String> favs = new ArrayList<>();
-		File fav_dir = new File(dir, "favorites");
-		if(get_favorites()) {
-			get_start_gui().append_console("getting_favorites", true);
-			if(!fav_dir.isDirectory()) {
-				fav_dir.mkdir();
+			//GET SCRAP PAGES
+			ArrayList<String> scrap_pages = new ArrayList<>();
+			if(get_scraps()) {
+				get_start_gui().append_console("getting_scraps", true);
+				scrap_pages = this.dev.get_pages(get_start_gui(), artist, dir, 's',
+						get_dvk_handler(), check_all);
 			}
-			favs = this.dev.get_pages(get_start_gui(), artist, fav_dir, 'f',
-					get_dvk_handler(), check_all, 0);
+			//GET MODULE PAGES
+			ArrayList<String> journal_pages = new ArrayList<>();
+			ArrayList<Dvk> mod_pages = new ArrayList<>();
+			if(get_journals()) {
+				//GET JOURNAL PAGES
+				ArrayList<Dvk> jp = new ArrayList<>();
+				get_start_gui().append_console("getting_journals", true);
+				jp = this.dev.get_module_pages(
+						get_start_gui(), artist, dir, 'j', get_dvk_handler(), check_all);
+				for(int i = 0; i < jp.size(); i++) {
+					journal_pages.add(jp.get(i).get_page_url());
+				}
+				//GET STATUS UPDATES
+				mod_pages = this.dev.get_module_pages(get_start_gui(), artist, dir, 's',
+						get_dvk_handler(), check_all);
+				//GET POLLS
+				mod_pages.addAll(this.dev.get_module_pages(get_start_gui(), artist, dir, 'p',
+						get_dvk_handler(), check_all));
+			}
+			//GET FAVORITES
+			ArrayList<String> favs = new ArrayList<>();
+			File fav_dir = new File(dir, "favorites");
+			if(get_favorites()) {
+				get_start_gui().append_console("getting_favorites", true);
+				if(!fav_dir.isDirectory()) {
+					fav_dir.mkdir();
+				}
+				favs = this.dev.get_pages(get_start_gui(), artist, fav_dir, 'f',
+						get_dvk_handler(), check_all);
+			}
+			//DOWNLOAD MAIN GALLERY
+			Dvk d = null;
+			String fav_artist = artist;
+			int g_size = main_pages.size();
+			int s_size = scrap_pages.size();
+			int j_size = journal_pages.size();
+			int m_size = mod_pages.size();
+			int f_size = favs.size();
+			int size = g_size + s_size + j_size + m_size + f_size;
+			get_start_gui().append_console("downloading_pages", true);
+			for(int i = g_size - 1; !get_start_gui().get_base_gui().is_canceled() && i > -1; i--) {
+				get_start_gui().get_main_pbar().set_progress(false, true, g_size - (i + 1), size);
+				d = this.download_media_page(main_pages.get(i), dir, null, "Gallery:Main", false);
+			}
+			//DOWNLOAD SCRAPS GALLERY
+			for(int i = s_size - 1; !get_start_gui().get_base_gui().is_canceled() && i > -1; i--) {
+				get_start_gui().get_main_pbar().set_progress(
+						false, true, g_size + (s_size - (i + 1)), size);
+				d = this.download_media_page(scrap_pages.get(i), dir, null, "Gallery:Main", false);
+			}
+			//DOWNLOAD JOURNAL GALLERY
+			int off = g_size + s_size;
+			for(int i = j_size - 1; !get_start_gui().get_base_gui().is_canceled() && i > -1; i--) {
+				get_start_gui().get_main_pbar().set_progress(
+						false, true, off + (j_size - (i + 1)), size);
+				d = this.download_media_page(journal_pages.get(i), dir, null, null, false);
+			}
+			//DOWNLOAD MODULE PAGES
+			off += j_size;
+			for(int i = m_size - 1; !get_start_gui().get_base_gui().is_canceled() && i > -1; i--) {
+				get_start_gui().get_main_pbar().set_progress(
+						false, true, off + (m_size - (i + 1)), size);
+				d = this.download_module_page(mod_pages.get(i), dir);
+			}
+			if(d != null) {
+				fav_artist = d.get_artists()[0];
+			}
+			//DOWNLOAD FAVORITES PAGES
+			off += m_size;
+			for(int i = f_size - 1; !get_start_gui().get_base_gui().is_canceled() && i > -1; i--) {
+				get_start_gui().get_main_pbar().set_progress(
+						false, true, off + (f_size - (i + 1)), size);
+				download_media_page(favs.get(i), fav_dir, fav_artist, null, true);
+			}
 		}
-		//DOWNLOAD MAIN GALLERY
-		Dvk d = null;
-		String fav_artist = artist;
-		int g_size = main_pages.size();
-		int s_size = scrap_pages.size();
-		int j_size = journal_pages.size();
-		int m_size = mod_pages.size();
-		int f_size = favs.size();
-		int size = g_size + s_size + j_size + m_size + f_size;
-		get_start_gui().append_console("downloading_pages", true);
-		for(int i = g_size - 1; !get_start_gui().get_base_gui().is_canceled() && i > -1; i--) {
-			get_start_gui().get_main_pbar().set_progress(false, true, g_size - (i + 1), size);
-			d = this.download_media_page(main_pages.get(i), dir, null, "Gallery:Main", false, true);
-		}
-		//DOWNLOAD SCRAPS GALLERY
-		for(int i = s_size - 1; !get_start_gui().get_base_gui().is_canceled() && i > -1; i--) {
-			get_start_gui().get_main_pbar().set_progress(
-					false, true, g_size + (s_size - (i + 1)), size);
-			d = this.download_media_page(scrap_pages.get(i), dir, null, "Gallery:Main", false, true);
-		}
-		//DOWNLOAD JOURNAL GALLERY
-		int off = g_size + s_size;
-		for(int i = j_size - 1; !get_start_gui().get_base_gui().is_canceled() && i > -1; i--) {
-			get_start_gui().get_main_pbar().set_progress(
-					false, true, off + (j_size - (i + 1)), size);
-			d = this.download_media_page(journal_pages.get(i), dir, null, null, false, true);
-		}
-		//DOWNLOAD MODULE PAGES
-		off += j_size;
-		for(int i = m_size - 1; !get_start_gui().get_base_gui().is_canceled() && i > -1; i--) {
-			get_start_gui().get_main_pbar().set_progress(
-					false, true, off + (m_size - (i + 1)), size);
-			d = this.download_module_page(mod_pages.get(i), dir);
-		}
-		if(d != null) {
-			fav_artist = d.get_artists()[0];
-		}
-		//DOWNLOAD FAVORITES PAGES
-		off += m_size;
-		for(int i = f_size - 1; !get_start_gui().get_base_gui().is_canceled() && i > -1; i--) {
-			get_start_gui().get_main_pbar().set_progress(
-					false, true, off + (f_size - (i + 1)), size);
-			download_media_page(favs.get(i), fav_dir, fav_artist, null, true, true);
+		catch(DvkException e) {
+			set_failed(true);
+			get_start_gui().append_console("deviantart_failed", true);
 		}
 		get_start_gui().append_console("", false);
 	}
@@ -236,7 +243,10 @@ public class DeviantArtGUI extends ArtistHostingGUI {
 			boolean download = !is_already_downloaded(id, false, false);
 			//DOWNLOAD PAGE
 			if(download) {
-				download_media_page(url, get_start_gui().get_directory(), null, null, true, false);
+				try {
+					download_media_page(url, get_start_gui().get_directory(), null, null, true);
+				}
+				catch(DvkException e) {}
 			}
 		}
 		else {
@@ -260,16 +270,15 @@ public class DeviantArtGUI extends ArtistHostingGUI {
 	 * Doesn't create favorite tag if null.
 	 * @param gallery Gallery tag to add to Dvk
 	 * @param single Whether this is a single download
-	 * @param cancel Whether to cancel process if download fails
 	 * @return Downloaded Dvk object
+	 * @throws DvkException Throws DvkException if downloading Dvk fails
 	 */
 	public Dvk download_media_page(
 			String url,
 			File directory,
 			String fav_artist,
 			String gallery,
-			boolean single,
-			boolean cancel) {
+			boolean single) throws DvkException {
 		String id = DeviantArt.get_page_id(url, true);
 		if(!get_start_gui().get_base_gui().is_canceled() && id.length() > 0) {
 			//CHECK WHETHER URL IS JOURNAL OR GALLERY PAGE
@@ -282,18 +291,10 @@ public class DeviantArtGUI extends ArtistHostingGUI {
 				//DOWNLOAD GALLERY PAGE
 				dvk = this.dev.get_dvk(url, get_dvk_handler(), gallery, directory, fav_artist, single);
 			}
-			//CANCEL IF DOWNLOAD FAILED
-			if(dvk == null || dvk.get_title() == null) {
-				if(cancel) {
-					get_start_gui().get_base_gui().set_canceled(true);
-				}
-				get_start_gui().append_console("deviantart_failed", true);
-				return null;
-			}
 			get_start_gui().append_console(dvk.get_artists()[0] + " - " + dvk.get_title(), false);
 			return dvk;
 		}
-		return null;
+		throw new DvkException();
 	}
 	
 	/**
@@ -303,8 +304,9 @@ public class DeviantArtGUI extends ArtistHostingGUI {
 	 * @param directory Directory in which to save media
 	 * @param gallery Gallery tag to add to Dvk
 	 * @return Downloaded Dvk object
+	 * @throws DvkException Throws DvkException if downloading Dvk fails
 	 */
-	public Dvk download_module_page(Dvk info, File directory) {
+	public Dvk download_module_page(Dvk info, File directory) throws DvkException {
 		String id = DeviantArt.get_page_id(info.get_page_url(), true);
 		if(!get_start_gui().get_base_gui().is_canceled() && id.length() > 0) {
 			//CHECK WHETHER URL IS POLL OR STATUS UPDATE PAGE
@@ -317,17 +319,12 @@ public class DeviantArtGUI extends ArtistHostingGUI {
 				//DOWNLOAD GALLERY PAGE
 				dvk = DeviantArt.get_poll_dvk(info, get_dvk_handler(), directory, true);
 			}
-			//CANCEL IF DOWNLOAD FAILED
-			if(dvk == null || dvk.get_title() == null) {
-				get_start_gui().get_base_gui().set_canceled(true);
-				get_start_gui().append_console("deviantart_failed", true);
-				return null;
-			}
 			get_start_gui().append_console(dvk.get_artists()[0] + " - " + dvk.get_title(), false);
 			return dvk;
 		}
-		return null;
+		throw new DvkException();
 	}
+
 	@Override
 	public void add() {
 		String[] messages = {"enter_deviantart"};
@@ -356,10 +353,9 @@ public class DeviantArtGUI extends ArtistHostingGUI {
 
 	@Override
 	public void directory_opened() {
+		get_start_gui().get_base_gui().set_canceled(false);
 		save_directory(get_start_gui().get_directory());
-		if(!get_start_gui().get_base_gui().is_canceled()) {
-			start_process("read_dvks", true);
-		}
+		start_process("read_dvks", true);
 	}
 
 	@Override

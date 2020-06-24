@@ -253,7 +253,7 @@ public class MangaDex {
 				}
 				dvk.set_artists(artists);
 				//SET ID
-				dvk.set_id(get_chapter_id(dvk.get_page_url()));
+				dvk.set_dvk_id(get_chapter_id(dvk.get_page_url()));
 				//APPEND TO DVK LIST
 				dvks.add(dvk);
 			}
@@ -312,7 +312,7 @@ public class MangaDex {
 		int size = pages.size();
 		boolean contains = false;
 		for(chapter = 0; !contains && chapter < chapters.size(); chapter++) {
-			String cid = chapters.get(chapter).get_id();
+			String cid = chapters.get(chapter).get_dvk_id();
 			for(int k = 0; k < size; k++) {
 				String hid = get_chapter_id(pages.get(k));
 				if(hid.length() > 0 && hid.equals(cid)) {
@@ -376,7 +376,7 @@ public class MangaDex {
 					}
 					//SET KNOWN INFO
 					Dvk dvk = new Dvk();
-					dvk.set_id("MDX" + chapters.get(c).get_id() + "-" + Integer.toString(page));
+					dvk.set_dvk_id("MDX" + chapters.get(c).get_dvk_id() + "-" + Integer.toString(page));
 					dvk.set_title(chapters.get(c).get_title() + " | Pg. " + Integer.toString(page));
 					dvk.set_artists(chapters.get(c).get_artists());
 					dvk.set_time(chapters.get(c).get_time());
@@ -385,7 +385,7 @@ public class MangaDex {
 					dvk.set_page_url(chapters.get(c).get_page_url() + "/" + Integer.toString(page));
 					//CHECK IF ALREADY DOWNLOADED
 					boolean contains = false;
-					params[0] = "%/" + chapters.get(c).get_id() + "/" + Integer.toString(page);
+					params[0] = "%/" + chapters.get(c).get_dvk_id() + "/" + Integer.toString(page);
 					try(ResultSet rs = dvk_handler.sql_select(sql.toString(), params, true)) {
 						contains = rs.next();
 					}
@@ -409,7 +409,7 @@ public class MangaDex {
 						DomAttr da;
 						da = connect.get_page().getFirstByXPath(xpath);
 						if(da == null
-								|| !da.getNodeValue().equals(chapters.get(c).get_id())) {
+								|| !da.getNodeValue().equals(chapters.get(c).get_dvk_id())) {
 							break;
 						}
 						//GET TOTAL PAGES
@@ -502,7 +502,7 @@ public class MangaDex {
 						}
 						Dvk dvk = new Dvk();
 						dvk.set_title(title.substring(0, end));
-						dvk.set_id(id);
+						dvk.set_dvk_id(id);
 						dvk.set_dvk_file(
 								search.get(i).get_dvk_file().getParentFile());
 						ids.add(id);
@@ -511,7 +511,7 @@ public class MangaDex {
 					else {
 						Dvk dvk = new Dvk();
 						dvk.set_title(dvks.get(index).get_title());
-						dvk.set_id(id);
+						dvk.set_dvk_id(id);
 						File file = search.get(i).get_dvk_file().getParentFile();
 						file = ArtistHosting.get_common_directory(
 								dvks.get(index).get_dvk_file(), file);

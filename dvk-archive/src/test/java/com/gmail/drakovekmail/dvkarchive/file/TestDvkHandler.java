@@ -93,7 +93,7 @@ public class TestDvkHandler {
 		//CREATE DVK0
 		Dvk dvk = new Dvk();
 		dvk.set_dvk_file(new File(this.f1, "dvk0.dvk"));
-		dvk.set_id("DVK0");
+		dvk.set_dvk_id("DVK0");
 		dvk.set_title("Page 1");
 		dvk.set_time_int(2020, 1, 29, 10, 39);
 		dvk.set_artist("Artist1");
@@ -102,7 +102,7 @@ public class TestDvkHandler {
 		dvk.write_dvk();
 		//CREATE DVK1
 		dvk.set_dvk_file(new File(this.sub, "dvk1.dvk"));
-		dvk.set_id("DVK1");
+		dvk.set_dvk_id("DVK1");
 		dvk.set_title("page 1.05");
 		dvk.set_time_int(2020, 1, 29, 10, 20);
 		dvk.set_artist("Artist2");
@@ -111,7 +111,7 @@ public class TestDvkHandler {
 		dvk.write_dvk();
 		//CREATE DVK2
 		dvk.set_dvk_file(new File(this.f2, "dvk2.dvk"));
-		dvk.set_id("DVK2");
+		dvk.set_dvk_id("DVK2");
 		dvk.set_title("Page 1.5");
 		dvk.set_time_int(2020, 1, 29, 8, 20);
 		dvk.set_artist("Artist1");
@@ -120,7 +120,7 @@ public class TestDvkHandler {
 		dvk.write_dvk();
 		//CREATE DVK3
 		dvk.set_dvk_file(new File(f3, "dvk3.dvk"));
-		dvk.set_id("DVK3");
+		dvk.set_dvk_id("DVK3");
 		dvk.set_title("Page 10");
 		dvk.set_time_int(2018, 1, 12, 8, 20);
 		String[] artists = {"Artist2", "Artist3"};
@@ -136,7 +136,7 @@ public class TestDvkHandler {
 		dvk.write_dvk();
 		//CREATE DVK4
 		dvk.set_dvk_file(new File(f3, "dvk4.dvk"));
-		dvk.set_id("DVK4");
+		dvk.set_dvk_id("DVK4");
 		dvk.set_title("Something");
 		dvk.set_time_int(2018, 1, 12, 8, 20);
 		dvk.set_artist("Artist1");
@@ -206,7 +206,7 @@ public class TestDvkHandler {
 		assertTrue(dvk.get_sql_id() > 0);
 		assertEquals(f3, dvk.get_dvk_file().getParentFile());
 		assertEquals("dvk3.dvk", dvk.get_dvk_file().getName());
-		assertEquals("DVK3", dvk.get_id());
+		assertEquals("DVK3", dvk.get_dvk_id());
 		assertEquals("Page 10", dvk.get_title());
 		assertEquals(2, dvk.get_artists().length);
 		assertEquals("Artist2", dvk.get_artists()[0]);
@@ -229,7 +229,7 @@ public class TestDvkHandler {
 		} catch (InterruptedException e) {}
 		//CREATE NEW DVK
 		dvk = new Dvk();
-		dvk.set_id("NEW123");
+		dvk.set_dvk_id("NEW123");
 		dvk.set_title("New Dvk");
 		dvk.set_artist("NewArtist");
 		dvk.set_page_url("/new_page/");
@@ -237,7 +237,7 @@ public class TestDvkHandler {
 		dvk.set_media_file("new_dvk.png");
 		dvk.write_dvk();
 		//MODIFY DVK
-		dvk.set_id("MOD123");
+		dvk.set_dvk_id("MOD123");
 		dvk.set_title("Mod DVK");
 		dvk.set_dvk_file(new File(f3, "dvk3.dvk"));
 		dvk.set_media_file("mod.png");
@@ -383,7 +383,7 @@ public class TestDvkHandler {
 		assertEquals(5, this.dvk_handler.get_size());
 		//ADD DVK
 		Dvk dvk = new Dvk();
-		dvk.set_id("ADD1234");
+		dvk.set_dvk_id("ADD1234");
 		dvk.set_title("New Title");
 		String[] artists = {"ArtGuy", "Other"};
 		dvk.set_artists(artists);
@@ -475,7 +475,7 @@ public class TestDvkHandler {
 	public void test_set_dvk() {
 		//INITIALIZE NEW DVK
 		Dvk dvk = new Dvk();
-		dvk.set_id("ADD1234");
+		dvk.set_dvk_id("ADD1234");
 		dvk.set_title("New Title");
 		String[] artists = {"ArtGuy", "Other"};
 		dvk.set_artists(artists);

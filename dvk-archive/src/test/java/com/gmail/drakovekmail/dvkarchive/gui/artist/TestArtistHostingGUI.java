@@ -125,7 +125,7 @@ public class TestArtistHostingGUI {
 	public void test_is_already_downloaded() {
 		//CREATE DVK1
 		Dvk dvk = new Dvk();
-		dvk.set_id("ID123-J");
+		dvk.set_dvk_id("ID123-J");
 		dvk.set_title("Title 1");
 		dvk.set_artist("Artist");
 		dvk.set_page_url("/page/");
@@ -133,12 +133,12 @@ public class TestArtistHostingGUI {
 		dvk.set_media_file("dvk1.png");
 		dvk.write_dvk();
 		//SET DVK2
-		dvk.set_id("THG123");
+		dvk.set_dvk_id("THG123");
 		dvk.set_dvk_file(new File(this.test_dir, "dvk2.dvk"));
 		dvk.set_media_file("dvk2.jpg");
 		dvk.write_dvk();
 		//SET DVK3
-		dvk.set_id("ID345");
+		dvk.set_dvk_id("ID345");
 		dvk.set_dvk_file(new File(this.test_dir, "dvk3.dvk"));
 		dvk.set_media_file("dvk3.txt");
 		dvk.write_dvk();
@@ -149,7 +149,7 @@ public class TestArtistHostingGUI {
 		assertEquals(this.test_dir, this.gui.get_start_gui().get_directory());
 		ArrayList<Dvk> dvks = this.gui.get_dvk_handler().get_dvks(0, -1, 'a', false, false);
 		assertEquals(3, dvks.size());
-		assertEquals("ID123-J", dvks.get(0).get_id());
+		assertEquals("ID123-J", dvks.get(0).get_dvk_id());
 		//CHECK ALREADY DOWNLOADED
 		assertFalse(this.gui.is_already_downloaded("THG12", false, true));
 		assertTrue(this.gui.is_already_downloaded("THG12%", true, true));

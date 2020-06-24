@@ -57,7 +57,7 @@ public class Dvk {
 	/**
 	 * ID of the Dvk
 	 */
-	private String id;
+	private String dvk_id;
 	
 	/**
 	 * Title of the Dvk
@@ -133,7 +133,7 @@ public class Dvk {
 	 */
 	public void clear_dvk() {
 		set_sql_id(0);
-		set_id(null);
+		set_dvk_id(null);
 		set_title(null);
 		set_artists(null);
 		set_time(null);
@@ -154,7 +154,7 @@ public class Dvk {
 	 */
 	public boolean can_write() {
 		if(get_dvk_file() == null
-				|| get_id() == null
+				|| get_dvk_id() == null
 				|| get_title() == null
 				|| get_artists().length == 0
 				|| get_page_url() == null
@@ -171,7 +171,7 @@ public class Dvk {
 		if(can_write()) {
 			JSONObject json = new JSONObject();
 			json.put("file_type", "dvk");
-			json.put("id", get_id());
+			json.put("id", get_dvk_id());
 			//INFO
 			JSONObject info = new JSONObject();
 			info.put("title", get_title());
@@ -250,7 +250,7 @@ public class Dvk {
 		try {
 			JSONObject json = new JSONObject(source);
 			if(json.getString("file_type").equals("dvk")) {
-				set_id(get_json_string(json, "id"));
+				set_dvk_id(get_json_string(json, "id"));
 				//INFO
 				JSONObject info = json.getJSONObject("info");
 				set_title(get_json_string(info, "title"));
@@ -353,12 +353,12 @@ public class Dvk {
 	 * 
 	 * @param id Dvk ID.
 	 */
-	public void set_id(final String id) {
+	public void set_dvk_id(final String id) {
 		if(id == null || id.length() == 0) {
-			this.id = null;
+			this.dvk_id = null;
 		}
 		else {
-			this.id = id.toUpperCase();
+			this.dvk_id = id.toUpperCase();
 		}
 	}
 	
@@ -367,8 +367,8 @@ public class Dvk {
 	 *
 	 * @return Dvk ID
 	 */
-	public String get_id() {
-		return this.id;
+	public String get_dvk_id() {
+		return this.dvk_id;
 	}
 	
 	/**
@@ -694,13 +694,13 @@ public class Dvk {
 	 * @return Dvk filename
 	 */
 	public String get_filename(boolean secondary) {
-		if(get_id() == null || get_title() == null) {
+		if(get_dvk_id() == null || get_title() == null) {
 			return new String();
 		}
 		StringBuilder filename = new StringBuilder();
 		filename.append(StringProcessing.get_filename(get_title()));
 		filename.append("_");
-		filename.append(get_id());
+		filename.append(get_dvk_id());
 		if(secondary) {
 			filename.append("_S");
 		}
@@ -724,7 +724,7 @@ public class Dvk {
 			file = get_media_file();
 			String ext = StringProcessing.get_extension(file.getName());
 			try {
-				set_media_file("xXTeMpXx" + get_id() + ext);
+				set_media_file("xXTeMpXx" + get_dvk_id() + ext);
 				if(!file.equals(get_media_file())) {
 					Files.move(file, get_media_file());
 				}
@@ -739,7 +739,7 @@ public class Dvk {
 			file = get_secondary_file();
 			String ext = StringProcessing.get_extension(file.getName());
 			try {
-				set_secondary_file("xXTeMpXx" + get_id() + ext);
+				set_secondary_file("xXTeMpXx" + get_dvk_id() + ext);
 				if(!file.equals(get_secondary_file())) {
 					Files.move(file, get_secondary_file());
 				}

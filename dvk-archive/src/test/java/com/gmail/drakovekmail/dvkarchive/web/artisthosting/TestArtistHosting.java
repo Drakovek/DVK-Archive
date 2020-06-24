@@ -66,7 +66,7 @@ public class TestArtistHosting {
 		}
 		//CREATE DVKS - ARTIST 1
 		Dvk dvk = new Dvk();
-		dvk.set_id("ID123");
+		dvk.set_dvk_id("ID123");
 		dvk.set_title("dvk1");
 		dvk.set_artist("artist1");
 		String[] tags = {"Tag1", "Thing", "DVK:Single", "Last"};
@@ -177,7 +177,7 @@ public class TestArtistHosting {
 	@Test
 	public void test_move_dvk() {
 		Dvk dvk = new Dvk();
-		dvk.set_id("id123");
+		dvk.set_dvk_id("id123");
 		dvk.set_title("Title");
 		dvk.set_artist("artist");
 		dvk.set_page_url("/page/");
@@ -235,7 +235,7 @@ public class TestArtistHosting {
 	public void test_update_favorite() {
 		//CREATE DVK
 		Dvk dvk = new Dvk();
-		dvk.set_id("ID123");
+		dvk.set_dvk_id("ID123");
 		dvk.set_title("Title!");
 		dvk.set_artist("ArtGuy");
 		dvk.set_page_url("/page/");
@@ -290,7 +290,7 @@ public class TestArtistHosting {
 	public void test_get_dvks_from_ids() {
 		//CREATE DVK 1
 		Dvk dvk = new Dvk();
-		dvk.set_id("ID1");
+		dvk.set_dvk_id("ID1");
 		dvk.set_title("Unimportant");
 		dvk.set_artist("Artist");
 		dvk.set_page_url("/page/");
@@ -298,11 +298,11 @@ public class TestArtistHosting {
 		dvk.set_media_file("dvk1.png");
 		dvk.write_dvk();
 		//CREATE DVK 2
-		dvk.set_id("ID123");
+		dvk.set_dvk_id("ID123");
 		dvk.set_dvk_file(new File(this.test_dir, "dvk2.dvk"));
 		dvk.write_dvk();
 		//CREATE DVK3
-		dvk.set_id("NEW35");
+		dvk.set_dvk_id("NEW35");
 		dvk.set_dvk_file(new File(this.test_dir, "dvk3.dvk"));
 		dvk.write_dvk();
 		//READ DVKS FROM FILE
@@ -321,12 +321,12 @@ public class TestArtistHosting {
 			ids.add("NEW35");
 			dvks = ArtistHosting.get_dvks_from_ids(dvk_handler, ids);
 			assertEquals(2, dvks.size());
-			String id = dvks.get(0).get_id();
+			String id = dvks.get(0).get_dvk_id();
 			assertNotEquals("ID1", id);
 			assertTrue(id.equals("ID123") || id.equals("NEW35"));
-			assertNotEquals("ID1", dvks.get(1).get_id());
-			assertTrue(dvks.get(1).get_id().equals("ID123") || dvks.get(1).get_id().equals("NEW35"));
-			assertNotEquals(id, dvks.get(1).get_id());
+			assertNotEquals("ID1", dvks.get(1).get_dvk_id());
+			assertTrue(dvks.get(1).get_dvk_id().equals("ID123") || dvks.get(1).get_dvk_id().equals("NEW35"));
+			assertNotEquals(id, dvks.get(1).get_dvk_id());
 		
 		}
 		catch(DvkException e) {

@@ -59,7 +59,7 @@ public class TestDvk {
 		Dvk dvk = new Dvk();
 		assertEquals(0, dvk.get_sql_id());
 		assertEquals(null, dvk.get_title());
-		assertEquals(null, dvk.get_id());
+		assertEquals(null, dvk.get_dvk_id());
 		assertEquals(null, dvk.get_title());
 		assertEquals(0, dvk.get_artists().length);
 		assertEquals("0000/00/00|00:00", dvk.get_time());
@@ -74,14 +74,14 @@ public class TestDvk {
 		Dvk save_dvk = new Dvk();
 		File dvk_file = new File(this.test_dir, "dvk.dvk");
 		save_dvk.set_dvk_file(dvk_file);
-		save_dvk.set_id("id702");
+		save_dvk.set_dvk_id("id702");
 		save_dvk.set_title("CTestTitle");
 		save_dvk.set_artist("artistName");
 		save_dvk.set_page_url("/url/");
 		save_dvk.set_media_file("media.jpg");
 		save_dvk.write_dvk();
 		dvk = new Dvk(dvk_file);
-		assertEquals("ID702", dvk.get_id());
+		assertEquals("ID702", dvk.get_dvk_id());
 		assertEquals("CTestTitle", dvk.get_title());
 		assertEquals(1, dvk.get_artists().length);
 		assertEquals("artistName", dvk.get_artists()[0]);
@@ -98,7 +98,7 @@ public class TestDvk {
 		Dvk dvk = new Dvk();
 		File user_dir = new File(System.getProperty("user.dir"));
 		dvk.set_dvk_file(new File(user_dir, "not_real.dvk"));
-		dvk.set_id("id");
+		dvk.set_dvk_id("id");
 		dvk.set_title("title");
 		dvk.set_artist("artist");
 		dvk.set_page_url("page_url");
@@ -107,9 +107,9 @@ public class TestDvk {
 		dvk.set_dvk_file(null);
 		assertFalse(dvk.can_write());
 		dvk.set_dvk_file(new File("file.dvk"));
-		dvk.set_id(null);
+		dvk.set_dvk_id(null);
 		assertFalse(dvk.can_write());
-		dvk.set_id("id123");
+		dvk.set_dvk_id("id123");
 		dvk.set_title(null);
 		assertFalse(dvk.can_write());
 		dvk.set_title("title");
@@ -132,7 +132,7 @@ public class TestDvk {
 		Dvk dvk = new Dvk();
 		File dvk_file = new File(this.test_dir, "dvk1.dvk");
 		dvk.set_dvk_file(dvk_file);
-		dvk.set_id("id1234");
+		dvk.set_dvk_id("id1234");
 		dvk.set_title("WriteTestTitle");
 		String[] artists = {"other", "Artist"};
 		dvk.set_artists(artists);
@@ -153,7 +153,7 @@ public class TestDvk {
 		//CHECK VALUES
 		String in = dvk.get_dvk_file().getAbsolutePath();
 		assertEquals(dvk_file.getAbsolutePath(), in);
-		assertEquals("ID1234", dvk.get_id());
+		assertEquals("ID1234", dvk.get_dvk_id());
 		assertEquals("WriteTestTitle", dvk.get_title());
 		assertEquals(2, dvk.get_artists().length);
 		assertEquals("Artist", dvk.get_artists()[0]);
@@ -209,7 +209,7 @@ public class TestDvk {
 		try (DConnect connect = new DConnect(false, false)) {
 			//CREATE INVALID DVK
 			Dvk dvk = new Dvk();
-			dvk.set_id("ID123");
+			dvk.set_dvk_id("ID123");
 			dvk.set_title("Title");
 			dvk.set_artist("Artist");
 			dvk.set_dvk_file(new File(this.test_dir, "dvk.dvk"));
@@ -269,18 +269,18 @@ public class TestDvk {
 	}
 	
 	/**
-	 * Tests the get_id and set_id methods.
+	 * Tests the get_dvk_id and set_dvk_id methods.
 	 */
 	@Test
 	@SuppressWarnings("static-method")
-	public void test_get_set_id() {
+	public void test_get_set_dvk_id() {
 		Dvk dvk = new Dvk();
-		dvk.set_id(null);
-		assertEquals(null, dvk.get_id());
-		dvk.set_id("");
-		assertEquals(null, dvk.get_id());
-		dvk.set_id("id1234");
-		assertEquals("ID1234", dvk.get_id());	
+		dvk.set_dvk_id(null);
+		assertEquals(null, dvk.get_dvk_id());
+		dvk.set_dvk_id("");
+		assertEquals(null, dvk.get_dvk_id());
+		dvk.set_dvk_id("id1234");
+		assertEquals("ID1234", dvk.get_dvk_id());	
 	}
 	
 	/**
@@ -548,7 +548,7 @@ public class TestDvk {
 		assertEquals("", dvk.get_filename(false));
 		dvk.set_title("Title");
 		assertEquals("", dvk.get_filename(false));
-		dvk.set_id("ID123");
+		dvk.set_dvk_id("ID123");
 		dvk.set_title(null);
 		assertEquals("", dvk.get_filename(false));
 		dvk.set_title("a   B-cd!");
@@ -567,7 +567,7 @@ public class TestDvk {
 		//CREATE DVK
 		File file = new File(this.test_dir, "dvk.dvk");
 		Dvk dvk = new Dvk();
-		dvk.set_id("ID1234");
+		dvk.set_dvk_id("ID1234");
 		dvk.set_title("Title");
 		dvk.set_artist("Artist");
 		dvk.set_page_url("/page/");
@@ -602,7 +602,7 @@ public class TestDvk {
 		//CREATE DVK
 		File file = new File(this.test_dir, "dvk.dvk");
 		Dvk dvk = new Dvk();
-		dvk.set_id("ID123");
+		dvk.set_dvk_id("ID123");
 		dvk.set_title("Title");
 		dvk.set_artist("Artist");
 		dvk.set_page_url("/page");

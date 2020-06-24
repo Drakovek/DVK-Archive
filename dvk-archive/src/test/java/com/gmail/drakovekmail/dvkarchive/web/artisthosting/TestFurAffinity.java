@@ -23,6 +23,8 @@ import com.gmail.drakovekmail.dvkarchive.file.InOut;
  */
 public class TestFurAffinity {
 	
+	//TODO TEST INVALID ENTRIES
+	
 	/**
 	 * Directory for holding test files.
 	 */
@@ -161,7 +163,7 @@ public class TestFurAffinity {
 		//CREATE DVK 1
 		Dvk dvk = new Dvk();
 		dvk.set_dvk_file(new File(this.test_dir, "shortcut.dvk"));
-		dvk.set_id("FAF35034678");
+		dvk.set_dvk_id("FAF35034678");
 		dvk.set_title("Down the Shortcut");
 		dvk.set_artist("Mr_Sparta");
 		String[] tags = {"DVK:Single", "Favorite:Whoever"};
@@ -172,7 +174,7 @@ public class TestFurAffinity {
 		dvk.write_dvk();
 		//CREATE DVK 2
 		dvk.set_dvk_file(new File(this.test_dir, "rabbit.dvk"));
-		dvk.set_id("FAF13982138");
+		dvk.set_dvk_id("FAF13982138");
 		dvk.set_title("Rabbit in the city");
 		tags[0] = null;
 		dvk.set_web_tags(tags);
@@ -190,14 +192,14 @@ public class TestFurAffinity {
 			}
 			//TEST SMALL SAMPLE
 			ArrayList<String> links = this.fur.get_gallery_ids("drakovek", sub, 'm',
-					handler, true, false, null);
+					handler, true, false);
 			assertEquals(2, links.size());
 			assertEquals("FAF32521285", links.get(1));
-			links = this.fur.get_gallery_ids("drakovek", sub, 's', handler, false, false, null);
+			links = this.fur.get_gallery_ids("drakovek", sub, 's', handler, false, false);
 			assertEquals(1, links.size());
 			assertEquals("FAF31071186", links.get(0));
 			//TEST ALREADY DOWNLOADED
-			links = this.fur.get_gallery_ids("mrsparta", sub, 'm', handler, false, false, null);
+			links = this.fur.get_gallery_ids("mrsparta", sub, 'm', handler, false, false);
 			assertTrue(links.size() > 0);
 			assertFalse(links.contains("FAF13982138"));
 			assertTrue(links.contains("FAF14019897"));
@@ -228,11 +230,30 @@ public class TestFurAffinity {
 			assertTrue(dvk.get_dvk_file().exists());
 			//TEST LOGIN
 			if(!this.fur.is_logged_in()) { 
-				links = this.fur.get_gallery_ids("mrsparta", sub, 'm', handler, false, true, null);
-				assertEquals(0, links.size());
+				try {
+					links = this.fur.get_gallery_ids("mrsparta", sub, 'm', handler, false, true);
+					assertTrue(false);
+				}
+				catch(DvkException f) {
+					assertTrue(true);
+				}
 			}
+			//TEST DISABLED
+			links = this.fur.get_gallery_ids("StilettoPink", sub, 'm', handler, false, false);
+			assertEquals(0, links.size());
+			links = this.fur.get_gallery_ids("StilettoPink", sub, 'f', handler, false, true);
+			assertEquals(0, links.size());
+			links = this.fur.get_gallery_ids("StilettoPink", sub, 's', handler, false, true);
+			assertEquals(0, links.size());
+			//TEST INVALID
+			try {
+				links = this.fur.get_gallery_ids("ajkse3n;sk", sub, 'n', handler, false, false);
+				assertTrue(false);
+			}
+			catch(DvkException f) {}
 		}
 		catch(DvkException e) {
+			e.printStackTrace();
 			assertTrue(false);
 		}
 	}
@@ -245,7 +266,7 @@ public class TestFurAffinity {
 		//DVK 1 - STOPS SCANNING DUE TO FAVORITES TAG
 		Dvk dvk = new Dvk();
 		dvk.set_dvk_file(new File(this.test_dir, "assistance.dvk"));
-		dvk.set_id("FAF33314829");
+		dvk.set_dvk_id("FAF33314829");
 		dvk.set_title("No Assistance Required");
 		dvk.set_artist("Kainik");
 		String[] tags = {"favorite:Thundergonian", "DVK:Single", "blah"};
@@ -257,7 +278,7 @@ public class TestFurAffinity {
 		//DVK 2 - KEEPS SCANNING DUE TO LACK OF FAVORITES TAG
 		dvk = new Dvk();
 		dvk.set_dvk_file(new File(this.test_dir, "crepes.dvk"));
-		dvk.set_id("FAF35881631");
+		dvk.set_dvk_id("FAF35881631");
 		dvk.set_title("Crepes");
 		dvk.set_artist("Nyhgault");
 		tags = new String[3];
@@ -279,7 +300,7 @@ public class TestFurAffinity {
 			}
 			//TEST ALREADY DOWNLOADED
 			ArrayList<String> links;
-			links = this.fur.get_gallery_ids("Thundergonian", sub, 'f', handler, false, false, null);
+			links = this.fur.get_gallery_ids("Thundergonian", sub, 'f', handler, false, false);
 			assertFalse(links.contains("FAF33314829"));
 			assertTrue(links.contains("FAF35881631"));
 			assertTrue(links.contains("FAF35442825"));
@@ -322,7 +343,7 @@ public class TestFurAffinity {
 		//CREATE DVK 1
 		Dvk dvk = new Dvk();
 		dvk.set_dvk_file(new File(this.test_dir, "might.dvk"));
-		dvk.set_id("FAF8104946-J");
+		dvk.set_dvk_id("FAF8104946-J");
 		dvk.set_title("might as well");
 		dvk.set_artist("angrboda");
 		String[] tags = {"bleh", "DVK:Single"};
@@ -333,7 +354,7 @@ public class TestFurAffinity {
 		dvk.write_dvk();
 		//CREATE DVK 2
 		dvk.set_dvk_file(new File(this.test_dir, "mff.dvk"));
-		dvk.set_id("FAF4030490-J");
+		dvk.set_dvk_id("FAF4030490-J");
 		dvk.set_title("finding me at MFF");
 		tags[1] = null;
 		dvk.set_web_tags(tags);
@@ -351,11 +372,11 @@ public class TestFurAffinity {
 		try(DvkHandler handler = new DvkHandler(prefs, dirs, null)) {
 			//TEST SMALL SAMPLE
 			ArrayList<String> links = this.fur.get_journal_ids(
-					"mr_sparta", sub, handler, true, false, 1);
+					"mr_sparta", sub, handler, true, false);
 			assertTrue(links.size() > 0);
 			assertTrue(links.contains("FAF9485924-J"));
 			//TEST ALREADY DOWNLOADED
-			links = this.fur.get_journal_ids("angrboda", sub, handler, false, false, 1);
+			links = this.fur.get_journal_ids("angrboda", sub, handler, false, false);
 			assertTrue(links.size() > 47);
 			assertFalse(links.contains("FAF8104946-J"));
 			assertFalse(links.contains("FAF4030490-J"));
@@ -380,9 +401,23 @@ public class TestFurAffinity {
 			assertTrue(dvk.get_dvk_file().exists());
 			//TEST LOGIN
 			if(!this.fur.is_logged_in()) {
-				links = this.fur.get_journal_ids("mrsparta", sub, handler, false, true, 1);
-				assertEquals(0, links.size());
+				try {
+					links = this.fur.get_journal_ids("mrsparta", sub, handler, false, true);
+					assertTrue(false);
+				}
+				catch(DvkException f) {
+					assertTrue(true);
+				}
 			}
+			//TEST DISABLED
+			links = this.fur.get_journal_ids("StilettoPink", sub, handler, true, false);
+			assertEquals(0, links.size());
+			//TEST INVALID
+			try {
+				links = this.fur.get_journal_ids("kljqj;;q'wjv", sub, handler, false, false);
+				assertTrue(false);
+			}
+			catch(DvkException f) {}
 		}
 		catch(DvkException e) {
 			assertTrue(false);
@@ -423,7 +458,7 @@ public class TestFurAffinity {
 	public void test_get_dvk() {
 		//CREATE TEST DVK
 		Dvk dvk = new Dvk();
-		dvk.set_id("FAF1234567");
+		dvk.set_dvk_id("FAF1234567");
 		dvk.set_title("Test");
 		dvk.set_artist("person");
 		dvk.set_page_url("/page/");
@@ -442,7 +477,7 @@ public class TestFurAffinity {
 			assertTrue(dvk.get_dvk_file().exists());
 			//FIRST DVK
 			dvk = this.fur.get_dvk("FAF32521285", dvk_handler, this.test_dir, null, false, false);
-			assertEquals("FAF32521285", dvk.get_id());
+			assertEquals("FAF32521285", dvk.get_dvk_id());
 			assertEquals("Robin the Bobcat", dvk.get_title());
 			assertEquals(1, dvk.get_artists().length);
 			assertEquals("Drakovek", dvk.get_artists()[0]);
@@ -474,7 +509,7 @@ public class TestFurAffinity {
 			assertEquals(null, dvk.get_secondary_file());
 			//SECOND DVK
 			dvk = this.fur.get_dvk("FAF15301779", dvk_handler, this.test_dir, "ArtDude", true, true);
-			assertEquals("FAF15301779", dvk.get_id());
+			assertEquals("FAF15301779", dvk.get_dvk_id());
 			assertEquals("Affinity Ch. 1", dvk.get_title());
 			assertEquals(1, dvk.get_artists().length);
 			assertEquals("MrSparta", dvk.get_artists()[0]);
@@ -524,7 +559,7 @@ public class TestFurAffinity {
 			assertTrue(value.contains("It was always the same dream for me."));
 			//THIRD DVK
 			dvk = this.fur.get_dvk("FAF29756524", dvk_handler, this.test_dir, null, false, false);
-			assertEquals("FAF29756524", dvk.get_id());
+			assertEquals("FAF29756524", dvk.get_dvk_id());
 			value = "[Changed fanart] Are you going to eat that Peach, human?";
 			assertEquals(value, dvk.get_title());
 			assertEquals(1, dvk.get_artists().length);
@@ -567,10 +602,16 @@ public class TestFurAffinity {
 			assertEquals("Affinity Ch. 1", dvks.get(1).get_title());
 			assertEquals("Robin the Bobcat", dvks.get(2).get_title());
 			assertEquals("Test", dvks.get(3).get_title());
+			//TEST INVALID DVK
+			try {
+				dvk = this.fur.get_dvk("FAF1982012831317", dvk_handler, this.test_dir, null, false, false);
+				assertTrue(false);
+			}
+			catch(DvkException f) {}
 			if(this.fur.is_logged_in()) {
 				//MATURE DVK
 				dvk = this.fur.get_dvk("FAF13634433", null, this.test_dir, "Person", false, false);
-				assertEquals("FAF13634433", dvk.get_id());
+				assertEquals("FAF13634433", dvk.get_dvk_id());
 				assertEquals("spiritual feedback - 3", dvk.get_title());
 				assertEquals(1, dvk.get_artists().length);
 				assertEquals("angrboda", dvk.get_artists()[0]);
@@ -626,7 +667,7 @@ public class TestFurAffinity {
 		try(DvkHandler dvk_handler = new DvkHandler(prefs, dirs, null)) {
 			//FIRST DVK
 			Dvk dvk = this.fur.get_journal_dvk("FAF9485924-J", dvk_handler, this.test_dir, false, true);
-			assertEquals("FAF9485924-J", dvk.get_id());
+			assertEquals("FAF9485924-J", dvk.get_dvk_id());
 			assertEquals("Commission Information", dvk.get_title());
 			assertEquals(1, dvk.get_artists().length);
 			assertEquals("MrSparta", dvk.get_artists()[0]);
@@ -655,7 +696,7 @@ public class TestFurAffinity {
 			assertEquals("<!DOCTYPE html><html>" + value + "</html>", text);
 			//SECOND DVK
 			dvk = this.fur.get_journal_dvk("FAF4743500-J", dvk_handler, this.test_dir, true, true);
-			assertEquals("FAF4743500-J", dvk.get_id());
+			assertEquals("FAF4743500-J", dvk.get_dvk_id());
 			assertEquals("CLOSED $35 quick color pinups - 4 spots", dvk.get_title());
 			assertEquals(1, dvk.get_artists().length);
 			assertEquals("angrboda", dvk.get_artists()[0]);
@@ -699,6 +740,12 @@ public class TestFurAffinity {
 			assertTrue(dvk.get_media_file().exists());
 			text = InOut.read_file(dvk.get_media_file());
 			assertEquals("<!DOCTYPE html><html>" + value + "</html>", text);
+			//TEST INVALID
+			try {
+				dvk = this.fur.get_journal_dvk("FAF646198461984618-J", dvk_handler, this.test_dir, true, true);
+				assertTrue(false);
+			}
+			catch(DvkException f) {}
 			//TEST ADDED TO DVK_HANDLER
 			ArrayList<Dvk> dvks = dvk_handler.get_dvks(0, -1, 'a', false, false);
 			assertEquals(2, dvk_handler.get_size());

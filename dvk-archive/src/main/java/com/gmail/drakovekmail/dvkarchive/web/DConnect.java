@@ -267,19 +267,24 @@ public class DConnect implements AutoCloseable {
 			int secs = this.timeout;
 			boolean exists = false;
 			DomElement de;
-			while(!exists && secs > -1) {
-				de = get_page().getFirstByXPath(element);
-				if(de == null) {
-					secs--;
-					try {
-						TimeUnit.MILLISECONDS.sleep(1000);
-					} catch (InterruptedException e) {}
+			try {
+				while(!exists && secs > -1) {
+					de = get_page().getFirstByXPath(element);
+					if(de == null) {
+						secs--;
+						try {
+							TimeUnit.MILLISECONDS.sleep(1000);
+						} catch (InterruptedException e) {}
+					}
+					else {
+						exists = true;
+					}
 				}
-				else {
-					exists = true;
-				}
+				return exists;
 			}
-			return exists;
+			catch(Exception e) {
+				return false;
+			}
 		}
 		return true;
 	}
@@ -331,41 +336,30 @@ public class DConnect implements AutoCloseable {
 	 * @param fallback Whether to use basic_download if download fails.
 	 */
 	public void download(String url, File file, boolean fallback) {
-		UnexpectedPage u_page;
-		@SuppressWarnings("resource")
-		InputStream is = null;
-		@SuppressWarnings("resource")
-		OutputStream os = null;
+		UnexpectedPage u_page = null;
 		try {
 			u_page = this.web_client.getPage(url);
-			is = u_page.getWebResponse().getContentAsStream();
-			os = new FileOutputStream(file);
-			byte[] buffer = new byte[1024];
-			int read;
-			while((read = is.read(buffer)) != -1) {
-				os.write(buffer, 0, read);
-			}
 		}
 		catch(Exception e) {
-			if(fallback) {
-				basic_download(url, file);
+			u_page = null;
+		}
+		if(u_page != null) {
+			try (InputStream is = u_page.getWebResponse().getContentAsStream();
+					OutputStream os = new FileOutputStream(file)){
+				byte[] buffer = new byte[1024];
+				int read;
+				while((read = is.read(buffer)) != -1) {
+					os.write(buffer, 0, read);
+				}
+			}
+			catch(Exception e) {
+				if(fallback) {
+					basic_download(url, file);
+				}
 			}
 		}
-		finally {
-			try {
-				if(is != null) {
-					is.close();
-				}
-			}
-			catch(IOException f) {}
-			try {
-				if(os != null) {
-					os.close();
-				}
-			}
-			catch(IOException f) {}
-			is = null;
-			os = null;
+		else if(fallback) {
+			basic_download(url, file);
 		}
 	}
 	
@@ -377,52 +371,31 @@ public class DConnect implements AutoCloseable {
 	 * @param file Given file
 	 */
 	public static void basic_download(String url, File file) {
-		InputStream is = null;
-		ByteArrayOutputStream baos = null;
-		@SuppressWarnings("resource")
-		FileOutputStream fos = null;
 		byte[] b = null;
 		byte[] full_data = null;
 		int data = 0;
+		URLConnection connect = null;
 		try {
-			URLConnection connect = new URL(url).openConnection();
-			connect.setRequestProperty("User-Agent",
+			connect = new URL(url).openConnection();
+			connect.setRequestProperty(
+					"User-Agent",
 					"Mozilla/5.0 (X11; Linux x86_64; rv:70.0) Gecko/20100101 Firefox/70.0");
 			connect.connect();
-			is = new BufferedInputStream(connect.getInputStream());
-			baos = new ByteArrayOutputStream();
-			b = new byte[1024];
-			data = 0;
-			while(-1 != (data = is.read(b))) {
-				baos.write(b, 0, data);
-			}
-			full_data = baos.toByteArray();
-			fos = new FileOutputStream(file);
-			fos.write(full_data);
 		}
-		catch(IOException e) {}
-		finally {
-			try {
-				if(is != null) {
-					is.close();
+		catch(Exception e) {}
+		if(connect != null) {
+			try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					FileOutputStream fos = new FileOutputStream(file);
+					InputStream is = new BufferedInputStream(connect.getInputStream())) {
+				b = new byte[1024];
+				data = 0;
+				while(-1 != (data = is.read(b))) {
+					baos.write(b, 0, data);
 				}
+				full_data = baos.toByteArray();
+				fos.write(full_data);
 			}
-			catch(IOException f) {}
-			try {
-				if(baos != null) {
-					baos.close();
-				}
-			}
-			catch(IOException f) {}
-			try {
-				if(fos != null) {
-					fos.close();
-				}
-			}
-			catch(IOException f) {}
-			is = null;
-			baos = null;
-			fos = null;
+			catch(IOException e) {}
 		}
 	}
 

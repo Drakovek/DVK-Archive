@@ -52,7 +52,7 @@ public class TestErrorFinding {
 		try {
 			//CREATE DVK1
 			Dvk dvk1 = new Dvk();
-			dvk1.set_id("ID1");
+			dvk1.set_dvk_id("ID1");
 			dvk1.set_title("Dvk1");
 			dvk1.set_artist("Artist");
 			dvk1.set_page_url("/page/");
@@ -64,7 +64,7 @@ public class TestErrorFinding {
 			dvk1.get_secondary_file().createNewFile();
 			//CREATE DVK2
 			Dvk dvk2 = new Dvk();
-			dvk2.set_id("ID1");
+			dvk2.set_dvk_id("ID1");
 			dvk2.set_title("Dvk2");
 			dvk2.set_artist("Artist");
 			dvk2.set_page_url("page");
@@ -74,7 +74,7 @@ public class TestErrorFinding {
 			dvk2.get_media_file().createNewFile();
 			//CREATE DVK3
 			Dvk dvk3 = new Dvk();
-			dvk3.set_id("ID3");
+			dvk3.set_dvk_id("ID3");
 			dvk3.set_title("Dvk3");
 			dvk3.set_artist("Artist");
 			dvk3.set_page_url("page");
@@ -83,7 +83,7 @@ public class TestErrorFinding {
 			dvk3.write_dvk();
 			//CREATE DVK3
 			Dvk dvk4 = new Dvk();
-			dvk4.set_id("ID1");
+			dvk4.set_dvk_id("ID1");
 			dvk4.set_title("Dvk4");
 			dvk4.set_artist("Artist");
 			dvk4.set_page_url("page");

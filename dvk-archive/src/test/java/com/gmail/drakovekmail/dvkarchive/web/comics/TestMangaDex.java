@@ -196,7 +196,7 @@ public class TestMangaDex {
 		value = "https://mangadex.org/chapter/2140";
 		assertEquals(value, dvks.get(0).get_page_url());
 		assertEquals("2018/01/18|19:08", dvks.get(0).get_time());
-		assertEquals("2140", dvks.get(0).get_id());
+		assertEquals("2140", dvks.get(0).get_dvk_id());
 		//TITLE 1, CHAPTER 2
 		value = "JoJo's Bizarre Adventure Part 2 | Vol. 4 Ch. 39 - "
 				+ "Chasing the Red Stone to Swizerland";
@@ -204,7 +204,7 @@ public class TestMangaDex {
 		value = "https://mangadex.org/chapter/2081";
 		assertEquals(value, dvks.get(30).get_page_url());
 		assertEquals("2018/01/18|18:44", dvks.get(30).get_time());
-		assertEquals("2081", dvks.get(30).get_id());
+		assertEquals("2081", dvks.get(30).get_dvk_id());
 		//TITLE 1, CHAPTER 3
 		value = "JoJo's Bizarre Adventure Part 2 | Vol. 1 Ch. 1 "
 				+ "- Joseph Joestar of New York";
@@ -212,7 +212,7 @@ public class TestMangaDex {
 		value = "https://mangadex.org/chapter/1949";
 		assertEquals(value, dvks.get(68).get_page_url());
 		assertEquals("2018/01/18|16:44", dvks.get(68).get_time());
-		assertEquals("1949", dvks.get(68).get_id());
+		assertEquals("1949", dvks.get(68).get_dvk_id());
 		//TITLE 1, SEPARATE LANGUAGE
 		dvks = MangaDex.get_chapters(this.connect, dvk, null, "Italian", 1);
 		assertEquals(26, dvks.size());
@@ -225,7 +225,7 @@ public class TestMangaDex {
 		assertEquals("2019/07/31|16:16", dvks.get(0).get_time());
 		value = "https://mangadex.org/chapter/676740";
 		assertEquals(value, dvks.get(0).get_page_url());
-		assertEquals("676740", dvks.get(0).get_id());
+		assertEquals("676740", dvks.get(0).get_dvk_id());
 		//TITLE 1, NON-EXISTANT LANGUAGE
 		dvks = MangaDex.get_chapters(this.connect, dvk, null, "JAKJSKDJK", 1);
 		assertEquals(0, dvks.size());
@@ -244,30 +244,30 @@ public class TestMangaDex {
 			ArrayList<Dvk> cps = new ArrayList<>();
 			Dvk dvk = new Dvk();
 			dvk.set_title("Randomphilia | Ch. 75");
-			dvk.set_id("770792");
+			dvk.set_dvk_id("770792");
 			cps.add(dvk);
 			dvk = new Dvk();
 			dvk.set_title("Randomphilia | Ch. 74");
-			dvk.set_id("770791");
+			dvk.set_dvk_id("770791");
 			cps.add(dvk);
 			dvk = new Dvk();
 			dvk.set_title("Randomphilia | Ch. 73");
-			dvk.set_id("761782");
+			dvk.set_dvk_id("761782");
 			cps.add(dvk);
 			dvk = new Dvk();
 			dvk.set_title("Randomphilia | Ch. 72");
-			dvk.set_id("761781");
+			dvk.set_dvk_id("761781");
 			cps.add(dvk);
 			dvk = new Dvk();
 			dvk.set_title("Randomphilia | Ch. 71");
-			dvk.set_id("688479");
+			dvk.set_dvk_id("688479");
 			cps.add(dvk);
 			//WITH NO EXISTING FILES
 			int chapter = MangaDex.get_start_chapter(dvk_handler, cps, false);
 			assertEquals(4, chapter);
 			//CREATE DVK
 			dvk = new Dvk();
-			dvk.set_id("MDX761782-2");
+			dvk.set_dvk_id("MDX761782-2");
 			dvk.set_title("Randomphilia | Ch. 73 | Pg. 2");
 			dvk.set_page_url("https://mangadex.cc/chapter/761782/1");
 			dvk.set_artist("Artist");
@@ -281,7 +281,7 @@ public class TestMangaDex {
 			chapter = MangaDex.get_start_chapter(dvk_handler, cps, true);
 			assertEquals(4, chapter);
 			//CREATE NEW DVK
-			dvk.set_id("MDX688478-5");
+			dvk.set_dvk_id("MDX688478-5");
 			dvk.set_title("Randomphilia | Ch. 75 | Pg. 1");
 			dvk.set_page_url("https://mangadex.org/chapter/770792");
 			dvk.set_dvk_file(new File(this.test_dir, "dvk2.dvk"));
@@ -308,7 +308,7 @@ public class TestMangaDex {
 				DvkHandler handler = new DvkHandler(prefs, null, null)) {
 			//CREATE DVK
 			Dvk dvk = new Dvk();
-			dvk.set_id("MDX770792-3");
+			dvk.set_dvk_id("MDX770792-3");
 			dvk.set_title("Randomphilia | Ch. 75 | Pg. 3");
 			dvk.set_artist("Artist");
 			dvk.set_page_url("https://mangadex.org/chapter/770792/3");
@@ -318,7 +318,7 @@ public class TestMangaDex {
 			//CREATE TEST CHAPTER DVKS
 			ArrayList<Dvk> cps = new ArrayList<>();
 			dvk = new Dvk();
-			dvk.set_id("770792");
+			dvk.set_dvk_id("770792");
 			dvk.set_title("Randomphilia | Ch. 75");
 			dvk.set_artist("Biru no Fukuro");
 			String[] tags = {"Tag"};
@@ -328,12 +328,12 @@ public class TestMangaDex {
 			dvk.set_page_url("https://mangadex.org/chapter/770792");
 			cps.add(dvk);
 			dvk = new Dvk();
-			dvk.set_id("770791");
+			dvk.set_dvk_id("770791");
 			dvk.set_title("Randomphilia | Ch. 74");
 			dvk.set_page_url("https://mangadex.org/chapter/770791");
 			cps.add(dvk);
 			dvk = new Dvk();
-			dvk.set_id("761782");
+			dvk.set_dvk_id("761782");
 			dvk.set_title("Randomphilia | Ch. 73");
 			dvk.set_page_url("https://mangadex.org/chapter/761782");
 			cps.add(dvk);
@@ -346,7 +346,7 @@ public class TestMangaDex {
 			//CHECK PAGE 1
 			String value;
 			assertEquals(3, dvks.size());
-			assertEquals("MDX770792-4", dvks.get(2).get_id());
+			assertEquals("MDX770792-4", dvks.get(2).get_dvk_id());
 			value = "Randomphilia | Ch. 75 | Pg. 4";
 			assertEquals(value, dvks.get(2).get_title());
 			assertEquals(1, dvks.get(2).get_artists().length);
@@ -366,7 +366,7 @@ public class TestMangaDex {
 			file = new File(this.test_dir, value);
 			assertEquals(file, dvks.get(2).get_media_file());
 			//CHECK PAGE 2
-			assertEquals("MDX770792-1", dvks.get(0).get_id());
+			assertEquals("MDX770792-1", dvks.get(0).get_dvk_id());
 			value = "Randomphilia | Ch. 75 | Pg. 1";
 			assertEquals(value, dvks.get(0).get_title());
 			value = "https://mangadex.org/chapter/770792/1";
@@ -437,7 +437,7 @@ public class TestMangaDex {
 		}
 		//CREATE DVKS - TITLE 1
 		Dvk dvk = new Dvk();
-		dvk.set_id("ID123");
+		dvk.set_dvk_id("ID123");
 		dvk.set_title("Title 1 | Chapter 2. | Page 3");
 		dvk.set_artist("artist");
 		String[] tags = {"blah", "mangadex:2468"};
@@ -489,13 +489,13 @@ public class TestMangaDex {
 			dvks = MangaDex.get_downloaded_titles(handler);
 			assertEquals(3, dvks.size());
 			assertEquals("Title 1 ", dvks.get(0).get_title());
-			assertEquals("2468", dvks.get(0).get_id());
+			assertEquals("2468", dvks.get(0).get_dvk_id());
 			assertEquals(this.test_dir, dvks.get(0).get_dvk_file());
 			assertEquals("Title 2", dvks.get(1).get_title());
-			assertEquals("12345", dvks.get(1).get_id());
+			assertEquals("12345", dvks.get(1).get_dvk_id());
 			assertEquals(this.test_dir, dvks.get(1).get_dvk_file());
 			assertEquals("Title 3 ", dvks.get(2).get_title());
-			assertEquals("9876", dvks.get(2).get_id());
+			assertEquals("9876", dvks.get(2).get_dvk_id());
 			assertEquals(sub2, dvks.get(2).get_dvk_file());
 		}
 		catch(DvkException e) {

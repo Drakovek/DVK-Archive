@@ -57,14 +57,14 @@ public class TestReformat {
 	public void test_reformat_dvks() {
 		//CREATE DVKS FOR REFORMATTING
 		Dvk dvk1 = new Dvk();
-		dvk1.set_id("ID1");
+		dvk1.set_dvk_id("ID1");
 		dvk1.set_title("Title 1");
 		dvk1.set_artist("Artist");
 		dvk1.set_page_url("/page/");
 		dvk1.set_dvk_file(new File(this.test_dir, "dvk1.dvk"));
 		dvk1.set_media_file("dvk1.png");
 		Dvk dvk2 = new Dvk();
-		dvk2.set_id("ID2");
+		dvk2.set_dvk_id("ID2");
 		dvk2.set_title("Title 2");
 		dvk2.set_artist("Artist");
 		dvk2.set_page_url("/page/");
@@ -73,7 +73,7 @@ public class TestReformat {
 		dvk2.set_secondary_file("dvk2.txt");
 		dvk2.set_description("This is fine already.");
 		Dvk dvk3 = new Dvk();
-		dvk3.set_id("ID3");
+		dvk3.set_dvk_id("ID3");
 		dvk3.set_title("Title 3");
 		dvk3.set_artist("Artist");
 		dvk3.set_page_url("/page/");
@@ -127,14 +127,14 @@ public class TestReformat {
 	public void test_rename_files() {
 		//CREATE DVKS FOR RENAMING
 		Dvk dvk1 = new Dvk();
-		dvk1.set_id("ID1");
+		dvk1.set_dvk_id("ID1");
 		dvk1.set_title("Title 1");
 		dvk1.set_artist("Artist");
 		dvk1.set_page_url("/page/");
 		dvk1.set_dvk_file(new File(this.test_dir, "dvk1.dvk"));
 		dvk1.set_media_file("dvk1.png");
 		Dvk dvk2 = new Dvk();
-		dvk2.set_id("ID2");
+		dvk2.set_dvk_id("ID2");
 		dvk2.set_title("Title 2");
 		dvk2.set_artist("Artist");
 		dvk2.set_page_url("/page/");

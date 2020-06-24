@@ -152,7 +152,7 @@ public class Inkbunny extends ArtistHosting {
 		}
 		catch(IOException e) {}
 		catch(JSONException f) {}
-		return new JSONObject();
+		return null;
 	}
 	
 	/**
@@ -182,10 +182,10 @@ public class Inkbunny extends ArtistHosting {
 			this.sid = id;
 			return true;
 		}
-		catch(JSONException e) {
-			this.sid = new String();
-			return false;
-		}
+		catch(JSONException e) {}
+		catch(NullPointerException f) {}
+		this.sid = new String();
+		return false;
 	}
 	
 	/**
@@ -206,6 +206,7 @@ public class Inkbunny extends ArtistHosting {
 			return user_id;
 		}
 		catch(JSONException e) {}
+		catch(NullPointerException e) {}
 		return "VOID";
 	}
 	
@@ -220,169 +221,144 @@ public class Inkbunny extends ArtistHosting {
 	 * @param type Type of gallery to scan. 'm' - Main gallery, 's' - Scraps gallery, 'f' - Favorites gallery
 	 * @param fav_artist Artist to check for in favorites tags when scanning favorites gallery
 	 * @param check_all Whether to check all pages in the gallery, not just the newest
-	 * @return List of Dvks objects for submissions in a given user's Inkbunny gallery
-	 */
-	public ArrayList<Dvk> get_pages(
-			String user_id,
-			File directory,
-			char type,
-			String fav_artist,
-			boolean check_all) {
-		return this.get_pages(user_id, directory, type, fav_artist, check_all, 100, null, 1);
-	}
-	
-	/**
-	 * Returns a list of submissions in a given Inkbunny gallery.
-	 * List uses Dvk objects.
-	 * Dvk page_url contains Inkbunny submission id.
-	 * Dvk id contains number of pages in the submission.
-	 * 
-	 * @param user_id Inkbunny user ID
-	 * @param directory Directory to move DVKs if necessary
-	 * @param type Type of gallery to scan. 'm' - Main gallery, 's' - Scraps gallery, 'f' - Favorites gallery
-	 * @param fav_artist Artist to check for in favorites tags when scanning favorites gallery
-	 * @param check_all Whether to check all pages in the gallery, not just the newest
 	 * @param page_limit Number of submissions per gallery page to show
-	 * @param rid Results ID for getting next pages in results list, set to null when starting search at page 1
-	 * @param page_num Gallery page number
 	 * @return List of Dvks objects for submissions in a given user's Inkbunny gallery
+	 * @throws DvkException Throws DvkException if the program can't connect to Inkbunny.net
 	 */
-	public ArrayList<Dvk> get_pages(
+	public ArrayList<String> get_pages(
 			String user_id,
 			File directory,
 			char type,
 			String fav_artist,
 			boolean check_all,
-			int page_limit,
-			String rid,
-			int page_num) {
-		//GET JSON OBJECT
+			int page_limit) throws DvkException {
+		//INITIALIZE VARIABLES
+		int max_pages;
+		int page_count;
+		JSONObject base;
+		JSONObject json;
+		JSONArray array;
+		boolean check_next;
+		boolean remove;
+		String sub_id;
+		String rid = null;
 		List<NameValuePair> params = new ArrayList<>();
-		params.add(new BasicNameValuePair("sid", this.sid));
-		params.add(new BasicNameValuePair("page", Integer.toString(page_num)));
-		params.add(new BasicNameValuePair("submissions_per_page", Integer.toString(page_limit)));
-		if(rid == null) {
-			params.add(new BasicNameValuePair("get_rid", "yes"));
-			if(type == 'm') {
-				params.add(new BasicNameValuePair("scraps", "no"));
-				params.add(new BasicNameValuePair("user_id", user_id));
-				params.add(new BasicNameValuePair("orderby", "last_file_update_datetime"));
-			}
-			else if(type == 's') {
-				params.add(new BasicNameValuePair("scraps", "only"));
-				params.add(new BasicNameValuePair("user_id", user_id));
-				params.add(new BasicNameValuePair("orderby", "last_file_update_datetime"));
-			}
-			else {
-				params.add(new BasicNameValuePair("favs_user_id", user_id));
-				params.add(new BasicNameValuePair("orderby", "fav_datetime"));
-			}
+		ArrayList<String> return_ids = new ArrayList<>();
+		ArrayList<String> cur_ids;
+		ArrayList<Integer> page_counts;
+		ArrayList<Dvk> search_dvks;
+		params.add(new BasicNameValuePair("get_rid", "yes"));
+		if(type == 'm') {
+			params.add(new BasicNameValuePair("scraps", "no"));
+			params.add(new BasicNameValuePair("user_id", user_id));
+			params.add(new BasicNameValuePair("orderby", "last_file_update_datetime"));
+		}
+		else if(type == 's') {
+			params.add(new BasicNameValuePair("scraps", "only"));
+			params.add(new BasicNameValuePair("user_id", user_id));
+			params.add(new BasicNameValuePair("orderby", "last_file_update_datetime"));
 		}
 		else {
+			params.add(new BasicNameValuePair("favs_user_id", user_id));
+			params.add(new BasicNameValuePair("orderby", "fav_datetime"));
+		}
+		//RUN THROUGH GALLERY PAGES
+		for(int page_num = 0; page_num < 50000; page_num++) {
+			//LOAD GALLERY JASON OBJECT
+			params.add(new BasicNameValuePair("sid", this.sid));
+			params.add(new BasicNameValuePair("page", Integer.toString(page_num)));
+			params.add(new BasicNameValuePair("submissions_per_page", Integer.toString(page_limit)));
+			base = json_post("https://inkbunny.net/api_search.php", params);
+			try {
+				check_next = true;
+				TimeUnit.MILLISECONDS.sleep(SLEEP);
+				//BREAK IF CANCELLED
+				if(this.start_gui != null && this.start_gui.get_base_gui().is_canceled()) {
+					return new ArrayList<>();
+				}
+				//RETURN DVKS IF LAST PAGE
+				max_pages = base.getInt("pages_count");
+				array = base.getJSONArray("submissions");
+				if(array.length() == 0 || page_num > max_pages) {
+					return ArrayProcessing.clean_list(return_ids);
+				}
+				rid = base.getString("rid");
+				//GET SUBMISSION IDS
+				cur_ids = new ArrayList<>();
+				page_counts = new ArrayList<>();
+				for(int arr_num = 0; arr_num < array.length(); arr_num++) {
+					json = array.getJSONObject(arr_num);
+					sub_id = json.getString("submission_id");
+					page_count = Integer.parseInt(json.getString("pagecount"));
+					Dvk submission = new Dvk();
+					submission.set_page_url(sub_id);
+					submission.set_sql_id(page_count);
+					for(int num = 0; num < page_count; num++) {
+						cur_ids.add("INK" + sub_id + "-" + Integer.toString(num + 1));
+						page_counts.add(Integer.valueOf(page_count));
+					}
+				}
+				search_dvks = get_dvks_from_ids(this.dvk_handler, cur_ids);
+				//REMOVE IDS THAT ARE ALREADY DOWNLOADED
+				for(int dvk_num = 0; dvk_num < search_dvks.size(); dvk_num++) {
+					remove = true;
+					Dvk dvk = search_dvks.get(dvk_num);
+					int index = cur_ids.indexOf(search_dvks.get(dvk_num).get_dvk_id());
+					if(type == 'f') {
+						//ADDS TO LIST, ONLY IF FAVORITE OF GIVEN ARTIST
+						check_next = false;
+						if(!ArrayProcessing.contains(dvk.get_web_tags(),
+								"favorite:" + fav_artist, false)) {
+							check_next = true;
+							remove = false;
+						}
+					}
+					else {
+						//STOPS RUNNING IF NOT A SINGLE DOWNLOAD
+						if(dvk.get_dvk_id().endsWith(
+								"-" + Integer.toString(page_counts.get(index).intValue()))
+								&& !ArrayProcessing.contains(dvk.get_web_tags(),
+								"dvk:single", false)) {
+							check_next = false;
+						}
+						//UPDATE DVK HANDLER		
+						dvk = ArtistHosting.move_dvk(dvk, directory);
+						this.dvk_handler.set_dvk(dvk, dvk.get_sql_id());
+					}
+					if(remove) {
+						cur_ids.remove(index);
+						page_counts.remove(index);
+					}
+				}
+				//REMOVE ENDINGS
+				for(int id_num = 0; id_num < cur_ids.size(); id_num++) {
+					String id = cur_ids.get(id_num);
+					String ext = Integer.toString(page_counts.get(id_num).intValue());
+					return_ids.add(id.substring(0, id.indexOf('-')) + "-" + ext);
+				}
+				//CHECK NEXT
+				if(!check_all && !check_next) {
+					return ArrayProcessing.clean_list(return_ids);
+				}
+			}
+			catch (Exception e) {
+				//TEST IF STILL ONLINE
+				if(this.connect == null) {
+					initialize_connect();
+				}
+				String xpath;
+				xpath = "//div[@id='banner_clickarea']//h2[@id='banner_panel']//a[@href='https://inkbunny.net/']";
+				this.connect.load_page("https://inkbunny.net/stats.php", xpath, 1);
+				if(this.connect.get_page() != null) {
+					return new ArrayList<>();
+				}
+				throw new DvkException();
+			}
+			//SET UP PARAMS FOR NEXT LOOP
+			params = new ArrayList<>();
 			params.add(new BasicNameValuePair("rid", rid));
 		}
-		String id;
-		int page_count;
-		JSONObject json;
-		boolean contains;
-		ArrayList<Dvk> dvks;
-		ArrayList<Dvk> submissions = new ArrayList<>();
-		JSONObject base = json_post("https://inkbunny.net/api_search.php", params);
-		try {
-			TimeUnit.MILLISECONDS.sleep(SLEEP);
-		} catch (InterruptedException e) {}
-		boolean check_next = true;
-		try {
-			//BREAK IF CANCELLED
-			if(this.start_gui != null && this.start_gui.get_base_gui().is_canceled()) {
-				base.getString("non_existant_dvk_exception_thing");
-			}
-			
-			int max_pages = base.getInt("pages_count");
-			JSONArray array = base.getJSONArray("submissions");
-			if(array.length() == 0 || page_num > max_pages) {
-				return new ArrayList<>();
-			}
-			String new_rid = base.getString("rid");
-			//SQL COMMAND TO GET SAVED URLS WITH SAME ID
-			StringBuilder sql = new StringBuilder("SELECT * FROM ");
-			sql.append(DvkHandler.DVKS);
-			sql.append(" WHERE ");
-			sql.append(DvkHandler.DVK_ID);
-			sql.append(" LIKE ? AND ");
-			sql.append(DvkHandler.DVK_ID);
-			sql.append(" NOT LIKE ?;");
-			String[] sql_params = new String[2];
-			sql_params[1] = "%-J";
-			for(int i = 0; i < array.length(); i++) {
-				contains = false;
-				//GET ID CURRENT MEDIA URL
-				json = array.getJSONObject(i);
-				id = json.getString("submission_id");
-				page_count = Integer.parseInt(json.getString("pagecount"));
-				sql_params[0] = "INK" + id + "-%";
-				try(ResultSet rs = this.dvk_handler.sql_select(sql.toString(), sql_params, true)) {
-					dvks = DvkHandler.get_dvks(rs);
-					if(dvks.size() >= page_count) {
-						//RUNS IF ID ALREADY DOWNLOADED
-						contains = true;
-						if(type == 'f') {
-							//ADDS TO LIST, ONLY IF FAVORITE OF GIVEN ARTIST
-							check_next = false;
-							for(int dnum = 0; dnum < dvks.size(); dnum++) {
-								if(!ArrayProcessing.contains(dvks.get(dnum).get_web_tags(),
-										"favorite:" + fav_artist, false)) {
-									check_next = true;
-									contains = false;
-								}
-							}
-						}
-						else {
-							for(int dnum = 0; dnum < dvks.size(); dnum++) {
-								//STOPS RUNNING IF NOT A SINGLE DOWNLOAD
-								if(!ArrayProcessing.contains(dvks.get(dnum).get_web_tags(),
-										"dvk:single", false)) {
-									check_next = false;
-								}
-								//UPDATE DVK HANDLER				
-								dvks.set(dnum, ArtistHosting.move_dvk(dvks.get(dnum), directory));
-								this.dvk_handler.set_dvk(dvks.get(dnum), dvks.get(dnum).get_sql_id());
-							}
-						}
-					}
-				}
-				catch(SQLException e) {}
-				if(!contains) {
-					Dvk submission = new Dvk();
-					submission.set_page_url(id);
-					submission.set_id(Integer.toString(page_count));
-					submissions.add(submission);
-				}
-			}
-			//GET NEXT PAGE(S)
-			if(check_all || check_next) {
-				ArrayList<Dvk> next = get_pages(
-						user_id, directory, type, fav_artist, check_all, page_limit, new_rid, page_num + 1);
-				if(next == null) {
-					if(this.start_gui != null) {
-						this.start_gui.append_console("inkbunny_failed", true);
-						this.start_gui.get_base_gui().set_canceled(true);
-					}
-					if(page_num == 1) {
-						return new ArrayList<>();
-					}
-					return null;
-				}
-				submissions.addAll(next);
-			}
-			return submissions;
-		}
-		catch(JSONException e) {
-			if(page_num == 1) {
-				return new ArrayList<>();
-			}
-			return null;
-		}
+		throw new DvkException();
 	}
 	
 	/**
@@ -393,89 +369,83 @@ public class Inkbunny extends ArtistHosting {
 	 * @param check_all Whether to check all gallery pages or just the newest
 	 * @param page_num Page number of the journal gallery to scan
 	 * @return List of Inkbunny journal IDs
+	 * @throws DvkException Throws DvkException if loading gallery page fails
 	 */
 	public ArrayList<String> get_journal_pages(
 			String artist,
 			File directory,
-			boolean check_all,
-			int page_num) {
+			boolean check_all) throws DvkException{
 		//GET URL
 		StringBuilder url = new StringBuilder("https://inkbunny.net/journals/");
 		url.append(artist);
 		url.append('/');
-		url.append(page_num);
+		//INITIALIZE VARIABLES
 		if(this.connect == null) {
 			initialize_connect();
 		}
-		String xpath = "//div[@class='content']//div[contains(@style,'font-family')]//a[contains(@href,'/j/')]";
-		this.connect.load_page(url.toString(), xpath, 2);
-		try {
-			TimeUnit.MILLISECONDS.sleep(SLEEP);
-		} catch (InterruptedException e1) {}
-		xpath = xpath + "/@href";
-		String id;
-		boolean contains;
-		boolean check_next = true;
-		ArrayList<String> ids = new ArrayList<>();
-		try {
-			List<DomAttr> das = this.connect.get_page().getByXPath(xpath);
-			StringBuilder sql = new StringBuilder("SELECT * FROM ");
-			sql.append(DvkHandler.DVKS);
-			sql.append(" WHERE ");
-			sql.append(DvkHandler.DVK_ID);
-			sql.append(" = ?;");
-			String[] sql_params = new String[1];
-			for(int i = 0; i < das.size(); i++) {
-				contains = false;
-				id = get_page_id("inkbunny.net" + das.get(i).getNodeValue(), true);
-				sql_params[0] = id;
-				try(ResultSet rs = this.dvk_handler.sql_select(sql.toString(), sql_params, true)) {
-					ArrayList<Dvk> dvks = DvkHandler.get_dvks(rs);
-					if(dvks.size() > 0) {
-						contains = true;
-						//UPDATE DVK LOCATION AND FAVORITE IF ALREADY DOWNLOADED
-						Dvk dvk = ArtistHosting.move_dvk(dvks.get(0), directory);
-						this.dvk_handler.set_dvk(dvk, dvk.get_sql_id());
-						if(!ArrayProcessing.contains(dvk.get_web_tags(), "dvk:single", false)) {
-							check_next = false;
-						}
+		String xpath;
+		boolean check_next;
+		List<DomAttr> das;
+		ArrayList<Dvk> dvks;
+		ArrayList<String> cur_ids;
+		ArrayList<String> return_ids = new ArrayList<>();
+		//RUN THROUGH PAGES
+		for(int page_num = 1; page_num < 50000; page_num++) {
+			//BREAK IF CANCELLED
+			if(this.start_gui != null && this.start_gui.get_base_gui().is_canceled()) {
+				return new ArrayList<>();
+			}
+			//LOAD PAGE
+			xpath = "//div[@id='banner_clickarea']//h2[@id='banner_panel']//a[@href='https://inkbunny.net/']";
+			this.connect.load_page(url.toString() + Integer.toString(page_num), xpath, 2);
+			try {
+				TimeUnit.MILLISECONDS.sleep(SLEEP);
+			} catch (InterruptedException e1) {}
+			boolean failed = this.connect.get_page() == null;
+			xpath = "//div[@class='content']//div[contains(@style,'font-family')]//a[contains(@href,'/j/')]";
+			boolean contains = this.connect.wait_for_element(xpath);
+			if(!contains) {
+				if(!failed) {
+					return new ArrayList<>();
+				}
+				throw new DvkException();
+			}
+			xpath = xpath + "/@href";
+			check_next = true;
+			try {
+				//RUN THROUGH JOURNAL URLS ON GALLERY PAGE, GETTING IDS
+				cur_ids = new ArrayList<>();
+				das = this.connect.get_page().getByXPath(xpath);
+				for(int att_num = 0; att_num < das.size(); att_num++) {
+					cur_ids.add(get_page_id("inkbunny.net" + das.get(att_num).getNodeValue(), true));
+				}
+				dvks = get_dvks_from_ids(this.dvk_handler, cur_ids);
+				//REMOVE ALREADY DOWNLOADED IDS
+				for(int dvk_num = 0; dvk_num < dvks.size(); dvk_num++) {
+					//UPDATE DVK LOCATION AND FAVORITE IF ALREADY DOWNLOADED
+					Dvk dvk = ArtistHosting.move_dvk(dvks.get(dvk_num), directory);
+					this.dvk_handler.set_dvk(dvk, dvk.get_sql_id());
+					if(!ArrayProcessing.contains(dvk.get_web_tags(), "dvk:single", false)) {
+						check_next = false;
+					}
+					int index = cur_ids.indexOf(dvk.get_dvk_id());
+					if(index != -1) {
+						cur_ids.remove(index);
 					}
 				}
-				catch(SQLException e) {}
-				if(!contains) {
-					id = get_page_id("inkbunny.net" + das.get(i).getNodeValue(), false);
-					ids.add(id);
+				return_ids.addAll(cur_ids);
+				//SEARCH FOR NEXT BUTTON
+				xpath = "//table[@class='bottomPaginatorBox']//a[@title='next page']";
+				DomElement de = this.connect.get_page().getFirstByXPath(xpath);
+				if(de == null || (!check_next && !check_all)) {
+					return ArrayProcessing.clean_list(return_ids);
 				}
 			}
-			//SEARCH FOR NEXT BUTTON
-			xpath = "//table[@class='bottomPaginatorBox']//a[@title='next page']";
-			DomElement de = this.connect.get_page().getFirstByXPath(xpath);
-			//GET NEXT JOURNAL GALLERY PAGES
-			if(de != null && (check_next || check_all)) {
-				ArrayList<String> next = get_journal_pages(artist, directory, check_all, page_num + 1);
-				if(next == null) {
-					if(page_num == 1) {
-						if(this.start_gui != null) {
-							this.start_gui.append_console("inkbunny_failed", true);
-							this.start_gui.get_base_gui().set_canceled(true);
-						}
-						return new ArrayList<>();
-					}
-					return null;
-				}
-				ids.addAll(next);
+			catch(Exception e) {
+				throw new DvkException();
 			}
-			return ids;
 		}
-		catch(Exception e) {}
-		if(page_num == 1) {
-			if(this.start_gui != null) {
-				this.start_gui.append_console("inkbunny_failed", true);
-				this.start_gui.get_base_gui().set_canceled(true);
-			}
-			return new ArrayList<>();
-		}
-		return null;
+		throw new DvkException();
 	}
 	
 	/**
@@ -488,18 +458,20 @@ public class Inkbunny extends ArtistHosting {
 	 * @param favorites Favorites tags to add to Dvks
 	 * @param save Whether to save Dvks and associated media to disk
 	 * @return List of Dvk objects from given submission ID
+	 * @throws DvkException Throws DvkException if getting API info fails
 	 */
 	public ArrayList<Dvk> get_dvks(
 			String sub_id,
 			File directory,
-			int page_count,
 			boolean single,
 			ArrayList<String> favorites,
-			boolean save) {
+			boolean save) throws DvkException {
 		if(this.connect == null) {
 			initialize_connect();
 		}
 		//CHECK FOR EXISTING DVKS
+		String id = sub_id.substring(0, sub_id.indexOf('-'));
+		id = id.replace("INK", "");
 		StringBuilder sql = new StringBuilder("SELECT * FROM ");
 		sql.append(DvkHandler.DVKS);
 		sql.append(" WHERE ");
@@ -507,8 +479,9 @@ public class Inkbunny extends ArtistHosting {
 		sql.append(" LIKE ? AND ");
 		sql.append(DvkHandler.DVK_ID);
 		sql.append(" NOT LIKE ?;");
-		String[] sql_params = {"INK" + sub_id + "-%", "%-J"};
+		String[] sql_params = {"INK" + id + "-%", "%-J"};
 		try(ResultSet rs = this.dvk_handler.sql_select(sql.toString(), sql_params, true)) {
+			int page_count = Integer.parseInt(sub_id.substring(sub_id.indexOf('-') + 1));
 			ArrayList<Dvk> search_dvks = DvkHandler.get_dvks(rs);
 			if(search_dvks.size() > 0) {
 				if(search_dvks.size() < page_count) {
@@ -535,7 +508,7 @@ public class Inkbunny extends ArtistHosting {
 						}
 					}
 					return this.get_dvks(
-							sub_id, directory, page_count, single, new_favs, save);
+							sub_id, directory, single, new_favs, save);
 				}
 				if(favorites != null) {
 					//ADD FAVORITES
@@ -557,7 +530,7 @@ public class Inkbunny extends ArtistHosting {
 		//GET JSON OBJECT
 		List<NameValuePair> params = new ArrayList<>();
 		params.add(new BasicNameValuePair("sid", this.sid));
-		params.add(new BasicNameValuePair("submission_ids", sub_id));
+		params.add(new BasicNameValuePair("submission_ids", id));
 		params.add(new BasicNameValuePair("show_description_bbcode_parsed", "yes"));
 		params.add(new BasicNameValuePair("show_writing_bbcode_parsed", "yes"));
 		params.add(new BasicNameValuePair("show_pools", "yes"));
@@ -646,7 +619,7 @@ public class Inkbunny extends ArtistHosting {
 			}
 			String[] web_tags = ArrayProcessing.list_to_array(tags);
 			//SET PAGE URL
-			String page_url = "https://inkbunny.net/s/" + sub_id;
+			String page_url = "https://inkbunny.net/s/" + id;
 			//SET MEDIA URLS
 			JSONObject file;
 			JSONArray files = json.getJSONArray("files");
@@ -675,7 +648,7 @@ public class Inkbunny extends ArtistHosting {
 			ArrayList<Dvk> dvks = new ArrayList<>();
 			for(int i = 0; i < size; i++) {
 				Dvk dvk = new Dvk();
-				dvk.set_id("INK" + sub_id + "-" + page_nums[i]);
+				dvk.set_dvk_id("INK" + id + "-" + page_nums[i]);
 				if(size > 1) {
 					dvk.set_title(title + " [" + page_nums[i] + "/" + size + "]");
 				}
@@ -714,7 +687,7 @@ public class Inkbunny extends ArtistHosting {
 					}
 					TimeUnit.MILLISECONDS.sleep(SLEEP);
 					if(!dvk.get_dvk_file().exists()) {
-						throw new Exception();
+						throw new DvkException();
 					}
 				}
 				dvks.add(dvk);
@@ -723,7 +696,7 @@ public class Inkbunny extends ArtistHosting {
 			return dvks;
 		}
 		catch(Exception e) {}
-		return new ArrayList<>();
+		throw new DvkException();
 	}
 	
 	/**
@@ -790,14 +763,15 @@ public class Inkbunny extends ArtistHosting {
 	 * @param single Whether this is a single download
 	 * @param save Whether to save the DVK file and associated media
 	 * @return Dvk object for the Inkbunny journal
+	 * @throws DvkException Throws DvkException if loading journal page fails
 	 */
 	public Dvk get_journal_dvk(
 			String journal_id,
 			File directory,
 			boolean single,
-			boolean save) {
+			boolean save) throws DvkException {
 		StringBuilder url = new StringBuilder("https://inkbunny.net/j/");
-		url.append(journal_id);
+		url.append(journal_id.replace("INK", "").replace("-J", ""));
 		if(this.connect == null) {
 			initialize_connect();
 		}
@@ -823,7 +797,7 @@ public class Inkbunny extends ArtistHosting {
 			de = this.connect.get_page().getFirstByXPath(xpath);
 			dvk.set_description(DConnect.clean_element(de.asXml(), true));
 			//SET ID
-			dvk.set_id("INK" + journal_id + "-J");
+			dvk.set_dvk_id(journal_id);
 			//SET PAGE URL
 			dvk.set_page_url(url.toString());
 			//SET TAGS
@@ -849,7 +823,7 @@ public class Inkbunny extends ArtistHosting {
 			return dvk;
 		}
 		catch(Exception e) {}
-		return new Dvk();
+		throw new DvkException();
 	}
 	
 	/**
