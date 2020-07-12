@@ -468,6 +468,55 @@ public class TestDeviantArt {
 			assertEquals("TF Mask_DVA777228001.dvk", dvk.get_dvk_file().getName());
 			assertEquals("TF Mask_DVA777228001.swf", dvk.get_media_file().getName());
 			assertEquals("TF Mask_DVA777228001_S.jpg", dvk.get_secondary_file().getName());
+			//TEST PDF
+			url = "ww.deviantart.com/inkblot123/art/Mind-Your-Manors-Story-742045791";
+			dvk = this.dev.get_dvk(url, dvk_handler, "Gallery:Main", this.test_dir, null, 0, false, true);
+			url = "https://www.deviantart.com/inkblot123/art/Mind-Your-Manors-Story-742045791";
+			assertEquals(url, dvk.get_page_url());
+			assertEquals("DVA742045791", dvk.get_dvk_id());
+			assertEquals("Mind Your Manors (Story)", dvk.get_title());
+			assertEquals(1, dvk.get_artists().length);
+			assertEquals("Inkblot123", dvk.get_artists()[0]);
+			assertEquals("2018/04/25|06:13", dvk.get_time());
+			assertEquals(20, dvk.get_web_tags().length);
+			assertEquals("Rating:Mature", dvk.get_web_tags()[0]);
+			assertEquals("Gallery:Main", dvk.get_web_tags()[1]);
+			assertEquals("Literature", dvk.get_web_tags()[2]);
+			assertEquals("Prose", dvk.get_web_tags()[3]);
+			assertEquals("Fiction", dvk.get_web_tags()[4]);
+			assertEquals("Fantasy", dvk.get_web_tags()[5]);
+			assertEquals("Introductions & Chapters", dvk.get_web_tags()[6]);
+			assertEquals("dragon", dvk.get_web_tags()[7]);
+			assertEquals("female", dvk.get_web_tags()[8]);
+			assertEquals("feral", dvk.get_web_tags()[9]);
+			assertEquals("girl", dvk.get_web_tags()[10]);
+			assertEquals("magic", dvk.get_web_tags()[11]);
+			assertEquals("maid", dvk.get_web_tags()[12]);
+			assertEquals("serpent", dvk.get_web_tags()[13]);
+			assertEquals("storytelling", dvk.get_web_tags()[14]);
+			assertEquals("tf", dvk.get_web_tags()[15]);
+			assertEquals("transformation", dvk.get_web_tags()[16]);
+			assertEquals("woman", dvk.get_web_tags()[17]);
+			assertEquals("sea_serpent", dvk.get_web_tags()[18]);
+			assertEquals("aquatic_dragon", dvk.get_web_tags()[19]);
+			desc = "Ok, so this&#160;tf&#160;is the culmination of a lot of stuff,"
+					+ " so bear with me while I list em' all.";
+			assertTrue(dvk.get_description().startsWith(desc));
+			desc = "Buntlys weren’t one of the best </q> </span> </a> </span> "
+					+ "<!-- ^TTT --> <!-- TTT$ --> </span>";
+			assertTrue(dvk.get_description().endsWith(desc));
+			url = "https://api-da.wixmp.com/_api/download/file?downloadToken=";
+			assertTrue(dvk.get_direct_url().startsWith(url));
+			url = "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/i/1ed28470-c30d-4506-"
+					+ "9cd2-b8c48b29190e/dc9sm73-4abb5d54-a584-4dc5-a714-3f86db88cd81.png/v1/fill"
+					+ "/w_1326,h_603,q_70,strp/mind_your_manors__story__by_inkblot123_dc9sm73-pre.jpg";
+			assertEquals(url, dvk.get_secondary_url());
+			assertEquals("Mind Your Manors Story_DVA742045791.dvk", dvk.get_dvk_file().getName());
+			assertEquals("Mind Your Manors Story_DVA742045791.pdf", dvk.get_media_file().getName());
+			assertEquals("Mind Your Manors Story_DVA742045791_S.jpg", dvk.get_secondary_file().getName());
+			assertTrue(dvk.get_dvk_file().exists());
+			assertTrue(dvk.get_media_file().exists());
+			assertTrue(dvk.get_secondary_file().exists());
 			//TEST PREMIUM CONTENT
 			url = "https://www.deviantart.com/treehousecharms/art/TC-Natural-Wield-536148032";
 			dvk = this.dev.get_dvk(url, dvk_handler, "Gallery:Main", this.test_dir, null, 0, false, false);
@@ -531,16 +580,17 @@ public class TestDeviantArt {
 			catch(DvkException f) {}
 			//TEST DVKS ADDED TO DVK HANDLER
 			ArrayList<Dvk> dvks = dvk_handler.get_dvks(0, -1, 'a', false, false);
-			assertEquals(9, dvks.size());
+			assertEquals(10, dvks.size());
 			assertEquals("Anthro Incineroar TF/TG", dvks.get(0).get_title());
 			assertEquals("Calem's Noivern TF", dvks.get(1).get_title());
 			assertEquals("Drakovek", dvks.get(2).get_title());
 			assertEquals("Finding One's True Self", dvks.get(3).get_title());
 			assertEquals("Interactive dragoness transformation", dvks.get(4).get_title());
-			assertEquals("Pokeclipse! (TF RP)", dvks.get(5).get_title());
-			assertEquals("TC ~ Natural Wield", dvks.get(6).get_title());
-			assertEquals("Test", dvks.get(7).get_title());
-			assertEquals("TF: Mask", dvks.get(8).get_title());
+			assertEquals("Mind Your Manors (Story)", dvks.get(5).get_title());
+			assertEquals("Pokeclipse! (TF RP)", dvks.get(6).get_title());
+			assertEquals("TC ~ Natural Wield", dvks.get(7).get_title());
+			assertEquals("Test", dvks.get(8).get_title());
+			assertEquals("TF: Mask", dvks.get(9).get_title());
 		}
 		catch(DvkException e) {
 			assertTrue(false);
@@ -980,8 +1030,6 @@ public class TestDeviantArt {
 			url = "https://www.deviantart.com/ecliptic-flare/art/Latias-Synth-807772446";
 			assertTrue(links.contains(url));
 			url = "https://www.deviantart.com/beingobscene/art/Patron-TF-Danger-Cleavage-797049917";
-			assertTrue(links.contains(url));
-			url = "https://www.deviantart.com/pencilpaper10/art/Anthro-Umbreon-TF-TG-797210157";
 			assertTrue(links.contains(url));
 			url = "https://www.deviantart.com/avatf/art/Firefox-pg-1-797368883";
 			assertTrue(links.contains(url));

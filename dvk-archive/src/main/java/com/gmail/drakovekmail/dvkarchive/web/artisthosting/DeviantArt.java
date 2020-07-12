@@ -322,6 +322,13 @@ public class DeviantArt extends ArtistHosting {
 			if(da != null) {
 				download = da.getNodeValue();
 			}
+			if(download == null) {
+				xpath = "//object[@aria-label][contains(@data,'/_api/')]/@data";
+				da = this.connect.get_page().getFirstByXPath(xpath);
+				if(da != null) {
+					download = da.getNodeValue();
+				}
+			}
 			//GET IMAGE LINK
 			String image = null;
 			if(download == null) {
