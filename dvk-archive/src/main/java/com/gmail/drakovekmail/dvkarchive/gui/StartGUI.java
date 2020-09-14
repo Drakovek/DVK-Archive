@@ -239,7 +239,6 @@ public class StartGUI implements DActionEvent, Disabler, DWorker {
 	 * Returns a String array of available services for a given category.
 	 * 
 	 * @param category Given category ID
-	 * @param use_language Whether to use language strings instead of IDs.
 	 * @return String array of available services
 	 */
 	public static String[] get_services(String category) {

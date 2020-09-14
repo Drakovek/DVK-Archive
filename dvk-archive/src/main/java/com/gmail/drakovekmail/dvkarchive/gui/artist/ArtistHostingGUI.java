@@ -240,7 +240,6 @@ public abstract class ArtistHostingGUI extends ServiceGUI implements DActionEven
 	 * Creates and displays a login GUI.
 	 * 
 	 * @param allow_skipping Whether to allow skipping login
-	 * @param captcha Whether to include CAPTCHA dialog in the GUI
 	 */
 	protected void create_login_gui(boolean allow_skipping) {
 		BaseGUI base_gui = get_start_gui().get_base_gui();

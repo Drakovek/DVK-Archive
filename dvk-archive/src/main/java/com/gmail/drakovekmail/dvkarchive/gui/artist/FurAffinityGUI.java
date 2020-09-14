@@ -257,7 +257,6 @@ public class FurAffinityGUI extends ArtistHostingGUI {
 	 * @param artist Artist to use when adding favorite tag.
 	 * Doesn't create favorite tag if null.
 	 * @param single Whether this is a single download
-	 * @param cancel Whether to cancel process if download fails
 	 * @return Downloaded Dvk object
 	 * @throws DvkException Throws DvkException if downloading Dvk fails
 	 */

@@ -259,7 +259,6 @@ public class FurAffinity extends ArtistHosting {
 	 * @param dvk_handler Used to check for already downloaded files
 	 * @param check_all Whether to check all gallery pages
 	 * @param check_login Whether to check if still logged in
-	 * @param url Page to scan. If null, scans first gallery page
 	 * @return List of FurAffinity media page IDs
 	 * @throws DvkException Throws DvkException if loading gallery page fails
 	 */
@@ -400,7 +399,6 @@ public class FurAffinity extends ArtistHosting {
 	 * @param dvk_handler Used to check for already downloaded files
 	 * @param check_all Whether to check all gallery pages
 	 * @param check_login Whether to check if still logged in
-	 * @param page Gallery page to scan
 	 * @return List of FurAffinity media page IDs
 	 * @throws DvkException Throws DvkException if loading gallery page fails
 	 */

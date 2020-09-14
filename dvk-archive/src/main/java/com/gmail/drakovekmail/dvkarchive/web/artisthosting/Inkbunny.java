@@ -367,7 +367,6 @@ public class Inkbunny extends ArtistHosting {
 	 * @param artist Inkbunny artist
 	 * @param directory Directory to move downloaded DVK files, if necessary
 	 * @param check_all Whether to check all gallery pages or just the newest
-	 * @param page_num Page number of the journal gallery to scan
 	 * @return List of Inkbunny journal IDs
 	 * @throws DvkException Throws DvkException if loading gallery page fails
 	 */
@@ -453,7 +452,6 @@ public class Inkbunny extends ArtistHosting {
 	 * 
 	 * @param sub_id Inkbunny submission ID
 	 * @param directory Directory in which to save files
-	 * @param page_count Number of pages in the given Inkbunny submission
 	 * @param single Whether this is a single download
 	 * @param favorites Favorites tags to add to Dvks
 	 * @param save Whether to save Dvks and associated media to disk

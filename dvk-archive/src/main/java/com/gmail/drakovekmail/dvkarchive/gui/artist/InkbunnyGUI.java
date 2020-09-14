@@ -236,7 +236,6 @@ public class InkbunnyGUI extends ArtistHostingGUI {
 	 * Downloads media for a given Inkbunny submission.
 	 * 
 	 * @param sub_id Inkbunny submission ID
-	 * @param page_count Number of pages in the submission
 	 * @param directory Directory in which to save media
 	 * @param fav_artist Artist to add as favorite tag, if applicable
 	 * @param single Whether this is a single download

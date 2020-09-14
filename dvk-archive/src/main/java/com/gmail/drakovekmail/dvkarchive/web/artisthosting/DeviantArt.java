@@ -271,7 +271,8 @@ public class DeviantArt extends ArtistHosting {
 			}
 			//GET DESCRIPTION
 			DomElement de;
-			xpath = "//a[contains(@class,'user-link')]/parent::div/following-sibling::div[contains(@class,'legacy-journal')]";
+			xpath = "//div[@data-hook='deviation_meta']/following-sibling::div[contains(@class,'legacy-journal')]|"
+					+ "//time/parent::span/parent::div/parent::div/preceding-sibling::div[contains(@class,'legacy-journal')]";
 			de = this.connect.get_page().getFirstByXPath(xpath);
 			if(de != null) {
 				dvk.set_description(DConnect.clean_element(de.asXml(), true));

@@ -302,7 +302,6 @@ public class DeviantArtGUI extends ArtistHostingGUI {
 	 * 
 	 * @param info Dvk with module page info
 	 * @param directory Directory in which to save media
-	 * @param gallery Gallery tag to add to Dvk
 	 * @return Downloaded Dvk object
 	 * @throws DvkException Throws DvkException if downloading Dvk fails
 	 */

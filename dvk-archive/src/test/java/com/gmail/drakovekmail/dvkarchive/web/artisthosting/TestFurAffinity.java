@@ -484,7 +484,7 @@ public class TestFurAffinity {
 			assertEquals("2019/08/03|17:21", dvk.get_time());
 			String value = "https://www.furaffinity.net/view/32521285/";
 			assertEquals(value, dvk.get_page_url());
-			value = "https://d.facdn.net/art/drakovek/1564867315/1564867315.drakovek_robin.png";
+			value = "https://d2.facdn.net/art/drakovek/1564867315/1564867315.drakovek_robin.png";
 			assertEquals(value, dvk.get_direct_url());
 			assertEquals(null, dvk.get_secondary_url());
 			value = "Character portrait for Robin, a bobcat character from a story "
@@ -516,11 +516,11 @@ public class TestFurAffinity {
 			assertEquals("2014/12/24|02:11", dvk.get_time());
 			value = "https://www.furaffinity.net/view/15301779/";
 			assertEquals(value, dvk.get_page_url());
-			value = "https://d.facdn.net/";
+			value = "https://d2.facdn.net/";
 			assertTrue(dvk.get_direct_url().startsWith(value));
 			value = "/art/mrsparta/stories/1488278723/1419405086.mrsparta_md-1.txt";
 			assertTrue(dvk.get_direct_url().endsWith(value));
-			value = "https://d.facdn.net/art/mrsparta/stories/1488278723/"
+			value = "https://d2.facdn.net/art/mrsparta/stories/1488278723/"
 					+ "1419405086.thumbnail.mrsparta_md-1.txt.gif";
 			assertEquals(value, dvk.get_secondary_url());
 			value = "I'm trying something new. It's a strange practice "
@@ -567,7 +567,7 @@ public class TestFurAffinity {
 			assertEquals("2018/12/16|00:02", dvk.get_time());
 			value = "https://www.furaffinity.net/view/29756524/";
 			assertEquals(value, dvk.get_page_url());
-			value = "https://d.facdn.net/art/tavaer/1544936555/1544936555.tavaer_purero.png";
+			value = "https://d2.facdn.net/art/tavaer/1544936555/1544936555.tavaer_purero.png";
 			assertEquals(value, dvk.get_direct_url());
 			assertEquals(null, dvk.get_secondary_url());
 			value = "Puro: \"Are you going to eat the peach, Lin-san?\" <br/> <br/> Lin: \"Go right "

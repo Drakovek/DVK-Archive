@@ -321,15 +321,15 @@ public class TestDeviantArt {
 					+ "or anything like that. <br/> 5. Have fun! </html>";
 			assertEquals(desc, file);
 			//FOURTH DVK - VIDEO
-			url = "http://www.deviantart.com/fezmangaka/art/Calem-s-Noivern-TF-786108284";
+			url = "http://www.deviantart.com/fujoshiineko/art/Calem-s-Noivern-TF-786108284";
 			dvk = this.dev.get_dvk(
 					url, dvk_handler, "Gallery:Scraps", this.test_dir, "Person", 0, false, false);
 			assertEquals("DVA786108284", dvk.get_dvk_id());
-			url = "https://www.deviantart.com/fezmangaka/art/Calem-s-Noivern-TF-786108284";
+			url = "https://www.deviantart.com/fujoshiineko/art/Calem-s-Noivern-TF-786108284";
 			assertEquals(url, dvk.get_page_url());
 			assertEquals("Calem's Noivern TF", dvk.get_title());
 			assertEquals(1, dvk.get_artists().length);
-			assertEquals("FezMangaka", dvk.get_artists()[0]);
+			assertEquals("FujoshiiNeko", dvk.get_artists()[0]);
 			assertEquals("2019/02/17|17:19", dvk.get_time());
 			assertEquals(11, dvk.get_web_tags().length);
 			assertEquals("Rating:General", dvk.get_web_tags()[0]);
@@ -351,9 +351,9 @@ public class TestDeviantArt {
 			url = "https://wixmp-ed30a86b8c4ca887773594c2.wixmp.com/v/mp4/1d735619-8d85-4a96-a2ee-82852d4551f0/"
 					+ "dd01118-e720f3db-1c53-4545-9e41-889295ea4c6e.720p.50714fd3435c49dba3d67d067bcb076c.mp4";
 			assertEquals(url, dvk.get_direct_url());
-			url = "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/i/1d735619-8d85-4a96-a2ee-82852d4551f0/"
-					+ "dd01118-49161b67-ecdc-4406-bb89-62212b2d6cda.jpg/v1/fit/w_300,h_900,q_70,strp/"
-					+ "calem_s_noivern_tf_by_fezmangaka_dd01118-300w.jpg";
+			url = "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/i/1d735619-8d85-4a96-a2ee-"
+					+ "82852d4551f0/dd01118-49161b67-ecdc-4406-bb89-62212b2d6cda.jpg/v1/fit/w_300,h_900,q_70,"
+					+ "strp/calem_s_noivern_tf_by_fujoshiineko_dd01118-300w.jpg";
 			assertEquals(url, dvk.get_secondary_url());
 			assertEquals("Calem-s Noivern TF_DVA786108284.dvk", dvk.get_dvk_file().getName());
 			assertEquals("Calem-s Noivern TF_DVA786108284.mp4", dvk.get_media_file().getName());
@@ -593,6 +593,7 @@ public class TestDeviantArt {
 			assertEquals("TF: Mask", dvks.get(9).get_title());
 		}
 		catch(DvkException e) {
+			e.printStackTrace();
 			assertTrue(false);
 		}
 	}
@@ -671,12 +672,12 @@ public class TestDeviantArt {
 			desc = "Please give info on what you want. </b> <br/> </div> </html>";
 			assertTrue(text.endsWith(desc));
 			//THIRD DVK
-			url = "deviantart.com/fezmangaka/journal/Important-announcement-Future-of-Commissions-839801217";
+			url = "deviantart.com/fujoshiineko/journal/Important-announcement-Future-of-Commissions-839801217";
 			dvk = this.dev.get_journal_dvk(url, dvk_handler, this.test_dir, "thing", 0, true, true);
 			assertEquals("DVA839801217-J", dvk.get_dvk_id());
 			assertEquals("Important announcement!! (Future of Commissions)", dvk.get_title());
 			assertEquals(1, dvk.get_artists().length);
-			assertEquals("FezMangaka", dvk.get_artists()[0]);
+			assertEquals("FujoshiiNeko", dvk.get_artists()[0]);
 			assertEquals("2020/04/28|18:40", dvk.get_time());
 			assertEquals(6, dvk.get_web_tags().length);
 			assertEquals("Rating:General", dvk.get_web_tags()[0]);
@@ -685,29 +686,40 @@ public class TestDeviantArt {
 			assertEquals("Personal", dvk.get_web_tags()[3]);
 			assertEquals("DVK:Single", dvk.get_web_tags()[4]);
 			assertEquals("Favorite:thing", dvk.get_web_tags()[5]);
-			desc = "<p class=\"_1tvZk _1iFR7 _3s8-3\"> Commission update: what to expect </p> "
-					+ "<div class=\"_1tvZk _1iFR7 _3s8-3\"> </div> <p class=\"_1tvZk _1iFR7 _3s8-3\"> "
-					+ "School hasn't   for me as the start of my 'internship' will begin shortly around May. "
-					+ "The thing is that internship is suspended and we're supposed to undertake "
-					+ "Entrepreneurship, Community or Assigned project. </p> <div class=\"_1tvZk _1iFR7 _3s8-3\"> "
-					+ "</div> <p class=\"_1tvZk _1iFR7 _3s8-3\"> School hasn't really ended for me as the start "
-					+ "of my 'internship' will begin shortly around May. The thing is that internship is "
-					+ "suspended and we're supposed to undertake Entrepreneurship, Community or Assigned project. "
-					+ "</p> <p class=\"_1tvZk _1iFR7 _3s8-3\"> The school says they'll provide projects for is "
-					+ "to do, which really sucks because you're given no time to really enjoy yourself. But the "
-					+ "good thing is that I'll be able to have time to do commissions as part of the "
-					+ "entrepreneurship (that which I'll ask my lecture if it's a possible option) </p> "
-					+ "<div class=\"_1tvZk _1iFR7 _3s8-3\"> </div> <p class=\"_1tvZk _1iFR7 _3s8-3\"> However, "
-					+ "here's the catch. I can't be drawing beans (TFs) all he time. I'll still take some but "
-					+ "will not mention that they're part of the commissions I do unless it's absolutely "
-					+ "necessary if there isn't any demand for illustrations. </p> <div class=\"_1tvZk _1iFR7 "
-					+ "_3s8-3\"> </div> <p class=\"_1tvZk _1iFR7 _3s8-3\"> Some possible options of "
-					+ "commissions are character illustration, character sheet reference, storyboarding ideas, "
-					+ "animated icons so on and so forth. I hope some of them would be of interest to you, even "
-					+ "thou this account mostly focused on beans. If not, please spread the message as it would "
-					+ "really help to be able to reach a larger audience. Thank you. </p>";
+			desc = "<div class=\"_23NSK _1zBoF _1KOBw\"> <p id=\"viewer-foo\" class=\"_39lC7 _1Ma_D _1tvZk _1iFR7 "
+					+ "_1zNTb _25QFG public-DraftStyleDefault-block-depth0 public-DraftStyleDefault-text-ltr\"> "
+					+ "Commission update: what to expect </p> <div id=\"viewer-criq1\" class=\"_39lC7 _1Ma_D _1tvZk "
+					+ "_1iFR7 _1zNTb _25QFG public-DraftStyleDefault-block-depth0 public-DraftStyleDefault-text-ltr\"> "
+					+ "<br/> </div> <p id=\"viewer-a9u9i\" class=\"_39lC7 _1Ma_D _1tvZk _1iFR7 _1zNTb _25QFG public-Draft"
+					+ "StyleDefault-block-depth0 public-DraftStyleDefault-text-ltr\"> School hasn't   for me as the "
+					+ "start of my 'internship' will begin shortly around May. The thing is that internship is suspended "
+					+ "and we're supposed to undertake Entrepreneurship, Community or Assigned project. </p> <div id=\""
+					+ "viewer-fner8\" class=\"_39lC7 _1Ma_D _1tvZk _1iFR7 _1zNTb _25QFG public-DraftStyleDefault-block-"
+					+ "depth0 public-DraftStyleDefault-text-ltr\"> <br/> </div> <p id=\"viewer-pbsu\" class=\"_39lC7 _1Ma_D"
+					+ " _1tvZk _1iFR7 _1zNTb _25QFG public-DraftStyleDefault-block-depth0 public-DraftStyleDefault-"
+					+ "text-ltr\"> School hasn't really ended for me as the start of my 'internship' will begin shortly "
+					+ "around May. The thing is that internship is suspended and we're supposed to undertake "
+					+ "Entrepreneurship, Community or Assigned project. </p> <p id=\"viewer-f8sog\" class=\"_39lC7 _1Ma_D"
+					+ " _1tvZk _1iFR7 _1zNTb _25QFG public-DraftStyleDefault-block-depth0 public-DraftStyleDefault-"
+					+ "text-ltr\"> The school says they'll provide projects for is to do, which really sucks because "
+					+ "you're given no time to really enjoy yourself. But the good thing is that I'll be able to have "
+					+ "time to do commissions as part of the entrepreneurship (that which I'll ask my lecture if it's "
+					+ "a possible option) </p> <div id=\"viewer-b1558\" class=\"_39lC7 _1Ma_D _1tvZk _1iFR7 _1zNTb "
+					+ "_25QFG public-DraftStyleDefault-block-depth0 public-DraftStyleDefault-text-ltr\"> <br/> </div> "
+					+ "<p id=\"viewer-86if1\" class=\"_39lC7 _1Ma_D _1tvZk _1iFR7 _1zNTb _25QFG public-DraftStyleDefault-"
+					+ "block-depth0 public-DraftStyleDefault-text-ltr\"> However, here's the catch. I can't be drawing "
+					+ "beans (TFs) all he time. I'll still take some but will not mention that they're part of the "
+					+ "commissions I do unless it's absolutely necessary if there isn't any demand for illustrations. "
+					+ "</p> <div id=\"viewer-68t5v\" class=\"_39lC7 _1Ma_D _1tvZk _1iFR7 _1zNTb _25QFG public-"
+					+ "DraftStyleDefault-block-depth0 public-DraftStyleDefault-text-ltr\"> <br/> </div> "
+					+ "<p id=\"viewer-4v98m\" class=\"_39lC7 _1Ma_D _1tvZk _1iFR7 _1zNTb _25QFG public-DraftStyleDefault"
+					+ "-block-depth0 public-DraftStyleDefault-text-ltr\"> Some possible options of commissions are "
+					+ "character illustration, character sheet reference, storyboarding ideas, animated icons so on and "
+					+ "so forth. I hope some of them would be of interest to you, even thou this account mostly focused "
+					+ "on beans. If not, please spread the message as it would really help to be able to reach a "
+					+ "larger audience. Thank you. </p> </div>";
 			assertEquals(desc, dvk.get_description());
-			url = "https://www.deviantart.com/fezmangaka/journal/Important-announcement-Future-of-Commissions-839801217";
+			url = "https://www.deviantart.com/fujoshiineko/journal/Important-announcement-Future-of-Commissions-839801217";
 			assertEquals(url, dvk.get_page_url());
 			assertEquals(null, dvk.get_direct_url());
 			assertEquals(null, dvk.get_secondary_url());
@@ -1065,10 +1077,10 @@ public class TestDeviantArt {
 		Dvk dvk = new Dvk();
 		dvk.set_dvk_id("DVA7283020-P");
 		dvk.set_title("Good TF");
-		dvk.set_artist("FezMangaka");
+		dvk.set_artist("FujoshiiNeko");
 		String[] tags = {"Test", "Thing", "Whatever"};
 		dvk.set_web_tags(tags);
-		dvk.set_page_url("https://www.deviantart.com/fezmangaka/poll/What-makes-a-good-TF-7283020");
+		dvk.set_page_url("https://www.deviantart.com/fujoshiineko/poll/What-makes-a-good-TF-7283020");
 		dvk.set_dvk_file(new File(this.test_dir, "good.dvk"));
 		dvk.set_media_file("good.jpg");
 		dvk.write_dvk();
@@ -1115,27 +1127,27 @@ public class TestDeviantArt {
 			//GET POLLS
 			ArrayList<Dvk> dvks;
 			dvks = this.dev.get_module_pages(
-					null, "FezMangaka", this.test_dir, 'p', handler, false);
+					null, "FujoshiiNeko", this.test_dir, 'p', handler, false);
 			assertTrue(dvks.size() > 42);
 			int index = -1;
 			for(int i = 0; i < dvks.size(); i++) {
-				assertNotEquals("https://www.deviantart.com/fezmangaka/poll/What-makes-a-good-TF-7283020",
+				assertNotEquals("https://www.deviantart.com/fujoshiineko/poll/What-makes-a-good-TF-7283020",
 						dvks.get(i).get_page_url());
 				if(dvks.get(i).get_page_url().equals(
-						"https://www.deviantart.com/fezmangaka/poll/Is-there-any-aftermath-"
-						+ "drawing-you-peps-would-want-to-see-as-of-the-recent-posts-7294815")) {
+						"https://www.deviantart.com/fujoshiineko/poll/Is-there-any-aftermath-drawing-you-"
+						+ "peps-would-want-to-see-as-of-the-recent-posts-7294815")) {
 					index = i;
 				}
 			}
 			assertNotEquals(-1, index);
-			assertEquals("https://www.deviantart.com/fezmangaka/poll/Which-is-your-"
+			assertEquals("https://www.deviantart.com/fujoshiineko/poll/Which-is-your-"
 					+ "favourite-and-what-do-you-think-of-them-7306515", dvks.get(index - 1).get_page_url());
-			assertEquals("https://www.deviantart.com/fezmangaka/poll/Transformation"
+			assertEquals("https://www.deviantart.com/fujoshiineko/poll/Transformation"
 					+ "-with-mental-changes-7311213", dvks.get(index - 2).get_page_url());
 			dvk = dvks.get(index - 2);
 			assertEquals("Transformation with mental changes?", dvk.get_title());
 			assertEquals(1, dvk.get_artists().length);
-			assertEquals("FezMangaka", dvk.get_artists()[0]);
+			assertEquals("FujoshiiNeko", dvk.get_artists()[0]);
 			assertEquals("2018/06/21|10:04", dvk.get_time());
 			String desc = "274<DVK-POLL-SEP>Like<DVK-POLL-SEP>127<DVK-POLL-SEP>Dislike<DVK-POLL-SEP>";
 			assertEquals(desc, dvk.get_description());
