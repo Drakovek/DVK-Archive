@@ -424,11 +424,11 @@ public class DeviantArt extends ArtistHosting {
 			}
 			//SET DIRECT URL
 			String type = json.getString("type");
+			if(video != null) {
+				dvk.set_direct_url(video);
+			}
 			if(type.equals("rich")) {
 				dvk.set_direct_url(null);
-			}
-			else if(type.equals("video")) {
-				dvk.set_direct_url(video);
 			}
 			else if(download == null && type.equals("photo")) {
 				dvk.set_direct_url(image);
@@ -503,6 +503,10 @@ public class DeviantArt extends ArtistHosting {
 		}
 		catch(Exception e) {
 			System.out.println("DeviantArt Error: " + page_url);
+			System.out.println("Attempted Donloads: ");
+			System.out.println(dvk.get_direct_url());
+			System.out.println(dvk.get_secondary_url());
+			System.out.println();
 		}
 		throw new DvkException();
 	}

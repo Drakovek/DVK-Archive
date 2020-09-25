@@ -369,16 +369,12 @@ public class TestDeviantArt {
 			assertEquals(1, dvk.get_artists().length);
 			assertEquals("Doom-the-wolf", dvk.get_artists()[0]);
 			assertEquals("2012/04/27|23:56", dvk.get_time());
-			assertEquals(9, dvk.get_web_tags().length);
+			assertEquals(5, dvk.get_web_tags().length);
 			assertEquals("Rating:Mature", dvk.get_web_tags()[0]);
 			assertEquals("Gallery:Scraps", dvk.get_web_tags()[1]);
 			assertEquals("Flash", dvk.get_web_tags()[2]);
 			assertEquals("Interactive", dvk.get_web_tags()[3]);
-			assertEquals("dragon", dvk.get_web_tags()[4]);
-			assertEquals("dragoness", dvk.get_web_tags()[5]);
-			assertEquals("transformation", dvk.get_web_tags()[6]);
-			assertEquals("dragondragoness", dvk.get_web_tags()[7]);
-			assertEquals("Favorite:Somebody", dvk.get_web_tags()[8]);
+			assertEquals("Favorite:Somebody", dvk.get_web_tags()[4]);
 			desc = "<b> Update: </b> <i> I improved the background. In the previous version is was just a "
 					+ "scribble. </i> <br/> <br/> <br/> Here's an animation of a kind I haven't really made "
 					+ "before. I think I can confidently state that this is my best transformation "

@@ -289,8 +289,9 @@ public class TestInkbunny {
 		assertEquals("Favorite:Another", dvk.get_web_tags()[10]);
 		assertEquals("Favorite:person", dvk.get_web_tags()[11]);
 		assertEquals("https://inkbunny.net/s/2110302", dvk.get_page_url());
-		url = "https://us.ib.metapix.net/files/full/3054/3054993_BlueShark_bred_2.mp4";
-		assertEquals(url, dvk.get_direct_url());
+		url = ".ib.metapix.net/files/full/3054/3054993_BlueShark_bred_2.mp4";
+		assertTrue(dvk.get_direct_url().startsWith("https://"));
+		assertTrue(dvk.get_direct_url().endsWith(url));
 		assertEquals(null, dvk.get_secondary_file());
 		assertEquals(this.test_dir, dvk.get_dvk_file().getParentFile());
 		assertEquals("Flying magic toaster NOT required_INK2110302-1.dvk", dvk.get_dvk_file().getName());
@@ -345,10 +346,11 @@ public class TestInkbunny {
 		assertEquals("wolf", dvk.get_web_tags()[24]);
 		assertEquals("Shrek And The Risers", dvk.get_web_tags()[25]);
 		assertEquals("https://inkbunny.net/s/2163805", dvk.get_page_url());
-		url = "https://us.ib.metapix.net/files/full/3138/3138552_Suneverse_shrek_"
+		url = "ib.metapix.net/files/full/3138/3138552_Suneverse_shrek_"
 				+ "and_the_risers_title.png";
 		assertEquals(null, dvk.get_direct_url());
-		assertEquals(url, dvk.get_secondary_url());
+		assertTrue(dvk.get_secondary_url().startsWith("https://"));
+		assertTrue(dvk.get_secondary_url().endsWith(url));
 		assertEquals(this.test_dir, dvk.get_dvk_file().getParentFile());
 		assertEquals("Shrek And The Risers Chapter 1_INK2163805-1.dvk", dvk.get_dvk_file().getName());
 		assertEquals("Shrek And The Risers Chapter 1_INK2163805-1.html", dvk.get_media_file().getName());
@@ -387,11 +389,12 @@ public class TestInkbunny {
 				+ "Democratic Sovereign Republic of Banana &copy; <a style='border: none;' "
 				+ "title='Kraken on Fur Affinity' rel='nofollow' href='https://furaffinity.net"
 				+ "/user/Kraken'><img style='border: none; vertical-align: bottom; width: 14px; "
-				+ "height: 14px;' width='14' height='14' src='https://us.ib.metapix.net/images78"
-				+ "/contacttypes/internet-furaffinity.png' /></a>&#9;&#9;&#9;&#9;&#9;<a "
-				+ "title='Kraken on Fur Affinity' rel='nofollow' href='https://furaffinity.net/"
-				+ "user/Kraken'>Kraken</a><br />Art by me!<br />";
-		assertEquals(desc, dvk.get_description());
+				+ "height: 14px;' width='14' height='14' src='https://";
+		assertTrue(dvk.get_description().startsWith(desc));
+		desc = "ib.metapix.net/images78/contacttypes/internet-furaffinity.png' /></a>&#9;&#9;&#9;"
+				+ "&#9;&#9;<a title='Kraken on Fur Affinity' rel='nofollow' href='https://"
+				+ "furaffinity.net/user/Kraken'>Kraken</a><br />Art by me!<br />";
+		assertTrue(dvk.get_description().endsWith(desc));
 		assertEquals(7, dvk.get_web_tags().length);
 		assertEquals("Gallery:Main", dvk.get_web_tags()[0]);
 		assertEquals("Rating:General", dvk.get_web_tags()[1]);
@@ -401,9 +404,10 @@ public class TestInkbunny {
 		assertEquals("volleyball", dvk.get_web_tags()[5]);
 		assertEquals("Favorite:person", dvk.get_web_tags()[6]);
 		assertEquals("https://inkbunny.net/s/1095495", dvk.get_page_url());
-		url = "https://us.ib.metapix.net/files/full/1516/1516215_LittleNapoleon"
+		url = ".ib.metapix.net/files/full/1516/1516215_LittleNapoleon"
 				+ "_1371773338.littlenapoleon_carmen-guard-small.jpg";
-		assertEquals(url, dvk.get_direct_url());
+		assertTrue(dvk.get_direct_url().startsWith("https://"));
+		assertTrue(dvk.get_direct_url().endsWith(url));
 		assertEquals(null, dvk.get_secondary_url());
 		assertEquals(this.test_dir, dvk.get_dvk_file().getParentFile());
 		assertEquals("Double Duty 2013 1-2_INK1095495-1.dvk", dvk.get_dvk_file().getName());
@@ -412,9 +416,10 @@ public class TestInkbunny {
 		dvk = dvks.get(1);
 		assertEquals("INK1095495-2", dvk.get_dvk_id());
 		assertEquals("Double Duty (2013) [2/2]", dvk.get_title());
-		url = "https://us.ib.metapix.net/files/full/1516/1516216_LittleNapoleon"
+		url = ".ib.metapix.net/files/full/1516/1516216_LittleNapoleon"
 				+ "_1371773588.littlenapoleon_carmen-volleyball-small.jpg";
-		assertEquals(url, dvk.get_direct_url());
+		assertTrue(dvk.get_direct_url().startsWith("https://"));
+		assertTrue(dvk.get_direct_url().endsWith(url));
 		assertEquals(null, dvk.get_secondary_url());
 		assertEquals(this.test_dir, dvk.get_dvk_file().getParentFile());
 		assertEquals("Double Duty 2013 2-2_INK1095495-2.dvk", dvk.get_dvk_file().getName());
