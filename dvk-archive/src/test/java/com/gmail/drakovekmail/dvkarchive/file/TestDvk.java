@@ -2,15 +2,11 @@ package com.gmail.drakovekmail.dvkarchive.file;
 
 import java.io.File;
 import java.io.IOException;
-
-import org.apache.commons.io.FileUtils;
 import org.json.JSONObject;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-
+import org.junit.rules.TemporaryFolder;
 import com.gmail.drakovekmail.dvkarchive.web.DConnect;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -23,32 +19,10 @@ import static org.junit.Assert.assertTrue;
 public class TestDvk {
 	
 	/**
-	 * Directory to hold all test files during testing.
+	 * Main directory for holding test files.
 	 */
-	private File test_dir;
-	
-	/**
-	 * Creates the test directory for holding test files.
-	 */
-	@Before
-	public void create_test_directory() {
-		String user_dir = System.getProperty("user.dir");
-		this.test_dir = new File(user_dir, "dvkobject");
-		if(!this.test_dir.isDirectory()) {
-			this.test_dir.mkdir();
-		}
-	}
-	
-	/**
-	 * Deletes the test directory after testing.
-	 */
-	@After
-	public void delete_test_directory() {
-		try {
-			FileUtils.deleteDirectory(this.test_dir);
-		}
-		catch(IOException e) {}
-	}
+	@Rule
+	public TemporaryFolder temp_dir = new TemporaryFolder();
 	
 	/**
 	 * Tests the constructors for the Dvk class.
@@ -72,7 +46,7 @@ public class TestDvk {
 		assertEquals(null, dvk.get_secondary_file());
 		//TEST FILE READING CONSTRUCTOR
 		Dvk save_dvk = new Dvk();
-		File dvk_file = new File(this.test_dir, "dvk.dvk");
+		File dvk_file = new File(this.temp_dir.getRoot(), "dvk.dvk");
 		save_dvk.set_dvk_file(dvk_file);
 		save_dvk.set_dvk_id("id702");
 		save_dvk.set_title("CTestTitle");
@@ -119,7 +93,7 @@ public class TestDvk {
 		dvk.set_page_url(null);
 		assertFalse(dvk.can_write());
 		dvk.set_page_url("page_url");
-		dvk.set_media_file(null);
+		dvk.set_media_file("");
 		assertFalse(dvk.can_write());
 	}
 	
@@ -130,7 +104,7 @@ public class TestDvk {
 	public void test_read_write_dvk() {
 		//SET DVK DATA
 		Dvk dvk = new Dvk();
-		File dvk_file = new File(this.test_dir, "dvk1.dvk");
+		File dvk_file = new File(this.temp_dir.getRoot(), "dvk1.dvk");
 		dvk.set_dvk_file(dvk_file);
 		dvk.set_dvk_id("id1234");
 		dvk.set_title("WriteTestTitle");
@@ -172,11 +146,13 @@ public class TestDvk {
 		dvk.set_dvk_file(null);
 		dvk.read_dvk();
 		assertEquals(null, dvk.get_title());
-		dvk.set_dvk_file(new File(this.test_dir, "kjsdf.txt"));
+		dvk_file = new File(this.temp_dir.getRoot(), "kjsdf.txt");
+		assertFalse(dvk_file.exists());
+		dvk.set_dvk_file(dvk_file);
 		dvk.read_dvk();
 		assertEquals(null, dvk.get_title());
 		//TEST READING NON-DVK FILES
-		dvk_file = new File(this.test_dir, "other.dvk");
+		dvk_file = new File(this.temp_dir.getRoot(), "other.dvk");
 		InOut.write_file(dvk_file, "Not a dvk");
 		dvk.set_dvk_file(dvk_file);
 		dvk.read_dvk();
@@ -194,7 +170,7 @@ public class TestDvk {
 		dvk.read_dvk();
 		assertEquals(null, dvk.get_title());
 		// TEST WRITING INVALID FILE
-		dvk_file = new File(this.test_dir, "dvk2.dvk");
+		dvk_file = new File(this.temp_dir.getRoot(), "dvk2.dvk");
 		Dvk invalid = new Dvk();
 		invalid.set_dvk_file(dvk_file);
 		invalid.write_dvk();
@@ -208,11 +184,12 @@ public class TestDvk {
 	public void test_write_media() {
 		try (DConnect connect = new DConnect(false, false)) {
 			//CREATE INVALID DVK
+			File dvk_file = new File(this.temp_dir.getRoot(), "invalid");
 			Dvk dvk = new Dvk();
 			dvk.set_dvk_id("ID123");
 			dvk.set_title("Title");
 			dvk.set_artist("Artist");
-			dvk.set_dvk_file(new File(this.test_dir, "dvk.dvk"));
+			dvk.set_dvk_file(dvk_file);
 			dvk.set_media_file("media.png");
 			dvk.set_direct_url("kjsdskjdf");
 			dvk.write_media(connect);
@@ -501,7 +478,7 @@ public class TestDvk {
 		String user_dir = System.getProperty("user.dir");
 		File parent = new File(user_dir);
 		dvk.set_dvk_file(new File(parent, "thing.dvk"));
-		dvk.set_media_file(null);
+		dvk.set_media_file("");
 		assertEquals(null, dvk.get_media_file());
 		dvk.set_media_file("media.png");
 		String out = parent.getAbsolutePath();
@@ -527,7 +504,7 @@ public class TestDvk {
 		String user_dir = System.getProperty("user.dir");
 		File parent = new File(user_dir);
 		dvk.set_dvk_file(new File(parent, "thing.dvk"));
-		dvk.set_secondary_file(null);
+		dvk.set_secondary_file("");
 		assertEquals(null, dvk.get_secondary_file());
 		dvk.set_secondary_file("media.png");
 		String out = parent.getAbsolutePath();
@@ -565,7 +542,7 @@ public class TestDvk {
 	@Test
 	public void test_rename_files() {
 		//CREATE DVK
-		File file = new File(this.test_dir, "dvk.dvk");
+		File file = new File(this.temp_dir.getRoot(), "rename.dvk");
 		Dvk dvk = new Dvk();
 		dvk.set_dvk_id("ID1234");
 		dvk.set_title("Title");
@@ -600,7 +577,7 @@ public class TestDvk {
 	@Test
 	public void test_update_extensions() {
 		//CREATE DVK
-		File file = new File(this.test_dir, "dvk.dvk");
+		File file = new File(this.temp_dir.getRoot(), "extension.dvk");
 		Dvk dvk = new Dvk();
 		dvk.set_dvk_id("ID123");
 		dvk.set_title("Title");

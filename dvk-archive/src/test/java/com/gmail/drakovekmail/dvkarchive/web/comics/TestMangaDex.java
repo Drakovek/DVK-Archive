@@ -2,14 +2,13 @@ package com.gmail.drakovekmail.dvkarchive.web.comics;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
 import com.gmail.drakovekmail.dvkarchive.file.DvkException;
 import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
@@ -27,7 +26,8 @@ public class TestMangaDex {
 	/**
 	 * Directory to hold all test files during testing.
 	 */
-	private File test_dir;
+	@Rule
+	public TemporaryFolder temp_dir = new TemporaryFolder();
 	
 	/**
 	 * DConnect object for online connection.
@@ -39,11 +39,6 @@ public class TestMangaDex {
 	 */
 	@Before
 	public void set_up() {
-		String user_dir = System.getProperty("user.dir");
-		this.test_dir = new File(user_dir, "mangadextest");
-		if(!this.test_dir.isDirectory()) {
-			this.test_dir.mkdir();
-		}
 		try {
 			this.connect = new DConnect(false, false);
 		}
@@ -55,10 +50,6 @@ public class TestMangaDex {
 	 */
 	@After
 	public void tear_down() {
-		try {
-			FileUtils.deleteDirectory(this.test_dir);
-		}
-		catch(IOException e) {}
 		try {
 			this.connect.close();
 		}
@@ -236,9 +227,9 @@ public class TestMangaDex {
 	 */
 	@Test
 	public void test_get_start_chapter() {
-		File[] dirs = {this.test_dir};
+		File[] dirs = {this.temp_dir.getRoot()};
 		FilePrefs prefs = new FilePrefs();
-		prefs.set_index_dir(this.test_dir);
+		prefs.set_index_dir(this.temp_dir.getRoot());
 		try(DvkHandler dvk_handler = new DvkHandler(prefs, dirs, null)) {
 			//CREATE TEST CHAPTER DVKS
 			ArrayList<Dvk> cps = new ArrayList<>();
@@ -271,7 +262,7 @@ public class TestMangaDex {
 			dvk.set_title("Randomphilia | Ch. 73 | Pg. 2");
 			dvk.set_page_url("https://mangadex.cc/chapter/761782/1");
 			dvk.set_artist("Artist");
-			dvk.set_dvk_file(new File(this.test_dir, "dvk.dvk"));
+			dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "dvk.dvk"));
 			dvk.set_media_file("media.jpg");
 			dvk.write_dvk();
 			//CHECK START CHAPTER WITH EXISTING FILES
@@ -284,7 +275,7 @@ public class TestMangaDex {
 			dvk.set_dvk_id("MDX688478-5");
 			dvk.set_title("Randomphilia | Ch. 75 | Pg. 1");
 			dvk.set_page_url("https://mangadex.org/chapter/770792");
-			dvk.set_dvk_file(new File(this.test_dir, "dvk2.dvk"));
+			dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "dvk2.dvk"));
 			dvk.set_media_file("media.jpg");
 			dvk.write_dvk();
 			//CHECK START CHAPTER WITH LATEST CHAPTER DOWNLOADED
@@ -303,7 +294,7 @@ public class TestMangaDex {
 	@Test
 	public void test_get_dvks() {
 		FilePrefs prefs = new FilePrefs();
-		prefs.set_index_dir(this.test_dir);
+		prefs.set_index_dir(this.temp_dir.getRoot());
 		try (DConnectSelenium s_connect = new DConnectSelenium(true, null);
 				DvkHandler handler = new DvkHandler(prefs, null, null)) {
 			//CREATE DVK
@@ -312,7 +303,7 @@ public class TestMangaDex {
 			dvk.set_title("Randomphilia | Ch. 75 | Pg. 3");
 			dvk.set_artist("Artist");
 			dvk.set_page_url("https://mangadex.org/chapter/770792/3");
-			dvk.set_dvk_file(new File(this.test_dir, "dvk.dvk"));
+			dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "dvk.dvk"));
 			dvk.set_media_file("test.png");
 			dvk.write_dvk();
 			//CREATE TEST CHAPTER DVKS
@@ -338,11 +329,11 @@ public class TestMangaDex {
 			dvk.set_page_url("https://mangadex.org/chapter/761782");
 			cps.add(dvk);
 			//GET DVKS
-			File[] dirs = {this.test_dir};
+			File[] dirs = {this.temp_dir.getRoot()};
 			handler.read_dvks(dirs);
 			ArrayList<Dvk> dvks = MangaDex.get_dvks(
 					s_connect, handler, null,
-					this.test_dir, cps, false, false);
+					this.temp_dir.getRoot(), cps, false, false);
 			//CHECK PAGE 1
 			String value;
 			assertEquals(3, dvks.size());
@@ -360,10 +351,10 @@ public class TestMangaDex {
 			value = "/2d60025d419442a4d56d58a7bbcdc6db/M4.jpg";
 			assertTrue(dvks.get(2).get_direct_url().endsWith(value));
 			value = "Randomphilia - Ch 75 - Pg 4_MDX770792-4.dvk";
-			File file = new File(this.test_dir, value);
+			File file = new File(this.temp_dir.getRoot(), value);
 			assertEquals(file, dvks.get(2).get_dvk_file());
 			value = "Randomphilia - Ch 75 - Pg 4_MDX770792-4.jpg";
-			file = new File(this.test_dir, value);
+			file = new File(this.temp_dir.getRoot(), value);
 			assertEquals(file, dvks.get(2).get_media_file());
 			//CHECK PAGE 2
 			assertEquals("MDX770792-1", dvks.get(0).get_dvk_id());
@@ -374,10 +365,10 @@ public class TestMangaDex {
 			value = "/2d60025d419442a4d56d58a7bbcdc6db/M1.jpg";
 			assertTrue(dvks.get(0).get_direct_url().endsWith(value));
 			value = "Randomphilia - Ch 75 - Pg 1_MDX770792-1.dvk";
-			file = new File(this.test_dir, value);
+			file = new File(this.temp_dir.getRoot(), value);
 			assertEquals(file, dvks.get(0).get_dvk_file());
 			value = "Randomphilia - Ch 75 - Pg 1_MDX770792-1.jpg";
-			file = new File(this.test_dir, value);
+			file = new File(this.temp_dir.getRoot(), value);
 			assertEquals(file, dvks.get(0).get_media_file());
 			//CHECK INVALID
 			dvks = MangaDex.get_dvks(
@@ -427,11 +418,11 @@ public class TestMangaDex {
 	@Test
 	public void test_get_downloaded_titles() {
 		//CREATE SUB-DIRECTORIES
-		File sub1 = new File(this.test_dir, "sub1");
+		File sub1 = new File(this.temp_dir.getRoot(), "sub1");
 		if(!sub1.isDirectory()) {
 			sub1.mkdir();
 		}
-		File sub2 = new File(this.test_dir, "sub2");
+		File sub2 = new File(this.temp_dir.getRoot(), "sub2");
 		if(!sub2.isDirectory()) {
 			sub2.mkdir();
 		}
@@ -456,7 +447,7 @@ public class TestMangaDex {
 		tags[0] = "MangaDex:12345";
 		tags[1] = "thing";
 		dvk.set_web_tags(tags);
-		dvk.set_dvk_file(new File(this.test_dir, "dvk3.dvk"));
+		dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "dvk3.dvk"));
 		dvk.set_media_file("dvk3.png");
 		dvk.write_dvk();
 		dvk.set_dvk_file(new File(sub1, "dvk4.dvk"));
@@ -476,24 +467,24 @@ public class TestMangaDex {
 		//CREATE DVKS - TITLE 4
 		dvk.set_title("Title 4 | Blah");
 		dvk.set_page_url("diferent/page");
-		dvk.set_dvk_file(new File(this.test_dir, "dvk7.dvk"));
+		dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "dvk7.dvk"));
 		dvk.set_media_file("dvk7.pdf");
 		dvk.write_dvk();
 		//CHECK GET ARTISTS
 		ArrayList<Dvk> dvks;
-		File[] dirs = {this.test_dir};
+		File[] dirs = {this.temp_dir.getRoot()};
 		FilePrefs prefs = new FilePrefs();
-		prefs.set_index_dir(this.test_dir);
+		prefs.set_index_dir(this.temp_dir.getRoot());
 		try(DvkHandler handler = new DvkHandler(prefs, dirs, null)) {
 			assertEquals(7, handler.get_size());
 			dvks = MangaDex.get_downloaded_titles(handler);
 			assertEquals(3, dvks.size());
 			assertEquals("Title 1 ", dvks.get(0).get_title());
 			assertEquals("2468", dvks.get(0).get_dvk_id());
-			assertEquals(this.test_dir, dvks.get(0).get_dvk_file());
+			assertEquals(this.temp_dir.getRoot(), dvks.get(0).get_dvk_file());
 			assertEquals("Title 2", dvks.get(1).get_title());
 			assertEquals("12345", dvks.get(1).get_dvk_id());
-			assertEquals(this.test_dir, dvks.get(1).get_dvk_file());
+			assertEquals(this.temp_dir.getRoot(), dvks.get(1).get_dvk_file());
 			assertEquals("Title 3 ", dvks.get(2).get_title());
 			assertEquals("9876", dvks.get(2).get_dvk_id());
 			assertEquals(sub2, dvks.get(2).get_dvk_file());

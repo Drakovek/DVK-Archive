@@ -6,10 +6,12 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
 import com.gmail.drakovekmail.dvkarchive.file.DvkException;
 import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
@@ -23,12 +25,11 @@ import com.gmail.drakovekmail.dvkarchive.file.InOut;
  */
 public class TestFurAffinity {
 	
-	//TODO TEST INVALID ENTRIES
-	
 	/**
 	 * Directory for holding test files.
 	 */
-	private File test_dir;
+	@Rule
+	public TemporaryFolder temp_dir = new TemporaryFolder();
 	
 	/**
 	 * FurAffinity object for testing
@@ -40,8 +41,6 @@ public class TestFurAffinity {
 	 */
 	@Before
 	public void set_up() {
-		//CREATE TEST FILES
-		create_directory();
 		//SET UP FURAFFINITY OBJECT
 		FilePrefs prefs = new FilePrefs();
 		this.fur = new FurAffinity(prefs, null);
@@ -52,29 +51,7 @@ public class TestFurAffinity {
 	 */
 	@After
 	public void tear_down() {
-		delete_directory();
 		this.fur.close();
-	}
-	
-	/**
-	 * Creates the directory for holding test files.
-	 */
-	private void create_directory() {
-		String user_dir = System.getProperty("user.dir");
-		this.test_dir = new File(user_dir, "faftest");
-		if(!this.test_dir.isDirectory()) {
-			this.test_dir.mkdir();
-		}
-	}
-	
-	/**
-	 * Deletes the directory holding test files.
-	 */
-	private void delete_directory() {
-		try {
-			FileUtils.deleteDirectory(this.test_dir);
-		}
-		catch(IOException e) {}
 	}
 	
 	/**
@@ -160,9 +137,17 @@ public class TestFurAffinity {
 	 */
 	@Test
 	public void test_get_gallery_ids() {
+		//CREATE DIRECTORY
+		File gal_dir = null;
+		try {
+			gal_dir = this.temp_dir.newFolder("gallery_ids");
+		}
+		catch(IOException e) {
+			assertTrue(false);
+		}
 		//CREATE DVK 1
 		Dvk dvk = new Dvk();
-		dvk.set_dvk_file(new File(this.test_dir, "shortcut.dvk"));
+		dvk.set_dvk_file(new File(gal_dir, "shortcut.dvk"));
 		dvk.set_dvk_id("FAF35034678");
 		dvk.set_title("Down the Shortcut");
 		dvk.set_artist("Mr_Sparta");
@@ -173,7 +158,7 @@ public class TestFurAffinity {
 		dvk.set_media_file("shortcut.png");
 		dvk.write_dvk();
 		//CREATE DVK 2
-		dvk.set_dvk_file(new File(this.test_dir, "rabbit.dvk"));
+		dvk.set_dvk_file(new File(gal_dir, "rabbit.dvk"));
 		dvk.set_dvk_id("FAF13982138");
 		dvk.set_title("Rabbit in the city");
 		tags[0] = null;
@@ -182,11 +167,11 @@ public class TestFurAffinity {
 		dvk.set_page_url(url);
 		dvk.set_media_file("rabbit.png");
 		dvk.write_dvk();
-		File[] dirs = {this.test_dir};
+		File[] dirs = {gal_dir};
 		FilePrefs prefs = new FilePrefs();
-		prefs.set_index_dir(this.test_dir);
+		prefs.set_index_dir(gal_dir);
 		try(DvkHandler handler = new DvkHandler(prefs, dirs, null)) {
-			File sub = new File(this.test_dir, "sub");
+			File sub = new File(gal_dir, "sub");
 			if(!sub.isDirectory()) {
 				sub.mkdir();
 			}
@@ -222,9 +207,9 @@ public class TestFurAffinity {
 			assertTrue(dvk.get_dvk_file().exists());
 			dvk = dvks.get(1);
 			assertEquals("rabbit.dvk", dvk.get_dvk_file().getName());
-			assertEquals(this.test_dir, dvk.get_dvk_file().getParentFile());
+			assertEquals(gal_dir, dvk.get_dvk_file().getParentFile());
 			assertEquals("rabbit.png", dvk.get_media_file().getName());
-			assertEquals(this.test_dir, dvk.get_media_file().getParentFile());
+			assertEquals(gal_dir, dvk.get_media_file().getParentFile());
 			assertEquals(1, dvk.get_web_tags().length);
 			assertEquals("Favorite:Whoever", dvk.get_web_tags()[0]);
 			assertTrue(dvk.get_dvk_file().exists());
@@ -263,9 +248,17 @@ public class TestFurAffinity {
 	 */
 	@Test
 	public void test_get_gallery_ids_favorites() {
+		//CREATE TEST DIRECTORY
+		File fav_dir = null;
+		try {
+			fav_dir = this.temp_dir.newFolder("favorite_ids");
+		}
+		catch(IOException e) {
+			assertTrue(false);
+		}
 		//DVK 1 - STOPS SCANNING DUE TO FAVORITES TAG
 		Dvk dvk = new Dvk();
-		dvk.set_dvk_file(new File(this.test_dir, "assistance.dvk"));
+		dvk.set_dvk_file(new File(fav_dir, "assistance.dvk"));
 		dvk.set_dvk_id("FAF33314829");
 		dvk.set_title("No Assistance Required");
 		dvk.set_artist("Kainik");
@@ -277,7 +270,7 @@ public class TestFurAffinity {
 		dvk.write_dvk();
 		//DVK 2 - KEEPS SCANNING DUE TO LACK OF FAVORITES TAG
 		dvk = new Dvk();
-		dvk.set_dvk_file(new File(this.test_dir, "crepes.dvk"));
+		dvk.set_dvk_file(new File(fav_dir, "crepes.dvk"));
 		dvk.set_dvk_id("FAF35881631");
 		dvk.set_title("Crepes");
 		dvk.set_artist("Nyhgault");
@@ -290,11 +283,11 @@ public class TestFurAffinity {
 		url = "https://www.furaffinity.net/view/35881631/";
 		dvk.set_page_url(url);
 		dvk.write_dvk();
-		File[] dirs = {this.test_dir};
+		File[] dirs = {fav_dir};
 		FilePrefs prefs = new FilePrefs();
-		prefs.set_index_dir(this.test_dir);
+		prefs.set_index_dir(fav_dir);
 		try(DvkHandler handler = new DvkHandler(prefs, dirs, null)) {
-			File sub = new File(this.test_dir, "sub");
+			File sub = new File(fav_dir, "sub");
 			if(!sub.isDirectory()) {
 				sub.mkdir();
 			}
@@ -316,8 +309,8 @@ public class TestFurAffinity {
 			assertEquals("no", dvk.get_web_tags()[0]);
 			assertEquals("tag", dvk.get_web_tags()[1]);
 			assertEquals("Favorite:Other", dvk.get_web_tags()[2]);
-			assertEquals(this.test_dir, dvk.get_dvk_file().getParentFile());
-			assertEquals(this.test_dir, dvk.get_media_file().getParentFile());
+			assertEquals(fav_dir, dvk.get_dvk_file().getParentFile());
+			assertEquals(fav_dir, dvk.get_media_file().getParentFile());
 			assertTrue(dvk.get_dvk_file().exists());
 			dvk = dvks.get(1);
 			assertEquals("No Assistance Required", dvk.get_title());
@@ -325,8 +318,8 @@ public class TestFurAffinity {
 			assertEquals("favorite:Thundergonian", dvk.get_web_tags()[0]);
 			assertEquals("DVK:Single", dvk.get_web_tags()[1]);
 			assertEquals("blah", dvk.get_web_tags()[2]);
-			assertEquals(this.test_dir, dvk.get_dvk_file().getParentFile());
-			assertEquals(this.test_dir, dvk.get_media_file().getParentFile());
+			assertEquals(fav_dir, dvk.get_dvk_file().getParentFile());
+			assertEquals(fav_dir, dvk.get_media_file().getParentFile());
 			assertTrue(dvk.get_dvk_file().exists());
 			assertEquals("No Assistance Required", dvk.get_title());
 		}
@@ -340,9 +333,17 @@ public class TestFurAffinity {
 	 */
 	@Test
 	public void test_get_journal_ids() {
+		//CREATE TEST DIRECTORY
+		File jnl_dir = null;
+		try {
+			jnl_dir = this.temp_dir.newFolder("journal_ids");
+		}
+		catch(IOException e) {
+			assertTrue(false);
+		}
 		//CREATE DVK 1
 		Dvk dvk = new Dvk();
-		dvk.set_dvk_file(new File(this.test_dir, "might.dvk"));
+		dvk.set_dvk_file(new File(jnl_dir, "might.dvk"));
 		dvk.set_dvk_id("FAF8104946-J");
 		dvk.set_title("might as well");
 		dvk.set_artist("angrboda");
@@ -353,7 +354,7 @@ public class TestFurAffinity {
 		dvk.set_media_file("might.png");
 		dvk.write_dvk();
 		//CREATE DVK 2
-		dvk.set_dvk_file(new File(this.test_dir, "mff.dvk"));
+		dvk.set_dvk_file(new File(jnl_dir, "mff.dvk"));
 		dvk.set_dvk_id("FAF4030490-J");
 		dvk.set_title("finding me at MFF");
 		tags[1] = null;
@@ -362,13 +363,13 @@ public class TestFurAffinity {
 		dvk.set_page_url(url);
 		dvk.set_media_file("mff.png");
 		dvk.write_dvk();
-		File sub = new File(this.test_dir, "sub");
+		File sub = new File(jnl_dir, "sub");
 		if(!sub.isDirectory()) {
 			sub.mkdir();
 		}
-		File[] dirs = {this.test_dir};
+		File[] dirs = {jnl_dir};
 		FilePrefs prefs = new FilePrefs();
-		prefs.set_index_dir(this.test_dir);
+		prefs.set_index_dir(jnl_dir);
 		try(DvkHandler handler = new DvkHandler(prefs, dirs, null)) {
 			//TEST SMALL SAMPLE
 			ArrayList<String> links = this.fur.get_journal_ids(
@@ -392,7 +393,7 @@ public class TestFurAffinity {
 			dvk = dvks.get(0);
 			assertEquals("finding me at MFF", dvk.get_title());
 			assertEquals(1, dvk.get_web_tags().length);
-			assertEquals(this.test_dir, dvk.get_dvk_file().getParentFile());
+			assertEquals(jnl_dir, dvk.get_dvk_file().getParentFile());
 			assertTrue(dvk.get_dvk_file().exists());
 			dvk = dvks.get(1);
 			assertEquals("might as well", dvk.get_title());
@@ -434,20 +435,12 @@ public class TestFurAffinity {
 		//GET PAGES
 		test_get_gallery_ids();
 		//GET FAVORITES PAGES
-		delete_directory();
-		create_directory();
 		test_get_gallery_ids_favorites();
 		//GET JOURNAL PAGES
-		delete_directory();
-		create_directory();
 		test_get_journal_ids();
 		//GET DVK
-		delete_directory();
-		create_directory();
 		test_get_dvk();
 		//GET JOURNAL DVK
-		delete_directory();
-		create_directory();
 		test_get_journal_dvk();
 	}
 	
@@ -456,27 +449,35 @@ public class TestFurAffinity {
 	 */
 	@Test
 	public void test_get_dvk() {
+		//CREATE TEST DIRECTORY
+		File dvk_dir = null;
+		try {
+			dvk_dir = this.temp_dir.newFolder("dvk_dir");
+		}
+		catch(IOException e) {
+			assertTrue(false);
+		}
 		//CREATE TEST DVK
 		Dvk dvk = new Dvk();
 		dvk.set_dvk_id("FAF1234567");
 		dvk.set_title("Test");
 		dvk.set_artist("person");
 		dvk.set_page_url("/page/");
-		dvk.set_dvk_file(new File(this.test_dir, "test.dvk"));
+		dvk.set_dvk_file(new File(dvk_dir, "test.dvk"));
 		dvk.set_media_file("test.png");
 		dvk.write_dvk();
-		File[] dirs = {this.test_dir};
+		File[] dirs = {dvk_dir};
 		FilePrefs prefs = new FilePrefs();
-		prefs.set_index_dir(this.test_dir);
+		prefs.set_index_dir(dvk_dir);
 		try(DvkHandler dvk_handler = new DvkHandler(prefs, dirs, null)) {
 			//TEST FAVORITING ALREADY DOWNLOADED DVK
-			dvk = this.fur.get_dvk("FAF1234567", dvk_handler, this.test_dir, "Somebody", true, true);
+			dvk = this.fur.get_dvk("FAF1234567", dvk_handler, dvk_dir, "Somebody", true, true);
 			assertEquals("Test", dvk.get_title());
 			assertEquals(1, dvk.get_web_tags().length);
 			assertEquals("Favorite:Somebody", dvk.get_web_tags()[0]);
 			assertTrue(dvk.get_dvk_file().exists());
 			//FIRST DVK
-			dvk = this.fur.get_dvk("FAF32521285", dvk_handler, this.test_dir, null, false, false);
+			dvk = this.fur.get_dvk("FAF32521285", dvk_handler, dvk_dir, null, false, false);
 			assertEquals("FAF32521285", dvk.get_dvk_id());
 			assertEquals("Robin the Bobcat", dvk.get_title());
 			assertEquals(1, dvk.get_artists().length);
@@ -504,12 +505,12 @@ public class TestFurAffinity {
 			assertEquals("vector", dvk.get_web_tags()[8]);
 			assertEquals("inkscape", dvk.get_web_tags()[9]);
 			assertEquals("Robin the Bobcat_FAF32521285.dvk", dvk.get_dvk_file().getName());
-			assertEquals(this.test_dir, dvk.get_dvk_file().getParentFile());
+			assertEquals(dvk_dir, dvk.get_dvk_file().getParentFile());
 			assertEquals("Robin the Bobcat_FAF32521285.png", dvk.get_media_file().getName());
-			assertEquals(this.test_dir, dvk.get_media_file().getParentFile());
+			assertEquals(dvk_dir, dvk.get_media_file().getParentFile());
 			assertEquals(null, dvk.get_secondary_file());
 			//SECOND DVK
-			dvk = this.fur.get_dvk("FAF15301779", dvk_handler, this.test_dir, "ArtDude", true, true);
+			dvk = this.fur.get_dvk("FAF15301779", dvk_handler, dvk_dir, "ArtDude", true, true);
 			assertEquals("FAF15301779", dvk.get_dvk_id());
 			assertEquals("Affinity Ch. 1", dvk.get_title());
 			assertEquals(1, dvk.get_artists().length);
@@ -548,11 +549,11 @@ public class TestFurAffinity {
 			assertEquals("DVK:Single", dvk.get_web_tags()[15]);
 			assertEquals("Favorite:ArtDude", dvk.get_web_tags()[16]);
 			assertEquals("Affinity Ch 1_FAF15301779.dvk", dvk.get_dvk_file().getName());
-			assertEquals(this.test_dir, dvk.get_dvk_file().getParentFile());
+			assertEquals(dvk_dir, dvk.get_dvk_file().getParentFile());
 			assertEquals("Affinity Ch 1_FAF15301779.txt", dvk.get_media_file().getName());
-			assertEquals(this.test_dir, dvk.get_media_file().getParentFile());
+			assertEquals(dvk_dir, dvk.get_media_file().getParentFile());
 			assertEquals("Affinity Ch 1_FAF15301779_S.jpg", dvk.get_secondary_file().getName());
-			assertEquals(this.test_dir, dvk.get_secondary_file().getParentFile());
+			assertEquals(dvk_dir, dvk.get_secondary_file().getParentFile());
 			assertTrue(dvk.get_dvk_file().exists());
 			assertTrue(dvk.get_media_file().exists());
 			assertTrue(dvk.get_secondary_file().exists());
@@ -561,7 +562,7 @@ public class TestFurAffinity {
 			assertTrue(value.contains("To Be Continued!!???"));
 			assertTrue(value.contains("It was always the same dream for me."));
 			//THIRD DVK
-			dvk = this.fur.get_dvk("FAF29756524", dvk_handler, this.test_dir, null, false, false);
+			dvk = this.fur.get_dvk("FAF29756524", dvk_handler, dvk_dir, null, false, false);
 			assertEquals("FAF29756524", dvk.get_dvk_id());
 			value = "[Changed fanart] Are you going to eat that Peach, human?";
 			assertEquals(value, dvk.get_title());
@@ -592,10 +593,10 @@ public class TestFurAffinity {
 			assertEquals("wolf", dvk.get_web_tags()[10]);
 			value = "Changed fanart Are you going to eat that Peach human_FAF29756524.dvk";
 			assertEquals(value, dvk.get_dvk_file().getName());
-			assertEquals(this.test_dir, dvk.get_dvk_file().getParentFile());
+			assertEquals(dvk_dir, dvk.get_dvk_file().getParentFile());
 			value = "Changed fanart Are you going to eat that Peach human_FAF29756524.png";
 			assertEquals(value, dvk.get_media_file().getName());
-			assertEquals(this.test_dir, dvk.get_media_file().getParentFile());
+			assertEquals(dvk_dir, dvk.get_media_file().getParentFile());
 			assertEquals(null, dvk.get_secondary_file());
 			//CHECK ADDED TO DVK HANDLER
 			ArrayList<Dvk> dvks = dvk_handler.get_dvks(0, -1, 'a', false, false);
@@ -608,13 +609,13 @@ public class TestFurAffinity {
 			assertEquals("Test", dvks.get(3).get_title());
 			//TEST INVALID DVK
 			try {
-				dvk = this.fur.get_dvk("FAF1982012831317", dvk_handler, this.test_dir, null, false, false);
+				dvk = this.fur.get_dvk("FAF1982012831317", dvk_handler, dvk_dir, null, false, false);
 				assertTrue(false);
 			}
 			catch(DvkException f) {}
 			if(this.fur.is_logged_in()) {
 				//MATURE DVK
-				dvk = this.fur.get_dvk("FAF13634433", null, this.test_dir, "Person", false, false);
+				dvk = this.fur.get_dvk("FAF13634433", null, dvk_dir, "Person", false, false);
 				assertEquals("FAF13634433", dvk.get_dvk_id());
 				assertEquals("spiritual feedback - 3", dvk.get_title());
 				assertEquals(1, dvk.get_artists().length);
@@ -648,10 +649,10 @@ public class TestFurAffinity {
 				assertEquals("Favorite:Person", dvk.get_web_tags()[15]);
 				value = "spiritual feedback - 3_FAF13634433.dvk";
 				assertEquals(value, dvk.get_dvk_file().getName());
-				assertEquals(this.test_dir, dvk.get_dvk_file().getParentFile());
+				assertEquals(this.temp_dir.getRoot(), dvk.get_dvk_file().getParentFile());
 				value = "spiritual feedback - 3_FAF13634433.jpg";
 				assertEquals(value, dvk.get_media_file().getName());
-				assertEquals(this.test_dir, dvk.get_media_file().getParentFile());
+				assertEquals(this.temp_dir.getRoot(), dvk.get_media_file().getParentFile());
 				assertEquals(null, dvk.get_secondary_file());
 			}
 		}
@@ -665,12 +666,19 @@ public class TestFurAffinity {
 	 */
 	@Test
 	public void test_get_journal_dvk() {
-		File[] dirs = {this.test_dir};
+		File jnl_dir = null;
+		try {
+			jnl_dir = this.temp_dir.newFolder("journal_dvks");
+		}
+		catch(IOException e) {
+			assertTrue(false);
+		}
+		File[] dirs = {jnl_dir};
 		FilePrefs prefs = new FilePrefs();
-		prefs.set_index_dir(this.test_dir);
+		prefs.set_index_dir(jnl_dir);
 		try(DvkHandler dvk_handler = new DvkHandler(prefs, dirs, null)) {
 			//FIRST DVK
-			Dvk dvk = this.fur.get_journal_dvk("FAF9485924-J", dvk_handler, this.test_dir, false, true);
+			Dvk dvk = this.fur.get_journal_dvk("FAF9485924-J", dvk_handler, jnl_dir, false, true);
 			assertEquals("FAF9485924-J", dvk.get_dvk_id());
 			assertEquals("Commission Information", dvk.get_title());
 			assertEquals(1, dvk.get_artists().length);
@@ -690,16 +698,16 @@ public class TestFurAffinity {
 			assertEquals("Rating:General", dvk.get_web_tags()[0]);
 			assertEquals("Gallery:Journals", dvk.get_web_tags()[1]);
 			assertEquals("Commission Information_FAF9485924-J.dvk", dvk.get_dvk_file().getName());
-			assertEquals(this.test_dir, dvk.get_dvk_file().getParentFile());
+			assertEquals(jnl_dir, dvk.get_dvk_file().getParentFile());
 			assertEquals("Commission Information_FAF9485924-J.html", dvk.get_media_file().getName());
-			assertEquals(this.test_dir, dvk.get_media_file().getParentFile());
+			assertEquals(jnl_dir, dvk.get_media_file().getParentFile());
 			assertEquals(null, dvk.get_secondary_file());
 			assertTrue(dvk.get_dvk_file().exists());
 			assertTrue(dvk.get_media_file().exists());
 			String text = InOut.read_file(dvk.get_media_file());
 			assertEquals("<!DOCTYPE html><html>" + value + "</html>", text);
 			//SECOND DVK
-			dvk = this.fur.get_journal_dvk("FAF4743500-J", dvk_handler, this.test_dir, true, true);
+			dvk = this.fur.get_journal_dvk("FAF4743500-J", dvk_handler, jnl_dir, true, true);
 			assertEquals("FAF4743500-J", dvk.get_dvk_id());
 			assertEquals("CLOSED $35 quick color pinups - 4 spots", dvk.get_title());
 			assertEquals(1, dvk.get_artists().length);
@@ -735,10 +743,10 @@ public class TestFurAffinity {
 			assertEquals("DVK:Single", dvk.get_web_tags()[2]);
 			assertEquals("CLOSED 35 quick color pinups - 4 spots_FAF4743500-J.dvk",
 					dvk.get_dvk_file().getName());
-			assertEquals(this.test_dir, dvk.get_dvk_file().getParentFile());
+			assertEquals(jnl_dir, dvk.get_dvk_file().getParentFile());
 			assertEquals("CLOSED 35 quick color pinups - 4 spots_FAF4743500-J.html",
 					dvk.get_media_file().getName());
-			assertEquals(this.test_dir, dvk.get_media_file().getParentFile());
+			assertEquals(jnl_dir, dvk.get_media_file().getParentFile());
 			assertEquals(null, dvk.get_secondary_file());
 			assertTrue(dvk.get_dvk_file().exists());
 			assertTrue(dvk.get_media_file().exists());
@@ -746,7 +754,7 @@ public class TestFurAffinity {
 			assertEquals("<!DOCTYPE html><html>" + value + "</html>", text);
 			//TEST INVALID
 			try {
-				dvk = this.fur.get_journal_dvk("FAF646198461984618-J", dvk_handler, this.test_dir, true, true);
+				dvk = this.fur.get_journal_dvk("FAF646198461984618-J", dvk_handler, jnl_dir, true, true);
 				assertTrue(false);
 			}
 			catch(DvkException f) {}

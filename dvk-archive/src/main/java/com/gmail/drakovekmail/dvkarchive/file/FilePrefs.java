@@ -16,19 +16,9 @@ public class FilePrefs {
 	private static final String INDEX_DIR = "index_dir";
 	
 	/**
-	 * Key for the "use index" setting
-	 */
-	private static final String USE_INDEX = "use_index";
-	
-	/**
 	 * Directory in which to store DvkDirectory index files
 	 */
 	private File index_dir;
-	
-	/**
-	 * Whether to load DvkDirectories from index files
-	 */
-	private boolean use_index;
 	
 	/**
 	 * Initializes FilePrefs by loading preferences.
@@ -49,8 +39,6 @@ public class FilePrefs {
 			file = get_default_directory();
 		}
 		set_index_dir(file);
-		//GET USE INDEXVALUE
-		set_use_index(prefs.getBoolean(USE_INDEX, true));
 	}
 	
 	/**
@@ -89,8 +77,6 @@ public class FilePrefs {
 		else {
 			prefs.put(INDEX_DIR, "");
 		}
-		//GET USE INDEXVALUE
-		prefs.putBoolean(USE_INDEX, use_index());
 	}
 	
 	/**
@@ -114,23 +100,5 @@ public class FilePrefs {
 	 */
 	public File get_index_dir() {
 		return this.index_dir;
-	}
-	
-	/**
-	 * Sets whether to use index files.
-	 * 
-	 * @param use_index Whether to use index files
-	 */
-	public void set_use_index(boolean use_index) {
-		this.use_index = use_index;
-	}
-	
-	/**
-	 * Returns whether to use index files.
-	 * 
-	 * @return Whether to use index files
-	 */
-	public boolean use_index() {
-		return this.use_index;
 	}
 }

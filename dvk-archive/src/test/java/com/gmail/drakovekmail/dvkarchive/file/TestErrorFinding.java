@@ -7,11 +7,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-
-import org.apache.commons.io.FileUtils;
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 /**
  * Unit tests for the ErrorFinding class.
@@ -23,33 +22,19 @@ public class TestErrorFinding {
 	/**
 	 * Main directory for storing test files.
 	 */
-	private File test_dir;
+	@Rule
+	public TemporaryFolder temp_dir = new TemporaryFolder();
 	
 	/**
 	 * Creates files for testing.
 	 */
 	@Before
 	public void create_test_files() {
-		//CREATE MAIN DIRECTORY
-		String user_dir = System.getProperty("user.dir");
-		this.test_dir = new File(user_dir, "errortest");
-		if(!this.test_dir.isDirectory()) {
-			this.test_dir.mkdir();
-		}
-		//CREATE SUBDIRECTORIES
-		File d1 = new File(this.test_dir, "d1");
-		if(!d1.isDirectory()) {
-			d1.mkdir();
-		}
-		File d2 = new File(this.test_dir, "d2");
-		if(!d2.isDirectory()) {
-			d2.mkdir();
-		}
-		File d3 = new File(this.test_dir, "d3");
-		if(!d3.isDirectory()) {
-			d3.mkdir();
-		}
 		try {
+			//CREATE SUBDIRECTORIES
+			File d1 = this.temp_dir.newFolder("d1");
+			File d2 = this.temp_dir.newFolder("d2");
+			File d3 = this.temp_dir.newFolder("d3");
 			//CREATE DVK1
 			Dvk dvk1 = new Dvk();
 			dvk1.set_dvk_id("ID1");
@@ -93,7 +78,7 @@ public class TestErrorFinding {
 			dvk4.get_media_file().createNewFile();
 			dvk4.write_dvk();
 			//CREATE UNLINKED FILES
-			File u1 = new File(this.test_dir, "u1.png");
+			File u1 = new File(this.temp_dir.getRoot(), "u1.png");
 			u1.createNewFile();
 			File u2 = new File(d3, "u2.jpg");
 			u2.createNewFile();
@@ -104,24 +89,13 @@ public class TestErrorFinding {
 	}
 	
 	/**
-	 * Deletes test files.
-	 */
-	@After
-	public void remove_test_files() {
-		try {
-			FileUtils.deleteDirectory(this.test_dir);
-		}
-		catch(IOException e) {}
-	}
-	
-	/**
 	 * Tests the get_unlinked_media method.
 	 */
 	@Test
 	public void test_get_unlinked_media() {
-		File[] dirs = {this.test_dir};
+		File[] dirs = {this.temp_dir.getRoot()};
 		FilePrefs prefs = new FilePrefs();
-		prefs.set_index_dir(this.test_dir);
+		prefs.set_index_dir(this.temp_dir.getRoot());
 		try(DvkHandler dvk_handler = new DvkHandler(prefs, dirs, null)) {
 			ArrayList<File> unlinked;
 			unlinked = ErrorFinding.get_unlinked_media(dvk_handler, dirs, null);
@@ -143,9 +117,9 @@ public class TestErrorFinding {
 	 */
 	@Test
 	public void test_get_missing_media_dvks() {
-		File[] dirs = {this.test_dir};
+		File[] dirs = {this.temp_dir.getRoot()};
 		FilePrefs prefs = new FilePrefs();
-		prefs.set_index_dir(this.test_dir);
+		prefs.set_index_dir(this.temp_dir.getRoot());
 		try(DvkHandler dvk_handler = new DvkHandler(prefs, dirs, null)) {
 			assertEquals(4, dvk_handler.get_size());
 			ArrayList<File> missing;
@@ -168,9 +142,9 @@ public class TestErrorFinding {
 	 */
 	@Test
 	public void test_get_same_ids() {
-		File[] dirs = {this.test_dir};
+		File[] dirs = {this.temp_dir.getRoot()};
 		FilePrefs prefs = new FilePrefs();
-		prefs.set_index_dir(this.test_dir);
+		prefs.set_index_dir(this.temp_dir.getRoot());
 		try(DvkHandler dvk_handler = new DvkHandler(prefs, dirs, null)) {
 			assertEquals(4, dvk_handler.get_size());
 			ArrayList<File> same;

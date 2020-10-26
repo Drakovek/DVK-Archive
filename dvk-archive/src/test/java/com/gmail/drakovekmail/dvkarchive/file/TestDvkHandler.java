@@ -10,11 +10,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
-import org.junit.After;
+import org.junit.rules.TemporaryFolder;
 import org.junit.Before;
+import org.junit.Rule;
 
 /**
  * Unit tests for the DvkHandler class.
@@ -24,14 +24,15 @@ import org.junit.Before;
 public class TestDvkHandler {
 	
 	/**
+	 * Main directory for holding test files.
+	 */
+	@Rule
+	public TemporaryFolder temp_dir = new TemporaryFolder();
+
+	/**
 	 * Main DvkHander object for testing purposes.
 	 */
 	private DvkHandler dvk_handler;
-
-	/**
-	 * Main directory for holding test files.
-	 */
-	private File test_dir;
 	
 	/**
 	 * Sub-directory for holding test files.
@@ -54,28 +55,19 @@ public class TestDvkHandler {
 	@Before
 	public void create_test_files() {
 		//CREATE DIRECTORIES
-		String user_dir = System.getProperty("user.dir");
-		this.test_dir = new File(user_dir, "handlerdir");
-		if(!this.test_dir.isDirectory()) {
-			this.test_dir.mkdir();
+		File index_dir = null;
+		File f3 = null;
+		File f4 = null;
+		try {
+			index_dir = this.temp_dir.newFolder("indexing");
+			this.f1 = this.temp_dir.newFolder("f1");
+			this.f2 = this.temp_dir.newFolder("f2");
+			f3 = this.temp_dir.newFolder("f3");
+			f4 = new File(this.f2, "f4");
 		}
-		File index_dir = new File(this.test_dir, "indexing");
-		if(!index_dir.isDirectory()) {
-			index_dir.mkdir();
+		catch(IOException e) {
+			f4 = new File("");
 		}
-		this.f1 = new File(this.test_dir, "f1");
-		if(!this.f1.isDirectory()) {
-			this.f1.mkdir();
-		}
-		this.f2 = new File(this.test_dir, "f2");
-		if(!this.f2.isDirectory()) {
-			this.f2.mkdir();
-		}
-		File f3 = new File(this.test_dir, "f3");
-		if(!f3.isDirectory()) {
-			f3.mkdir();
-		}
-		File f4 = new File(this.f2, "f4");
 		if(!f4.isDirectory()) {
 			f4.mkdir();
 		}
@@ -146,29 +138,14 @@ public class TestDvkHandler {
 	}
 	
 	/**
-	 * Deletes the test directory after testing.
-	 */
-	@After
-	public void delete_test_directory() {
-		try {
-			this.dvk_handler.close();
-		}
-		catch(DvkException e) {}
-		try {
-			FileUtils.deleteDirectory(this.test_dir);
-		}
-		catch(IOException e) {}
-	}
-	
-	/**
 	 * Tests the initialize_connect method.
 	 */
 	@Test
 	public void test_initialize_connect() {
 		//CREATE INDEX DIRECTORY
 		FilePrefs prefs = new FilePrefs();
-		prefs.set_index_dir(this.test_dir);
-		File db = new File(this.test_dir, "dvk_archive.db");
+		prefs.set_index_dir(this.temp_dir.getRoot());
+		File db = new File(this.temp_dir.getRoot(), "dvk_archive.db");
 		assertFalse(db.exists());
 		try (DvkHandler handler = new DvkHandler(prefs, null, null)) {
 			handler.initialize_connection();
@@ -189,7 +166,7 @@ public class TestDvkHandler {
 		assertEquals(0, this.dvk_handler.get_size());
 		assertEquals(0, this.dvk_handler.get_size());
 		//LOAD FROM MAIN TEST DIRECTORY
-		File[] dirs = {this.test_dir};
+		File[] dirs = {this.temp_dir.getRoot()};
 		this.dvk_handler.read_dvks(dirs);
 		assertEquals(5, this.dvk_handler.get_size());
 		ArrayList<Dvk> dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
@@ -202,7 +179,7 @@ public class TestDvkHandler {
 		assertEquals("Something", dvks.get(4).get_title());
 		//TEST ALL DVK PARAMETERS
 		Dvk dvk = dvks.get(3);
-		File f3 = new File(this.test_dir, "f3");
+		File f3 = new File(this.temp_dir.getRoot(), "f3");
 		assertTrue(dvk.get_sql_id() > 0);
 		assertEquals(f3, dvk.get_dvk_file().getParentFile());
 		assertEquals("dvk3.dvk", dvk.get_dvk_file().getName());
@@ -233,7 +210,7 @@ public class TestDvkHandler {
 		dvk.set_title("New Dvk");
 		dvk.set_artist("NewArtist");
 		dvk.set_page_url("/new_page/");
-		dvk.set_dvk_file(new File(this.test_dir, "new_dvk.dvk"));
+		dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "new_dvk.dvk"));
 		dvk.set_media_file("new_dvk.png");
 		dvk.write_dvk();
 		//MODIFY DVK
@@ -263,7 +240,7 @@ public class TestDvkHandler {
 		assertEquals(3, dvks.size());
 		//TEST DELETING DVKS
 		dirs = new File[1];
-		dirs[0] = this.test_dir;
+		dirs[0] = this.temp_dir.getRoot();
 		this.dvk_handler.read_dvks(dirs);
 		assertEquals(6, this.dvk_handler.get_size());
 		dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
@@ -298,7 +275,7 @@ public class TestDvkHandler {
 	 */
 	@Test
 	public void test_remove_duplicates() {
-		File[] dirs = {this.test_dir};
+		File[] dirs = {this.temp_dir.getRoot()};
 		this.dvk_handler.read_dvks(dirs);
 		assertEquals(5, this.dvk_handler.get_size());
 		//ADD DVKS
@@ -322,7 +299,7 @@ public class TestDvkHandler {
 			psmt.setString(2, "DifferentDir");
 			psmt.setString(3, "ARTIST");
 			psmt.setString(4, "/page");
-			psmt.setString(5, this.test_dir.getAbsolutePath());
+			psmt.setString(5, this.temp_dir.getRoot().getAbsolutePath());
 			psmt.setString(6, "dvk0.dvk");
 			psmt.executeUpdate();
 			psmt.executeUpdate();
@@ -350,7 +327,7 @@ public class TestDvkHandler {
 	 */
 	@Test
 	public void test_get_dvks_limit() {
-		File[] dirs = {this.test_dir};
+		File[] dirs = {this.temp_dir.getRoot()};
 		this.dvk_handler.read_dvks(dirs);
 		//TEST NO LIMIT
 		ArrayList<Dvk> dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
@@ -378,7 +355,7 @@ public class TestDvkHandler {
 	 */
 	@Test
 	public void test_add_dvk() {
-		File[] dirs = {this.test_dir};
+		File[] dirs = {this.temp_dir.getRoot()};
 		this.dvk_handler.read_dvks(dirs);
 		assertEquals(5, this.dvk_handler.get_size());
 		//ADD DVK
@@ -394,7 +371,7 @@ public class TestDvkHandler {
 		dvk.set_page_url("/page/");
 		dvk.set_direct_url("/page/text.txt");
 		dvk.set_secondary_url("/page/text.jpg");
-		dvk.set_dvk_file(new File(this.test_dir, "new.dvk"));
+		dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "new.dvk"));
 		dvk.set_media_file("new.txt");
 		dvk.set_secondary_file("new.jpg");
 		this.dvk_handler.add_dvk(dvk);
@@ -416,7 +393,7 @@ public class TestDvkHandler {
 			assertEquals("/page/", rs.getString(DvkHandler.PAGE_URL));
 			assertEquals("/page/text.txt", rs.getString(DvkHandler.DIRECT_URL));
 			assertEquals("/page/text.jpg", rs.getString(DvkHandler.SECONDARY_URL));
-			assertEquals(this.test_dir.getAbsolutePath(), rs.getString(DvkHandler.DIRECTORY));
+			assertEquals(this.temp_dir.getRoot().getAbsolutePath(), rs.getString(DvkHandler.DIRECTORY));
 			assertEquals("new.dvk", rs.getString(DvkHandler.DVK_FILE));
 			assertEquals("new.txt", rs.getString(DvkHandler.MEDIA_FILE));
 			assertEquals("new.jpg", rs.getString(DvkHandler.SECONDARY_FILE));
@@ -431,7 +408,7 @@ public class TestDvkHandler {
 	 */
 	@Test
 	public void test_delete_dvk() {
-		File[] dirs = {this.test_dir};
+		File[] dirs = {this.temp_dir.getRoot()};
 		this.dvk_handler.read_dvks(dirs);
 		assertEquals(5, this.dvk_handler.get_size());
 		ArrayList<Dvk> dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
@@ -448,7 +425,7 @@ public class TestDvkHandler {
 	 */
 	@Test
 	public void test_sql_select() {
-		File[] dirs = {this.test_dir};
+		File[] dirs = {this.temp_dir.getRoot()};
 		this.dvk_handler.read_dvks(dirs);
 		StringBuilder sql = new StringBuilder("SELECT ");
 		sql.append(DvkHandler.TITLE);
@@ -486,11 +463,11 @@ public class TestDvkHandler {
 		dvk.set_page_url("/page/");
 		dvk.set_direct_url("/page/text.txt");
 		dvk.set_secondary_url("/page/text.jpg");
-		dvk.set_dvk_file(new File(this.test_dir, "new.dvk"));
+		dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "new.dvk"));
 		dvk.set_media_file("new.txt");
 		dvk.set_secondary_file("new.jpg");
 		//SET DVK
-		File[] dirs = {this.test_dir};
+		File[] dirs = {this.temp_dir.getRoot()};
 		this.dvk_handler.read_dvks(dirs);
 		StringBuilder sql = new StringBuilder("SELECT ");
 		sql.append(DvkHandler.SQL_ID);
@@ -535,7 +512,7 @@ public class TestDvkHandler {
 			assertEquals("/page/", rs.getString(DvkHandler.PAGE_URL));
 			assertEquals("/page/text.txt", rs.getString(DvkHandler.DIRECT_URL));
 			assertEquals("/page/text.jpg", rs.getString(DvkHandler.SECONDARY_URL));
-			assertEquals(this.test_dir.getAbsolutePath(), rs.getString(DvkHandler.DIRECTORY));
+			assertEquals(this.temp_dir.getRoot().getAbsolutePath(), rs.getString(DvkHandler.DIRECTORY));
 			assertEquals("new.dvk", rs.getString(DvkHandler.DVK_FILE));
 			assertEquals("new.txt", rs.getString(DvkHandler.MEDIA_FILE));
 			assertEquals("new.jpg", rs.getString(DvkHandler.SECONDARY_FILE));
@@ -551,7 +528,7 @@ public class TestDvkHandler {
 	@Test
 	public void test_get_size() {
 		assertEquals(0, this.dvk_handler.get_size());
-		File[] dirs = {this.test_dir};
+		File[] dirs = {this.temp_dir.getRoot()};
 		this.dvk_handler.read_dvks(dirs);
 		assertEquals(5, this.dvk_handler.get_size());
 		//LOAD FROM MULTIPLE DIRECTORIES
@@ -584,19 +561,19 @@ public class TestDvkHandler {
 		dirs = DvkHandler.get_directories(dir, true);
 		assertEquals(0, dirs.length);
 		//TEST SINGLE DIRECTORY
-		dirs = DvkHandler.get_directories(this.test_dir, true);
+		dirs = DvkHandler.get_directories(this.temp_dir.getRoot(), true);
 		assertEquals(4, dirs.length);
 		assertEquals("f1", dirs[0].getName());
 		assertEquals("sub", dirs[1].getName());
 		assertEquals("f2", dirs[2].getName());
 		assertEquals("f3", dirs[3].getName());
 		//TEST GET SINGLE DIRECTORY, INCLUDING DIRECTORIES WITHOUT DVK FILES
-		File new_dir = new File(this.test_dir, "new");
+		File new_dir = new File(this.temp_dir.getRoot(), "new");
 		new_dir.mkdir();
 		assertTrue(new_dir.exists());
-		dirs = DvkHandler.get_directories(this.test_dir, false);
+		dirs = DvkHandler.get_directories(this.temp_dir.getRoot(), false);
 		assertEquals(8, dirs.length);
-		assertEquals("handlerdir", dirs[0].getName());
+		assertEquals(this.temp_dir.getRoot().getName(), dirs[0].getName());
 		assertEquals("f1", dirs[1].getName());
 		assertEquals("sub", dirs[2].getName());
 		assertEquals("f2", dirs[3].getName());
@@ -607,7 +584,7 @@ public class TestDvkHandler {
 		//TEST PARTIALLY VALID DIRECTORIES
 		dirs = new File[2];
 		dirs[0] = null;
-		dirs[1] = this.test_dir;
+		dirs[1] = this.temp_dir.getRoot();
 		dirs = DvkHandler.get_directories(dirs, true);
 		assertEquals(4, dirs.length);
 		//TEST MULTIPLE DIRECTORIES
@@ -634,7 +611,7 @@ public class TestDvkHandler {
 	 */
 	@Test
 	public void test_sort_title() {
-		File[] dirs = {this.test_dir};
+		File[] dirs = {this.temp_dir.getRoot()};
 		this.dvk_handler.read_dvks(dirs);
 		//TEST STANDARD TITLE SORT
 		ArrayList<Dvk> dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
@@ -667,7 +644,7 @@ public class TestDvkHandler {
 	 */
 	@Test
 	public void test_get_dvk() {
-		File[] dirs = {this.test_dir};
+		File[] dirs = {this.temp_dir.getRoot()};
 		this.dvk_handler.read_dvks(dirs);
 		StringBuilder sql = new StringBuilder("SELECT ");
 		sql.append(DvkHandler.SQL_ID);
@@ -704,7 +681,7 @@ public class TestDvkHandler {
 	 */
 	@Test
 	public void test_sort_time() {
-		File[] dirs = {this.test_dir};
+		File[] dirs = {this.temp_dir.getRoot()};
 		this.dvk_handler.read_dvks(dirs);
 		//TEST STANDARD TIME SORT
 		ArrayList<Dvk> dvks = this.dvk_handler.get_dvks(0, -1, 't', false, false);
@@ -737,16 +714,16 @@ public class TestDvkHandler {
 	 */
 	@Test
 	public void test_contains_file() {
-		File[] dirs = {this.test_dir};
+		File[] dirs = {this.temp_dir.getRoot()};
 		this.dvk_handler.read_dvks(dirs);
 		assertEquals(5, this.dvk_handler.get_size());
-		File file = new File(this.test_dir, "noFile.txt");
+		File file = new File(this.temp_dir.getRoot(), "noFile.txt");
 		assertFalse(this.dvk_handler.contains_file(file));
-		file = new File(this.test_dir, "dvk2.png");
+		file = new File(this.temp_dir.getRoot(), "dvk2.png");
 		assertFalse(this.dvk_handler.contains_file(file));
 		file = new File(this.f2, "dvk2.png");
 		assertTrue(this.dvk_handler.contains_file(file));
-		File f3 = new File(this.test_dir, "f3");
+		File f3 = new File(this.temp_dir.getRoot(), "f3");
 		file = new File(f3, "dvk3.txt");
 		assertTrue(this.dvk_handler.contains_file(file));
 		file = new File(f3, "dvk3.png");
@@ -759,9 +736,9 @@ public class TestDvkHandler {
 	@Test
 	public void test_delete_database() {
 		FilePrefs prefs = new FilePrefs();
-		prefs.set_index_dir(this.test_dir);
+		prefs.set_index_dir(this.temp_dir.getRoot());
 		try(DvkHandler handler = new DvkHandler(prefs, null, null)) {
-			File file = new File(this.test_dir, "dvk_archive.db");
+			File file = new File(this.temp_dir.getRoot(), "dvk_archive.db");
 			assertTrue(file.exists());
 			handler.delete_database();
 			assertFalse(file.exists());

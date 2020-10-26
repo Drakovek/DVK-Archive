@@ -4,13 +4,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
-
 import java.io.File;
-import java.io.IOException;
-import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gmail.drakovekmail.dvkarchive.file.DvkException;
 
@@ -22,14 +21,15 @@ import com.gmail.drakovekmail.dvkarchive.file.DvkException;
 public class TestDConnect {
 
 	/**
+	 * Directory for holding test files.
+	 */
+	@Rule
+	public TemporaryFolder temp_dir = new TemporaryFolder();
+	
+	/**
 	 * DConnect object for running web tests.
 	 */
 	private DConnect connect;
-
-	/**
-	 * Directory for holding test files.
-	 */
-	private File test_dir;
 
 	/**
 	 * Sets up objects for testing.
@@ -40,11 +40,6 @@ public class TestDConnect {
 			this.connect = new DConnect(false, false);
 		}
 		catch(DvkException e) {}
-		String user_dir = System.getProperty("user.dir");
-		this.test_dir = new File(user_dir, "connect_dir");
-		if(!this.test_dir.isDirectory()) {
-			this.test_dir.mkdir();
-		}
 	}
 	
 	/**
@@ -56,10 +51,6 @@ public class TestDConnect {
 			this.connect.close();
 		}
 		catch(DvkException e) {}
-		try {
-			FileUtils.deleteDirectory(this.test_dir);
-		}
-		catch(IOException e) {}
 	}
 	
 	/**
@@ -119,7 +110,7 @@ public class TestDConnect {
 	 */
 	@Test
 	public void test_download() {
-		File file = new File(this.test_dir, "image.jpg");
+		File file = new File(this.temp_dir.getRoot(), "image.jpg");
 		this.connect.download(null, null, false);
 		this.connect.download(null, file, false);
 		assertFalse(file.exists());
@@ -137,7 +128,7 @@ public class TestDConnect {
 	 */
 	@Test
 	public void test_basic_download() {
-		File file = new File(this.test_dir, "image.jpg");
+		File file = new File(this.temp_dir.getRoot(), "image.jpg");
 		DConnect.basic_download(null, null);
 		DConnect.basic_download(null, file);
 		assertFalse(file.exists());

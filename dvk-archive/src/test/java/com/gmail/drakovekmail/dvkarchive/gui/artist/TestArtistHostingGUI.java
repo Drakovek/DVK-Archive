@@ -5,14 +5,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-
-import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-
+import org.junit.rules.TemporaryFolder;
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
 import com.gmail.drakovekmail.dvkarchive.gui.BaseGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
@@ -27,7 +25,8 @@ public class TestArtistHostingGUI {
 	/**
 	 * Directory for holding test files
 	 */
-	private File test_dir;
+	@Rule
+	public TemporaryFolder temp_dir = new TemporaryFolder();
 	
 	/**
 	 * Main ArtistHostingGUI used for testing
@@ -45,18 +44,13 @@ public class TestArtistHostingGUI {
 	 */
 	@Before
 	public void set_up() {
-		String user_dir = System.getProperty("user.dir");
-		this.test_dir = new File(user_dir, "arthosttest");
-		if(!this.test_dir.isDirectory()) {
-			this.test_dir.mkdir();
-		}
 		BaseGUI base = new BaseGUI();
 		this.start = new StartGUI(base, false);
-		this.start.get_file_prefs().set_index_dir(this.test_dir);
-		this.start.set_directory(this.test_dir);
+		this.start.get_file_prefs().set_index_dir(this.temp_dir.getRoot());
+		this.start.set_directory(this.temp_dir.getRoot());
 		this.start.get_base_gui().set_theme("Metal");
 		this.gui = new FurAffinityGUI(this.start);
-		this.start.set_directory(this.test_dir);
+		this.start.set_directory(this.temp_dir.getRoot());
 	}
 	
 	/**
@@ -64,10 +58,6 @@ public class TestArtistHostingGUI {
 	 */
 	@After
 	public void tear_down() {
-		try {
-			FileUtils.deleteDirectory(this.test_dir);
-		}
-		catch(IOException e) {}
 		this.gui.close();
 		this.gui = null;
 		this.start.close();
@@ -129,24 +119,26 @@ public class TestArtistHostingGUI {
 		dvk.set_title("Title 1");
 		dvk.set_artist("Artist");
 		dvk.set_page_url("/page/");
-		dvk.set_dvk_file(new File(this.test_dir, "dvk1.dvk"));
+		dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "dvk1.dvk"));
 		dvk.set_media_file("dvk1.png");
 		dvk.write_dvk();
 		//SET DVK2
+		dvk.set_title("Title 2");
 		dvk.set_dvk_id("THG123");
-		dvk.set_dvk_file(new File(this.test_dir, "dvk2.dvk"));
+		dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "dvk2.dvk"));
 		dvk.set_media_file("dvk2.jpg");
 		dvk.write_dvk();
 		//SET DVK3
+		dvk.set_title("Title 3");
 		dvk.set_dvk_id("ID345");
-		dvk.set_dvk_file(new File(this.test_dir, "dvk3.dvk"));
+		dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "dvk3.dvk"));
 		dvk.set_media_file("dvk3.txt");
 		dvk.write_dvk();
 		//READ DVKS
 		this.gui.get_start_gui().get_base_gui().set_canceled(false);
 		this.gui.read_dvks();
 		assertTrue(dvk.get_dvk_file().exists());
-		assertEquals(this.test_dir, this.gui.get_start_gui().get_directory());
+		assertEquals(this.temp_dir.getRoot(), this.gui.get_start_gui().get_directory());
 		ArrayList<Dvk> dvks = this.gui.get_dvk_handler().get_dvks(0, -1, 'a', false, false);
 		assertEquals(3, dvks.size());
 		assertEquals("ID123-J", dvks.get(0).get_dvk_id());

@@ -6,10 +6,9 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import org.apache.commons.io.FileUtils;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
 import com.gmail.drakovekmail.dvkarchive.file.DvkException;
 import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
@@ -25,30 +24,8 @@ public class TestReformat {
 	/**
 	 * Main directory  for holding test files
 	 */
-	private File test_dir;
-	
-	/**
-	 * Creates the test directory for holding test files.
-	 */
-	@Before
-	public void create_test_directory() {
-		String user_dir = System.getProperty("user.dir");
-		this.test_dir = new File(user_dir, "reftest");
-		if(!this.test_dir.isDirectory()) {
-			this.test_dir.mkdir();
-		}
-	}
-	
-	/**
-	 * Deletes the test directory after testing.
-	 */
-	@After
-	public void delete_test_directory() {
-		try {
-			FileUtils.deleteDirectory(this.test_dir);
-		}
-		catch(IOException e) {}
-	}
+	@Rule
+	public TemporaryFolder temp_dir = new TemporaryFolder();
 	
 	/**
 	 * Tests the reformat_dvks method.
@@ -61,14 +38,14 @@ public class TestReformat {
 		dvk1.set_title("Title 1");
 		dvk1.set_artist("Artist");
 		dvk1.set_page_url("/page/");
-		dvk1.set_dvk_file(new File(this.test_dir, "dvk1.dvk"));
+		dvk1.set_dvk_file(new File(this.temp_dir.getRoot(), "dvk1.dvk"));
 		dvk1.set_media_file("dvk1.png");
 		Dvk dvk2 = new Dvk();
 		dvk2.set_dvk_id("ID2");
 		dvk2.set_title("Title 2");
 		dvk2.set_artist("Artist");
 		dvk2.set_page_url("/page/");
-		dvk2.set_dvk_file(new File(this.test_dir, "dvk2.dvk"));
+		dvk2.set_dvk_file(new File(this.temp_dir.getRoot(), "dvk2.dvk"));
 		dvk2.set_media_file("dvk2.jpg");
 		dvk2.set_secondary_file("dvk2.txt");
 		dvk2.set_description("This is fine already.");
@@ -77,7 +54,7 @@ public class TestReformat {
 		dvk3.set_title("Title 3");
 		dvk3.set_artist("Artist");
 		dvk3.set_page_url("/page/");
-		dvk3.set_dvk_file(new File(this.test_dir, "dvk3.dvk"));
+		dvk3.set_dvk_file(new File(this.temp_dir.getRoot(), "dvk3.dvk"));
 		dvk3.set_media_file("dvk3.txt");
 		dvk3.set_description(" <a> <b>words 'n stuff  </b>   </a> ");
 		dvk1.write_dvk();
@@ -87,12 +64,12 @@ public class TestReformat {
 		assertTrue(dvk2.get_dvk_file().exists());
 		assertTrue(dvk3.get_dvk_file().exists());
 		//REFORMAT DVKS
-		File[] dirs = {this.test_dir};
+		File[] dirs = {this.temp_dir.getRoot()};
 		FilePrefs prefs = new FilePrefs();
-		prefs.set_index_dir(this.test_dir);
+		prefs.set_index_dir(this.temp_dir.getRoot());
 		try (DvkHandler handler = new DvkHandler(prefs, dirs, null)) {
 			Reformat.reformat_dvks(handler, null);
-			File db = new File(this.test_dir, "dvk_archive.db");
+			File db = new File(this.temp_dir.getRoot(), "dvk_archive.db");
 			assertTrue(db.exists());
 			handler.delete_database();
 			assertFalse(db.exists());
@@ -131,14 +108,14 @@ public class TestReformat {
 		dvk1.set_title("Title 1");
 		dvk1.set_artist("Artist");
 		dvk1.set_page_url("/page/");
-		dvk1.set_dvk_file(new File(this.test_dir, "dvk1.dvk"));
+		dvk1.set_dvk_file(new File(this.temp_dir.getRoot(), "dvk1.dvk"));
 		dvk1.set_media_file("dvk1.png");
 		Dvk dvk2 = new Dvk();
 		dvk2.set_dvk_id("ID2");
 		dvk2.set_title("Title 2");
 		dvk2.set_artist("Artist");
 		dvk2.set_page_url("/page/");
-		dvk2.set_dvk_file(new File(this.test_dir, "dvk2.dvk"));
+		dvk2.set_dvk_file(new File(this.temp_dir.getRoot(), "dvk2.dvk"));
 		dvk2.set_media_file("dvk2.jpg");
 		dvk2.set_secondary_file("dvk2.txt");
 		dvk1.write_dvk();
@@ -154,9 +131,9 @@ public class TestReformat {
 		assertTrue(dvk2.get_media_file().exists());
 		assertTrue(dvk2.get_secondary_file().exists());
 		//RENAME FILES
-		File[] dirs = {this.test_dir};
+		File[] dirs = {this.temp_dir.getRoot()};
 		FilePrefs prefs = new FilePrefs();
-		prefs.set_index_dir(this.test_dir);
+		prefs.set_index_dir(this.temp_dir.getRoot());
 		try(DvkHandler handler = new DvkHandler(prefs, dirs, null)) {
 			Reformat.rename_files(handler, null);
 			//CHECK FILES READ
@@ -172,7 +149,7 @@ public class TestReformat {
 			assertEquals("Title 2_ID2.dvk", dvks.get(1).get_dvk_file().getName());
 			assertEquals("Title 2_ID2.jpg", dvks.get(1).get_media_file().getName());
 			assertEquals("Title 2_ID2_S.txt", dvks.get(1).get_secondary_file().getName());
-			File db = new File(this.test_dir, "dvk_archive.db");
+			File db = new File(this.temp_dir.getRoot(), "dvk_archive.db");
 			assertTrue(db.exists());
 			handler.delete_database();
 			assertFalse(db.exists());

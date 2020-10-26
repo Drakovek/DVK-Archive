@@ -2,14 +2,11 @@ package com.gmail.drakovekmail.dvkarchive.web;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-
-import java.io.File;
-import java.io.IOException;
-import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-
+import org.junit.rules.TemporaryFolder;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gmail.drakovekmail.dvkarchive.file.DvkException;
 
@@ -21,14 +18,15 @@ import com.gmail.drakovekmail.dvkarchive.file.DvkException;
 public class TestDConnectSelenium {
 
 	/**
+	 * Directory for holding test files.
+	 */
+	@Rule
+	public TemporaryFolder temp_dir = new TemporaryFolder();
+	
+	/**
 	 * DConnectSelenuim object for running web tests.
 	 */
 	private DConnectSelenium connect;
-
-	/**
-	 * Directory for holding test files.
-	 */
-	private File test_dir;
 
 	/**
 	 * Sets up objects for testing.
@@ -39,11 +37,6 @@ public class TestDConnectSelenium {
 			this.connect = new DConnectSelenium(true, null);
 		}
 		catch(DvkException e) {}
-		String user_dir = System.getProperty("user.dir");
-		this.test_dir = new File(user_dir, "connect_dir");
-		if(!this.test_dir.isDirectory()) {
-			this.test_dir.mkdir();
-		}
 	}
 	
 	/**
@@ -55,10 +48,6 @@ public class TestDConnectSelenium {
 			this.connect.close();
 		}
 		catch(DvkException e) {}
-		try {
-			FileUtils.deleteDirectory(this.test_dir);
-		}
-		catch(IOException e) {}
 	}
 	
 	/**

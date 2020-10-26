@@ -8,10 +8,11 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
 import com.gmail.drakovekmail.dvkarchive.file.DvkException;
 import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
@@ -35,14 +36,15 @@ public class TestInkbunny {
 	 */
 	
 	/**
+	 * Main directory for holding test files
+	 */
+	@Rule
+	public TemporaryFolder temp_dir = new TemporaryFolder();
+	
+	/**
 	 * Inkbunny object for running tests on
 	 */
 	private Inkbunny ink;
-	
-	/**
-	 * Main directory for holding test files
-	 */
-	private File test_dir;
 	
 	/**
 	 * Handles test DVK files
@@ -54,13 +56,8 @@ public class TestInkbunny {
 	 */
 	@Before
 	public void set_up() {
-		String user_dir = System.getProperty("user.dir");
-		this.test_dir = new File(user_dir, "inktest");
-		if(!this.test_dir.isDirectory()) {
-			this.test_dir.mkdir();
-		}
 		FilePrefs prefs = new FilePrefs();
-		prefs.set_index_dir(this.test_dir);
+		prefs.set_index_dir(this.temp_dir.getRoot());
 		try {
 			this.dvk_handler = new DvkHandler(prefs, null, null);
 		}
@@ -74,10 +71,6 @@ public class TestInkbunny {
 	@After
 	public void tear_down() {
 		this.ink.close();
-		try {
-			FileUtils.deleteDirectory(this.test_dir);
-		}
-		catch(IOException e) {}
 	}
 	
 	/**
@@ -173,7 +166,7 @@ public class TestInkbunny {
 		dvk1.set_page_url("/page/");
 		String[] tags = {"Tag", "thing", "Favorite:person"};
 		dvk1.set_web_tags(tags);
-		dvk1.set_dvk_file(new File(this.test_dir, "dvk1.dvk"));
+		dvk1.set_dvk_file(new File(this.temp_dir.getRoot(), "dvk1.dvk"));
 		dvk1.set_media_file("dvk1.png");
 		dvk1.write_dvk();
 		//CREATE DVK 2 TO BE FAVORITED
@@ -182,7 +175,7 @@ public class TestInkbunny {
 		dvk2.set_title("Title 2");
 		dvk2.set_artist("artist");
 		dvk2.set_page_url("/page/");
-		dvk2.set_dvk_file(new File(this.test_dir, "dvk2.dvk"));
+		dvk2.set_dvk_file(new File(this.temp_dir.getRoot(), "dvk2.dvk"));
 		dvk2.set_media_file("dvk2.txt");
 		dvk2.set_secondary_file("dvk2.png");
 		dvk2.write_dvk();
@@ -193,7 +186,7 @@ public class TestInkbunny {
 		dvk3.set_artist("artist");
 		dvk3.set_page_url("/page/");
 		dvk3.set_web_tags(tags);
-		dvk3.set_dvk_file(new File(this.test_dir, "dvk3.dvk"));
+		dvk3.set_dvk_file(new File(this.temp_dir.getRoot(), "dvk3.dvk"));
 		dvk3.set_media_file("dvk3.jpg");
 		dvk3.write_dvk();
 		//CREATE DVK 4, DECOY JOURNAL PAGE
@@ -202,7 +195,7 @@ public class TestInkbunny {
 		dvk4.set_title("Title 4");
 		dvk4.set_artist("artist");
 		dvk4.set_page_url("/page/");
-		dvk4.set_dvk_file(new File(this.test_dir, "dvk4.dvk"));
+		dvk4.set_dvk_file(new File(this.temp_dir.getRoot(), "dvk4.dvk"));
 		dvk4.set_media_file("dvk4.png");
 		dvk4.write_dvk();
 		try {
@@ -220,7 +213,7 @@ public class TestInkbunny {
 		assert(dvk4.get_dvk_file().exists());
 		//LOAD DVKS
 		String url;
-		File[] dirs = {this.test_dir};
+		File[] dirs = {this.temp_dir.getRoot()};
 		assertTrue(this.ink.login("guest", ""));
 		//TEST ADDING FAVORITES TAGS - EQUAL PAGES
 		this.dvk_handler.read_dvks(dirs);
@@ -229,7 +222,7 @@ public class TestInkbunny {
 		favorites.add("Favorite:New Artist");
 		ArrayList<Dvk> dvks = new ArrayList<>();
 		try {
-			dvks = this.ink.get_dvks("INK2110302-2", this.test_dir, true, favorites, false);
+			dvks = this.ink.get_dvks("INK2110302-2", this.temp_dir.getRoot(), true, favorites, false);
 		}
 		catch(DvkException e) {
 			assertTrue(false);
@@ -252,7 +245,7 @@ public class TestInkbunny {
 		//TEST ADDING FAVORITES TAGS - FEWER PAGES
 		favorites.add("Favorite:Another");
 		try {
-			dvks = this.ink.get_dvks("INK2110302-3", this.test_dir, true, favorites, false);
+			dvks = this.ink.get_dvks("INK2110302-3", this.temp_dir.getRoot(), true, favorites, false);
 		}
 		catch(DvkException e) {
 			assertTrue(false);
@@ -293,13 +286,13 @@ public class TestInkbunny {
 		assertTrue(dvk.get_direct_url().startsWith("https://"));
 		assertTrue(dvk.get_direct_url().endsWith(url));
 		assertEquals(null, dvk.get_secondary_file());
-		assertEquals(this.test_dir, dvk.get_dvk_file().getParentFile());
+		assertEquals(this.temp_dir.getRoot(), dvk.get_dvk_file().getParentFile());
 		assertEquals("Flying magic toaster NOT required_INK2110302-1.dvk", dvk.get_dvk_file().getName());
 		assertEquals("Flying magic toaster NOT required_INK2110302-1.mp4", dvk.get_media_file().getName());
 		assertEquals(null, dvk.get_secondary_file());
 		//TEST STORY
 		try {
-			dvks = this.ink.get_dvks("INK2163805-3", this.test_dir, false, null, true);
+			dvks = this.ink.get_dvks("INK2163805-3", this.temp_dir.getRoot(), false, null, true);
 		}
 		catch(DvkException e) {
 			assertTrue(false);
@@ -351,7 +344,7 @@ public class TestInkbunny {
 		assertEquals(null, dvk.get_direct_url());
 		assertTrue(dvk.get_secondary_url().startsWith("https://"));
 		assertTrue(dvk.get_secondary_url().endsWith(url));
-		assertEquals(this.test_dir, dvk.get_dvk_file().getParentFile());
+		assertEquals(this.temp_dir.getRoot(), dvk.get_dvk_file().getParentFile());
 		assertEquals("Shrek And The Risers Chapter 1_INK2163805-1.dvk", dvk.get_dvk_file().getName());
 		assertEquals("Shrek And The Risers Chapter 1_INK2163805-1.html", dvk.get_media_file().getName());
 		assertEquals("Shrek And The Risers Chapter 1_INK2163805-1_S.png", dvk.get_secondary_file().getName());
@@ -366,7 +359,7 @@ public class TestInkbunny {
 		assertTrue(read.endsWith(desc));
 		//TEST MULTIPLE PAGES, THUMBNAIL
 		try {
-			dvks = this.ink.get_dvks("INK1095495-3", this.test_dir, false, null, true);
+			dvks = this.ink.get_dvks("INK1095495-3", this.temp_dir.getRoot(), false, null, true);
 		}
 		catch(DvkException e) {
 			assertTrue(false);
@@ -409,7 +402,7 @@ public class TestInkbunny {
 		assertTrue(dvk.get_direct_url().startsWith("https://"));
 		assertTrue(dvk.get_direct_url().endsWith(url));
 		assertEquals(null, dvk.get_secondary_url());
-		assertEquals(this.test_dir, dvk.get_dvk_file().getParentFile());
+		assertEquals(this.temp_dir.getRoot(), dvk.get_dvk_file().getParentFile());
 		assertEquals("Double Duty 2013 1-2_INK1095495-1.dvk", dvk.get_dvk_file().getName());
 		assertEquals("Double Duty 2013 1-2_INK1095495-1.jpg", dvk.get_media_file().getName());
 		assertEquals(null, dvk.get_secondary_file());
@@ -421,13 +414,13 @@ public class TestInkbunny {
 		assertTrue(dvk.get_direct_url().startsWith("https://"));
 		assertTrue(dvk.get_direct_url().endsWith(url));
 		assertEquals(null, dvk.get_secondary_url());
-		assertEquals(this.test_dir, dvk.get_dvk_file().getParentFile());
+		assertEquals(this.temp_dir.getRoot(), dvk.get_dvk_file().getParentFile());
 		assertEquals("Double Duty 2013 2-2_INK1095495-2.dvk", dvk.get_dvk_file().getName());
 		assertEquals("Double Duty 2013 2-2_INK1095495-2.jpg", dvk.get_media_file().getName());
 		assertEquals(null, dvk.get_secondary_file());
 		//TEST INVALID
 		try {
-			dvks = this.ink.get_dvks("jsdja-1", this.test_dir, true, null, false);
+			dvks = this.ink.get_dvks("jsdja-1", this.temp_dir.getRoot(), true, null, false);
 			assertTrue(false);
 		}catch(DvkException e) {}
 	}
@@ -445,7 +438,7 @@ public class TestInkbunny {
 		String[] tags1 = {"Other", "Favorite:Tyroo", "Next"};
 		dvk1.set_web_tags(tags1);
 		dvk1.set_page_url("https://inkbunny.net/s/406592");
-		dvk1.set_dvk_file(new File(this.test_dir, "shark.dvk"));
+		dvk1.set_dvk_file(new File(this.temp_dir.getRoot(), "shark.dvk"));
 		dvk1.set_media_file("shark.png");
 		dvk1.write_dvk();
 		//CREATE DVK 2
@@ -456,16 +449,16 @@ public class TestInkbunny {
 		String[] tags2 = {"Thing", "Favorite:SomeoneElse"};
 		dvk2.set_web_tags(tags2);
 		dvk2.set_page_url("https://inkbunny.net/s/419741");
-		dvk2.set_dvk_file(new File(this.test_dir, "dance.dvk"));
+		dvk2.set_dvk_file(new File(this.temp_dir.getRoot(), "dance.dvk"));
 		dvk2.set_media_file("dance.jpg");
 		dvk2.write_dvk();
-		File sub = new File(this.test_dir, "sub");
+		File sub = new File(this.temp_dir.getRoot(), "sub");
 		sub.mkdir();
 		assertTrue(sub.exists());
 		assertTrue(dvk1.get_dvk_file().exists());
 		assertTrue(dvk2.get_dvk_file().exists());
 		//TEST GETTING EMPTY FAVORITES GALLERY
-		File[] dirs = {this.test_dir};
+		File[] dirs = {this.temp_dir.getRoot()};
 		this.dvk_handler.read_dvks(dirs);
 		assertTrue(this.ink.login("guest", ""));
 		ArrayList<String> ids = new ArrayList<>();
@@ -492,8 +485,8 @@ public class TestInkbunny {
 		//TEST DIDN'T MOVE
 		ArrayList<Dvk> dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
 		assertEquals(2, dvks.size());
-		assertEquals(this.test_dir, dvks.get(0).get_dvk_file().getParentFile());
-		assertEquals(this.test_dir, dvks.get(1).get_dvk_file().getParentFile());
+		assertEquals(this.temp_dir.getRoot(), dvks.get(0).get_dvk_file().getParentFile());
+		assertEquals(this.temp_dir.getRoot(), dvks.get(1).get_dvk_file().getParentFile());
 		//TEST GET ALL
 		try {
 			ids = this.ink.get_pages("123706", sub, 'f', "Tyroo", true, 2);
@@ -519,7 +512,7 @@ public class TestInkbunny {
 		dvk1.set_title("Nightsparrow");
 		dvk1.set_artist("LittleNapoleon");
 		dvk1.set_page_url("https://inkbunny.net/s/1095485");
-		dvk1.set_dvk_file(new File(this.test_dir, "night.dvk"));
+		dvk1.set_dvk_file(new File(this.temp_dir.getRoot(), "night.dvk"));
 		dvk1.set_media_file("night.jpg");
 		dvk1.write_dvk();
 		//CREATE DVK 2
@@ -528,7 +521,7 @@ public class TestInkbunny {
 		dvk2.set_title("Double Duty");
 		dvk2.set_artist("LittleNapoleon");
 		dvk2.set_page_url("https://inkbunny.net/s/1095495");
-		dvk2.set_dvk_file(new File(this.test_dir, "double.dvk"));
+		dvk2.set_dvk_file(new File(this.temp_dir.getRoot(), "double.dvk"));
 		dvk2.set_media_file("double.jpg");
 		dvk2.write_dvk();
 		//CREATE DVK 3
@@ -539,17 +532,17 @@ public class TestInkbunny {
 		String[] tags = {"Test", "Dvk:Single"};
 		dvk3.set_web_tags(tags);
 		dvk3.set_page_url("https://inkbunny.net/s/1874284");
-		dvk3.set_dvk_file(new File(this.test_dir, "west.dvk"));
+		dvk3.set_dvk_file(new File(this.temp_dir.getRoot(), "west.dvk"));
 		dvk3.set_media_file("west.png");
 		dvk3.write_dvk();
 		assertTrue(dvk1.get_dvk_file().exists());
 		assertTrue(dvk2.get_dvk_file().exists());
 		//CREATE NEW DIRECTORY
-		File sub = new File(this.test_dir, "sub");
+		File sub = new File(this.temp_dir.getRoot(), "sub");
 		sub.mkdir();
 		assertTrue(this.ink.login("guest", ""));
 		//TEST EMPTY SCRAPS DIRECTORY
-		File[] dirs = {this.test_dir};
+		File[] dirs = {this.temp_dir.getRoot()};
 		this.dvk_handler.read_dvks(dirs);
 		ArrayList<String> ids = new ArrayList<>();
 		try {
@@ -579,10 +572,10 @@ public class TestInkbunny {
 		ArrayList<Dvk> dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
 		assertEquals(3, dvks.size());
 		assertEquals("Double Duty", dvks.get(0).get_title());
-		assertEquals(this.test_dir, dvks.get(0).get_dvk_file().getParentFile());
+		assertEquals(this.temp_dir.getRoot(), dvks.get(0).get_dvk_file().getParentFile());
 		assertTrue(dvks.get(0).get_dvk_file().exists());
 		assertEquals("Nightsparrow", dvks.get(1).get_title());
-		assertEquals(this.test_dir, dvks.get(1).get_dvk_file().getParentFile());
+		assertEquals(this.temp_dir.getRoot(), dvks.get(1).get_dvk_file().getParentFile());
 		assertTrue(dvks.get(1).get_dvk_file().exists());
 		assertEquals("To the West!", dvks.get(2).get_title());
 		assertEquals(sub, dvks.get(2).get_dvk_file().getParentFile());
@@ -609,7 +602,7 @@ public class TestInkbunny {
 		assertTrue(ids.contains("INK1095400-2"));
 		//TEST INVALID
 		try {
-			ids = this.ink.get_pages("ksjdkfksfk", this.test_dir, 'm', null, true, 50);
+			ids = this.ink.get_pages("ksjdkfksfk", this.temp_dir.getRoot(), 'm', null, true, 50);
 			assertEquals(0, ids.size());
 		}
 		catch(DvkException e) {
@@ -630,15 +623,15 @@ public class TestInkbunny {
 		String[] tags = {"blah", "Dvk:Single", "other"};
 		dvk1.set_web_tags(tags);
 		dvk1.set_page_url("https://inkbunny.net/j/386752-SonicSpirit-streaming-whooooooo-");
-		dvk1.set_dvk_file(new File(this.test_dir, "streaming.dvk"));
+		dvk1.set_dvk_file(new File(this.temp_dir.getRoot(), "streaming.dvk"));
 		dvk1.set_media_file("streaming.png");
 		dvk1.write_dvk();
-		File sub = new File(this.test_dir, "sub");
+		File sub = new File(this.temp_dir.getRoot(), "sub");
 		sub.mkdir();
 		assertTrue(dvk1.get_dvk_file().exists());
 		assertTrue(sub.exists());
 		//CHECK SKIPS SINGLE
-		File[] dirs = {this.test_dir};
+		File[] dirs = {this.temp_dir.getRoot()};
 		this.dvk_handler.read_dvks(dirs);
 		ArrayList<String> ids = new ArrayList<>();
 		try {
@@ -666,7 +659,7 @@ public class TestInkbunny {
 		dvk2.set_title("Doop");
 		dvk2.set_artist("SonicSpirit");
 		dvk2.set_page_url("https://inkbunny.net/j/389024-SonicSpirit-doop-doop-it-doesnt-matter-update");
-		dvk2.set_dvk_file(new File(this.test_dir, "doop.dvk"));
+		dvk2.set_dvk_file(new File(this.temp_dir.getRoot(), "doop.dvk"));
 		dvk2.set_media_file("doop.dvk");
 		dvk2.write_dvk();
 		assertTrue(dvk2.get_dvk_file().exists());
@@ -695,7 +688,7 @@ public class TestInkbunny {
 		}
 		//CHECK INVALLID
 		try {
-			ids = this.ink.get_journal_pages("jkq0a2i3jc", this.test_dir, false);
+			ids = this.ink.get_journal_pages("jkq0a2i3jc", this.temp_dir.getRoot(), false);
 			assertEquals(0, ids.size());
 		}
 		catch(DvkException e) {
@@ -708,12 +701,12 @@ public class TestInkbunny {
 	 */
 	@Test
 	public void test_get_journal_dvk() {
-		File[] dirs = {this.test_dir};
+		File[] dirs = {this.temp_dir.getRoot()};
 		this.dvk_handler.read_dvks(dirs);
 		//TEST INVALID
 		Dvk dvk = new Dvk();
 		try {
-			dvk = this.ink.get_journal_dvk("nwD135ajkds", this.test_dir, true, true);
+			dvk = this.ink.get_journal_dvk("nwD135ajkds", this.temp_dir.getRoot(), true, true);
 			assertTrue(false);
 		}
 		catch(DvkException e) {
@@ -721,7 +714,7 @@ public class TestInkbunny {
 		}
 		//TEST GETTING JOURNAL PAGE
 		try {
-			dvk = this.ink.get_journal_dvk("INK387688-J", this.test_dir, true, true);
+			dvk = this.ink.get_journal_dvk("INK387688-J", this.temp_dir.getRoot(), true, true);
 		}
 		catch(DvkException e) {
 			assertTrue(false);
@@ -752,7 +745,7 @@ public class TestInkbunny {
 		assertEquals(desc, dvk.get_description());
 		assertEquals("https://inkbunny.net/j/387688", dvk.get_page_url());
 		assertEquals(null, dvk.get_direct_url());
-		assertEquals(this.test_dir, dvk.get_dvk_file().getParentFile());
+		assertEquals(this.temp_dir.getRoot(), dvk.get_dvk_file().getParentFile());
 		assertEquals("It-s an It Doesn-t Matter Week_INK387688-J.dvk", dvk.get_dvk_file().getName());
 		assertEquals("It-s an It Doesn-t Matter Week_INK387688-J.html", dvk.get_media_file().getName());
 		assertTrue(dvk.get_dvk_file().exists());
@@ -761,7 +754,7 @@ public class TestInkbunny {
 		assertEquals("<!DOCTYPE html><html>" + desc + "</html>", journal);
 		//TEST GETTING SECOND JOURNAL PAGE
 		try {
-			dvk = this.ink.get_journal_dvk("INK382279-J", this.test_dir, false, true);
+			dvk = this.ink.get_journal_dvk("INK382279-J", this.temp_dir.getRoot(), false, true);
 		}
 		catch(DvkException e) {
 			assertTrue(false);
@@ -785,7 +778,7 @@ public class TestInkbunny {
 		assertEquals(desc, dvk.get_description());
 		assertEquals("https://inkbunny.net/j/382279", dvk.get_page_url());
 		assertEquals(null, dvk.get_direct_url());
-		assertEquals(this.test_dir, dvk.get_dvk_file().getParentFile());
+		assertEquals(this.temp_dir.getRoot(), dvk.get_dvk_file().getParentFile());
 		assertEquals("Alteration is a Pretty Generic Name Help Me Do Better_INK382279-J.dvk",
 				dvk.get_dvk_file().getName());
 		assertEquals("Alteration is a Pretty Generic Name Help Me Do Better_INK382279-J.html",

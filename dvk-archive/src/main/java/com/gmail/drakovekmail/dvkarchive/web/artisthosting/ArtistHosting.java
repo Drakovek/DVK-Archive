@@ -171,30 +171,33 @@ public abstract class ArtistHosting implements DActionEvent {
 	 * @return Dvk of moved DVK file
 	 */
 	public static Dvk move_dvk(Dvk dvk, File directory) {
-		Dvk new_dvk = dvk;
 		//MOVE FILES IF NECESSARY
+		File dvk_file = dvk.get_dvk_file();
+		File media_file = dvk.get_media_file();
+		File sec_file = dvk.get_secondary_file();
 		if(directory != null && 
 				ArrayProcessing.contains(dvk.get_web_tags(), "dvk:single", false) && 
 				!dvk.get_dvk_file().getParentFile().equals(directory)) {
 			//SET DVK FILE
-			File file = new File(directory, dvk.get_dvk_file().getName());
+			dvk_file = new File(directory, dvk.get_dvk_file().getName());
 			dvk.get_dvk_file().delete();
-			new_dvk.set_dvk_file(file);
 			//MOVE MEDIA FILE
-			file = new File(directory, dvk.get_media_file().getName());
+			media_file = new File(directory, dvk.get_media_file().getName());
 			try {
-				Files.move(dvk.get_media_file(), file);
+				Files.move(dvk.get_media_file(), media_file);
 			} catch (IOException e) {}
-			new_dvk.set_media_file(file.getName());
 			//MOVE SECONDARY FILE
 			if(dvk.get_secondary_file() != null) {
-				file = new File(directory, dvk.get_secondary_file().getName());
+				sec_file = new File(directory, dvk.get_secondary_file().getName());
 				try {
-					Files.move(dvk.get_secondary_file(), file);
+					Files.move(dvk.get_secondary_file(), sec_file);
 				} catch (IOException e) {}
-				new_dvk.set_secondary_file(file.getName());
 			}
 		}
+		Dvk new_dvk = dvk;
+		new_dvk.set_dvk_file(dvk_file);
+		new_dvk.set_media_file(media_file);
+		new_dvk.set_secondary_file(sec_file);
 		new_dvk.write_dvk();
 		return new_dvk;
 	}

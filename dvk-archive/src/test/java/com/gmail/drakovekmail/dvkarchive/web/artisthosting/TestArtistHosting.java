@@ -6,10 +6,10 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import org.apache.commons.io.FileUtils;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
 import com.gmail.drakovekmail.dvkarchive.file.DvkException;
 import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
@@ -25,30 +25,8 @@ public class TestArtistHosting {
 	/**
 	 * Main directory for storing test files.
 	 */
-	private File test_dir;
-	
-	/**
-	 * Creates the test directory for holding test files.
-	 */
-	@Before
-	public void create_test_directory() {
-		String user_dir = System.getProperty("user.dir");
-		this.test_dir = new File(user_dir, "arthosttest");
-		if(!this.test_dir.isDirectory()) {
-			this.test_dir.mkdir();
-		}
-	}
-	
-	/**
-	 * Deletes the test directory after testing.
-	 */
-	@After
-	public void delete_test_directory() {
-		try {
-			FileUtils.deleteDirectory(this.test_dir);
-		}
-		catch(IOException e) {}
-	}
+	@Rule
+	public TemporaryFolder temp_dir = new TemporaryFolder();
 	
 	/**
 	 * Tests the get_artists method.
@@ -56,11 +34,11 @@ public class TestArtistHosting {
 	@Test
 	public void test_get_artists() {
 		//CREATE SUB-DIRECTORIES
-		File sub1 = new File(this.test_dir, "sub1");
+		File sub1 = new File(this.temp_dir.getRoot(), "sub1");
 		if(!sub1.isDirectory()) {
 			sub1.mkdir();
 		}
-		File sub2 = new File(this.test_dir, "sub2");
+		File sub2 = new File(this.temp_dir.getRoot(), "sub2");
 		if(!sub2.isDirectory()) {
 			sub2.mkdir();
 		}
@@ -83,7 +61,7 @@ public class TestArtistHosting {
 		//CREATE DVKS - ARTIST 2
 		dvk.set_title("dvk3");
 		dvk.set_artist("artist2");
-		dvk.set_dvk_file(new File(this.test_dir, "dvk3.dvk"));
+		dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "dvk3.dvk"));
 		dvk.set_media_file("dvk3.png");
 		dvk.write_dvk();
 		dvk.set_title("dvk4");
@@ -106,7 +84,7 @@ public class TestArtistHosting {
 		dvk.set_title("dvk7");
 		dvk.set_artist("artist4");
 		dvk.set_page_url("diferent/page");
-		dvk.set_dvk_file(new File(this.test_dir, "dvk7.dvk"));
+		dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "dvk7.dvk"));
 		dvk.set_media_file("dvk7.pdf");
 		dvk.write_dvk();
 		//CREATE DVKS - ARTIST 5 - SINGLE
@@ -114,14 +92,14 @@ public class TestArtistHosting {
 		dvk.set_artist("artist5");
 		dvk.set_page_url("www.website.com/view/2");
 		dvk.set_web_tags(tags);
-		dvk.set_dvk_file(new File(this.test_dir, "dvk8.dvk"));
+		dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "dvk8.dvk"));
 		dvk.set_media_file("dvk8.txt");
 		dvk.write_dvk();
 		//CHECK GET ARTISTS
 		ArrayList<Dvk> dvks;
-		File[] dirs = {this.test_dir};
+		File[] dirs = {this.temp_dir.getRoot()};
 		FilePrefs prefs = new FilePrefs();
-		prefs.set_index_dir(this.test_dir);
+		prefs.set_index_dir(this.temp_dir.getRoot());
 		try(DvkHandler handler = new DvkHandler(prefs, dirs, null)) {
 			assertEquals(8, handler.get_size());
 			dvks = ArtistHosting.get_artists(handler, "website.com");
@@ -129,7 +107,7 @@ public class TestArtistHosting {
 			assertEquals("artist1", dvks.get(0).get_artists()[0]);
 			assertEquals(sub2, dvks.get(0).get_dvk_file());
 			assertEquals("artist2", dvks.get(1).get_artists()[0]);
-			assertEquals(this.test_dir, dvks.get(1).get_dvk_file());
+			assertEquals(this.temp_dir.getRoot(), dvks.get(1).get_dvk_file());
 			assertEquals("artist3", dvks.get(2).get_artists()[0]);
 			assertEquals(sub2, dvks.get(2).get_dvk_file());
 		}
@@ -144,11 +122,11 @@ public class TestArtistHosting {
 	@Test
 	public void test_get_common_directory() {
 		//CREATE SUB-DIRECTORIES
-		File sub1 = new File(this.test_dir, "sub1");
+		File sub1 = new File(this.temp_dir.getRoot(), "sub1");
 		if(!sub1.isDirectory()) {
 			sub1.mkdir();
 		}
-		File sub2 = new File(this.test_dir, "sub2");
+		File sub2 = new File(this.temp_dir.getRoot(), "sub2");
 		if(!sub2.isDirectory()) {
 			sub2.mkdir();
 		}
@@ -164,11 +142,11 @@ public class TestArtistHosting {
 		file = ArtistHosting.get_common_directory(sub1, sub1);
 		assertEquals(sub1, file);
 		file = ArtistHosting.get_common_directory(sub2, sub1);
-		assertEquals(this.test_dir, file);
+		assertEquals(this.temp_dir.getRoot(), file);
 		file = ArtistHosting.get_common_directory(sub1, supsub);
 		assertEquals(sub1, file);
 		file = ArtistHosting.get_common_directory(sub2, supsub);
-		assertEquals(this.test_dir, file);
+		assertEquals(this.temp_dir.getRoot(), file);
 	}
 	
 	/**
@@ -181,7 +159,7 @@ public class TestArtistHosting {
 		dvk.set_title("Title");
 		dvk.set_artist("artist");
 		dvk.set_page_url("/page/");
-		dvk.set_dvk_file(new File(this.test_dir, "dvk.dvk"));
+		dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "dvk.dvk"));
 		dvk.set_media_file("dvk.txt");
 		dvk.set_secondary_file("dvk.png");
 		String[] tags = {"bleh", "DVK:Single"};
@@ -199,12 +177,13 @@ public class TestArtistHosting {
 		assertTrue(dvk.get_dvk_file().exists());
 		assertTrue(dvk.get_media_file().exists());
 		assertTrue(dvk.get_secondary_file().exists());
-		assertEquals(this.test_dir, dvk.get_dvk_file().getParentFile());
+		assertEquals(this.temp_dir.getRoot(), dvk.get_dvk_file().getParentFile());
 		//CHANGE DIRECTORY
-		File sub = new File(this.test_dir, "sub");
+		File sub = new File(this.temp_dir.getRoot(), "sub");
 		if(!sub.isDirectory()) {
 			sub.mkdir();
 		}
+		assertTrue(dvk.get_media_file().exists());
 		dvk = ArtistHosting.move_dvk(dvk, sub);
 		assertTrue(dvk.get_dvk_file().exists());
 		assertTrue(dvk.get_media_file().exists());
@@ -216,9 +195,9 @@ public class TestArtistHosting {
 		assertEquals("dvk.txt", dvk.get_media_file().getName());
 		assertEquals("dvk.png", dvk.get_secondary_file().getName());
 		//DON'T MOVE, DVK NOT SINGLE
-		dvk.set_secondary_file(null);
+		dvk.set_secondary_file("");
 		dvk.set_web_tags(null);
-		dvk = ArtistHosting.move_dvk(dvk, this.test_dir);
+		dvk = ArtistHosting.move_dvk(dvk, this.temp_dir.getRoot());
 		assertTrue(dvk.get_dvk_file().exists());
 		assertTrue(dvk.get_media_file().exists());
 		assertEquals(null, dvk.get_secondary_file());
@@ -241,13 +220,13 @@ public class TestArtistHosting {
 		dvk.set_page_url("/page/");
 		String[] tags = {"Something", "blah", "favorite:person"};
 		dvk.set_web_tags(tags);
-		dvk.set_dvk_file(new File(this.test_dir, "dvk.dvk"));
+		dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "dvk.dvk"));
 		dvk.set_media_file("dvk.jpg");
 		dvk.write_dvk();
 		//READ DVKS
-		File[] dirs = {this.test_dir};
+		File[] dirs = {this.temp_dir.getRoot()};
 		FilePrefs prefs = new FilePrefs();
-		prefs.set_index_dir(this.test_dir);
+		prefs.set_index_dir(this.temp_dir.getRoot());
 		try(DvkHandler handler = new DvkHandler(prefs, dirs, null)) {
 			//TEST UPDATITNG FAVORITES
 			assertEquals(1, handler.get_size());
@@ -294,21 +273,21 @@ public class TestArtistHosting {
 		dvk.set_title("Unimportant");
 		dvk.set_artist("Artist");
 		dvk.set_page_url("/page/");
-		dvk.set_dvk_file(new File(this.test_dir, "dvk1.dvk"));
+		dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "dvk1.dvk"));
 		dvk.set_media_file("dvk1.png");
 		dvk.write_dvk();
 		//CREATE DVK 2
 		dvk.set_dvk_id("ID123");
-		dvk.set_dvk_file(new File(this.test_dir, "dvk2.dvk"));
+		dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "dvk2.dvk"));
 		dvk.write_dvk();
 		//CREATE DVK3
 		dvk.set_dvk_id("NEW35");
-		dvk.set_dvk_file(new File(this.test_dir, "dvk3.dvk"));
+		dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "dvk3.dvk"));
 		dvk.write_dvk();
 		//READ DVKS FROM FILE
 		FilePrefs prefs = new FilePrefs();
-		prefs.set_index_dir(this.test_dir);
-		File[] dirs = {this.test_dir};
+		prefs.set_index_dir(this.temp_dir.getRoot());
+		File[] dirs = {this.temp_dir.getRoot()};
 		try(DvkHandler dvk_handler = new DvkHandler(prefs, dirs, null)) {
 			assertEquals(3, dvk_handler.get_size());
 			//TEST NO VALID IDS

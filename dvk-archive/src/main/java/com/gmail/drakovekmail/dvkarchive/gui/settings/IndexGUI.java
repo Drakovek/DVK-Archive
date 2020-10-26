@@ -11,18 +11,16 @@ import javax.swing.SwingConstants;
 import com.gmail.drakovekmail.dvkarchive.file.FilePrefs;
 import com.gmail.drakovekmail.dvkarchive.gui.BaseGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DButton;
-import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DCheckBox;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DLabel;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DTextField;
 import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
-import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DCheckEvent;
 
 /**
  * GUI for handling settings regarding Dvk indexing files.
  * 
  * @author Drakovek
  */
-public class IndexGUI extends JPanel implements DActionEvent, DCheckEvent {
+public class IndexGUI extends JPanel implements DActionEvent {
 
 	/**
 	 * SerialVersionUID
@@ -33,11 +31,6 @@ public class IndexGUI extends JPanel implements DActionEvent, DCheckEvent {
 	 * Directory in which to store Dvk index files
 	 */
 	private File directory;
-	
-	/**
-	 * Whether to use index files
-	 */
-	private boolean use_index;
 	
 	/**
 	 * FilePrefs object to use when saving index settings
@@ -64,12 +57,10 @@ public class IndexGUI extends JPanel implements DActionEvent, DCheckEvent {
 		index_lbl.set_font_large();
 		JSeparator sep = new JSeparator(SwingConstants.HORIZONTAL);
 		JPanel title_pnl = base_gui.get_y_stack(index_lbl, sep);
-		DCheckBox index_chk = new DCheckBox(base_gui, this, "use_index", file_prefs.use_index());
 		DButton open_btn = new DButton(base_gui, this, "browse");
 		open_btn.always_allow_action();
 		JPanel open_pnl = base_gui.get_x_stack(this.path_txt, 1, open_btn, 0);
-		JPanel options_pnl = base_gui.get_y_stack(index_chk, open_pnl);
-		JPanel full_pnl = base_gui.get_y_stack(title_pnl, 0, options_pnl, 1);
+		JPanel full_pnl = base_gui.get_y_stack(title_pnl, 0, open_pnl, 0);
 		setLayout(new GridLayout(1, 1));
 		set_directory(this.directory);
 		add(full_pnl);
@@ -118,7 +109,6 @@ public class IndexGUI extends JPanel implements DActionEvent, DCheckEvent {
 	 */
 	public void save() {
 		this.file_prefs.set_index_dir(this.directory);
-		this.file_prefs.set_use_index(this.use_index);
 		this.file_prefs.save_preferences();
 	}
 	
@@ -132,10 +122,5 @@ public class IndexGUI extends JPanel implements DActionEvent, DCheckEvent {
 				set_directory(this.path_txt.getText());
 				break;
 		}
-	}
-
-	@Override
-	public void check_event(String id, boolean checked) {
-		this.use_index = checked;
 	}
 }

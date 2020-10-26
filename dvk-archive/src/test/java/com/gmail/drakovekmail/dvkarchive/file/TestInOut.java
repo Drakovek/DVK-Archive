@@ -1,12 +1,11 @@
 package com.gmail.drakovekmail.dvkarchive.file;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import org.apache.commons.io.FileUtils;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -21,30 +20,8 @@ public class TestInOut{
 	/**
 	 * Directory to hold all test files during testing.
 	 */
-	private File test_dir;
-	
-	/**
-	 * Creates the test directory for holding test files.
-	 */
-	@Before
-	public void create_test_directory() {
-		String user_dir = System.getProperty("user.dir");
-		this.test_dir = new File(user_dir, "inout");
-		if(!this.test_dir.isDirectory()) {
-			this.test_dir.mkdir();
-		}
-	}
-	
-	/**
-	 * Deletes the test directory after testing.
-	 */
-	@After
-	public void delete_test_directory() {
-		try {
-			FileUtils.deleteDirectory(this.test_dir);
-		}
-		catch(IOException e) {}
-	}
+	@Rule
+	public TemporaryFolder temp_dir = new TemporaryFolder();
 	
 	/**
 	 * Tests the write_file methods.
@@ -52,7 +29,7 @@ public class TestInOut{
 	@Test
 	public void test_write_file() {
 		//TEST INVALID CONTENTS
-		File file = new File(this.test_dir, "file.txt");
+		File file = new File(this.temp_dir.getRoot(), "file.txt");
 		String str = null;
 		ArrayList<String> list = null;
 		InOut.write_file(null, str);
@@ -94,7 +71,7 @@ public class TestInOut{
 		assertEquals(0, list.size());
 		//TEST VALID FILES
 		str = "line1\r\nline2";
-		File file = new File(this.test_dir, "file.txt");
+		File file = new File(this.temp_dir.getRoot(), "file.txt");
 		InOut.write_file(file, str);
 		list = InOut.read_file_list(file);
 		assertEquals(2, list.size());
