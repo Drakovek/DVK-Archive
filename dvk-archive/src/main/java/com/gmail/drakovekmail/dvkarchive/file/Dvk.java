@@ -21,6 +21,7 @@ import com.google.common.io.Files;
 public class Dvk {
 	
 	//TODO ADD PARAMETERS FOR LOCAL IMAGES TO USE IN HTML DESCRIPTIONS AND MEDIA.
+	//TODO PREVENT OVERWRITING DVK FILES
 	
 	/**
 	 * Array of Tika data types and associated extensions. 
@@ -741,44 +742,54 @@ public class Dvk {
 	 * Renames the DVK file and its associated media files.
 	 * Retains all media file extensions.
 	 * 
-	 * @param filename Filename to use when renaming
+	 * @param filename Main filename to use when renaming
 	 * @param secondary Filename to use for secondary media
 	 */
 	public void rename_files(String filename, String secondary) {
-		//RENAME DVK
+		//RENAME DVK FILE
 		get_dvk_file().delete();
-		File file = get_dvk_file().getParentFile();
-		set_dvk_file(new File(file, filename + ".dvk"));
+		set_dvk_file(new File(get_dvk_file().getParentFile(), filename + ".dvk"));
 		//RENAME MEDIA FILE
 		if(get_media_file() != null) {
-			file = get_media_file();
-			String ext = StringProcessing.get_extension(file.getName());
-			try {
-				set_media_file("xXTeMpXx" + get_dvk_id() + ext);
-				if(!file.equals(get_media_file())) {
-					Files.move(file, get_media_file());
+			File from = get_media_file();
+			String rename = filename + StringProcessing.get_extension(from.getName());
+			//CHECK IF RENAME IS NEEDED
+			if(!from.getName().equals(rename)) {
+				try {
+					//RENAME TO TEMPORARY FILE
+					set_media_file("xXTeMpPrImXx.tmp");
+					Files.move(from, get_media_file());
+					//RENAME TO FINAL FILENAME
+					from = get_media_file();
+					set_media_file(rename);
+					Files.move(from, get_media_file());
 				}
-				file = get_media_file();
-				set_media_file(filename + ext);
-				Files.move(file, get_media_file());
+				catch(IOException e) {
+					set_media_file(rename);
+				}
 			}
-			catch (IOException e) {}
 		}
-		//RENAME SECONDARY FILE
+		//RENAME SECONDARY MEDIA FILE
 		if(get_secondary_file() != null) {
-			file = get_secondary_file();
-			String ext = StringProcessing.get_extension(file.getName());
-			try {
-				set_secondary_file("xXTeMpXx" + get_dvk_id() + ext);
-				if(!file.equals(get_secondary_file())) {
-					Files.move(file, get_secondary_file());
+			File from = get_secondary_file();
+			String rename = secondary + StringProcessing.get_extension(from.getName());
+			//CHECK IF RENAME IS NEEDED
+			if(!from.getName().equals(rename)) {
+				try {
+					//RENAME TO TEMPORARY FILE
+					set_secondary_file("xXTeMpSeCoNdXx.tmp");
+					Files.move(from, get_secondary_file());
+					//RENAME TO FINAL FILENAME
+					from = get_secondary_file();
+					set_secondary_file(rename);
+					Files.move(from, get_secondary_file());
 				}
-				file = get_secondary_file();
-				set_secondary_file(secondary + ext);
-				Files.move(file, get_secondary_file());
-			} catch (IOException e) {}
+				catch(IOException e) {
+					set_secondary_file(rename);
+				}
+			}
 		}
-		//WRITE DVK FILE
+		//REWRITE DVK FILE
 		write_dvk();
 	}
 
