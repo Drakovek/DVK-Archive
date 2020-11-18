@@ -31,6 +31,13 @@ public class ExtensionFilter implements FileFilter {
 		this.include = include;
 	}
 	
+	/**
+	 * Returns whether a given file should be accepted.
+	 * Based on whether or not the file uses a given file extension.
+	 * 
+	 * @param file Given file
+	 * @return Whether file should be accepted
+	 */
 	@Override
 	public boolean accept(File file) {
 		if(file.isDirectory()) {

@@ -2,22 +2,7 @@ package com.gmail.drakovekmail.dvkarchive.web.artisthosting;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
-import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
-import com.gmail.drakovekmail.dvkarchive.gui.BaseGUI;
-import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DButton;
-import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DDialog;
-import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DLabel;
-import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DPasswordField;
-import com.gmail.drakovekmail.dvkarchive.gui.swing.components.DTextField;
-import com.gmail.drakovekmail.dvkarchive.gui.swing.listeners.DActionEvent;
 import com.gmail.drakovekmail.dvkarchive.processing.ArrayProcessing;
 import com.google.common.io.Files;
 
@@ -26,12 +11,8 @@ import com.google.common.io.Files;
  * 
  * @author Drakovek
  */
-public abstract class ArtistHosting implements DActionEvent {
-	
-	/**
-	 * Dialog for getting user data
-	 */
-	private DDialog dialog;
+//TODO REINSTATE
+public abstract class ArtistHosting {
 	
 	/**
 	 * Returns a list of Dvks of different artist's work from a given domain.
@@ -41,6 +22,8 @@ public abstract class ArtistHosting implements DActionEvent {
 	 * @param domain Domain in which to check for artists
 	 * @return List of Dvks from different artists of a domain
 	 */
+	//TODO REINSTATE
+	/*
 	public static ArrayList<Dvk> get_artists(
 			DvkHandler dvk_handler,
 			String domain) {
@@ -73,6 +56,7 @@ public abstract class ArtistHosting implements DActionEvent {
 		catch(SQLException e) {}
 		return new ArrayList<>();
 	}
+	*/
 	
 	/**
 	 * Gets the common directory of two given directories.
@@ -82,6 +66,8 @@ public abstract class ArtistHosting implements DActionEvent {
 	 * @param dir2 Directory 2
 	 * @return Common directory
 	 */
+	//TODO REINSTATE
+	/*
 	public static File get_common_directory(
 			File dir1,
 			File dir2) {
@@ -112,6 +98,7 @@ public abstract class ArtistHosting implements DActionEvent {
 		}
 		return dir1;
 	}
+	*/
 	
 	/**
 	 * Gets user info.
@@ -120,6 +107,8 @@ public abstract class ArtistHosting implements DActionEvent {
 	 * @param captcha File for captcha. If null, no CAPTCHA
 	 * @return [0] - Username, [1] - Password, [2] - CAPTCHA
 	 */
+	//TODO REINSTATE
+	/*
 	public String[] get_user_info(String title, File captcha) {
 		BaseGUI base_gui = new BaseGUI();
 		//CAPTCHA
@@ -162,6 +151,7 @@ public abstract class ArtistHosting implements DActionEvent {
 		info[2] = cap_txt.getText();
 		return info;
 	}
+	*/
 	
 	/**
 	 * Moves a DVK file to a given directory if Dvk is a single download.
@@ -211,6 +201,8 @@ public abstract class ArtistHosting implements DActionEvent {
 	 * @param dvk_id Given DVK ID of Dvk to update
 	 * @return Updated Dvk object, null if Dvk with given ID does not exist
 	 */
+	//TODO REINSTATE
+	/*
 	public static Dvk update_favorite(DvkHandler dvk_handler, String artist, String dvk_id) {
 		StringBuilder sql = new StringBuilder("SELECT * FROM ");
 		sql.append(DvkHandler.DVKS);
@@ -245,6 +237,7 @@ public abstract class ArtistHosting implements DActionEvent {
 		catch(SQLException e) {}
 		return null;
 	}
+	*/
 	
 	/**
 	 * Returns Dvk objects that match one of a given list of DVK IDs.
@@ -253,6 +246,8 @@ public abstract class ArtistHosting implements DActionEvent {
 	 * @param ids IDs of Dvk objects to return
 	 * @return Dvks matching one of the IDs
 	 */
+	//TODO REINSTATE
+	/*
 	public static ArrayList<Dvk> get_dvks_from_ids(DvkHandler dvk_handler, ArrayList<String> ids) {
 		ArrayList<String> params = new ArrayList<>();
 		StringBuilder sql = new StringBuilder("SELECT * FROM ");
@@ -282,9 +277,5 @@ public abstract class ArtistHosting implements DActionEvent {
 			return new ArrayList<>();
 		}
 	}
-	
-	@Override
-	public void event(String id) {
-		this.dialog.dispose();
-	}
+	*/
 }

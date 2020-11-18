@@ -5,12 +5,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.Before;
@@ -28,128 +25,110 @@ public class TestDvkHandler {
 	 */
 	@Rule
 	public TemporaryFolder temp_dir = new TemporaryFolder();
-
-	/**
-	 * Main DvkHander object for testing purposes.
-	 */
-	private DvkHandler dvk_handler;
 	
 	/**
-	 * Sub-directory for holding test files.
+	 * Sub-directory that of temp_dir that contains test files
 	 */
-	private File f1;
+	private File main_sub;
 	
 	/**
-	 * Sub-directory for holding test files.
+	 * Sub-directory of temp_dir that by default, contains no DVK files
 	 */
-	private File f2;
+	private File empty;
 	
 	/**
-	 * Sub-directory for holding test files.
+	 * Sub-directory of empty directory
 	 */
-	private File sub;
+	private File sub_empty;
 	
 	/**
-	 * Creates the test directory for holding test files.
+	 * Sub-directory of temp_dir that by default, contains no DVK files
+	 */
+	private File empty_2;
+	
+	/**
+	 * Creates test DVK files to use in unit tests.
 	 */
 	@Before
 	public void create_test_files() {
-		//CREATE DIRECTORIES
-		File index_dir = null;
-		File f3 = null;
-		File f4 = null;
 		try {
-			index_dir = this.temp_dir.newFolder("indexing");
-			this.f1 = this.temp_dir.newFolder("f1");
-			this.f2 = this.temp_dir.newFolder("f2");
-			f3 = this.temp_dir.newFolder("f3");
-			f4 = new File(this.f2, "f4");
+			//CREATE TEST DIRECTORIES
+			this.main_sub = this.temp_dir.newFolder("sub");
+			this.empty = this.temp_dir.newFolder("empty");
+			this.sub_empty = this.temp_dir.newFolder("empty/sub_empty");
+			this.empty_2 = this.temp_dir.newFolder("empty_2");
+			//CREATE DVK FILES IN THE MAIN TEMPORARY DIRECTORY
+			Dvk main_dvk_1 = new Dvk();
+			main_dvk_1.set_dvk_file(new File(this.temp_dir.getRoot(), "main1.dvk"));
+			main_dvk_1.set_dvk_id("MAN1");
+			main_dvk_1.set_title("Title 10");
+			main_dvk_1.set_artist("Artist 1");
+			main_dvk_1.set_time_int(2020, 9, 4, 17, 13);
+			String[] tags = {"tag1", "other tag", "Tag 3"};
+			main_dvk_1.set_web_tags(tags);
+			main_dvk_1.set_description("<p>Test &amp; such.</p>");
+			main_dvk_1.set_page_url("page/url/");
+			main_dvk_1.set_direct_url("/direct/URL/");
+			main_dvk_1.set_secondary_url("sec/file/Url");
+			main_dvk_1.set_media_file("main.txt");
+			main_dvk_1.set_secondary_file("main.jpeg");
+			main_dvk_1.write_dvk();
+			Dvk main_dvk_2 = new Dvk();
+			main_dvk_2.set_dvk_file(new File(this.temp_dir.getRoot(), "main2.dvk"));
+			main_dvk_2.set_dvk_id("MAN2");
+			main_dvk_2.set_title("TITLE 0.55");
+			main_dvk_2.set_artist("Artist 2");
+			main_dvk_2.set_page_url("/url/");
+			main_dvk_2.set_media_file("main.txt");
+			main_dvk_2.set_time_int(2018, 5, 20, 14, 15);
+			main_dvk_2.write_dvk();
+			//CREATE DVK FILE IN SUB DIRECTORY
+			Dvk sub_dvk = new Dvk();
+			sub_dvk.set_dvk_file(new File(this.main_sub, "sub.dvk"));
+			sub_dvk.set_dvk_id("SUB1");
+			sub_dvk.set_title("title 0.55");
+			sub_dvk.set_artist("Artist 1");
+			sub_dvk.set_page_url("/url/");
+			sub_dvk.set_media_file("sub.txt");
+			sub_dvk.set_time_int(2017, 10, 6, 12, 0);
+			sub_dvk.write_dvk();
+			//CREATE DVK FILE IN SUB_EMPTY DIRECTORY
+			Dvk sub_empty_dvk = new Dvk();
+			sub_empty_dvk.set_dvk_file(new File(this.sub_empty, "sub_empty.dvk"));
+			sub_empty_dvk.set_dvk_id("SBE1");
+			sub_empty_dvk.set_title("Title 2");
+			sub_empty_dvk.set_artist("Test");
+			sub_empty_dvk.set_page_url("/url/");
+			sub_empty_dvk.set_media_file("sub.txt");
+			sub_empty_dvk.set_time_int(2017, 10, 6, 12, 0);
+			sub_empty_dvk.write_dvk();
 		}
-		catch(IOException e) {
-			f4 = new File("");
-		}
-		if(!f4.isDirectory()) {
-			f4.mkdir();
-		}
-		this.sub = new File(this.f1, "sub");
-		if(!this.sub.isDirectory()) {
-			this.sub.mkdir();
-		}
-		//CREATE INDEX DIRECTORY
-		FilePrefs prefs = new FilePrefs();
-		prefs.set_index_dir(index_dir);
-		try {
-			this.dvk_handler = new DvkHandler(prefs, null, null);
-		}
-		catch(DvkException e) {}
-		//CREATE DVK0
-		Dvk dvk = new Dvk();
-		dvk.set_dvk_file(new File(this.f1, "dvk0.dvk"));
-		dvk.set_dvk_id("DVK0");
-		dvk.set_title("Page 1");
-		dvk.set_time_int(2020, 1, 29, 10, 39);
-		dvk.set_artist("Artist1");
-		dvk.set_page_url("/page0");
-		dvk.set_media_file("dvk0.png");
-		dvk.write_dvk();
-		//CREATE DVK1
-		dvk.set_dvk_file(new File(this.sub, "dvk1.dvk"));
-		dvk.set_dvk_id("DVK1");
-		dvk.set_title("page 1.05");
-		dvk.set_time_int(2020, 1, 29, 10, 20);
-		dvk.set_artist("Artist2");
-		dvk.set_page_url("/page1");
-		dvk.set_media_file("dvk1.png");
-		dvk.write_dvk();
-		//CREATE DVK2
-		dvk.set_dvk_file(new File(this.f2, "dvk2.dvk"));
-		dvk.set_dvk_id("DVK2");
-		dvk.set_title("Page 1.5");
-		dvk.set_time_int(2020, 1, 29, 8, 20);
-		dvk.set_artist("Artist1");
-		dvk.set_page_url("/page2");
-		dvk.set_media_file("dvk2.png");
-		dvk.write_dvk();
-		//CREATE DVK3
-		dvk.set_dvk_file(new File(f3, "dvk3.dvk"));
-		dvk.set_dvk_id("DVK3");
-		dvk.set_title("Page 10");
-		dvk.set_time_int(2018, 1, 12, 8, 20);
-		String[] artists = {"Artist2", "Artist3"};
-		dvk.set_artists(artists);
-		String[] tags = {"Tag1", "tag2!", "other,tag"};
-		dvk.set_web_tags(tags);
-		dvk.set_description("<p>Description thing!");
-		dvk.set_page_url("site/page3");
-		dvk.set_direct_url("direct/page.txt");
-		dvk.set_secondary_url("second/page.png");
-		dvk.set_media_file("dvk3.txt");
-		dvk.set_secondary_file("dvk3.png");
-		dvk.write_dvk();
-		//CREATE DVK4
-		dvk.set_dvk_file(new File(f3, "dvk4.dvk"));
-		dvk.set_dvk_id("DVK4");
-		dvk.set_title("Something");
-		dvk.set_time_int(2018, 1, 12, 8, 20);
-		dvk.set_artist("Artist1");
-		dvk.set_page_url("site/page4");
-		dvk.set_media_file("dvk4.txt");
-		dvk.write_dvk();
+		catch(IOException e) {}
 	}
 	
 	/**
-	 * Tests the initialize_connect method.
+	 * Tests the inititalize_connection function.
 	 */
 	@Test
-	public void test_initialize_connect() {
-		//CREATE INDEX DIRECTORY
+	public void test_initialize_connection() {
+		//TEST DATABASE FILE DOESN'T CURRENTLY EXIST
 		FilePrefs prefs = new FilePrefs();
 		prefs.set_index_dir(this.temp_dir.getRoot());
 		File db = new File(this.temp_dir.getRoot(), "dvk_archive.db");
 		assertFalse(db.exists());
-		try (DvkHandler handler = new DvkHandler(prefs, null, null)) {
+		//INITIALIZE THE CONNECTION
+		try (DvkHandler handler = new DvkHandler(prefs)) {
 			handler.initialize_connection();
+			//TEST DATABASE FILE NOW EXISTS
 			assertTrue(db.exists());
+			//CREATE DATABASE FILE THAT IS NOT PROPER SQLITE FILE
+			handler.delete_database();
+			assertFalse(db.exists());
+			InOut.write_file(db, "text");
+			assertTrue(db.exists());
+			//TRY READING INVALID DATABASE FILE
+			handler.initialize_connection();
+			assertFalse(db.exists());
 		}
 		catch(DvkException e) {
 			assertTrue(false);
@@ -157,590 +136,632 @@ public class TestDvkHandler {
 	}
 	
 	/**
-	 * Tests the read_dvks method.
+	 * Tests the read_dvks function.
 	 */
 	@Test
 	public void test_read_dvks() {
-		//TEST INVALID DIRECTORIES
-		this.dvk_handler.read_dvks(null);
-		assertEquals(0, this.dvk_handler.get_size());
-		assertEquals(0, this.dvk_handler.get_size());
-		//LOAD FROM MAIN TEST DIRECTORY
-		File[] dirs = {this.temp_dir.getRoot()};
-		this.dvk_handler.read_dvks(dirs);
-		assertEquals(5, this.dvk_handler.get_size());
-		ArrayList<Dvk> dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
-		assertEquals(5, dvks.size());
-		assertEquals("Page 1", dvks.get(0).get_title());
-		assertTrue(dvks.get(0).get_web_tags() == null);
-		assertEquals(null, dvks.get(0).get_secondary_file());
-		assertEquals("page 1.05", dvks.get(1).get_title());
-		assertEquals("Page 1.5", dvks.get(2).get_title());
-		assertEquals("Something", dvks.get(4).get_title());
-		//TEST ALL DVK PARAMETERS
-		Dvk dvk = dvks.get(3);
-		File f3 = new File(this.temp_dir.getRoot(), "f3");
-		assertTrue(dvk.get_sql_id() > 0);
-		assertEquals(f3, dvk.get_dvk_file().getParentFile());
-		assertEquals("dvk3.dvk", dvk.get_dvk_file().getName());
-		assertEquals("DVK3", dvk.get_dvk_id());
-		assertEquals("Page 10", dvk.get_title());
-		assertEquals(2, dvk.get_artists().length);
-		assertEquals("Artist2", dvk.get_artists()[0]);
-		assertEquals("Artist3", dvk.get_artists()[1]);
-		assertEquals("2018/01/12|08:20", dvk.get_time());
-		assertEquals(3, dvk.get_web_tags().length);
-		assertEquals("Tag1", dvk.get_web_tags()[0]);
-		assertEquals("tag2!", dvk.get_web_tags()[1]);
-		assertEquals("other,tag", dvk.get_web_tags()[2]);
-		assertEquals("<p>Description thing!", dvk.get_description());
-		assertEquals("site/page3", dvk.get_page_url());
-		assertEquals("direct/page.txt", dvk.get_direct_url());
-		assertEquals("second/page.png", dvk.get_secondary_url());
-		assertEquals(f3, dvk.get_media_file().getParentFile());
-		assertEquals("dvk3.txt", dvk.get_media_file().getName());
-		assertEquals(f3, dvk.get_secondary_file().getParentFile());
-		assertEquals("dvk3.png", dvk.get_secondary_file().getName());
-		try {
-			TimeUnit.MILLISECONDS.sleep(1500);
-		} catch (InterruptedException e) {}
-		//CREATE NEW DVK
-		dvk = new Dvk();
-		dvk.set_dvk_id("NEW123");
-		dvk.set_title("New Dvk");
-		dvk.set_artist("NewArtist");
-		dvk.set_page_url("/new_page/");
-		dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "new_dvk.dvk"));
-		dvk.set_media_file("new_dvk.png");
-		dvk.write_dvk();
-		//MODIFY DVK
-		dvk.set_dvk_id("MOD123");
-		dvk.set_title("Mod DVK");
-		dvk.set_dvk_file(new File(f3, "dvk3.dvk"));
-		dvk.set_media_file("mod.png");
-		dvk.write_dvk();
-		//TEST UPDATING DVK INFO
-		this.dvk_handler.read_dvks(dirs);
-		assertEquals(6, this.dvk_handler.get_size());
-		dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
-		assertEquals(6, dvks.size());
-		assertEquals("Mod DVK", dvks.get(0).get_title());
-		assertEquals("New Dvk", dvks.get(1).get_title());
-		assertEquals("Page 1", dvks.get(2).get_title());
-		assertEquals("page 1.05", dvks.get(3).get_title());
-		assertEquals("Page 1.5", dvks.get(4).get_title());
-		assertEquals("Something", dvks.get(5).get_title());
-		//LOAD FROM MULTIPLE DIRECTORIES
-		dirs = new File[2];
-		dirs[0] = this.f1;
-		dirs[1] = this.f2;
-		this.dvk_handler.read_dvks(dirs);
-		assertEquals(3, this.dvk_handler.get_size());
-		dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
-		assertEquals(3, dvks.size());
-		//TEST DELETING DVKS
-		dirs = new File[1];
-		dirs[0] = this.temp_dir.getRoot();
-		this.dvk_handler.read_dvks(dirs);
-		assertEquals(6, this.dvk_handler.get_size());
-		dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
-		dvks.get(0).get_dvk_file().delete();
-		assertFalse(dvks.get(0).get_dvk_file().exists());
-		this.dvk_handler.read_dvks(dirs);
-		dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
-		assertEquals(5, dvks.size());
-		assertEquals("New Dvk", dvks.get(0).get_title());
-		assertEquals("Page 1", dvks.get(1).get_title());
-		assertEquals("page 1.05", dvks.get(2).get_title());
-		assertEquals("Page 1.5", dvks.get(3).get_title());
-		assertEquals("Something", dvks.get(4).get_title());
-		//TEST DELETING FOLDER
-		try {
-			FileUtils.deleteDirectory(f3);
-		} catch (IOException e) {
+		//INITIALIZE DVK_HANDLER
+		FilePrefs file_prefs = new FilePrefs();
+		file_prefs.set_index_dir(this.temp_dir.getRoot());
+		try(DvkHandler dvk_handler = new DvkHandler(file_prefs))
+		{
+			//TEST LOADING AN INVALID DIRECTORY
+			dvk_handler.read_dvks(null);
+			assertEquals(0, dvk_handler.get_dvks('a', false, false, null, null).size());
+			dvk_handler.read_dvks(new File(this.temp_dir.getRoot(), "notreal"));
+			assertEquals(0, dvk_handler.get_dvks('a', false, false, null, null).size());
+			//LOAD DVKS FROM THE MAIN TEST DIRECTORY
+			dvk_handler.read_dvks(this.temp_dir.getRoot());
+			ArrayList<Dvk> dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			assertEquals(4, dvks.size());
+			assertEquals("title 0.55", dvks.get(0).get_title());
+			assertEquals("TITLE 0.55", dvks.get(1).get_title());
+			assertEquals("Title 2", dvks.get(2).get_title());
+			assertEquals("Title 10", dvks.get(3).get_title());
+			//TEST GETTING ALL INFORMATION FROM DVK
+			assertEquals(this.temp_dir.getRoot(), dvks.get(3).get_dvk_file().getParentFile());
+			assertEquals("main1.dvk", dvks.get(3).get_dvk_file().getName());
+			assertEquals("MAN1", dvks.get(3).get_dvk_id());
+			assertEquals("Title 10", dvks.get(3).get_title());
+			assertEquals(1, dvks.get(3).get_artists().length);
+			assertEquals("Artist 1", dvks.get(3).get_artists()[0]);
+			assertEquals(3, dvks.get(3).get_web_tags().length);
+			assertEquals("2020/09/04|17:13", dvks.get(3).get_time());
+			assertEquals("tag1", dvks.get(3).get_web_tags()[0]);
+			assertEquals("other tag", dvks.get(3).get_web_tags()[1]);
+			assertEquals("Tag 3", dvks.get(3).get_web_tags()[2]);
+			assertEquals("<p>Test &amp; such.</p>", dvks.get(3).get_description());
+			assertEquals("page/url/", dvks.get(3).get_page_url());
+			assertEquals("/direct/URL/", dvks.get(3).get_direct_url());
+			assertEquals("sec/file/Url", dvks.get(3).get_secondary_url());
+			assertEquals(this.temp_dir.getRoot(), dvks.get(3).get_media_file().getParentFile());
+			assertEquals("main.txt", dvks.get(3).get_media_file().getName());
+			assertEquals(this.temp_dir.getRoot(), dvks.get(3).get_secondary_file().getParentFile());
+			assertEquals("main.jpeg", dvks.get(3).get_secondary_file().getName());
+			//TRY READING AN EMPTY DIRECTORY
+			dvk_handler.read_dvks(this.empty_2);
+			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			assertEquals(0, dvks.size());
+			//TEST READING AFTER NEW DVK HAS BEEN WRITTEN
+			Dvk new_dvk = new Dvk();
+			new_dvk.set_dvk_file(new File(this.empty_2, "new_dvk.dvk"));
+			new_dvk.set_dvk_id("NEW123");
+			new_dvk.set_title("New Dvk");
+			new_dvk.set_artist("artist");
+			new_dvk.set_page_url("/url/");
+			new_dvk.set_media_file("file.png");
+			new_dvk.write_dvk();
+			assertTrue(new_dvk.get_dvk_file().exists());
+			dvk_handler.read_dvks(this.temp_dir.getRoot());
+			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			assertEquals(5, dvks.size());
+			assertEquals("New Dvk", dvks.get(0).get_title());
+			assertEquals("title 0.55", dvks.get(1).get_title());
+			assertEquals("TITLE 0.55", dvks.get(2).get_title());
+			assertEquals("Title 2", dvks.get(3).get_title());
+			assertEquals("Title 10", dvks.get(4).get_title());
+			//TEST READING AFTER DVK HAS BEEN MODIFIED
+			Dvk mod_dvk = dvks.get(4);
+			mod_dvk.set_title("Modified");
+			TimeUnit.SECONDS.sleep(1);
+			mod_dvk.write_dvk();
+			dvk_handler.read_dvks(this.temp_dir.getRoot());
+			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			assertEquals(5, dvks.size());
+			assertEquals("Modified", dvks.get(0).get_title());
+			assertEquals("New Dvk", dvks.get(1).get_title());
+			assertEquals("title 0.55", dvks.get(2).get_title());
+			assertEquals("TITLE 0.55", dvks.get(3).get_title());
+			assertEquals("Title 2", dvks.get(4).get_title());
+			//TEST READING AFTER DVK HAS BEEN DELETED
+			dvks.get(1).get_dvk_file().delete();
+			dvk_handler.read_dvks(this.temp_dir.getRoot());
+			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			assertEquals(4, dvks.size());
+			assertEquals("Modified", dvks.get(0).get_title());
+			assertEquals("title 0.55", dvks.get(1).get_title());
+			assertEquals("TITLE 0.55", dvks.get(2).get_title());
+			assertEquals("Title 2", dvks.get(3).get_title());
+		}
+		catch(DvkException e) {
 			assertTrue(false);
 		}
-		assertFalse(f3.exists());
-		this.dvk_handler.read_dvks(dirs);
-		dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
-		assertEquals(4, dvks.size());
-		assertEquals("New Dvk", dvks.get(0).get_title());
-		assertEquals("Page 1", dvks.get(1).get_title());
-		assertEquals("page 1.05", dvks.get(2).get_title());
-		assertEquals("Page 1.5", dvks.get(3).get_title());
+		catch(InterruptedException f) {
+			assertTrue(false);
+		}
 	}
 	
 	/**
-	 * Tests the remove_duplicates method.
+	 * Test the remove_duplicates function.
 	 */
 	@Test
 	public void test_remove_duplicates() {
-		File[] dirs = {this.temp_dir.getRoot()};
-		this.dvk_handler.read_dvks(dirs);
-		assertEquals(5, this.dvk_handler.get_size());
-		//ADD DVKS
-		StringBuilder sql = new StringBuilder("INSERT INTO ");
-		sql.append(DvkHandler.DVKS);
-		sql.append(" (");
-		sql.append(DvkHandler.DVK_ID);
-		sql.append(',');
-		sql.append(DvkHandler.TITLE);
-		sql.append(',');
-		sql.append(DvkHandler.ARTISTS);
-		sql.append(',');
-		sql.append(DvkHandler.PAGE_URL);
-		sql.append(',');
-		sql.append(DvkHandler.DIRECTORY);
-		sql.append(',');
-		sql.append(DvkHandler.DVK_FILE);
-		sql.append(") VALUES (?,?,?,?,?,?);");
-		try(PreparedStatement psmt = this.dvk_handler.get_sql_connection().prepareStatement(sql.toString())) {
-			psmt.setString(1, "ID256");
-			psmt.setString(2, "DifferentDir");
-			psmt.setString(3, "ARTIST");
-			psmt.setString(4, "/page");
-			psmt.setString(5, this.temp_dir.getRoot().getAbsolutePath());
-			psmt.setString(6, "dvk0.dvk");
-			psmt.executeUpdate();
-			psmt.executeUpdate();
-			psmt.setString(5, this.sub.getAbsolutePath());
-			psmt.setString(6, "dvk1.dvk");
-			psmt.executeUpdate();
+		//INITIALIZE THE DVK HANDLER
+		FilePrefs file_prefs = new FilePrefs();
+		file_prefs.set_index_dir(this.temp_dir.getRoot());
+		try(DvkHandler dvk_handler = new DvkHandler(file_prefs)) {
+			//READ DVKS FROM AN EMPTY DIRECTORY
+			dvk_handler.read_dvks(this.empty_2);
+			assertEquals(0, dvk_handler.get_dvks('a', false, false, null, null).size());
+			//ADD DVKS TO THE DVK HANDLER
+			Dvk dvk = new Dvk();
+			dvk.set_dvk_file(new File(this.empty_2, "dup.dvk"));
+			dvk.set_dvk_id("ID123");
+			dvk.set_title("Duplicated");
+			dvk.set_artist("artist");
+			dvk.set_page_url("/url/");
+			dvk.set_media_file("duplicate");
+			dvk_handler.add_dvk(dvk);
+			dvk.set_dvk_id("ID456");
+			dvk.set_title("dup");
+			dvk_handler.add_dvk(dvk);
+			dvk.set_dvk_file(new File(this.main_sub, "dup.dvk"));
+			dvk.set_title("Not the same");
+			dvk_handler.add_dvk(dvk);
+			dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "other.dvk"));
+			dvk.set_title("Dvk");
+			dvk_handler.add_dvk(dvk);
+			//CHECK ENTRIES ADDED TO THE DVK HANDLER
+			assertEquals(4, dvk_handler.get_dvks('a', false, false, null, null).size());
+			//TEST REMOVING THE DUPLICATE ENTRIES
+			dvk_handler.remove_duplicates();
+			ArrayList<Dvk> dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			assertEquals(2, dvks.size());
+			assertEquals("Dvk", dvks.get(0).get_title());
+			assertEquals("Not the same", dvks.get(1).get_title());
+			//MAKE SURE FUNCTION DOESN'T BREAK ON EXCEPTION
+			dvk_handler.delete_database();
+			dvk_handler.remove_duplicates();
+			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			assertEquals(0, dvks.size());
 		}
-		catch(SQLException e) {
+		catch(DvkException e) {
 			assertTrue(false);
 		}
-		assertEquals(8, this.dvk_handler.get_size());
-		//TEST REMOVING DUPLICATES
-		this.dvk_handler.remove_duplicates();
-		ArrayList<Dvk> dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
-		assertEquals(4, this.dvk_handler.get_size());
-		assertEquals(4, dvks.size());
-		assertEquals("Page 1", dvks.get(0).get_title());
-		assertEquals("Page 1.5", dvks.get(1).get_title());
-		assertEquals("Page 10", dvks.get(2).get_title());
-		assertEquals("Something", dvks.get(3).get_title());
-	}
-	
-	/**
-	 * Tests the get_dvks method while limiting results.
-	 */
-	@Test
-	public void test_get_dvks_limit() {
-		File[] dirs = {this.temp_dir.getRoot()};
-		this.dvk_handler.read_dvks(dirs);
-		//TEST NO LIMIT
-		ArrayList<Dvk> dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
-		assertEquals(5, dvks.size());
-		assertEquals("Page 1", dvks.get(0).get_title());
-		assertEquals("page 1.05", dvks.get(1).get_title());
-		assertEquals("Page 1.5", dvks.get(2).get_title());
-		assertEquals("Page 10", dvks.get(3).get_title());
-		assertEquals("Something", dvks.get(4).get_title());
-		//LIMIT TO 3
-		dvks = this.dvk_handler.get_dvks(0, 3, 'a', false, false);
-		assertEquals(3, dvks.size());
-		assertEquals("Page 1", dvks.get(0).get_title());
-		assertEquals("page 1.05", dvks.get(1).get_title());
-		assertEquals("Page 1.5", dvks.get(2).get_title());
-		//OFFSET
-		dvks = this.dvk_handler.get_dvks(3, 10, 'a', false, false);
-		assertEquals(2, dvks.size());
-		assertEquals("Page 10", dvks.get(0).get_title());
-		assertEquals("Something", dvks.get(1).get_title());
 	}
 
 	/**
-	 * Tests the add_dvk method.
-	 */
-	@Test
-	public void test_add_dvk() {
-		File[] dirs = {this.temp_dir.getRoot()};
-		this.dvk_handler.read_dvks(dirs);
-		assertEquals(5, this.dvk_handler.get_size());
-		//ADD DVK
-		Dvk dvk = new Dvk();
-		dvk.set_dvk_id("ADD1234");
-		dvk.set_title("New Title");
-		String[] artists = {"ArtGuy", "Other"};
-		dvk.set_artists(artists);
-		dvk.set_time("2020/05/08|14:05");
-		String[] tags = {"Tag", "Other", "thing"};
-		dvk.set_web_tags(tags);
-		dvk.set_description("This is text.");
-		dvk.set_page_url("/page/");
-		dvk.set_direct_url("/page/text.txt");
-		dvk.set_secondary_url("/page/text.jpg");
-		dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "new.dvk"));
-		dvk.set_media_file("new.txt");
-		dvk.set_secondary_file("new.jpg");
-		this.dvk_handler.add_dvk(dvk);
-		//TEST ADDED CORRECTLY
-		StringBuilder sql = new StringBuilder("SELECT * FROM ");
-		sql.append(DvkHandler.DVKS);
-		sql.append(" WHERE ");
-		sql.append(DvkHandler.TITLE);
-		sql.append(" = ?");
-		String[] params = {"New Title"};
-		try(ResultSet rs = this.dvk_handler.sql_select(sql.toString(), params, true)) {
-			rs.next();
-			assertEquals("ADD1234", rs.getString(DvkHandler.DVK_ID));
-			assertEquals("New Title", rs.getString(DvkHandler.TITLE));
-			assertEquals("ArtGuy,Other", rs.getString(DvkHandler.ARTISTS));
-			assertEquals("2020/05/08|14:05", rs.getString(DvkHandler.TIME));
-			assertEquals("Tag,Other,thing", rs.getString(DvkHandler.WEB_TAGS));
-			assertEquals("This is text.", rs.getString(DvkHandler.DESCRIPTION));
-			assertEquals("/page/", rs.getString(DvkHandler.PAGE_URL));
-			assertEquals("/page/text.txt", rs.getString(DvkHandler.DIRECT_URL));
-			assertEquals("/page/text.jpg", rs.getString(DvkHandler.SECONDARY_URL));
-			assertEquals(this.temp_dir.getRoot().getAbsolutePath(), rs.getString(DvkHandler.DIRECTORY));
-			assertEquals("new.dvk", rs.getString(DvkHandler.DVK_FILE));
-			assertEquals("new.txt", rs.getString(DvkHandler.MEDIA_FILE));
-			assertEquals("new.jpg", rs.getString(DvkHandler.SECONDARY_FILE));
-		}
-		catch(SQLException e) {
-			assertTrue(false);
-		}
-	}
-	
-	/**
-	 * Tests the delete_dvk method.
+	 * Tests the delete_dvk function.
 	 */
 	@Test
 	public void test_delete_dvk() {
-		File[] dirs = {this.temp_dir.getRoot()};
-		this.dvk_handler.read_dvks(dirs);
-		assertEquals(5, this.dvk_handler.get_size());
-		ArrayList<Dvk> dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
-		assertEquals(5, dvks.size());
-		assertEquals("Page 1", dvks.get(0).get_title());
-		this.dvk_handler.delete_dvk(dvks.get(0).get_sql_id());
-		dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
-		assertEquals(4, dvks.size());
-		assertEquals("page 1.05", dvks.get(0).get_title());
-	}
-	
-	/**
-	 * Tests the sql_select method.
-	 */
-	@Test
-	public void test_sql_select() {
-		File[] dirs = {this.temp_dir.getRoot()};
-		this.dvk_handler.read_dvks(dirs);
-		StringBuilder sql = new StringBuilder("SELECT ");
-		sql.append(DvkHandler.TITLE);
-		sql.append(" FROM ");
-		sql.append(DvkHandler.DVKS);
-		sql.append(" WHERE ");
-		sql.append(DvkHandler.TITLE);
-		sql.append(" = ?");
-		String[] params = {"Page 1"};
-		try (ResultSet rs = this.dvk_handler.sql_select(sql.toString(), params, true)) {
-			while(rs.next()) {
-				assertEquals("Page 1", rs.getString(DvkHandler.TITLE));
-			}
+		//READ DEFAULT TEST DVK FILES
+		FilePrefs file_prefs = new FilePrefs();
+		file_prefs.set_index_dir(this.temp_dir.getRoot());
+		try(DvkHandler dvk_handler = new DvkHandler(file_prefs)) {
+			dvk_handler.read_dvks(this.temp_dir.getRoot());
+			ArrayList<Dvk> dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			assertEquals(4, dvks.size());
+			assertEquals("title 0.55", dvks.get(0).get_title());
+			assertEquals("TITLE 0.55", dvks.get(1).get_title());
+			assertEquals("Title 2", dvks.get(2).get_title());
+			assertEquals("Title 10", dvks.get(3).get_title());
+			//TEST DELETING ONE OF THE DVK ENTRIES
+			dvk_handler.delete_dvk(dvks.get(2).get_sql_id());
+			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			assertEquals(3, dvks.size());
+			assertEquals("title 0.55", dvks.get(0).get_title());
+			assertEquals("TITLE 0.55", dvks.get(1).get_title());
+			assertEquals("Title 10", dvks.get(2).get_title());
+			//TEST DELETING ANOTHER DVK ENTRY
+			dvk_handler.delete_dvk(dvks.get(1).get_sql_id());
+			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			assertEquals(2, dvks.size());
+			assertEquals("title 0.55", dvks.get(0).get_title());
+			assertEquals("Title 10", dvks.get(1).get_title());
+			//TEST DELETING A DVK ENTRY WITH A NON-EXISTANT SQL ID
+			dvk_handler.delete_dvk(45);
+			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			assertEquals(2, dvks.size());
+			assertEquals("title 0.55", dvks.get(0).get_title());
+			assertEquals("Title 10", dvks.get(1).get_title());
+			//MAKE SURE FUNCTION DOESN'T BREAK ON EXCEPTION
+			dvk_handler.delete_database();
+			dvk_handler.delete_dvk(1);
+			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			assertEquals(0, dvks.size());
 		}
-		catch(SQLException e) {
+		catch(DvkException e) {
 			assertTrue(false);
 		}
 	}
 	
 	/**
-	 * Tests the set_dvk method.
+	 * Tests the add_dvk function.
+	 */
+	@Test
+	public void test_add_dvk() {
+		//LOAD THE DEFAULT SET OF TEST DVK FILES
+		FilePrefs file_prefs = new FilePrefs();
+		file_prefs.set_index_dir(this.temp_dir.getRoot());
+		try(DvkHandler dvk_handler = new DvkHandler(file_prefs)) {
+			dvk_handler.read_dvks(this.temp_dir.getRoot());
+			ArrayList<Dvk> dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			assertEquals(4, dvks.size());
+			//ADD DVK TO THE DVK HANDLER
+			Dvk dvk = new Dvk();
+			dvk.set_dvk_file(new File(this.empty_2, "new.dvk"));
+			dvk.set_dvk_id("NEW456");
+			dvk.set_title("New DVK");
+			String[] artists = {"Artist, Person", "Person 2"};
+			dvk.set_artists(artists);
+			dvk.set_time_int(1864, 10, 31, 7, 2);
+			String[] web_tags = {"Tag, 1", "Tags! & such"};
+			dvk.set_web_tags(web_tags);
+			dvk.set_description("<p>Description &amp; such</p>");
+			dvk.set_page_url("/page/URL");
+			dvk.set_direct_url("/direct/media/Url");
+			dvk.set_secondary_url("sec/media/URL");
+			dvk.set_media_file("new.txt");
+			dvk.set_secondary_file("new_s.png");
+			dvk_handler.add_dvk(dvk);
+			//TEST DVK WAS ADDED CORRECTLY
+			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			assertEquals(5, dvks.size());
+			Dvk returned = dvks.get(0);
+			assertEquals(5, returned.get_sql_id());
+			assertEquals("NEW456", returned.get_dvk_id());
+			assertEquals("New DVK", returned.get_title());
+			assertEquals(2, returned.get_artists().length);
+			assertEquals("Artist, Person", returned.get_artists()[0]);
+			assertEquals("Person 2", returned.get_artists()[1]);
+			assertEquals("1864/10/31|07:02", returned.get_time());
+			assertEquals(2, returned.get_web_tags().length);
+			assertEquals("Tag, 1", returned.get_web_tags()[0]);
+			assertEquals("Tags! & such", returned.get_web_tags()[1]);
+			assertEquals("<p>Description &amp; such</p>", returned.get_description());
+			assertEquals("/page/URL", returned.get_page_url());
+			assertEquals("/direct/media/Url", returned.get_direct_url());
+			assertEquals("sec/media/URL", returned.get_secondary_url());
+			assertEquals(this.empty_2, returned.get_dvk_file().getParentFile());
+			assertEquals("new.dvk", returned.get_dvk_file().getName());
+			assertEquals("new.txt", returned.get_media_file().getName());
+			assertEquals("new_s.png", returned.get_secondary_file().getName());
+			//ADD DVK WITH MOST FIELDS ABSENT
+			dvk = new Dvk();
+			dvk.set_dvk_file(new File(this.empty_2, "min.dvk"));
+			dvk.set_dvk_id("MIN246");
+			dvk.set_title("minimal");
+			dvk.set_artist("Name");
+			dvk.set_page_url("/url/");
+			dvk_handler.add_dvk(dvk);
+			//CHECK MINIMAL DVK WAS ADDED CORRECTLY
+			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			assertEquals(6, dvks.size());
+			returned = dvks.get(0);
+			assertEquals(6, returned.get_sql_id());
+			assertEquals("MIN246", returned.get_dvk_id());
+			assertEquals("minimal", returned.get_title());
+			assertEquals(1, returned.get_artists().length);
+			assertEquals("Name", returned.get_artists()[0]);
+			assertEquals("0000/00/00|00:00", returned.get_time());
+			assertTrue(returned.get_web_tags() == null);
+			assertEquals(null, returned.get_description());
+			assertEquals("/url/", returned.get_page_url());
+			assertEquals(null, returned.get_direct_url());
+			assertEquals(null, returned.get_secondary_url());
+			assertEquals(this.empty_2, returned.get_dvk_file().getParentFile());
+			assertEquals("min.dvk", returned.get_dvk_file().getName());
+			assertEquals(null, returned.get_media_file());
+			assertEquals(null, returned.get_secondary_file());
+			//MAKE SURE FUNCTION DOESN'T BREAK ON EXCEPTION
+			dvk_handler.delete_database();
+			dvk_handler.add_dvk(dvk);
+			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			assertEquals(0, dvks.size());
+		}
+		catch(DvkException e) {
+			assertTrue(false);
+		}
+	}
+	
+	/**
+	 * Tests the set_dvk function.
 	 */
 	@Test
 	public void test_set_dvk() {
-		//INITIALIZE NEW DVK
-		Dvk dvk = new Dvk();
-		dvk.set_dvk_id("ADD1234");
-		dvk.set_title("New Title");
-		String[] artists = {"ArtGuy", "Other"};
-		dvk.set_artists(artists);
-		dvk.set_time("2020/05/08|14:05");
-		String[] tags = {"Tag", "Other", "thing"};
-		dvk.set_web_tags(tags);
-		dvk.set_description("This is text.");
-		dvk.set_page_url("/page/");
-		dvk.set_direct_url("/page/text.txt");
-		dvk.set_secondary_url("/page/text.jpg");
-		dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "new.dvk"));
-		dvk.set_media_file("new.txt");
-		dvk.set_secondary_file("new.jpg");
-		//SET DVK
-		File[] dirs = {this.temp_dir.getRoot()};
-		this.dvk_handler.read_dvks(dirs);
-		StringBuilder sql = new StringBuilder("SELECT ");
-		sql.append(DvkHandler.SQL_ID);
-		sql.append(" FROM ");
-		sql.append(DvkHandler.DVKS);
-		sql.append(" WHERE ");
-		sql.append(DvkHandler.TITLE);
-		sql.append(" = ?");
-		String[] params = {"Page 1"};
-		int id = -1;
-		try(ResultSet rs = this.dvk_handler.sql_select(sql.toString(), params, true)){
-			rs.next();
-			id = rs.getInt(DvkHandler.SQL_ID);
-			this.dvk_handler.set_dvk(dvk, id);
+		//TEST READING THE DEFAULT TEST DVK FILES
+		FilePrefs file_prefs = new FilePrefs();
+		file_prefs.set_index_dir(this.temp_dir.getRoot());
+		try(DvkHandler dvk_handler = new DvkHandler(file_prefs)) {
+			dvk_handler.read_dvks(this.temp_dir.getRoot());
+			ArrayList<Dvk> dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			assertEquals(4, dvks.size());
+			assertEquals("title 0.55", dvks.get(0).get_title());
+			assertEquals("TITLE 0.55", dvks.get(1).get_title());
+			assertEquals("Title 2", dvks.get(2).get_title());
+			assertEquals("Title 10", dvks.get(3).get_title());
+			//CHANGE A DVK FILE USING THE SET_DVK FUNCTION
+			Dvk dvk = dvks.get(1);
+			dvk.set_dvk_id("DIF1234");
+			dvk.set_title("Modified");
+			String[] artists = {"person 1", "Artist&2"};
+			dvk.set_artists(artists);
+			dvk.set_time_int(1864, 10, 31, 7, 2);
+			String[] tags = {"tag1", "Other, Tag's"};
+			dvk.set_web_tags(tags);
+			dvk.set_description("<p>Desciption &amp; stuff.</p>");
+			dvk.set_page_url("/URL/page/");
+			dvk.set_direct_url("Direct/Url/thing");
+			dvk.set_secondary_url("sec/URL/page");
+			dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "modified.dvk"));
+			dvk.set_media_file("mod.txt");
+			dvk.set_secondary_file("mod.jpg");
+			dvk_handler.set_dvk(dvk, dvks.get(1).get_sql_id());
+			//TEST DVK WAS SET CORRECTLY
+			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			assertEquals(4, dvks.size());
+			assertEquals("Modified", dvks.get(0).get_title());
+			assertEquals("title 0.55", dvks.get(1).get_title());
+			assertEquals("Title 2", dvks.get(2).get_title());
+			assertEquals("Title 10", dvks.get(3).get_title());
+			Dvk returned = dvks.get(0);
+			assertEquals(dvk.get_sql_id(), returned.get_sql_id());
+			assertEquals("DIF1234", returned.get_dvk_id());
+			assertEquals("Modified", returned.get_title());
+			assertEquals(2, returned.get_artists().length);
+			assertEquals("Artist&2", returned.get_artists()[0]);
+			assertEquals("person 1", returned.get_artists()[1]);
+			assertEquals("1864/10/31|07:02", returned.get_time());
+			assertEquals(2, returned.get_web_tags().length);
+			assertEquals("tag1", returned.get_web_tags()[0]);
+			assertEquals("Other, Tag's", returned.get_web_tags()[1]);
+			assertEquals("<p>Desciption &amp; stuff.</p>", returned.get_description());
+			assertEquals("/URL/page/", returned.get_page_url());
+			assertEquals("Direct/Url/thing", returned.get_direct_url());
+			assertEquals("sec/URL/page", returned.get_secondary_url());
+			assertEquals(this.temp_dir.getRoot(), returned.get_dvk_file().getParentFile());
+			assertEquals("modified.dvk", returned.get_dvk_file().getName());
+			assertEquals("mod.txt", returned.get_media_file().getName());
+			assertEquals("mod.jpg", returned.get_secondary_file().getName());
+			//SET DVK WITH MOST FIELDS ABSENT
+			dvk = new Dvk();
+			dvk.set_dvk_file(new File(this.empty_2, "min.dvk"));
+			dvk.set_dvk_id("MIN246");
+			dvk.set_title("minimal");
+			dvk.set_artist("Name");
+			dvk.set_page_url("/url/");
+			dvk_handler.set_dvk(dvk, returned.get_sql_id());
+			//TEST DVK WAS SET WITH DEFAULT VALUES
+			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			assertEquals(4, dvks.size());
+			assertEquals("minimal", dvks.get(0).get_title());
+			assertEquals("title 0.55", dvks.get(1).get_title());
+			assertEquals("Title 2", dvks.get(2).get_title());
+			assertEquals("Title 10", dvks.get(3).get_title());
+			returned = dvks.get(0);
+			assertEquals(dvks.get(0).get_sql_id(), returned.get_sql_id());
+			assertEquals("MIN246", returned.get_dvk_id());
+			assertEquals("minimal", returned.get_title());
+			assertEquals(1, returned.get_artists().length);
+			assertEquals("Name", returned.get_artists()[0]);
+			assertEquals("0000/00/00|00:00", returned.get_time());
+			assertTrue(returned.get_web_tags() == null);
+			assertEquals(null, returned.get_description());
+			assertEquals("/url/", returned.get_page_url());
+			assertEquals(null, returned.get_direct_url());
+			assertEquals(null, returned.get_secondary_url());
+			assertEquals(this.empty_2, returned.get_dvk_file().getParentFile());
+			assertEquals("min.dvk", returned.get_dvk_file().getName());
+			assertEquals(null, returned.get_media_file());
+			assertEquals(null, returned.get_secondary_file());
+			//TEST SETTING DVK ENTRY WITH SQL ID THAT DOESN'T EXIST
+			dvk_handler.set_dvk(dvk, 45);
+			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			assertEquals(4, dvks.size());
+			//MAKE SURE FUNCTION DOESN'T BREAK ON EXCEPTION
+			dvk_handler.delete_database();
+			dvk_handler.set_dvk(dvk, 2);
+			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			assertEquals(0, dvks.size());
 		}
-		catch(SQLException e) {
-			assertTrue(false);
-		}
-		//CHECK OLD DVK NO LONGER EXISTS
-		try(ResultSet rs = this.dvk_handler.sql_select(sql.toString(), params, false)){
-			assertFalse(rs.next());
-		}
-		catch(SQLException e) {
-			assertTrue(false);
-		}
-		//TEST SET CORRECTLY
-		sql = new StringBuilder("SELECT * FROM ");
-		sql.append(DvkHandler.DVKS);
-		sql.append(" WHERE ");
-		sql.append(DvkHandler.TITLE);
-		sql.append(" = ?");
-		params[0] = "New Title";
-		try(ResultSet rs = this.dvk_handler.sql_select(sql.toString(), params, true)) {
-			rs.next();
-			assertEquals(id, rs.getInt(DvkHandler.SQL_ID));
-			assertEquals("ADD1234", rs.getString(DvkHandler.DVK_ID));
-			assertEquals("New Title", rs.getString(DvkHandler.TITLE));
-			assertEquals("ArtGuy,Other", rs.getString(DvkHandler.ARTISTS));
-			assertEquals("2020/05/08|14:05", rs.getString(DvkHandler.TIME));
-			assertEquals("Tag,Other,thing", rs.getString(DvkHandler.WEB_TAGS));
-			assertEquals("This is text.", rs.getString(DvkHandler.DESCRIPTION));
-			assertEquals("/page/", rs.getString(DvkHandler.PAGE_URL));
-			assertEquals("/page/text.txt", rs.getString(DvkHandler.DIRECT_URL));
-			assertEquals("/page/text.jpg", rs.getString(DvkHandler.SECONDARY_URL));
-			assertEquals(this.temp_dir.getRoot().getAbsolutePath(), rs.getString(DvkHandler.DIRECTORY));
-			assertEquals("new.dvk", rs.getString(DvkHandler.DVK_FILE));
-			assertEquals("new.txt", rs.getString(DvkHandler.MEDIA_FILE));
-			assertEquals("new.jpg", rs.getString(DvkHandler.SECONDARY_FILE));
-		}
-		catch(SQLException e) {
+		catch(DvkException e) {
 			assertTrue(false);
 		}
 	}
 	
 	/**
-	 * Tests the get_size method.
+	 * Tests the get_dvks function.
 	 */
 	@Test
-	public void test_get_size() {
-		assertEquals(0, this.dvk_handler.get_size());
-		File[] dirs = {this.temp_dir.getRoot()};
-		this.dvk_handler.read_dvks(dirs);
-		assertEquals(5, this.dvk_handler.get_size());
-		//LOAD FROM MULTIPLE DIRECTORIES
-		dirs = new File[2];
-		dirs[0] = this.f1;
-		dirs[1] = this.f2;
-		this.dvk_handler.read_dvks(dirs);
-		assertEquals(3, this.dvk_handler.get_size());
+	public void test_get_dvks() {
+		//SET UP DVK HANDLER
+		FilePrefs file_prefs = new FilePrefs();
+		file_prefs.set_index_dir(this.temp_dir.getRoot());
+		try(DvkHandler dvk_handler = new DvkHandler(file_prefs)) {
+			//TEST THAT FUNCTION DOESN'T BREAK WHEN NO DIRECTORIES HAVE BEEN LOADED
+			ArrayList<Dvk> dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			assertEquals(0, dvks.size());
+			//READ THE DEFAULT TEST DVK FILES
+			dvk_handler.read_dvks(this.temp_dir.getRoot());
+			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			assertEquals(4, dvks.size());
+			assertEquals("title 0.55", dvks.get(0).get_title());
+			assertEquals("TITLE 0.55", dvks.get(1).get_title());
+			assertEquals("Title 2", dvks.get(2).get_title());
+			assertEquals("Title 10", dvks.get(3).get_title());
+			//TEST GETTING DVK FILES WITH A SPECIFIC SQL WHERE STATEMENT
+			StringBuilder statement = new StringBuilder();
+			statement.append(DvkHandler.TITLE);
+			statement.append("=? OR ");
+			statement.append(DvkHandler.TITLE);
+			statement.append("=?");
+			ArrayList<String> params = new ArrayList<>();
+			params.add("Title 2");
+			params.add("Title 10");
+			dvks = dvk_handler.get_dvks('a', false, false, statement.toString(), params);
+			assertEquals(2, dvks.size());
+			assertEquals("Title 2", dvks.get(0).get_title());
+			assertEquals("Title 10", dvks.get(1).get_title());
+			//TEST REVERSING DVK ENTRIES
+			dvks = dvk_handler.get_dvks('a', false, true, statement.toString(), params);
+			assertEquals(2, dvks.size());
+			assertEquals("Title 10", dvks.get(0).get_title());
+			assertEquals("Title 2", dvks.get(1).get_title());
+			//MAKE SURE FUNCTION DOESN'T BREAK ON EXCEPTION
+			dvk_handler.delete_database();
+			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			assertEquals(0, dvks.size());
+		}
+		catch(DvkException e) {
+			assertTrue(false);
+		}
 	}
 	
 	/**
-	 * Tests the get_directories methods.
+	 * Tests the get_directories function.
 	 */
 	@Test
 	public void test_get_directories() {
-		//TEST INVALID DIRECTORY
-		File dir = null;
-		File[] dirs = null;
-		dirs = DvkHandler.get_directories(dirs, true);
-		assertEquals(0, dirs.length);
-		dirs = DvkHandler.get_directories(dir, true);
-		assertEquals(0, dirs.length);
-		//TEST NON-EXISTANT DIRECTORIES
-		dirs = new File[2];
-		dirs[0] = null;
-		dirs[1] = new File("ljalkdmwner");
-		dirs = DvkHandler.get_directories(dirs, true);
-		assertEquals(0, dirs.length);
-		dir = new File("kljasdsf");
-		dirs = DvkHandler.get_directories(dir, true);
-		assertEquals(0, dirs.length);
-		//TEST SINGLE DIRECTORY
+		//TEST GETTING ALL DIRECTORIES AND SUBDIRECTORIES
+		ArrayList<File> dirs = DvkHandler.get_directories(this.temp_dir.getRoot(), false);
+		Collections.sort(dirs);
+		assertEquals(5, dirs.size());
+		assertEquals(this.temp_dir.getRoot(), dirs.get(0));
+		assertEquals(this.empty, dirs.get(1));
+		assertEquals(this.sub_empty, dirs.get(2));
+		assertEquals(this.empty_2, dirs.get(3));
+		assertEquals(this.main_sub, dirs.get(4));
+		//TEST ONLY GETTING DIRECTORIES WITH DVK FILES
 		dirs = DvkHandler.get_directories(this.temp_dir.getRoot(), true);
-		assertEquals(4, dirs.length);
-		assertEquals("f1", dirs[0].getName());
-		assertEquals("sub", dirs[1].getName());
-		assertEquals("f2", dirs[2].getName());
-		assertEquals("f3", dirs[3].getName());
-		//TEST GET SINGLE DIRECTORY, INCLUDING DIRECTORIES WITHOUT DVK FILES
-		File new_dir = new File(this.temp_dir.getRoot(), "new");
-		new_dir.mkdir();
-		assertTrue(new_dir.exists());
-		dirs = DvkHandler.get_directories(this.temp_dir.getRoot(), false);
-		assertEquals(8, dirs.length);
-		assertEquals(this.temp_dir.getRoot().getName(), dirs[0].getName());
-		assertEquals("f1", dirs[1].getName());
-		assertEquals("sub", dirs[2].getName());
-		assertEquals("f2", dirs[3].getName());
-		assertEquals("f4", dirs[4].getName());
-		assertEquals("f3", dirs[5].getName());
-		assertEquals("indexing", dirs[6].getName());
-		assertEquals("new", dirs[7].getName());
-		//TEST PARTIALLY VALID DIRECTORIES
-		dirs = new File[2];
-		dirs[0] = null;
-		dirs[1] = this.temp_dir.getRoot();
-		dirs = DvkHandler.get_directories(dirs, true);
-		assertEquals(4, dirs.length);
-		//TEST MULTIPLE DIRECTORIES
-		dirs = new File[2];
-		dirs[0] = this.f1;
-		dirs[1] = this.f2;
-		dirs = DvkHandler.get_directories(dirs, true);
-		assertEquals(3, dirs.length);
-		assertEquals("f1", dirs[0].getName());
-		assertEquals("sub", dirs[1].getName());
-		assertEquals("f2", dirs[2].getName());
-		//TEST OVERLAPPING DIRECTORIES
-		dirs = new File[2];
-		dirs[0] = this.f1;
-		dirs[1] = this.sub;
-		dirs = DvkHandler.get_directories(dirs, true);
-		assertEquals(2, dirs.length);
-		assertEquals("f1", dirs[0].getName());
-		assertEquals("sub", dirs[1].getName());
+		assertEquals(3, dirs.size());
+		assertEquals(this.temp_dir.getRoot(), dirs.get(0));
+		assertEquals(this.main_sub, dirs.get(1));
+		assertEquals(this.sub_empty, dirs.get(2));		
+		//TEST GETTING DIRECTORIES FROM DIRECTORY WITH NO DVK FILES
+		dirs = DvkHandler.get_directories(this.empty_2, true);
+		assertEquals(0, dirs.size());
+		//TEST GETTING INVALID DIRECTORY
+		dirs = DvkHandler.get_directories(null, false);
+		assertEquals(0, dirs.size());
+		dirs = DvkHandler.get_directories(new File(this.temp_dir.getRoot(), "notreal"), true);
+		assertEquals(0, dirs.size());
 	}
 	
 	/**
-	 * Tests get_dvks method while sorting by title.
+	 * Tests the get_sortable_string function.
 	 */
 	@Test
-	public void test_sort_title() {
-		File[] dirs = {this.temp_dir.getRoot()};
-		this.dvk_handler.read_dvks(dirs);
-		//TEST STANDARD TITLE SORT
-		ArrayList<Dvk> dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, false);
-		assertEquals(5, dvks.size());
-		assertEquals("Page 1", dvks.get(0).get_title());
-		assertEquals("page 1.05", dvks.get(1).get_title());
-		assertEquals("Page 1.5", dvks.get(2).get_title());
-		assertEquals("Page 10", dvks.get(3).get_title());
-		assertEquals("Something", dvks.get(4).get_title());
-		//TEST GROUPED ARTISTS
-		dvks = this.dvk_handler.get_dvks(0, -1, 'a', true, false);
-		assertEquals(5, dvks.size());
-		assertEquals("Page 1", dvks.get(0).get_title());
-		assertEquals("Page 1.5", dvks.get(1).get_title());
-		assertEquals("Something", dvks.get(2).get_title());
-		assertEquals("page 1.05", dvks.get(3).get_title());
-		assertEquals("Page 10", dvks.get(4).get_title());
-		//TEST INVERTED
-		dvks = this.dvk_handler.get_dvks(0, -1, 'a', false, true);
-		assertEquals(5, dvks.size());
-		assertEquals("Something", dvks.get(0).get_title());
-		assertEquals("Page 10", dvks.get(1).get_title());
-		assertEquals("Page 1.5", dvks.get(2).get_title());
-		assertEquals("page 1.05", dvks.get(3).get_title());
-		assertEquals("Page 1", dvks.get(4).get_title());
+	@SuppressWarnings("static-method")
+	public void test_get_sortable_string() {
+		//TEST CONVERTING STRINGS SO THAT THEY ARE SORTABLE BY NUMERIC VALUE WHEN SORTED ALPHABETICALLY
+		assertEquals("title 00001", DvkHandler.get_sortable_string("Title 1"));
+		assertEquals("title 00002", DvkHandler.get_sortable_string("TiTlE 002"));
+		assertEquals("test 00052-45", DvkHandler.get_sortable_string("  TeSt!  052.45  "));
+		assertEquals("00000-1-25 00002-3", DvkHandler.get_sortable_string("0.1.25  2.3"));
+		assertEquals("00002-5 - 00003-44 words 00030", DvkHandler.get_sortable_string("2.5 & 3.44 wordS 30"));
 	}
-	
+
 	/**
-	 * Tests the get_dvk method.
+	 * Tests the get_dvk function.
 	 */
 	@Test
 	public void test_get_dvk() {
-		File[] dirs = {this.temp_dir.getRoot()};
-		this.dvk_handler.read_dvks(dirs);
-		StringBuilder sql = new StringBuilder("SELECT ");
-		sql.append(DvkHandler.SQL_ID);
-		sql.append(" FROM ");
-		sql.append(DvkHandler.DVKS);
-		sql.append(" ORDER BY ");
-		sql.append(DvkHandler.TITLE);
-		sql.append(" COLLATE NOCASE ASC;");
-		try(ResultSet rs = this.dvk_handler.sql_select(sql.toString(), new String[0], true)) {
-			rs.next();
-			Dvk dvk = this.dvk_handler.get_dvk(rs.getInt(DvkHandler.SQL_ID));
-			assertEquals("Page 1", dvk.get_title());
-			rs.next();
-			dvk = this.dvk_handler.get_dvk(rs.getInt(DvkHandler.SQL_ID));
-			assertEquals("page 1.05", dvk.get_title());
-			rs.next();
-			dvk = this.dvk_handler.get_dvk(rs.getInt(DvkHandler.SQL_ID));
-			assertEquals("Page 1.5", dvk.get_title());
-			rs.next();
-			dvk = this.dvk_handler.get_dvk(rs.getInt(DvkHandler.SQL_ID));
-			assertEquals("Page 10", dvk.get_title());
-			rs.next();
-			dvk = this.dvk_handler.get_dvk(rs.getInt(DvkHandler.SQL_ID));
-			assertEquals("Something", dvk.get_title());
+		//READ DEFAULT TEST DVKS
+		FilePrefs file_prefs = new FilePrefs();
+		file_prefs.set_index_dir(this.temp_dir.getRoot());
+		try(DvkHandler dvk_handler = new DvkHandler(file_prefs)) {
+			dvk_handler.read_dvks(this.temp_dir.getRoot());
+			ArrayList<Dvk> dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			assertEquals("title 0.55", dvks.get(0).get_title());
+			assertEquals("TITLE 0.55", dvks.get(1).get_title());
+			assertEquals("Title 2", dvks.get(2).get_title());
+			assertEquals("Title 10", dvks.get(3).get_title());
+			//TEST GETTING DVK BASED ON SQL ID
+			Dvk returned = dvk_handler.get_dvk(dvks.get(3).get_sql_id());
+			assertEquals(this.temp_dir.getRoot(), returned.get_dvk_file().getParentFile());
+			assertEquals("main1.dvk", returned.get_dvk_file().getName());
+			assertEquals("MAN1", returned.get_dvk_id());
+			assertEquals("Title 10", returned.get_title());
+			assertEquals(1, returned.get_artists().length);
+			assertEquals("Artist 1", returned.get_artists()[0]);
+			assertEquals(3, returned.get_web_tags().length);
+			assertEquals("2020/09/04|17:13", returned.get_time());
+			assertEquals("tag1", returned.get_web_tags()[0]);
+			assertEquals("other tag", returned.get_web_tags()[1]);
+			assertEquals("Tag 3", returned.get_web_tags()[2]);
+			assertEquals("<p>Test &amp; such.</p>", returned.get_description());
+			assertEquals("page/url/", returned.get_page_url());
+			assertEquals("/direct/URL/", returned.get_direct_url());
+			assertEquals("sec/file/Url", returned.get_secondary_url());
+			assertEquals(this.temp_dir.getRoot(), returned.get_media_file().getParentFile());
+			assertEquals("main.txt", returned.get_media_file().getName());
+			assertEquals(this.temp_dir.getRoot(), returned.get_secondary_file().getParentFile());
+			assertEquals("main.jpeg", returned.get_secondary_file().getName());
+			//TEST GETTING DVK IF THE SQL ID IS INVALID
+			returned = dvk_handler.get_dvk(15);
+			assertEquals(null, returned.get_title());
+			//MAKE SURE FUNCTION DOESN'T BREAK ON EXCEPTION
+			dvk_handler.delete_database();
+			returned = dvk_handler.get_dvk(1);
+			assertEquals(null, returned.get_title());
 		}
-		catch(SQLException e) {
-			e.printStackTrace();
+		catch(DvkException e) {
 			assertTrue(false);
 		}
 	}
 	
 	/**
-	 * Tests get_dvks method while sorting by time published.
+	 * Tests the get_dvks function when sorting by title.
+	 */
+	@Test
+	public void test_sort_title() {
+		//READ ALL THE DEFAULT TEST DVK FILES
+		FilePrefs file_prefs = new FilePrefs();
+		file_prefs.set_index_dir(this.temp_dir.getRoot());
+		try(DvkHandler dvk_handler = new DvkHandler(file_prefs)) {
+			dvk_handler.read_dvks(this.temp_dir.getRoot());
+			//TEST DVKS ARE SORTED BY TITLE
+			ArrayList<Dvk> dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			assertEquals("title 0.55", dvks.get(0).get_title());
+			assertEquals("2017/10/06|12:00", dvks.get(0).get_time());
+			assertEquals("TITLE 0.55", dvks.get(1).get_title());
+			assertEquals("2018/05/20|14:15", dvks.get(1).get_time());
+			assertEquals("Title 2", dvks.get(2).get_title());
+			assertEquals("Title 10", dvks.get(3).get_title());
+			//TEST DVKS SORTED BY TITLE IN REVERSE
+			dvks = dvk_handler.get_dvks('a', false, true, null, null);
+			assertEquals("Title 10", dvks.get(0).get_title());
+			assertEquals("Title 2", dvks.get(1).get_title());
+			assertEquals("TITLE 0.55", dvks.get(2).get_title());
+			assertEquals("2018/05/20|14:15", dvks.get(2).get_time());
+			assertEquals("title 0.55", dvks.get(3).get_title());
+			assertEquals("2017/10/06|12:00", dvks.get(3).get_time());
+			//TEST SORTING BY TITLE WHEN ARTISTS ARE GROUPED
+			dvks = dvk_handler.get_dvks('a', true, false, null, null);
+			assertEquals("title 0.55", dvks.get(0).get_title());
+			assertEquals("Artist 1", dvks.get(0).get_artists()[0]);
+			assertEquals("Title 10", dvks.get(1).get_title());
+			assertEquals("Artist 1", dvks.get(1).get_artists()[0]);
+			assertEquals("TITLE 0.55", dvks.get(2).get_title());
+			assertEquals("Artist 2", dvks.get(2).get_artists()[0]);
+			assertEquals("Title 2", dvks.get(3).get_title());
+			assertEquals("Test", dvks.get(3).get_artists()[0]);
+		}
+		catch(DvkException e) {
+			assertTrue(false);
+		}
+	}
+	
+	/**
+	 * Tests the get_dvks function when sorting by time published.
 	 */
 	@Test
 	public void test_sort_time() {
-		File[] dirs = {this.temp_dir.getRoot()};
-		this.dvk_handler.read_dvks(dirs);
-		//TEST STANDARD TIME SORT
-		ArrayList<Dvk> dvks = this.dvk_handler.get_dvks(0, -1, 't', false, false);
-		assertEquals(5, dvks.size());
-		assertEquals("Page 10", dvks.get(0).get_title());
-		assertEquals("Something", dvks.get(1).get_title());
-		assertEquals("Page 1.5", dvks.get(2).get_title());
-		assertEquals("page 1.05", dvks.get(3).get_title());
-		assertEquals("Page 1", dvks.get(4).get_title());
-		//TEST GROUPED ARTISTS
-		dvks = this.dvk_handler.get_dvks(0, -1, 't', true, false);
-		assertEquals(5, dvks.size());
-		assertEquals("Something", dvks.get(0).get_title());
-		assertEquals("Page 1.5", dvks.get(1).get_title());
-		assertEquals("Page 1", dvks.get(2).get_title());
-		assertEquals("page 1.05", dvks.get(3).get_title());
-		assertEquals("Page 10", dvks.get(4).get_title());
-		//TEST INVERTED
-		dvks = this.dvk_handler.get_dvks(0, -1, 't', false, true);
-		assertEquals(5, dvks.size());
-		assertEquals("Page 1", dvks.get(0).get_title());
-		assertEquals("page 1.05", dvks.get(1).get_title());
-		assertEquals("Page 1.5", dvks.get(2).get_title());
-		assertEquals("Something", dvks.get(3).get_title());
-		assertEquals("Page 10", dvks.get(4).get_title());
+		//READ ALL THE DEFAULT TEST DVK FILES
+		FilePrefs file_prefs = new FilePrefs();
+		file_prefs.set_index_dir(this.temp_dir.getRoot());
+		try(DvkHandler dvk_handler = new DvkHandler(file_prefs)) {
+			dvk_handler.read_dvks(this.temp_dir.getRoot());
+			//TEST DVKS ARE SORTED BY TIME
+			ArrayList<Dvk> dvks = dvk_handler.get_dvks('t', false, false, null, null);
+			assertEquals(4, dvks.size());
+			assertEquals("2017/10/06|12:00", dvks.get(0).get_time());
+			assertEquals("title 0.55", dvks.get(0).get_title());
+			assertEquals("2017/10/06|12:00", dvks.get(1).get_time());
+			assertEquals("Title 2", dvks.get(1).get_title());
+			assertEquals("2018/05/20|14:15", dvks.get(2).get_time());
+			assertEquals("2020/09/04|17:13", dvks.get(3).get_time());
+			//TEST DVKS SORTED BY TIME IN REVERSE
+			dvks = dvk_handler.get_dvks('t', false, true, null, null);
+			assertEquals(4, dvks.size());
+			assertEquals("2020/09/04|17:13", dvks.get(0).get_time());
+			assertEquals("2018/05/20|14:15", dvks.get(1).get_time());
+			assertEquals("2017/10/06|12:00", dvks.get(2).get_time());
+			assertEquals("Title 2", dvks.get(2).get_title());
+			assertEquals("2017/10/06|12:00", dvks.get(3).get_time());
+			assertEquals("title 0.55", dvks.get(3).get_title());
+			//TEST SORTING BY TIME WHEN ARTISTS ARE GROUPED
+			dvks = dvk_handler.get_dvks('t', true, false, null, null);
+			assertEquals(4, dvks.size());
+			assertEquals("2017/10/06|12:00", dvks.get(0).get_time());
+			assertEquals("Artist 1", dvks.get(0).get_artists()[0]);
+			assertEquals("2020/09/04|17:13", dvks.get(1).get_time());
+			assertEquals("Artist 1", dvks.get(1).get_artists()[0]);
+			assertEquals("2018/05/20|14:15", dvks.get(2).get_time());
+			assertEquals("Artist 2", dvks.get(2).get_artists()[0]);
+			assertEquals("2017/10/06|12:00", dvks.get(3).get_time());
+			assertEquals("Test", dvks.get(3).get_artists()[0]);
+		}
+		catch(DvkException e) {
+			assertTrue(false);
+		}
 	}
 	
 	/**
-	 * Tests the contains_file method.
-	 */
-	@Test
-	public void test_contains_file() {
-		File[] dirs = {this.temp_dir.getRoot()};
-		this.dvk_handler.read_dvks(dirs);
-		assertEquals(5, this.dvk_handler.get_size());
-		File file = new File(this.temp_dir.getRoot(), "noFile.txt");
-		assertFalse(this.dvk_handler.contains_file(file));
-		file = new File(this.temp_dir.getRoot(), "dvk2.png");
-		assertFalse(this.dvk_handler.contains_file(file));
-		file = new File(this.f2, "dvk2.png");
-		assertTrue(this.dvk_handler.contains_file(file));
-		File f3 = new File(this.temp_dir.getRoot(), "f3");
-		file = new File(f3, "dvk3.txt");
-		assertTrue(this.dvk_handler.contains_file(file));
-		file = new File(f3, "dvk3.png");
-		assertTrue(this.dvk_handler.contains_file(file));
-	}
-	
-	/**
-	 * Tests the delete_database method.
+	 * Tests the delete_database function.
 	 */
 	@Test
 	public void test_delete_database() {
+		//SET UP DVK HANDLER
 		FilePrefs prefs = new FilePrefs();
 		prefs.set_index_dir(this.temp_dir.getRoot());
-		try(DvkHandler handler = new DvkHandler(prefs, null, null)) {
+		try(DvkHandler handler = new DvkHandler(prefs)) {
+			//CHECK DVK ARCHIVE DATABASE FILE EXISTS
 			File file = new File(this.temp_dir.getRoot(), "dvk_archive.db");
 			assertTrue(file.exists());
-			handler.delete_database();
+			//TEST DELETING THE DATABASE FILE
+			assertTrue(handler.delete_database());
 			assertFalse(file.exists());
 		}
 		catch(DvkException e) {

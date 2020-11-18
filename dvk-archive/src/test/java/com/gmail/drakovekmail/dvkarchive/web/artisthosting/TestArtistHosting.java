@@ -1,19 +1,7 @@
 package com.gmail.drakovekmail.dvkarchive.web.artisthosting;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
 import org.junit.Rule;
-import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
-import com.gmail.drakovekmail.dvkarchive.file.Dvk;
-import com.gmail.drakovekmail.dvkarchive.file.DvkException;
-import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
-import com.gmail.drakovekmail.dvkarchive.file.FilePrefs;
 
 /**
  * Unit tests for the ArtistHosting class.
@@ -31,6 +19,8 @@ public class TestArtistHosting {
 	/**
 	 * Tests the get_artists method.
 	 */
+	//TODO REINSTATE
+	/*
 	@Test
 	public void test_get_artists() {
 		//CREATE SUB-DIRECTORIES
@@ -115,10 +105,13 @@ public class TestArtistHosting {
 			assertTrue(false);
 		}
 	}
+	*/
 	
 	/**
 	 * Tests the get_common_directory method.
 	 */
+	//TODO REINSTATE
+	/*
 	@Test
 	public void test_get_common_directory() {
 		//CREATE SUB-DIRECTORIES
@@ -148,10 +141,13 @@ public class TestArtistHosting {
 		file = ArtistHosting.get_common_directory(sub2, supsub);
 		assertEquals(this.temp_dir.getRoot(), file);
 	}
+	*/
 	
 	/**
 	 * Tests the move_dvk method.
 	 */
+	//TODO REINSTATE
+	/*
 	@Test
 	public void test_move_dvk() {
 		Dvk dvk = new Dvk();
@@ -206,10 +202,13 @@ public class TestArtistHosting {
 		assertEquals("dvk.dvk", dvk.get_dvk_file().getName());
 		assertEquals("dvk.txt", dvk.get_media_file().getName());
 	}
+	*/
 	
 	/**
 	 * Tests the update favorite method.
 	 */
+	//TODO REINSTATE
+	/*
 	@Test
 	public void test_update_favorite() {
 		//CREATE DVK
@@ -261,10 +260,13 @@ public class TestArtistHosting {
 			assertTrue(false);
 		}
 	}
+	*/
 	
 	/**
 	 * Tests the get_dvks_from_ids method.
 	 */
+	//TODO REINSTATE
+	/*
 	@Test
 	public void test_get_dvks_from_ids() {
 		//CREATE DVK 1
@@ -312,4 +314,5 @@ public class TestArtistHosting {
 			assertTrue(false);
 		}
 	}
+	*/
 }

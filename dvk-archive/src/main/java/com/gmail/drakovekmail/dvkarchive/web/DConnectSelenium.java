@@ -12,8 +12,6 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gmail.drakovekmail.dvkarchive.file.DvkException;
-import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
-import com.gmail.drakovekmail.dvkarchive.gui.swing.compound.DButtonDialog;
 
 /**
  * Class for getting web info using Selenium WebDriver.
@@ -37,10 +35,9 @@ public class DConnectSelenium implements AutoCloseable {
 	 * Disables Selenium logs.
 	 * 
 	 * @param headless Whether drivers should be headless.
-	 * @param start_gui GUI to tie message box to if informing user to download Selenium driver
 	 * @exception DvkException DvkException
 	 */
-	public DConnectSelenium(boolean headless, StartGUI start_gui) throws DvkException {
+	public DConnectSelenium(boolean headless) throws DvkException {
 		//DISABLE LOGS
 		java.util.logging.Logger.getLogger("org.openqa.selenium")
 			.setLevel(java.util.logging.Level.OFF);
@@ -52,7 +49,7 @@ public class DConnectSelenium implements AutoCloseable {
 				"/dev/null");
 		//INITIALIZE OBJECT
 		this.connect = new DConnect(false, false);
-		initialize_driver('f', headless, start_gui);
+		initialize_driver('f', headless);
 	}
 	
 	/**
@@ -62,9 +59,8 @@ public class DConnectSelenium implements AutoCloseable {
 	 * 
 	 * @param driver_type f - Firefox, c - Chrome, s - Safari e - Edge
 	 * @param headless Whether driver should be headless.
-	 * @param start_gui GUI to tie message box to if informing user to download Selenium driver.
 	 */
-	public void initialize_driver(char driver_type, boolean headless, StartGUI start_gui) {
+	public void initialize_driver(char driver_type, boolean headless) {
 		if(driver_type == 'f') {
 			//FIREFOX DRIVER
 			try {
@@ -73,7 +69,7 @@ public class DConnectSelenium implements AutoCloseable {
 				this.driver = new FirefoxDriver(op);
 			}
 			catch(Exception e) {
-				initialize_driver('c', headless, start_gui);
+				initialize_driver('c', headless);
 			}
 		}
 		else if(driver_type == 'c') {
@@ -84,7 +80,7 @@ public class DConnectSelenium implements AutoCloseable {
 				this.driver = new ChromeDriver(op);
 			}
 			catch(Exception e) {
-				initialize_driver('s', headless, start_gui);
+				initialize_driver('s', headless);
 			}
 		}
 		else if(driver_type == 's') {
@@ -93,7 +89,7 @@ public class DConnectSelenium implements AutoCloseable {
 				this.driver = new SafariDriver();
 			}
 			catch(Exception e) {
-				initialize_driver('e', headless, start_gui);
+				initialize_driver('e', headless);
 			}
 		}
 		else if(driver_type == 'e') {
@@ -101,15 +97,7 @@ public class DConnectSelenium implements AutoCloseable {
 			try {
 				this.driver = new EdgeDriver();
 			}
-			catch(Exception e) {
-				if(start_gui != null) {
-					//INFORM USER TO INSTALL SELENIUM DRIVER
-					String[] buttons = {"ok"};
-					DButtonDialog dialog = new DButtonDialog();
-					dialog.open_html(start_gui.get_base_gui(), start_gui.get_frame(),
-							"selenium_title", "selenium_message", buttons);
-				}
-			}
+			catch(Exception e) {}
 		}
 	}
 	
@@ -197,6 +185,9 @@ public class DConnectSelenium implements AutoCloseable {
 		return this.driver;
 	}
 	
+	/**
+	 * Safely closes the Selenium driver
+	 */
 	@Override
 	public void close() throws DvkException {
 		try {

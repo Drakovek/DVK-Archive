@@ -66,6 +66,7 @@ public class TestStringProcessing {
 		assertEquals("thing-stuff - bleh", StringProcessing.get_filename("thing--stuff  @*-   bleh"));
 		assertEquals("a - b - c", StringProcessing.get_filename("a% - !b @  ??c"));
 		assertEquals("Test", StringProcessing.get_filename("Test String", 5));
+		assertEquals("Test String", StringProcessing.get_filename("Test String", -1));
 	}
 	
 	/**

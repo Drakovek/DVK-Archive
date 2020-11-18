@@ -133,7 +133,11 @@ public class StringProcessing {
 			}
 		}
 		//TRUNCATE STRING
-		String cleaned = truncate_string(builder.toString(), length);
+		//TODO CREATE TEST FOR CHECKING NOT TRUNCATING THE STRING
+		String cleaned = builder.toString();
+		if(length != -1) {
+			cleaned = truncate_string(cleaned, length);
+		}
 		//RETURN CLEANED STRING
 		if(cleaned.length() == 0) {
 			return "0";

@@ -2,24 +2,19 @@ package com.gmail.drakovekmail.dvkarchive.web.artisthosting;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.gargoylesoftware.htmlunit.html.DomAttr;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlButton;
-import com.gargoylesoftware.htmlunit.html.HtmlImage;
 import com.gargoylesoftware.htmlunit.html.HtmlInput;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
 import com.gmail.drakovekmail.dvkarchive.file.DvkException;
 import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
 import com.gmail.drakovekmail.dvkarchive.file.InOut;
-import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
 import com.gmail.drakovekmail.dvkarchive.processing.ArrayProcessing;
-import com.gmail.drakovekmail.dvkarchive.processing.HtmlProcessing;
 import com.gmail.drakovekmail.dvkarchive.processing.StringProcessing;
 import com.gmail.drakovekmail.dvkarchive.web.DConnect;
 
@@ -202,6 +197,8 @@ public class DeviantArt extends ArtistHosting {
 	 * @return Dvk of DeviantArt media page
 	 * @throws DvkException Throws DvkException if loading page fails
 	 */
+	//TODO REINSTATE
+	/*
 	public Dvk get_dvk(
 			String page_url,
 			DvkHandler dvk_handler,
@@ -211,6 +208,7 @@ public class DeviantArt extends ArtistHosting {
 			boolean single) throws DvkException {
 		return this.get_dvk(page_url, dvk_handler, gallery, directory, fav_artist, 0, single, true);
 	}
+	*/
 	
 	/**
 	 * Returns a Dvk for a given DeviantArt media page.
@@ -227,6 +225,8 @@ public class DeviantArt extends ArtistHosting {
 	 * @return Dvk of DeviantArt media page
 	 * @throws DvkException Throws DvkException if loading page fails
 	 */
+	//TODO REINSTATE
+	/*
 	public Dvk get_dvk(
 			String page_url,
 			DvkHandler dvk_handler,
@@ -510,6 +510,7 @@ public class DeviantArt extends ArtistHosting {
 		}
 		throw new DvkException();
 	}
+	*/
 	
 	/**
 	 * Returns a Dvk for a given DeviantArt poll page.
@@ -846,6 +847,8 @@ public class DeviantArt extends ArtistHosting {
 	 * @return List of DeviantArt media page URLs
 	 * @throws DvkException Throws DvkException if loading gallery page fails
 	 */
+	//TODO REINSTATE
+	/*
 	public ArrayList<String> get_pages(
 			StartGUI start_gui,
 			String artist,
@@ -966,6 +969,7 @@ public class DeviantArt extends ArtistHosting {
 		}
 		throw new DvkException();
 	}
+	*/
 	
 	/**
 	 * Returns a list of Dvk objects containing media info for a given artist.
@@ -980,6 +984,8 @@ public class DeviantArt extends ArtistHosting {
 	 * @return List of Dvks with DeviantArt info
 	 * @throws DvkException Throws DvkException if loading gallery page fails
 	 */
+	//TODO REINSTATE
+	/*
 	public ArrayList<Dvk> get_module_pages(
 			StartGUI start_gui,
 			String artist,
@@ -1161,4 +1167,5 @@ public class DeviantArt extends ArtistHosting {
 		}
 		throw new DvkException();
 	}
+	*/
 }

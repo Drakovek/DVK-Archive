@@ -133,6 +133,13 @@ public class StringCompare implements Comparator<String> {
 		return str1.toLowerCase().compareTo(str2.toLowerCase());
 	}
 
+	/**
+	 * Returns int to indicate which of two Strings should come first alpha-numerically.
+	 * 
+	 * @param str1 String 1
+	 * @param str2 String 2
+	 * @return < 0 if str1 is first, > 0 if str2 is first, 0 if both are equal
+	 */
 	@Override
 	public int compare(String str1, String str2) {
 		return compare_alphanum(str1, str2);

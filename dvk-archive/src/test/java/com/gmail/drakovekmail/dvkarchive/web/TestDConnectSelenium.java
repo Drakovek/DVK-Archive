@@ -34,7 +34,7 @@ public class TestDConnectSelenium {
 	@Before
 	public void set_up() {
 		try {
-			this.connect = new DConnectSelenium(true, null);
+			this.connect = new DConnectSelenium(true);
 		}
 		catch(DvkException e) {}
 	}

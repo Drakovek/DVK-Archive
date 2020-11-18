@@ -1,22 +1,8 @@
 package com.gmail.drakovekmail.dvkarchive.web.artisthosting;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
-import com.gmail.drakovekmail.dvkarchive.file.Dvk;
-import com.gmail.drakovekmail.dvkarchive.file.DvkException;
-import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
-import com.gmail.drakovekmail.dvkarchive.file.FilePrefs;
-import com.gmail.drakovekmail.dvkarchive.file.InOut;
 
 /**
  * Unit tests for the FurAffinity object.
@@ -39,12 +25,15 @@ public class TestFurAffinity {
 	/**
 	 * Sets up object and files for testing.
 	 */
+	//TODO REINSTATE
+	/*
 	@Before
 	public void set_up() {
 		//SET UP FURAFFINITY OBJECT
 		FilePrefs prefs = new FilePrefs();
 		this.fur = new FurAffinity(prefs, null);
 	}
+	*/
 	
 	/**
 	 * Removes test objects and files.
@@ -57,6 +46,8 @@ public class TestFurAffinity {
 	/**
 	 * Tests the get_url_artists method.
 	 */
+	//TODO REINSTATE
+	/*
 	@Test
 	@SuppressWarnings("static-method")
 	public void test_get_url_artist() {
@@ -64,10 +55,13 @@ public class TestFurAffinity {
 		assertEquals("otherartistguy", FurAffinity.get_url_artist("Other_Artist_Guy"));
 		assertEquals("thatisit", FurAffinity.get_url_artist("That is It"));
 	}
+	*/
 	
 	/**
 	 * Tests the get_page_id method.
 	 */
+	//TODO REINSTATE
+	/*
 	@Test
 	@SuppressWarnings("static-method")
 	public void test_get_page_id() {
@@ -102,10 +96,13 @@ public class TestFurAffinity {
 		assertEquals("FAF-J", FurAffinity.get_page_id(url, true));
 		assertEquals("", FurAffinity.get_page_id(url, false));
 	}
+	*/
 	
 	/**
 	 * Tests the get_time method.
 	 */
+	//TODO REINSTATE
+	/*
 	@Test
 	@SuppressWarnings("static-method")
 	public void test_get_time() {
@@ -131,10 +128,13 @@ public class TestFurAffinity {
 		assertEquals("2016/12/08|01:05", FurAffinity.get_time("dec  08, 2016  1:05  Am"));
 		assertEquals("0000/00/00|00:00", FurAffinity.get_time("jug  08, 2016  1:05  Am"));
 	}
+	*/
 	
 	/**
 	 * Tests the get_gallery_ids method.
 	 */
+	//TODO REINSTATE
+	/*
 	@Test
 	public void test_get_gallery_ids() {
 		//CREATE DIRECTORY
@@ -242,10 +242,13 @@ public class TestFurAffinity {
 			assertTrue(false);
 		}
 	}
+	*/
 	
 	/**
 	 * Tests the get_gallery_ids method for getting favorites pages.
 	 */
+	//TODO REINSTATE
+	/*
 	@Test
 	public void test_get_gallery_ids_favorites() {
 		//CREATE TEST DIRECTORY
@@ -327,10 +330,13 @@ public class TestFurAffinity {
 			assertTrue(false);
 		}
 	}
+	*/
 	
 	/**
 	 * Tests the get_journal_ids method.
 	 */
+	//TODO REINSTATE
+	/*
 	@Test
 	public void test_get_journal_ids() {
 		//CREATE TEST DIRECTORY
@@ -424,10 +430,13 @@ public class TestFurAffinity {
 			assertTrue(false);
 		}
 	}
+	*/
 	
 	/**
 	 * Runs tests after being logged in to Fur Affinity
 	 */
+	//TODO REINSTATE
+	/*
 	@Test
 	public void test_after_login() {
 		this.fur.login();
@@ -443,10 +452,13 @@ public class TestFurAffinity {
 		//GET JOURNAL DVK
 		test_get_journal_dvk();
 	}
+	*/
 	
 	/**
 	 * Tests the get_dvk method.
 	 */
+	//TODO REINSTATE
+	/*
 	@Test
 	public void test_get_dvk() {
 		//CREATE TEST DIRECTORY
@@ -660,10 +672,13 @@ public class TestFurAffinity {
 			assertTrue(false);
 		}
 	}
+	*/
 	
 	/**
 	 * Tests the get_journal_dvk method.
 	 */
+	//TODO REINSTATE
+	/*
 	@Test
 	public void test_get_journal_dvk() {
 		File jnl_dir = null;
@@ -769,4 +784,5 @@ public class TestFurAffinity {
 			assertTrue(false);
 		}
 	}
+	*/
 }

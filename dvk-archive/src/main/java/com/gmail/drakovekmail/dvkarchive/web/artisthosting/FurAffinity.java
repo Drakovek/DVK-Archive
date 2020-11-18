@@ -1,8 +1,6 @@
 package com.gmail.drakovekmail.dvkarchive.web.artisthosting;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Point;
@@ -10,15 +8,11 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import com.gargoylesoftware.htmlunit.html.DomAttr;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
 import com.gmail.drakovekmail.dvkarchive.file.DvkException;
 import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
-import com.gmail.drakovekmail.dvkarchive.file.FilePrefs;
 import com.gmail.drakovekmail.dvkarchive.file.InOut;
-import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
-import com.gmail.drakovekmail.dvkarchive.processing.ArrayProcessing;
 import com.gmail.drakovekmail.dvkarchive.processing.StringProcessing;
 import com.gmail.drakovekmail.dvkarchive.web.DConnect;
 import com.gmail.drakovekmail.dvkarchive.web.DConnectSelenium;
@@ -46,20 +40,18 @@ public class FurAffinity extends ArtistHosting {
 	private DConnect downloader;
 	
 	/**
-	 * Used for canceling and showing progress
-	 */
-	private StartGUI start_gui;
-	
-	/**
 	 * Initializes the FurAffinity object.
 	 * 
 	 * @param prefs FilePrefs for DVK Archive
 	 * @param start_gui Used to display progress and messages if using GUI
 	 */
+	//TODO REINSTATE
+	/*
 	public FurAffinity(FilePrefs prefs, StartGUI start_gui) {
 		this.connect = null;
 		this.start_gui = start_gui;
 	}
+	*/
 	
 	/**
 	 * Initializes the main DConnect object.
@@ -68,7 +60,7 @@ public class FurAffinity extends ArtistHosting {
 	 */
 	private void initialize_connect(boolean headless) {
 		try {
-			this.connect = new DConnectSelenium(headless, this.start_gui);
+			this.connect = new DConnectSelenium(headless);
 			this.downloader = new DConnect(false, true);
 		}
 		catch(DvkException e) {
@@ -262,6 +254,8 @@ public class FurAffinity extends ArtistHosting {
 	 * @return List of FurAffinity media page IDs
 	 * @throws DvkException Throws DvkException if loading gallery page fails
 	 */
+	//TODO REINSTATE
+	/*
 	public ArrayList<String> get_gallery_ids(
 			String artist,
 			File directory,
@@ -389,6 +383,7 @@ public class FurAffinity extends ArtistHosting {
 		}
 		throw new DvkException();
 	}
+	*/
 	
 	/**
 	 * Returns a list of FurAffinity journal page IDs
@@ -402,6 +397,8 @@ public class FurAffinity extends ArtistHosting {
 	 * @return List of FurAffinity media page IDs
 	 * @throws DvkException Throws DvkException if loading gallery page fails
 	 */
+	//TODO REINSTATE
+	/*
 	public ArrayList<String> get_journal_ids(
 			String artist,
 			File directory,
@@ -488,6 +485,7 @@ public class FurAffinity extends ArtistHosting {
 		}
 		throw new DvkException();
 	}
+	*/
 	
 	/**
 	 * Returns a Dvk for a given FurAffinity media page.
@@ -502,6 +500,8 @@ public class FurAffinity extends ArtistHosting {
 	 * @return Dvk of FurAffinity media page
 	 * @throws DvkException Throws DvkException if loading page fails
 	 */
+	//TODO REINSTATE
+	/*
 	public Dvk get_dvk(
 			String id,
 			DvkHandler dvk_handler,
@@ -739,6 +739,7 @@ public class FurAffinity extends ArtistHosting {
 		catch(Exception e) {}
 		throw new DvkException();
 	}
+	*/
 	
 	/**
 	 * Returns a Dvk for a given FurAffinity journal page.

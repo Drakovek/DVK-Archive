@@ -1,23 +1,8 @@
 package com.gmail.drakovekmail.dvkarchive.web.artisthosting;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import com.gmail.drakovekmail.dvkarchive.file.Dvk;
-import com.gmail.drakovekmail.dvkarchive.file.DvkException;
-import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
-import com.gmail.drakovekmail.dvkarchive.file.FilePrefs;
-import com.gmail.drakovekmail.dvkarchive.file.InOut;
 
 /**
  * Unit tests for the Inkbunny class.
@@ -47,13 +32,10 @@ public class TestInkbunny {
 	private Inkbunny ink;
 	
 	/**
-	 * Handles test DVK files
-	 */
-	private DvkHandler dvk_handler;
-	
-	/**
 	 * Creates test files and initializes objects used for testing.
 	 */
+	//TODO REINSTATE
+	/*
 	@Before
 	public void set_up() {
 		FilePrefs prefs = new FilePrefs();
@@ -64,6 +46,7 @@ public class TestInkbunny {
 		catch(DvkException e) {}
 		this.ink = new Inkbunny(null, this.dvk_handler);
 	}
+	*/
 	
 	/**
 	 * Removes all test files and closes connections.
@@ -76,6 +59,8 @@ public class TestInkbunny {
 	/**
 	 * Tests the get_page_id method.
 	 */
+	//TODO REINSTATE
+	/*
 	@Test
 	@SuppressWarnings("static-method")
 	public void test_get_page_id() {
@@ -98,10 +83,13 @@ public class TestInkbunny {
 		assertEquals("", Inkbunny.get_page_id("inkbunny.com/j/1234", true));
 		assertEquals("", Inkbunny.get_page_id("something.net/s/1234", false));
 	}
+	*
 	
 	/**
 	 * Tests the login and is_logged_in methods.
 	 */
+	//TODO REINSTATE
+	/*
 	@Test
 	public void test_login() {
 		assertFalse(this.ink.is_logged_in());
@@ -110,10 +98,13 @@ public class TestInkbunny {
 		assertTrue(this.ink.login("guest", ""));
 		assertTrue(this.ink.is_logged_in());
 	}
+	*/
 	
 	/**
 	 * Tests the get_user_id method.
 	 */
+	//TODO REINSTATE
+	/*
 	@Test
 	public void test_get_user_id() {
 		assertEquals("VOID", this.ink.get_user_id("Tyroo"));
@@ -123,10 +114,13 @@ public class TestInkbunny {
 		assertEquals("544679", this.ink.get_user_id("biobasher"));
 		assertEquals("159684", this.ink.get_user_id("LittleNapoleon"));
 	}
+	*/
 	
 	/**
 	 * Tests the get_time method.
 	 */
+	//TODO REINSTATE
+	/*
 	@Test
 	@SuppressWarnings("static-method")
 	public void test_get_time() {
@@ -152,10 +146,13 @@ public class TestInkbunny {
 		assertEquals(null, Inkbunny.get_time("28 Mar 2020 14: CEST"));
 		assertEquals(null, Inkbunny.get_time("28 Mar 2020 1444 CEST"));
 	}
+	*/
 	
 	/**
 	 * Tests the get_dvks method.
 	 */
+	//TODO REINSTATE
+	/*
 	@Test
 	public void test_get_dvks() {
 		//CREATE DVK 1 TO BE FAVORITED
@@ -424,10 +421,13 @@ public class TestInkbunny {
 			assertTrue(false);
 		}catch(DvkException e) {}
 	}
+	*/
 	
 	/**
 	 * Tests the get_pages method when getting pages.
 	 */
+	//TODO REINSTATE
+	/*
 	@Test
 	public void test_get_pages_favorites() {
 		//CREATE DVK 1
@@ -500,10 +500,13 @@ public class TestInkbunny {
 		index = ids.size() - 1;
 		assertEquals("INK343043-1", ids.get(index));
 	}
+	*/
 	
 	/**
 	 * Tests the get_pages method.
 	 */
+	//TODO REINSTATE
+	/*
 	@Test
 	public void test_get_pages() {
 		//CREATE DVK 1
@@ -609,10 +612,13 @@ public class TestInkbunny {
 			assertTrue(false);
 		}
 	}
+	*/
 	
 	/**
 	 * Tests the get_journal_pages method.
 	 */
+	//TODO REINSTATE
+	/*
 	@Test
 	public void test_get_journal_pages() {
 		//CREATE DVK1
@@ -695,10 +701,13 @@ public class TestInkbunny {
 			assertTrue(false);
 		}
 	}
+	*/
 	
 	/**
 	 * Tests the get_journal_dvk method.
 	 */
+	//TODO REINSTATE
+	/*
 	@Test
 	public void test_get_journal_dvk() {
 		File[] dirs = {this.temp_dir.getRoot()};
@@ -793,4 +802,5 @@ public class TestInkbunny {
 		assertEquals("It's an \"It Doesn't Matter\" Week!", dvks.get(0).get_title());
 		assertEquals("“Alteration” is a Pretty Generic Name, Help Me Do Better?", dvks.get(1).get_title());
 	}
+	*/
 }

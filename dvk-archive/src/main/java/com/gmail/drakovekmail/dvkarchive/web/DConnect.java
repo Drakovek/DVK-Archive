@@ -307,6 +307,9 @@ public class DConnect implements AutoCloseable {
 		return this.web_client;
 	}
 	
+	/**
+	 * Safely closes the WebClient
+	 */
 	@Override
 	public void close() throws DvkException {
 		this.page = null;

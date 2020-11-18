@@ -1,21 +1,12 @@
 package com.gmail.drakovekmail.dvkarchive.web.comics;
 
-import java.io.File;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import com.gargoylesoftware.htmlunit.html.DomAttr;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
-import com.gmail.drakovekmail.dvkarchive.file.DvkException;
-import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
-import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
-import com.gmail.drakovekmail.dvkarchive.processing.StringProcessing;
 import com.gmail.drakovekmail.dvkarchive.web.DConnect;
-import com.gmail.drakovekmail.dvkarchive.web.DConnectSelenium;
-import com.gmail.drakovekmail.dvkarchive.web.artisthosting.ArtistHosting;
+
 
 /**
  * Class for downloading media from MangaDex.
@@ -178,6 +169,8 @@ public class MangaDex {
 	 * @param page Page of chapter list to start scanning from
 	 * @return ArrayList of Dvk objects containing chapter info
 	 */
+	//TODO REINSTATE
+	/*
 	public static ArrayList<Dvk> get_chapters(
 			DConnect connect,
 			Dvk base_dvk,
@@ -276,6 +269,7 @@ public class MangaDex {
 		}
 		return dvks;
 	}
+	*/
 	
 	/**
 	 * Returns which MangaDex chapter to start downloading from.
@@ -287,6 +281,8 @@ public class MangaDex {
 	 * 					If true, returns last chapter index.
 	 * @return Index of chapter to start downloading from
 	 */
+	//TODO REINSTATE
+	/*
 	public static int get_start_chapter(
 			DvkHandler dvk_handler,
 			ArrayList<Dvk> chapters,
@@ -323,6 +319,7 @@ public class MangaDex {
 		}
 		return chapter - 1;
 	}
+	*/
 	
 	/**
 	 * Returns a list of Dvks for MangaDex media.
@@ -336,6 +333,8 @@ public class MangaDex {
 	 * @param save Whether to save Dvk objects to disk
 	 * @return List of Dvks for MangaDex media
 	 */
+	//TODO REINSTATE
+	/*
 	public static ArrayList<Dvk> get_dvks(
 			DConnectSelenium connect,
 			DvkHandler dvk_handler,
@@ -452,6 +451,7 @@ public class MangaDex {
 		catch(DvkException e) {}
 		return new ArrayList<>();
 	}
+	*/
 	
 	/**
 	 * Returns MangaDex title ID from array of tags.
@@ -477,6 +477,8 @@ public class MangaDex {
 	 * @param dvk_handler DvkHandler for getting downloaded files.
 	 * @return List of MangaDex Dvks
 	 */
+	//TODO REINSTATE
+	/*
 	public static ArrayList<Dvk> get_downloaded_titles(DvkHandler dvk_handler) {
 		ArrayList<String> ids = new ArrayList<>();
 		ArrayList<Dvk> dvks = new ArrayList<>();
@@ -524,4 +526,5 @@ public class MangaDex {
 		catch(SQLException e) {}
 		return dvks;
 	}
+	*/
 }

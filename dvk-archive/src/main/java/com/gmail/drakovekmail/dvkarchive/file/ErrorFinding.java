@@ -1,12 +1,5 @@
 package com.gmail.drakovekmail.dvkarchive.file;
 
-import java.io.File;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
-
 /**
  * Class containing methods for finding errors in DVK files.
  * 
@@ -23,6 +16,8 @@ public class ErrorFinding {
 	 * @param start_gui Used for displaying progress and results
 	 * @return List of unlinked files
 	 */
+	//TODO REINSTATE
+	/*
 	public static ArrayList<File> get_unlinked_media(
 			DvkHandler dvk_handler,
 			File[] directories,
@@ -99,6 +94,7 @@ public class ErrorFinding {
 		}
 		return missing;
 	}
+	*/
 	
 	/**
 	 * Returns list of Dvks missing their associated media file(s).
@@ -107,6 +103,8 @@ public class ErrorFinding {
 	 * @param start_gui Used to show progress if not null
 	 * @return Dvks with missing primary or secondary media
 	 */
+	//TODO REINSTATE
+	/*
 	public static ArrayList<File> get_missing_media_dvks(
 			DvkHandler dvk_handler,
 			StartGUI start_gui) {
@@ -135,6 +133,7 @@ public class ErrorFinding {
 		}
 		return files;
 	}
+	*/
 	
 	/**
 	 * Returns a list of Dvks that share the same IDs.
@@ -143,6 +142,8 @@ public class ErrorFinding {
 	 * @param start_gui Used to show progress if not null
 	 * @return List of Dvks that have identical IDs
 	 */
+	//TODO REINSTATE
+	/*
 	public static ArrayList<File> get_same_ids(
 			DvkHandler dvk_handler,
 			StartGUI start_gui) {
@@ -220,4 +221,5 @@ public class ErrorFinding {
 		}
 		return files;
 	}
+	*/
 }

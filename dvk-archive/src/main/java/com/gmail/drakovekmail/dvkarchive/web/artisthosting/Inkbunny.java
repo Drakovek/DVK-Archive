@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -17,18 +15,14 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.gargoylesoftware.htmlunit.html.DomAttr;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
 import com.gmail.drakovekmail.dvkarchive.file.DvkException;
 import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
 import com.gmail.drakovekmail.dvkarchive.file.InOut;
-import com.gmail.drakovekmail.dvkarchive.gui.StartGUI;
-import com.gmail.drakovekmail.dvkarchive.processing.ArrayProcessing;
 import com.gmail.drakovekmail.dvkarchive.processing.StringProcessing;
 import com.gmail.drakovekmail.dvkarchive.web.DConnect;
 
@@ -43,11 +37,6 @@ public class Inkbunny extends ArtistHosting {
 	 * Milliseconds to wait after connection events for rate limiting.
 	 */
 	private static final int SLEEP = 2000;
-	
-	/**
-	 * StartGUI for showing progress
-	 */
-	private StartGUI start_gui;
 	
 	/**
 	 * DvkHandler for checking already downloaded DVK files
@@ -70,12 +59,15 @@ public class Inkbunny extends ArtistHosting {
 	 * @param start_gui StartGUI for showing progress
 	 * @param dvk_handler DvkHandler for checking already downloaded DVK files
 	 */
+	//TODO REINSTATE
+	/*
 	public Inkbunny(StartGUI start_gui, DvkHandler dvk_handler) {
 		this.sid = new String();
 		this.start_gui = start_gui;
 		this.dvk_handler = dvk_handler;
 		this.connect = null;
 	}
+	*/
 	
 	/**
 	 * Initializes the DConnect object.
@@ -225,6 +217,8 @@ public class Inkbunny extends ArtistHosting {
 	 * @return List of Dvks objects for submissions in a given user's Inkbunny gallery
 	 * @throws DvkException Throws DvkException if the program can't connect to Inkbunny.net
 	 */
+	//TODO REINSTATE
+	/*
 	public ArrayList<String> get_pages(
 			String user_id,
 			File directory,
@@ -360,6 +354,7 @@ public class Inkbunny extends ArtistHosting {
 		}
 		throw new DvkException();
 	}
+	*/
 	
 	/**
 	 * Returns a list of Inkbunny journal IDs for a given artist.
@@ -370,6 +365,8 @@ public class Inkbunny extends ArtistHosting {
 	 * @return List of Inkbunny journal IDs
 	 * @throws DvkException Throws DvkException if loading gallery page fails
 	 */
+	//TODO REINSTATE
+	/*
 	public ArrayList<String> get_journal_pages(
 			String artist,
 			File directory,
@@ -446,6 +443,7 @@ public class Inkbunny extends ArtistHosting {
 		}
 		throw new DvkException();
 	}
+	*/
 	
 	/**
 	 * Returns a list of Dvk objects for a given Inkbunny submission ID.
@@ -458,6 +456,8 @@ public class Inkbunny extends ArtistHosting {
 	 * @return List of Dvk objects from given submission ID
 	 * @throws DvkException Throws DvkException if getting API info fails
 	 */
+	//TODO REINSTATE
+	/*
 	public ArrayList<Dvk> get_dvks(
 			String sub_id,
 			File directory,
@@ -696,6 +696,7 @@ public class Inkbunny extends ArtistHosting {
 		catch(Exception e) {}
 		throw new DvkException();
 	}
+	*/
 	
 	/**
 	 * Returns a DVK formatted time string from the date given on an Inkbunny.net page.
