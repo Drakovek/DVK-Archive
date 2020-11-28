@@ -632,6 +632,20 @@ public class DvkHandler implements AutoCloseable {
 	}
 	
 	/**
+	 * Returns an ArrayList of sorted Dvk objects.
+	 * Defaults to all of the Dvk entries currently loaded.
+	 * 
+	 * @param sort_type Order to sort the Dvk entries
+	 * ('a' - Alphabetically by title, 't' - Earliest to latest published time)
+	 * @param group_artists Whether to group Dvk entries by artist
+	 * @param reverse Whether to reverse the order of Dvk
+	 * @return List of ordered and filtered Dvk objects
+	 */
+	public ArrayList<Dvk> get_dvks(char sort_type, boolean group_artists, boolean reverse) {
+		return get_dvks(sort_type, group_artists, reverse, null, null, null);
+	}
+	
+	/**
 	 * Returns an ArrayList of filtered Dvk objects.
 	 * 
 	 * @param sort_type Order to sort the Dvk entries
@@ -639,7 +653,7 @@ public class DvkHandler implements AutoCloseable {
 	 * @param group_artists Whether to group Dvk entries by artist
 	 * @param reverse Whether to reverse the order of Dvk
 	 * @param sql_where WHERE query to additionally filter Dvk entries (Use '?' for parameters)
-	 * @param params Parameters of the WHERE query
+	 * @param where_params Parameters of the WHERE query
 	 * @return List of ordered and filtered Dvk objects
 	 */
 	public ArrayList<Dvk> get_dvks(
@@ -647,7 +661,29 @@ public class DvkHandler implements AutoCloseable {
 			boolean group_artists,
 			boolean reverse,
 			String sql_where,
-			ArrayList<String> params) {
+			ArrayList<String> where_params) {
+		return this.get_dvks(sort_type, group_artists, reverse, sql_where, where_params, null);
+	}
+	
+	/**
+	 * Returns an ArrayList of filtered Dvk objects.
+	 * 
+	 * @param sort_type Order to sort the Dvk entries
+	 * ('a' - Alphabetically by title, 't' - Earliest to latest published time)
+	 * @param group_artists Whether to group Dvk entries by artist
+	 * @param reverse Whether to reverse the order of Dvk
+	 * @param sql_where WHERE query to additionally filter Dvk entries (Use '?' for parameters)
+	 * @param where_params Parameters of the WHERE query
+	 * @param extra Any additional SQL queries to add before the WHERE statement
+	 * @return List of ordered and filtered Dvk objects
+	 */
+	public ArrayList<Dvk> get_dvks(
+			char sort_type,
+			boolean group_artists,
+			boolean reverse,
+			String sql_where,
+			ArrayList<String> where_params,
+			String extra) {
 		//ADD STATEMENT SECTION TO GET ALL ELEMENTS FROM THE DVK TABLE
 		StringBuilder statement = new StringBuilder();
 		statement.append("SELECT * FROM ");
@@ -669,7 +705,12 @@ public class DvkHandler implements AutoCloseable {
 			statement.append(" AND (");
 			statement.append(sql_where);
 			statement.append(")");
-			parameters.addAll(params);
+			parameters.addAll(where_params);
+		}
+		//ADD EXTRA STATEMENT
+		if(extra != null && extra.length() != 0) {
+			statement.append(" ");
+			statement.append(extra);
 		}
 		//DETERMINE DIRECTION TO SORT DVK FILES
 		String direction = "ASC";
@@ -797,6 +838,18 @@ public class DvkHandler implements AutoCloseable {
 			//RETURNS EMPTY DVK IF EXECUTING THE STATEMENT FAILS
 			return new Dvk();
 		}
+	}
+	
+	/**
+	 * Returns a list of the directories containing DVK files currently loaded.
+	 * 
+	 * @return Currently loaded directories
+	 */
+	public ArrayList<File> get_loaded_directories() {
+		if(this.directories == null) {
+			return new ArrayList<>();
+		}
+		return this.directories;
 	}
 	
 	/**

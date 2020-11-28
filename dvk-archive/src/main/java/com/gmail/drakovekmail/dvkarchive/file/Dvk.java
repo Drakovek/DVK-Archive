@@ -2,7 +2,6 @@ package com.gmail.drakovekmail.dvkarchive.file;
 
 import java.io.File;
 import java.io.IOException;
-
 import org.apache.tika.Tika;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,6 +19,7 @@ import com.google.common.io.Files;
  */
 public class Dvk {
 	
+	//TODO ADD PARAMETERS FOR SINGLE AND FAVORITES TAGS
 	//TODO ADD PARAMETERS FOR LOCAL IMAGES TO USE IN HTML DESCRIPTIONS AND MEDIA.
 	//TODO PREVENT OVERWRITING DVK FILES
 	

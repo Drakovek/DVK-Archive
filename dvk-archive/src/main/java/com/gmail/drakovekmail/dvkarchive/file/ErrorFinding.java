@@ -1,5 +1,10 @@
 package com.gmail.drakovekmail.dvkarchive.file;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+
 /**
  * Class containing methods for finding errors in DVK files.
  * 
@@ -12,214 +17,114 @@ public class ErrorFinding {
 	 * Only returns files in the same directories as DVK files.
 	 * 
 	 * @param dvk_handler DvkHandler with loaded Dvk objects
-	 * @param directories Directories in which to search for files
-	 * @param start_gui Used for displaying progress and results
 	 * @return List of unlinked files
 	 */
-	//TODO REINSTATE
-	/*
-	public static ArrayList<File> get_unlinked_media(
-			DvkHandler dvk_handler,
-			File[] directories,
-			StartGUI start_gui) {
-		//TODO FIX POTENTIAL MEMORY ISSUES
-		int index;
-		File file;
-		File[] dirs = new File[0];
-		if(start_gui == null || !start_gui.get_base_gui().is_canceled()) {
-			dirs = DvkHandler.get_directories(directories, true);
-		}
-		ArrayList<File> missing = new ArrayList<>();
-		//CREATE MAIN SQL COMMAND
-		StringBuilder sql = new StringBuilder("SELECT ");
-		sql.append(DvkHandler.MEDIA_FILE);
-		sql.append(", ");
-		sql.append(DvkHandler.SECONDARY_FILE);
-		sql.append(" FROM ");
-		sql.append(DvkHandler.DVKS);
-		sql.append(" WHERE ");
-		sql.append(DvkHandler.DIRECTORY);
-		sql.append(" = ?;");
-		String[] params = new String[1];
-		//RUN THROUGH DIRECTORIES
-		for(int i = 0; i < dirs.length; i++) {
-			//BREAK IF CANCELLED
-			if(start_gui != null && start_gui.get_base_gui().is_canceled()) {
-				break;
-			}
-			//UPDATE PROGRESS
-			if(start_gui != null) {
-				start_gui.get_main_pbar().set_progress(false, true, i, dirs.length);
-			}
-			//GET NON-DVKS IN DIRECTORY
-			File[] files = {dirs[i]};
-			dvk_handler.read_dvks(files);
-			files = dirs[i].listFiles(new ExtensionFilter(".dvk", false));
-			Arrays.parallelSort(files);
-			ArrayList<File> non_dvks = new ArrayList<>();
-			for(File non_dvk: files) {
-				non_dvks.add(non_dvk);
-			}
-			files = null;
-			//REMOVE FILES
-			params[0] = dirs[i].getAbsolutePath();
-			try(ResultSet rs = dvk_handler.sql_select(sql.toString(), params, false)) {
-				while(rs.next()) {
-					try {
-						file = new File(dirs[i], rs.getString(DvkHandler.MEDIA_FILE));
-						index = non_dvks.indexOf(file);
-						if(index != -1) {
-							non_dvks.remove(index);
-						}
+	public static ArrayList<File> get_unlinked_media(DvkHandler dvk_handler) {
+		//INITIALIZE VARIABLES
+		ArrayList<Dvk> dvks;
+		ArrayList<String> params;
+		ArrayList<File> unlinked = new ArrayList<>();
+		ExtensionFilter filter = new ExtensionFilter(".dvk", false);
+		//GET LIST OF THE DIRECTORIES LOADED IN THE DVK DIRECTORY
+		ArrayList<File> dirs = dvk_handler.get_loaded_directories();
+		//RUN THROUGH ALL SUB-DIRECTORIES
+		for(int dir_num = 0; dir_num < dirs.size(); dir_num++) {
+			//GET A LIST OF ALL THE DVK OBJECTS IN THE CURRENT DIRECTORY
+			params = new ArrayList<>();
+			params.add(dirs.get(dir_num).getAbsolutePath());
+			dvks = dvk_handler.get_dvks('a', false, false);
+			//GET A LIST OF ALL THE NON-DVK FILES IN THE CURRENT DIRECTORY
+			ArrayList<File> files = new ArrayList<>(Arrays.asList(dirs.get(dir_num).listFiles(filter)));
+			//REMOVE FILES FROM THE FILE LIST THAT ARE IN A DVK ENTRY
+			int size = dvks.size();
+			for(int dvk_num = 0; dvk_num < size; dvk_num++) {
+				int index;
+				File media = dvks.get(dvk_num).get_media_file();
+				File second = dvks.get(dvk_num).get_secondary_file();
+				//REMOVE MEDIA FILE IF IT EXISTS
+				if(media != null) {
+					index = files.indexOf(media);
+					if(index != -1) {
+						files.remove(index);
 					}
-					catch(NullPointerException f) {}
-					try {
-						file = new File(dirs[i], rs.getString(DvkHandler.SECONDARY_FILE));
-						index = non_dvks.indexOf(file);
-						if(index != -1) {
-							non_dvks.remove(index);
-						}
-					}
-					catch(NullPointerException f) {}
+				}
+				//REMOVE SECONDARY FILE IF IT EXISTS
+				index = files.indexOf(second);
+				if(index != -1) {
+					files.remove(index);
 				}
 			}
-			catch(SQLException e) {}
-			//ADD MISSING FILES TO MISSING LIST
-			missing.addAll(non_dvks);
-			if(start_gui != null) {
-				for(int missingno = 0; missingno < non_dvks.size(); missingno++) {
-					start_gui.append_console(non_dvks.get(missingno).getAbsolutePath(), false);
-				}
-			}
+			//ADD THE REMAINING FILES THAT WEREN'T IN A DVK ENTRY TO THE UNLINKED LIST
+			unlinked.addAll(files);
 		}
-		return missing;
+		//RETURN THE LIST OF UNLINKED FILES
+		Collections.sort(unlinked);
+		return unlinked;
 	}
-	*/
 	
 	/**
 	 * Returns list of Dvks missing their associated media file(s).
 	 * 
 	 * @param dvk_handler Contains Dvk objects to check
-	 * @param start_gui Used to show progress if not null
 	 * @return Dvks with missing primary or secondary media
 	 */
-	//TODO REINSTATE
-	/*
-	public static ArrayList<File> get_missing_media_dvks(
-			DvkHandler dvk_handler,
-			StartGUI start_gui) {
-		ArrayList<Dvk> dvks = dvk_handler.get_dvks(0, -1, 'a', true, false);
+	public static ArrayList<File> get_missing_media_dvks(DvkHandler dvk_handler) {
+		//INITIALIZE LIST OF DVKS WITH MISSING MEDIA
+		ArrayList<File> missing = new ArrayList<>();
+		//GET A LIST OF ALL THE DVK FILES LOADED BY THE GIVEN DVK HANDLER
+		ArrayList<Dvk> dvks = dvk_handler.get_dvks('a', true, false);
+		//CHECK EACH DVK OBJECT TO SEE IF THE LINKED MEDIA FILES EXIST
+		File media;
+		File secondary;
 		int size = dvks.size();
-		ArrayList<File> files = new ArrayList<>();
-		for(int i = 0; i < size; i++) {
-			//UPDATE PROGRESS
-			if(start_gui != null) {
-				start_gui.get_main_pbar().set_progress(false, true, i, size);
-				//BREAK IF CANCELED
-				if(start_gui.get_base_gui().is_canceled()) {
-					break;
-				}
-			}
-			Dvk dvk = dvks.get(i);
-			if(!dvk.get_media_file().exists()
-					|| (dvk.get_secondary_file() != null 
-					&& !dvk.get_secondary_file().exists())) {
-				files.add(dvk.get_dvk_file());
-				//PRINT
-				if(start_gui != null) {
-					start_gui.append_console(dvk.get_dvk_file().getAbsolutePath(), false);
-				}
+		for(int dvk_num = 0; dvk_num < size; dvk_num++) {
+			//GET THE MEDIA AND SECONDARY MEDIA FILES FROM THE CURRENT DVK
+			media = dvks.get(dvk_num).get_media_file();
+			secondary = dvks.get(dvk_num).get_secondary_file();
+			//IF LINKED MEDIA DOESN'T EXIST, ADD TO THE MISSING LIST
+			if(media == null || !media.exists() || (secondary != null && !secondary.exists())) {
+				missing.add(dvks.get(dvk_num).get_dvk_file());
 			}
 		}
-		return files;
+		//RETURNS LIST OF DVK FILES THAT HAVE INVALID LINKED MEDIA FILES
+		Collections.sort(missing);
+		return missing;
 	}
-	*/
 	
 	/**
 	 * Returns a list of Dvks that share the same IDs.
+	 * Files are grouped when they share the same DVK ID.
 	 * 
 	 * @param dvk_handler Contains Dvk objects to check
-	 * @param start_gui Used to show progress if not null
 	 * @return List of Dvks that have identical IDs
 	 */
-	//TODO REINSTATE
-	/*
-	public static ArrayList<File> get_same_ids(
-			DvkHandler dvk_handler,
-			StartGUI start_gui) {
-		StringBuilder sql = new StringBuilder("SELECT ");
-		sql.append(DvkHandler.DVK_ID);
-		sql.append(" FROM ");
-		sql.append(DvkHandler.DVKS);
-		sql.append(" GROUP BY ");
-		sql.append(DvkHandler.DVK_ID);
-		sql.append(" HAVING COUNT(");
-		sql.append(DvkHandler.DVK_ID);
-		sql.append(") > 1 ORDER BY ");
-		sql.append(DvkHandler.ARTISTS);
-		sql.append(", ");
-		sql.append(DvkHandler.TITLE);
-		sql.append(';');
-		//GET LIST OF DUPLICATED DVK IDS
-		ArrayList<String> ids = new ArrayList<>();
-		try (ResultSet rs = dvk_handler.sql_select(sql.toString(), new String[0], true)) {
-			while(rs.next()) {
-				//BREAK IF CANCELLED
-				if(start_gui != null && start_gui.get_base_gui().is_canceled()) {
-					break;
-				}
-				ids.add(rs.getString(DvkHandler.DVK_ID));
+	public static ArrayList<ArrayList<File>> get_same_ids(DvkHandler dvk_handler) {
+		//INITIALIZE VARIABLE
+		ArrayList<ArrayList<File>> same_ids = new ArrayList<>();
+		//GET A LIST OF DVKS WITH IDS THAT ARE SHARED BY MULTIPLE DVK FILES
+		StringBuilder extra = new StringBuilder();
+		extra.append("GROUP BY ");
+		extra.append(DvkHandler.DVK_ID);
+		extra.append(" HAVING COUNT(");
+		extra.append(DvkHandler.DVK_ID);
+		extra.append(") > 1");
+		ArrayList<Dvk> id_dvks = dvk_handler.get_dvks('a', false, false, null, null, extra.toString());
+		//GET GROUPS OF DVKS THAT SHARE THE SAME IDS BASED ON THE IDS FOUND
+		ArrayList<String> parameters;
+		String where = DvkHandler.DVK_ID + "=?";
+		for(int id_num = 0; id_num < id_dvks.size(); id_num++) {
+			//GET ALL THE DVKS THAT SHARE THE CURRENTLY SELECTED DVK ID
+			parameters = new ArrayList<>();
+			parameters.add(id_dvks.get(id_num).get_dvk_id());
+			ArrayList<Dvk> same_dvks = dvk_handler.get_dvks('a', true, false, where, parameters);
+			//ADD FILES TO THE MAIN SAME_IDS ARRAYLIST
+			ArrayList<File> files = new ArrayList<>();
+			for(int dvk_num = 0; dvk_num < same_dvks.size(); dvk_num++) {
+				files.add(same_dvks.get(dvk_num).get_dvk_file());
 			}
+			same_ids.add(files);
 		}
-		catch(SQLException e) {}
-		File file;
-		boolean first;
-		ArrayList<File> files = new ArrayList<>();
-		sql = new StringBuilder("SELECT ");
-		sql.append(DvkHandler.DIRECTORY);
-		sql.append(", ");
-		sql.append(DvkHandler.DVK_FILE);
-		sql.append(" FROM ");
-		sql.append(DvkHandler.DVKS);
-		sql.append(" WHERE ");
-		sql.append(DvkHandler.DVK_ID);
-		sql.append(" = ? COLLATE NOCASE ORDER BY ");
-		sql.append(DvkHandler.TITLE);
-		sql.append(';');
-		String[] params = new String[1];
-		int size = ids.size();
-		for(int i = 0; i < size; i++) {
-			params[0] = ids.get(i);
-			try(ResultSet rs = dvk_handler.sql_select(sql.toString(), params, true)) {
-				//BREAK IF CANCELLED
-				if(start_gui != null) {
-					start_gui.get_main_pbar().set_progress(false, true, i, size);
-					if(start_gui.get_base_gui().is_canceled()) {
-						break;
-					}
-				}
-				first = true;
-				while(rs.next()) {
-					file = new File(rs.getString(DvkHandler.DIRECTORY),
-							rs.getString(DvkHandler.DVK_FILE));
-					//PRINT FILE
-					if(start_gui != null) {
-						if(first) {
-							start_gui.append_console(file.getAbsolutePath(), false);
-						}
-						else {
-							start_gui.append_console("    " + file.getAbsolutePath(), false);
-						}
-					}
-					first = false;
-					files.add(file);
-				}
-			}
-			catch(SQLException f) {
-				return new ArrayList<>();
-			}
-		}
-		return files;
+		//RETURN LIST OF DVK FILES GROUPED TOGETHER IF THEY HAVE THE SAME DVK ID
+		return same_ids;
 	}
-	*/
 }

@@ -60,7 +60,7 @@ public class TestDvkHandler {
 			//CREATE DVK FILES IN THE MAIN TEMPORARY DIRECTORY
 			Dvk main_dvk_1 = new Dvk();
 			main_dvk_1.set_dvk_file(new File(this.temp_dir.getRoot(), "main1.dvk"));
-			main_dvk_1.set_dvk_id("MAN1");
+			main_dvk_1.set_dvk_id("MAN123");
 			main_dvk_1.set_title("Title 10");
 			main_dvk_1.set_artist("Artist 1");
 			main_dvk_1.set_time_int(2020, 9, 4, 17, 13);
@@ -75,7 +75,7 @@ public class TestDvkHandler {
 			main_dvk_1.write_dvk();
 			Dvk main_dvk_2 = new Dvk();
 			main_dvk_2.set_dvk_file(new File(this.temp_dir.getRoot(), "main2.dvk"));
-			main_dvk_2.set_dvk_id("MAN2");
+			main_dvk_2.set_dvk_id("MAN123");
 			main_dvk_2.set_title("TITLE 0.55");
 			main_dvk_2.set_artist("Artist 2");
 			main_dvk_2.set_page_url("/url/");
@@ -147,12 +147,12 @@ public class TestDvkHandler {
 		{
 			//TEST LOADING AN INVALID DIRECTORY
 			dvk_handler.read_dvks(null);
-			assertEquals(0, dvk_handler.get_dvks('a', false, false, null, null).size());
+			assertEquals(0, dvk_handler.get_dvks('a', false, false).size());
 			dvk_handler.read_dvks(new File(this.temp_dir.getRoot(), "notreal"));
-			assertEquals(0, dvk_handler.get_dvks('a', false, false, null, null).size());
+			assertEquals(0, dvk_handler.get_dvks('a', false, false).size());
 			//LOAD DVKS FROM THE MAIN TEST DIRECTORY
 			dvk_handler.read_dvks(this.temp_dir.getRoot());
-			ArrayList<Dvk> dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			ArrayList<Dvk> dvks = dvk_handler.get_dvks('a', false, false);
 			assertEquals(4, dvks.size());
 			assertEquals("title 0.55", dvks.get(0).get_title());
 			assertEquals("TITLE 0.55", dvks.get(1).get_title());
@@ -161,7 +161,7 @@ public class TestDvkHandler {
 			//TEST GETTING ALL INFORMATION FROM DVK
 			assertEquals(this.temp_dir.getRoot(), dvks.get(3).get_dvk_file().getParentFile());
 			assertEquals("main1.dvk", dvks.get(3).get_dvk_file().getName());
-			assertEquals("MAN1", dvks.get(3).get_dvk_id());
+			assertEquals("MAN123", dvks.get(3).get_dvk_id());
 			assertEquals("Title 10", dvks.get(3).get_title());
 			assertEquals(1, dvks.get(3).get_artists().length);
 			assertEquals("Artist 1", dvks.get(3).get_artists()[0]);
@@ -180,7 +180,7 @@ public class TestDvkHandler {
 			assertEquals("main.jpeg", dvks.get(3).get_secondary_file().getName());
 			//TRY READING AN EMPTY DIRECTORY
 			dvk_handler.read_dvks(this.empty_2);
-			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			dvks = dvk_handler.get_dvks('a', false, false);
 			assertEquals(0, dvks.size());
 			//TEST READING AFTER NEW DVK HAS BEEN WRITTEN
 			Dvk new_dvk = new Dvk();
@@ -193,7 +193,7 @@ public class TestDvkHandler {
 			new_dvk.write_dvk();
 			assertTrue(new_dvk.get_dvk_file().exists());
 			dvk_handler.read_dvks(this.temp_dir.getRoot());
-			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			dvks = dvk_handler.get_dvks('a', false, false);
 			assertEquals(5, dvks.size());
 			assertEquals("New Dvk", dvks.get(0).get_title());
 			assertEquals("title 0.55", dvks.get(1).get_title());
@@ -206,7 +206,7 @@ public class TestDvkHandler {
 			TimeUnit.SECONDS.sleep(1);
 			mod_dvk.write_dvk();
 			dvk_handler.read_dvks(this.temp_dir.getRoot());
-			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			dvks = dvk_handler.get_dvks('a', false, false);
 			assertEquals(5, dvks.size());
 			assertEquals("Modified", dvks.get(0).get_title());
 			assertEquals("New Dvk", dvks.get(1).get_title());
@@ -216,7 +216,7 @@ public class TestDvkHandler {
 			//TEST READING AFTER DVK HAS BEEN DELETED
 			dvks.get(1).get_dvk_file().delete();
 			dvk_handler.read_dvks(this.temp_dir.getRoot());
-			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			dvks = dvk_handler.get_dvks('a', false, false);
 			assertEquals(4, dvks.size());
 			assertEquals("Modified", dvks.get(0).get_title());
 			assertEquals("title 0.55", dvks.get(1).get_title());
@@ -242,7 +242,7 @@ public class TestDvkHandler {
 		try(DvkHandler dvk_handler = new DvkHandler(file_prefs)) {
 			//READ DVKS FROM AN EMPTY DIRECTORY
 			dvk_handler.read_dvks(this.empty_2);
-			assertEquals(0, dvk_handler.get_dvks('a', false, false, null, null).size());
+			assertEquals(0, dvk_handler.get_dvks('a', false, false).size());
 			//ADD DVKS TO THE DVK HANDLER
 			Dvk dvk = new Dvk();
 			dvk.set_dvk_file(new File(this.empty_2, "dup.dvk"));
@@ -262,17 +262,17 @@ public class TestDvkHandler {
 			dvk.set_title("Dvk");
 			dvk_handler.add_dvk(dvk);
 			//CHECK ENTRIES ADDED TO THE DVK HANDLER
-			assertEquals(4, dvk_handler.get_dvks('a', false, false, null, null).size());
+			assertEquals(4, dvk_handler.get_dvks('a', false, false).size());
 			//TEST REMOVING THE DUPLICATE ENTRIES
 			dvk_handler.remove_duplicates();
-			ArrayList<Dvk> dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			ArrayList<Dvk> dvks = dvk_handler.get_dvks('a', false, false);
 			assertEquals(2, dvks.size());
 			assertEquals("Dvk", dvks.get(0).get_title());
 			assertEquals("Not the same", dvks.get(1).get_title());
 			//MAKE SURE FUNCTION DOESN'T BREAK ON EXCEPTION
 			dvk_handler.delete_database();
 			dvk_handler.remove_duplicates();
-			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			dvks = dvk_handler.get_dvks('a', false, false);
 			assertEquals(0, dvks.size());
 		}
 		catch(DvkException e) {
@@ -290,7 +290,7 @@ public class TestDvkHandler {
 		file_prefs.set_index_dir(this.temp_dir.getRoot());
 		try(DvkHandler dvk_handler = new DvkHandler(file_prefs)) {
 			dvk_handler.read_dvks(this.temp_dir.getRoot());
-			ArrayList<Dvk> dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			ArrayList<Dvk> dvks = dvk_handler.get_dvks('a', false, false);
 			assertEquals(4, dvks.size());
 			assertEquals("title 0.55", dvks.get(0).get_title());
 			assertEquals("TITLE 0.55", dvks.get(1).get_title());
@@ -298,27 +298,27 @@ public class TestDvkHandler {
 			assertEquals("Title 10", dvks.get(3).get_title());
 			//TEST DELETING ONE OF THE DVK ENTRIES
 			dvk_handler.delete_dvk(dvks.get(2).get_sql_id());
-			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			dvks = dvk_handler.get_dvks('a', false, false);
 			assertEquals(3, dvks.size());
 			assertEquals("title 0.55", dvks.get(0).get_title());
 			assertEquals("TITLE 0.55", dvks.get(1).get_title());
 			assertEquals("Title 10", dvks.get(2).get_title());
 			//TEST DELETING ANOTHER DVK ENTRY
 			dvk_handler.delete_dvk(dvks.get(1).get_sql_id());
-			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			dvks = dvk_handler.get_dvks('a', false, false);
 			assertEquals(2, dvks.size());
 			assertEquals("title 0.55", dvks.get(0).get_title());
 			assertEquals("Title 10", dvks.get(1).get_title());
 			//TEST DELETING A DVK ENTRY WITH A NON-EXISTANT SQL ID
 			dvk_handler.delete_dvk(45);
-			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			dvks = dvk_handler.get_dvks('a', false, false);
 			assertEquals(2, dvks.size());
 			assertEquals("title 0.55", dvks.get(0).get_title());
 			assertEquals("Title 10", dvks.get(1).get_title());
 			//MAKE SURE FUNCTION DOESN'T BREAK ON EXCEPTION
 			dvk_handler.delete_database();
 			dvk_handler.delete_dvk(1);
-			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			dvks = dvk_handler.get_dvks('a', false, false);
 			assertEquals(0, dvks.size());
 		}
 		catch(DvkException e) {
@@ -336,7 +336,7 @@ public class TestDvkHandler {
 		file_prefs.set_index_dir(this.temp_dir.getRoot());
 		try(DvkHandler dvk_handler = new DvkHandler(file_prefs)) {
 			dvk_handler.read_dvks(this.temp_dir.getRoot());
-			ArrayList<Dvk> dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			ArrayList<Dvk> dvks = dvk_handler.get_dvks('a', false, false);
 			assertEquals(4, dvks.size());
 			//ADD DVK TO THE DVK HANDLER
 			Dvk dvk = new Dvk();
@@ -356,7 +356,7 @@ public class TestDvkHandler {
 			dvk.set_secondary_file("new_s.png");
 			dvk_handler.add_dvk(dvk);
 			//TEST DVK WAS ADDED CORRECTLY
-			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			dvks = dvk_handler.get_dvks('a', false, false);
 			assertEquals(5, dvks.size());
 			Dvk returned = dvks.get(0);
 			assertEquals(5, returned.get_sql_id());
@@ -386,7 +386,7 @@ public class TestDvkHandler {
 			dvk.set_page_url("/url/");
 			dvk_handler.add_dvk(dvk);
 			//CHECK MINIMAL DVK WAS ADDED CORRECTLY
-			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			dvks = dvk_handler.get_dvks('a', false, false);
 			assertEquals(6, dvks.size());
 			returned = dvks.get(0);
 			assertEquals(6, returned.get_sql_id());
@@ -407,7 +407,7 @@ public class TestDvkHandler {
 			//MAKE SURE FUNCTION DOESN'T BREAK ON EXCEPTION
 			dvk_handler.delete_database();
 			dvk_handler.add_dvk(dvk);
-			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			dvks = dvk_handler.get_dvks('a', false, false);
 			assertEquals(0, dvks.size());
 		}
 		catch(DvkException e) {
@@ -425,7 +425,7 @@ public class TestDvkHandler {
 		file_prefs.set_index_dir(this.temp_dir.getRoot());
 		try(DvkHandler dvk_handler = new DvkHandler(file_prefs)) {
 			dvk_handler.read_dvks(this.temp_dir.getRoot());
-			ArrayList<Dvk> dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			ArrayList<Dvk> dvks = dvk_handler.get_dvks('a', false, false);
 			assertEquals(4, dvks.size());
 			assertEquals("title 0.55", dvks.get(0).get_title());
 			assertEquals("TITLE 0.55", dvks.get(1).get_title());
@@ -449,7 +449,7 @@ public class TestDvkHandler {
 			dvk.set_secondary_file("mod.jpg");
 			dvk_handler.set_dvk(dvk, dvks.get(1).get_sql_id());
 			//TEST DVK WAS SET CORRECTLY
-			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			dvks = dvk_handler.get_dvks('a', false, false);
 			assertEquals(4, dvks.size());
 			assertEquals("Modified", dvks.get(0).get_title());
 			assertEquals("title 0.55", dvks.get(1).get_title());
@@ -483,7 +483,7 @@ public class TestDvkHandler {
 			dvk.set_page_url("/url/");
 			dvk_handler.set_dvk(dvk, returned.get_sql_id());
 			//TEST DVK WAS SET WITH DEFAULT VALUES
-			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			dvks = dvk_handler.get_dvks('a', false, false);
 			assertEquals(4, dvks.size());
 			assertEquals("minimal", dvks.get(0).get_title());
 			assertEquals("title 0.55", dvks.get(1).get_title());
@@ -507,12 +507,12 @@ public class TestDvkHandler {
 			assertEquals(null, returned.get_secondary_file());
 			//TEST SETTING DVK ENTRY WITH SQL ID THAT DOESN'T EXIST
 			dvk_handler.set_dvk(dvk, 45);
-			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			dvks = dvk_handler.get_dvks('a', false, false);
 			assertEquals(4, dvks.size());
 			//MAKE SURE FUNCTION DOESN'T BREAK ON EXCEPTION
 			dvk_handler.delete_database();
 			dvk_handler.set_dvk(dvk, 2);
-			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			dvks = dvk_handler.get_dvks('a', false, false);
 			assertEquals(0, dvks.size());
 		}
 		catch(DvkException e) {
@@ -530,11 +530,11 @@ public class TestDvkHandler {
 		file_prefs.set_index_dir(this.temp_dir.getRoot());
 		try(DvkHandler dvk_handler = new DvkHandler(file_prefs)) {
 			//TEST THAT FUNCTION DOESN'T BREAK WHEN NO DIRECTORIES HAVE BEEN LOADED
-			ArrayList<Dvk> dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			ArrayList<Dvk> dvks = dvk_handler.get_dvks('a', false, false);
 			assertEquals(0, dvks.size());
 			//READ THE DEFAULT TEST DVK FILES
 			dvk_handler.read_dvks(this.temp_dir.getRoot());
-			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			dvks = dvk_handler.get_dvks('a', false, false);
 			assertEquals(4, dvks.size());
 			assertEquals("title 0.55", dvks.get(0).get_title());
 			assertEquals("TITLE 0.55", dvks.get(1).get_title());
@@ -558,10 +558,51 @@ public class TestDvkHandler {
 			assertEquals(2, dvks.size());
 			assertEquals("Title 10", dvks.get(0).get_title());
 			assertEquals("Title 2", dvks.get(1).get_title());
+			//TEST GETTING DVK FILES WITH EXTRA PARAMETER
+			StringBuilder extra = new StringBuilder();
+			extra.append("GROUP BY ");
+			extra.append(DvkHandler.DVK_ID);
+			extra.append(" HAVING COUNT(");
+			extra.append(DvkHandler.DVK_ID);
+			extra.append(") > 1");
+			dvks = dvk_handler.get_dvks('a', false, false, null, null, extra.toString());
+			assertEquals(1, dvks.size());
+			assertEquals("MAN123", dvks.get(0).get_dvk_id());
+			assertEquals("Title 10", dvks.get(0).get_title());
 			//MAKE SURE FUNCTION DOESN'T BREAK ON EXCEPTION
 			dvk_handler.delete_database();
-			dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			dvks = dvk_handler.get_dvks('a', false, false);
 			assertEquals(0, dvks.size());
+		}
+		catch(DvkException e) {
+			assertTrue(false);
+		}
+	}
+	
+	/**
+	 * Tests the get_loaded_directories method.
+	 */
+	@Test
+	public void test_get_loaded_directories() {
+		//INITIALIZE DVK HANDLER
+		FilePrefs file_prefs = new FilePrefs();
+		file_prefs.set_index_dir(this.temp_dir.getRoot());
+		try(DvkHandler dvk_handler = new DvkHandler(file_prefs)) {
+			//TEST GETTING LOADED DIRECTORIES BEFORE ANYTHING IS LOADED
+			ArrayList<File> dirs = dvk_handler.get_loaded_directories();
+			assertEquals(0, dirs.size());
+			//TEST GETTING LOADED DIRECTORIES
+			dvk_handler.read_dvks(this.temp_dir.getRoot());
+			dirs = dvk_handler.get_loaded_directories();
+			Collections.sort(dirs);
+			assertEquals(3, dirs.size());
+			assertEquals(this.temp_dir.getRoot(), dirs.get(0));
+			assertEquals(this.sub_empty, dirs.get(1));
+			assertEquals(this.main_sub, dirs.get(2));
+			//MAKE SURE FUNCTION DOESN'T FAIL ON EXCPETION
+			dvk_handler.delete_database();
+			dirs = dvk_handler.get_loaded_directories();
+			assertEquals(0, dirs.size());
 		}
 		catch(DvkException e) {
 			assertTrue(false);
@@ -622,7 +663,7 @@ public class TestDvkHandler {
 		file_prefs.set_index_dir(this.temp_dir.getRoot());
 		try(DvkHandler dvk_handler = new DvkHandler(file_prefs)) {
 			dvk_handler.read_dvks(this.temp_dir.getRoot());
-			ArrayList<Dvk> dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			ArrayList<Dvk> dvks = dvk_handler.get_dvks('a', false, false);
 			assertEquals("title 0.55", dvks.get(0).get_title());
 			assertEquals("TITLE 0.55", dvks.get(1).get_title());
 			assertEquals("Title 2", dvks.get(2).get_title());
@@ -631,7 +672,7 @@ public class TestDvkHandler {
 			Dvk returned = dvk_handler.get_dvk(dvks.get(3).get_sql_id());
 			assertEquals(this.temp_dir.getRoot(), returned.get_dvk_file().getParentFile());
 			assertEquals("main1.dvk", returned.get_dvk_file().getName());
-			assertEquals("MAN1", returned.get_dvk_id());
+			assertEquals("MAN123", returned.get_dvk_id());
 			assertEquals("Title 10", returned.get_title());
 			assertEquals(1, returned.get_artists().length);
 			assertEquals("Artist 1", returned.get_artists()[0]);
@@ -672,7 +713,7 @@ public class TestDvkHandler {
 		try(DvkHandler dvk_handler = new DvkHandler(file_prefs)) {
 			dvk_handler.read_dvks(this.temp_dir.getRoot());
 			//TEST DVKS ARE SORTED BY TITLE
-			ArrayList<Dvk> dvks = dvk_handler.get_dvks('a', false, false, null, null);
+			ArrayList<Dvk> dvks = dvk_handler.get_dvks('a', false, false);
 			assertEquals("title 0.55", dvks.get(0).get_title());
 			assertEquals("2017/10/06|12:00", dvks.get(0).get_time());
 			assertEquals("TITLE 0.55", dvks.get(1).get_title());
@@ -680,7 +721,7 @@ public class TestDvkHandler {
 			assertEquals("Title 2", dvks.get(2).get_title());
 			assertEquals("Title 10", dvks.get(3).get_title());
 			//TEST DVKS SORTED BY TITLE IN REVERSE
-			dvks = dvk_handler.get_dvks('a', false, true, null, null);
+			dvks = dvk_handler.get_dvks('a', false, true);
 			assertEquals("Title 10", dvks.get(0).get_title());
 			assertEquals("Title 2", dvks.get(1).get_title());
 			assertEquals("TITLE 0.55", dvks.get(2).get_title());
@@ -688,7 +729,7 @@ public class TestDvkHandler {
 			assertEquals("title 0.55", dvks.get(3).get_title());
 			assertEquals("2017/10/06|12:00", dvks.get(3).get_time());
 			//TEST SORTING BY TITLE WHEN ARTISTS ARE GROUPED
-			dvks = dvk_handler.get_dvks('a', true, false, null, null);
+			dvks = dvk_handler.get_dvks('a', true, false);
 			assertEquals("title 0.55", dvks.get(0).get_title());
 			assertEquals("Artist 1", dvks.get(0).get_artists()[0]);
 			assertEquals("Title 10", dvks.get(1).get_title());
@@ -714,7 +755,7 @@ public class TestDvkHandler {
 		try(DvkHandler dvk_handler = new DvkHandler(file_prefs)) {
 			dvk_handler.read_dvks(this.temp_dir.getRoot());
 			//TEST DVKS ARE SORTED BY TIME
-			ArrayList<Dvk> dvks = dvk_handler.get_dvks('t', false, false, null, null);
+			ArrayList<Dvk> dvks = dvk_handler.get_dvks('t', false, false);
 			assertEquals(4, dvks.size());
 			assertEquals("2017/10/06|12:00", dvks.get(0).get_time());
 			assertEquals("title 0.55", dvks.get(0).get_title());
@@ -723,7 +764,7 @@ public class TestDvkHandler {
 			assertEquals("2018/05/20|14:15", dvks.get(2).get_time());
 			assertEquals("2020/09/04|17:13", dvks.get(3).get_time());
 			//TEST DVKS SORTED BY TIME IN REVERSE
-			dvks = dvk_handler.get_dvks('t', false, true, null, null);
+			dvks = dvk_handler.get_dvks('t', false, true);
 			assertEquals(4, dvks.size());
 			assertEquals("2020/09/04|17:13", dvks.get(0).get_time());
 			assertEquals("2018/05/20|14:15", dvks.get(1).get_time());
@@ -732,7 +773,7 @@ public class TestDvkHandler {
 			assertEquals("2017/10/06|12:00", dvks.get(3).get_time());
 			assertEquals("title 0.55", dvks.get(3).get_title());
 			//TEST SORTING BY TIME WHEN ARTISTS ARE GROUPED
-			dvks = dvk_handler.get_dvks('t', true, false, null, null);
+			dvks = dvk_handler.get_dvks('t', true, false);
 			assertEquals(4, dvks.size());
 			assertEquals("2017/10/06|12:00", dvks.get(0).get_time());
 			assertEquals("Artist 1", dvks.get(0).get_artists()[0]);
