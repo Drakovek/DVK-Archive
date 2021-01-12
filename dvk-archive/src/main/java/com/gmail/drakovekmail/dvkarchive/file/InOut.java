@@ -8,7 +8,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
@@ -26,39 +25,27 @@ public class InOut {
 	 * @param file Given file in which to save text
 	 * @param contents Contents of text file
 	 */
-	public static void write_file(
-			final File file, 
-			final ArrayList<String> contents) {
-		boolean write = true;
+	public static void write_file(File file, ArrayList<String> contents) {
+		//DELETE FILE IF GIVEN FILE ALREADY EXISTS
+		boolean should_write = true;
 		if(file != null && file.exists()) {
-			write = file.delete();
+			should_write = file.delete();
 		}
-		if(write && file != null && contents != null) {
-			BufferedWriter bw = null;
-			try {
-				FileOutputStream fos; 
-				OutputStreamWriter osw;
-				Charset utf = StandardCharsets.UTF_8;
-				fos = new FileOutputStream(file);
-				osw = new OutputStreamWriter(fos, utf);
-				bw = new BufferedWriter(osw);
+		//WRITE FILE
+		if(should_write && file != null && contents != null) {
+			try(FileOutputStream fos = new FileOutputStream(file);
+					OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
+					BufferedWriter bw = new BufferedWriter(osw)) {
+				//WRITE EACH LINE OF CONTENTS
 				for(int i = 0; i < contents.size(); i++) {
 					if(i > 0) {
+						//ADDS LINE BREAK BETWEEN LINES
 						bw.append("\r\n");
 					}
 					bw.append(contents.get(i));
 				}
 			}
 			catch(IOException e) {}
-			finally {
-				if(bw != null) {
-					try {
-						bw.flush();
-						bw.close();
-					}
-					catch(IOException f) {}
-				}
-			}
 		}
 	}
 	
@@ -68,9 +55,7 @@ public class InOut {
 	 * @param file Given file in which to save text
 	 * @param contents Contents of text file
 	 */
-	public static void write_file(
-			final File file, 
-			final String contents) {
+	public static void write_file(File file, String contents) {
 		if(contents != null) {
 			ArrayList<String> list = new ArrayList<>();
 			list.add(contents);
@@ -85,34 +70,23 @@ public class InOut {
 	 * @param file Given UTF-8 file to read.
 	 * @return Text contents of file
 	 */
-	public static ArrayList<String> read_file_list(final File file) {
+	public static ArrayList<String> read_file_list(File file) {
+		//RETURN EMPTY LIST IF FILE IS INVALID
 		if(file == null || !file.exists()) {
 			return new ArrayList<>();
 		}
+		//READ FILE
 		ArrayList<String> contents = new ArrayList<>();
-		@SuppressWarnings("resource")
-		BufferedReader br = null;
-		try {
+		try(FileInputStream fis = new FileInputStream(file);
+				InputStreamReader isr = new InputStreamReader(fis, StandardCharsets.UTF_8);
+				BufferedReader br = new BufferedReader(isr)) {
+			//READ EACH LINE
 			String line;
-			FileInputStream fis;
-			InputStreamReader isr;
-			Charset utf = StandardCharsets.UTF_8;
-			fis = new FileInputStream(file);
-			isr = new InputStreamReader(fis, utf);
-			br = new BufferedReader(isr);
 			while((line = br.readLine()) != null) {
 				contents.add(line);
 			}
 		}
 		catch(IOException e) {}
-		finally {
-			if(br != null) {
-				try {
-					br.close();
-				}
-				catch(IOException f) {}
-			}
-		}
 		return contents;
 	}
 	
@@ -123,11 +97,11 @@ public class InOut {
 	 * @return Text contents of file
 	 */
 	public static String read_file(final File file) {
-		ArrayList<String> contents;
-		contents = read_file_list(file);
+		ArrayList<String> contents = read_file_list(file);
 		StringBuilder builder = new StringBuilder();
 		for(int i = 0; i < contents.size(); i++) {
 			if(i > 0) {
+				//ADDS LINE BREAK BETWEEN LINES
 				builder.append("\r\n");
 			}
 			builder.append(contents.get(i));
