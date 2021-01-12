@@ -104,9 +104,9 @@ public class DvkHandler implements AutoCloseable {
 	private Connection connection;
 	
 	/**
-	 * FilePrefs for determining where to save the database file.
+	 * Config class for getting directory for the database file.
 	 */
-	private FilePrefs file_prefs;
+	private Config config;
 	
 	/**
 	 * ArrayList of directories to limit database searches to.
@@ -125,12 +125,12 @@ public class DvkHandler implements AutoCloseable {
 	
 	/**
 	 * Initializes DvkHandler with empty Dvk list.
-	 * 
-	 * @param file_prefs FilePrefs for getting directory in which to store SQLite database
+	 *
+	 * @param config Config object for getting directory in which to store SQLite database
 	 * @exception DvkException DvkException
 	 */
-	public DvkHandler(FilePrefs file_prefs) throws DvkException {
-		this.file_prefs = file_prefs;
+	public DvkHandler(Config config) throws DvkException {
+		this.config = config;
 		this.connection = null;
 		this.directories = new ArrayList<>();
 		initialize_connection();
@@ -145,7 +145,7 @@ public class DvkHandler implements AutoCloseable {
 		//CLOSE DATABASE IF CURRENTLY OPEN
 		close();
 		//SET THE LAST MODIFIED VALUE OF THE DATABASE FILE
-		this.database = new File(this.file_prefs.get_index_dir(), "dvk_archive.db");
+		this.database = new File(this.config.get_config_directory(), "dvk_archive.db");
 		this.modified = 0L;
 		if(this.database.exists()) {
 			this.modified = this.database.lastModified();

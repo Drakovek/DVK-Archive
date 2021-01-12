@@ -106,9 +106,9 @@ public class TestErrorFinding {
 	@Test
 	public void test_get_unlinked_media() {
 		//SET UP A DVK HANDLER OBJECT AND READ ALL THE TEST DVK FILES
-		FilePrefs file_prefs = new FilePrefs();
-		file_prefs.set_index_dir(this.no_dvks);
-		try(DvkHandler dvk_handler = new DvkHandler(file_prefs)) {
+		Config config = new Config();
+		config.set_config_directory(this.no_dvks);
+		try(DvkHandler dvk_handler = new DvkHandler(config)) {
 			dvk_handler.read_dvks(this.temp_dir.getRoot());
 			//TEST GETTING UNLINKED FILES
 			ArrayList<File> unlinked = ErrorFinding.get_unlinked_media(dvk_handler);
@@ -133,9 +133,9 @@ public class TestErrorFinding {
 	@Test
 	public void test_get_missing_media_dvks() {
 		//SET UP A DVK HANDLER OBJECT AND READ ALL THE TEST DVK FILES
-		FilePrefs file_prefs = new FilePrefs();
-		file_prefs.set_index_dir(this.no_dvks);
-		try(DvkHandler dvk_handler = new DvkHandler(file_prefs)) {
+		Config config = new Config();
+		config.set_config_directory(this.no_dvks);
+		try(DvkHandler dvk_handler = new DvkHandler(config)) {
 			dvk_handler.read_dvks(this.temp_dir.getRoot());
 			//ADD DVK WITH LINKED MEDIA SET TO NULL, 
 			Dvk null_dvk = new Dvk();
@@ -173,9 +173,9 @@ public class TestErrorFinding {
 	@Test
 	public void test_get_same_ids() {
 		//SET UP A DVK HANDLER OBJECT AND READ ALL THE TEST DVK FILES
-		FilePrefs file_prefs = new FilePrefs();
-		file_prefs.set_index_dir(this.no_dvks);
-		try(DvkHandler dvk_handler = new DvkHandler(file_prefs)) {
+		Config config = new Config();
+		config.set_config_directory(this.no_dvks);
+		try(DvkHandler dvk_handler = new DvkHandler(config)) {
 			dvk_handler.read_dvks(this.temp_dir.getRoot());
 			//TEST GETTING DVKS WITH THE SAME ID
 			ArrayList<ArrayList<File>> same = ErrorFinding.get_same_ids(dvk_handler);

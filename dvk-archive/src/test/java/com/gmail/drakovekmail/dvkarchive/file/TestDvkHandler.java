@@ -112,12 +112,12 @@ public class TestDvkHandler {
 	@Test
 	public void test_initialize_connection() {
 		//TEST DATABASE FILE DOESN'T CURRENTLY EXIST
-		FilePrefs prefs = new FilePrefs();
-		prefs.set_index_dir(this.temp_dir.getRoot());
+		Config config = new Config();
+		config.set_config_directory(this.temp_dir.getRoot());
 		File db = new File(this.temp_dir.getRoot(), "dvk_archive.db");
 		assertFalse(db.exists());
 		//INITIALIZE THE CONNECTION
-		try (DvkHandler handler = new DvkHandler(prefs)) {
+		try (DvkHandler handler = new DvkHandler(config)) {
 			handler.initialize_connection();
 			//TEST DATABASE FILE NOW EXISTS
 			assertTrue(db.exists());
@@ -141,9 +141,9 @@ public class TestDvkHandler {
 	@Test
 	public void test_read_dvks() {
 		//INITIALIZE DVK_HANDLER
-		FilePrefs file_prefs = new FilePrefs();
-		file_prefs.set_index_dir(this.temp_dir.getRoot());
-		try(DvkHandler dvk_handler = new DvkHandler(file_prefs))
+		Config config = new Config();
+		config.set_config_directory(this.temp_dir.getRoot());
+		try(DvkHandler dvk_handler = new DvkHandler(config))
 		{
 			//TEST LOADING AN INVALID DIRECTORY
 			dvk_handler.read_dvks(null);
@@ -237,9 +237,9 @@ public class TestDvkHandler {
 	@Test
 	public void test_remove_duplicates() {
 		//INITIALIZE THE DVK HANDLER
-		FilePrefs file_prefs = new FilePrefs();
-		file_prefs.set_index_dir(this.temp_dir.getRoot());
-		try(DvkHandler dvk_handler = new DvkHandler(file_prefs)) {
+		Config config = new Config();
+		config.set_config_directory(this.temp_dir.getRoot());
+		try(DvkHandler dvk_handler = new DvkHandler(config)) {
 			//READ DVKS FROM AN EMPTY DIRECTORY
 			dvk_handler.read_dvks(this.empty_2);
 			assertEquals(0, dvk_handler.get_dvks('a', false, false).size());
@@ -286,9 +286,9 @@ public class TestDvkHandler {
 	@Test
 	public void test_delete_dvk() {
 		//READ DEFAULT TEST DVK FILES
-		FilePrefs file_prefs = new FilePrefs();
-		file_prefs.set_index_dir(this.temp_dir.getRoot());
-		try(DvkHandler dvk_handler = new DvkHandler(file_prefs)) {
+		Config config = new Config();
+		config.set_config_directory(this.temp_dir.getRoot());
+		try(DvkHandler dvk_handler = new DvkHandler(config)) {
 			dvk_handler.read_dvks(this.temp_dir.getRoot());
 			ArrayList<Dvk> dvks = dvk_handler.get_dvks('a', false, false);
 			assertEquals(4, dvks.size());
@@ -332,9 +332,9 @@ public class TestDvkHandler {
 	@Test
 	public void test_add_dvk() {
 		//LOAD THE DEFAULT SET OF TEST DVK FILES
-		FilePrefs file_prefs = new FilePrefs();
-		file_prefs.set_index_dir(this.temp_dir.getRoot());
-		try(DvkHandler dvk_handler = new DvkHandler(file_prefs)) {
+		Config config = new Config();
+		config.set_config_directory(this.temp_dir.getRoot());
+		try(DvkHandler dvk_handler = new DvkHandler(config)) {
 			dvk_handler.read_dvks(this.temp_dir.getRoot());
 			ArrayList<Dvk> dvks = dvk_handler.get_dvks('a', false, false);
 			assertEquals(4, dvks.size());
@@ -421,9 +421,9 @@ public class TestDvkHandler {
 	@Test
 	public void test_set_dvk() {
 		//TEST READING THE DEFAULT TEST DVK FILES
-		FilePrefs file_prefs = new FilePrefs();
-		file_prefs.set_index_dir(this.temp_dir.getRoot());
-		try(DvkHandler dvk_handler = new DvkHandler(file_prefs)) {
+		Config config = new Config();
+		config.set_config_directory(this.temp_dir.getRoot());
+		try(DvkHandler dvk_handler = new DvkHandler(config)) {
 			dvk_handler.read_dvks(this.temp_dir.getRoot());
 			ArrayList<Dvk> dvks = dvk_handler.get_dvks('a', false, false);
 			assertEquals(4, dvks.size());
@@ -526,9 +526,9 @@ public class TestDvkHandler {
 	@Test
 	public void test_get_dvks() {
 		//SET UP DVK HANDLER
-		FilePrefs file_prefs = new FilePrefs();
-		file_prefs.set_index_dir(this.temp_dir.getRoot());
-		try(DvkHandler dvk_handler = new DvkHandler(file_prefs)) {
+		Config config = new Config();
+		config.set_config_directory(this.temp_dir.getRoot());
+		try(DvkHandler dvk_handler = new DvkHandler(config)) {
 			//TEST THAT FUNCTION DOESN'T BREAK WHEN NO DIRECTORIES HAVE BEEN LOADED
 			ArrayList<Dvk> dvks = dvk_handler.get_dvks('a', false, false);
 			assertEquals(0, dvks.size());
@@ -585,9 +585,9 @@ public class TestDvkHandler {
 	@Test
 	public void test_get_loaded_directories() {
 		//INITIALIZE DVK HANDLER
-		FilePrefs file_prefs = new FilePrefs();
-		file_prefs.set_index_dir(this.temp_dir.getRoot());
-		try(DvkHandler dvk_handler = new DvkHandler(file_prefs)) {
+		Config config = new Config();
+		config.set_config_directory(this.temp_dir.getRoot());
+		try(DvkHandler dvk_handler = new DvkHandler(config)) {
 			//TEST GETTING LOADED DIRECTORIES BEFORE ANYTHING IS LOADED
 			ArrayList<File> dirs = dvk_handler.get_loaded_directories();
 			assertEquals(0, dirs.size());
@@ -659,9 +659,9 @@ public class TestDvkHandler {
 	@Test
 	public void test_get_dvk() {
 		//READ DEFAULT TEST DVKS
-		FilePrefs file_prefs = new FilePrefs();
-		file_prefs.set_index_dir(this.temp_dir.getRoot());
-		try(DvkHandler dvk_handler = new DvkHandler(file_prefs)) {
+		Config config = new Config();
+		config.set_config_directory(this.temp_dir.getRoot());
+		try(DvkHandler dvk_handler = new DvkHandler(config)) {
 			dvk_handler.read_dvks(this.temp_dir.getRoot());
 			ArrayList<Dvk> dvks = dvk_handler.get_dvks('a', false, false);
 			assertEquals("title 0.55", dvks.get(0).get_title());
@@ -708,9 +708,9 @@ public class TestDvkHandler {
 	@Test
 	public void test_sort_title() {
 		//READ ALL THE DEFAULT TEST DVK FILES
-		FilePrefs file_prefs = new FilePrefs();
-		file_prefs.set_index_dir(this.temp_dir.getRoot());
-		try(DvkHandler dvk_handler = new DvkHandler(file_prefs)) {
+		Config config = new Config();
+		config.set_config_directory(this.temp_dir.getRoot());
+		try(DvkHandler dvk_handler = new DvkHandler(config)) {
 			dvk_handler.read_dvks(this.temp_dir.getRoot());
 			//TEST DVKS ARE SORTED BY TITLE
 			ArrayList<Dvk> dvks = dvk_handler.get_dvks('a', false, false);
@@ -750,9 +750,9 @@ public class TestDvkHandler {
 	@Test
 	public void test_sort_time() {
 		//READ ALL THE DEFAULT TEST DVK FILES
-		FilePrefs file_prefs = new FilePrefs();
-		file_prefs.set_index_dir(this.temp_dir.getRoot());
-		try(DvkHandler dvk_handler = new DvkHandler(file_prefs)) {
+		Config config = new Config();
+		config.set_config_directory(this.temp_dir.getRoot());
+		try(DvkHandler dvk_handler = new DvkHandler(config)) {
 			dvk_handler.read_dvks(this.temp_dir.getRoot());
 			//TEST DVKS ARE SORTED BY TIME
 			ArrayList<Dvk> dvks = dvk_handler.get_dvks('t', false, false);
@@ -795,9 +795,9 @@ public class TestDvkHandler {
 	@Test
 	public void test_delete_database() {
 		//SET UP DVK HANDLER
-		FilePrefs prefs = new FilePrefs();
-		prefs.set_index_dir(this.temp_dir.getRoot());
-		try(DvkHandler handler = new DvkHandler(prefs)) {
+		Config config = new Config();
+		config.set_config_directory(this.temp_dir.getRoot());
+		try(DvkHandler handler = new DvkHandler(config)) {
 			//CHECK DVK ARCHIVE DATABASE FILE EXISTS
 			File file = new File(this.temp_dir.getRoot(), "dvk_archive.db");
 			assertTrue(file.exists());
