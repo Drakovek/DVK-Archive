@@ -9,39 +9,6 @@ import java.util.Arrays;
  * @author Drakovek
  */
 public class ArrayProcessing {
-	/**
-	 * Converts a String array to an ArrayList<String>.
-	 * 
-	 * @param array Given String array
-	 * @return ArrayList<String> representation of array
-	 */
-	public static ArrayList<String> array_to_list(final String[] array) {
-		if(array == null) {
-			return new ArrayList<>();
-		}
-		ArrayList<String> list = new ArrayList<>();
-		for(int i = 0; i < array.length; i++) {
-			list.add(array[i]);
-		}
-		return list;
-	}
-	
-	/**
-	 * Converts an ArrayList<String> into a String array.
-	 * 
-	 * @param list Given ArrayList<String>
-	 * @return String array representation of list
-	 */
-	public static String[] list_to_array(final ArrayList<String> list) {
-		if(list == null) {
-			return new String[0];
-		}
-		String[] array = new String[list.size()];
-		for(int i = 0; i < list.size(); i++) {
-			array[i] = list.get(i);
-		}
-		return array;
-	}
 	
 	/**
 	 * Removes all duplicate and null entries from a String array.
@@ -50,9 +17,14 @@ public class ArrayProcessing {
 	 * @return String array without duplicate or null entries.
 	 */
 	public static String[] clean_array(final String[] array) {
-		ArrayList<String> list = array_to_list(array);
+		//RETURN AN EMPTY STRING IF GIVEN ARRAY IS NULL
+		if(array == null) {
+			return new String[0];
+		}
+		//CLEAN ARRAY
+		ArrayList<String> list = new ArrayList<>(Arrays.asList(array));
 		list = clean_list(list);
-		return list_to_array(list);
+		return list.toArray(new String[list.size()]);
 	}
 	
 	/**
@@ -109,17 +81,22 @@ public class ArrayProcessing {
 	 * @return String of given array
 	 */
 	public static String array_to_string(String[] array, int indent, boolean use_html) {
+		//IF ARRAY IS NULL, RETURN NULL
 		if(array == null) {
 			return null;
 		}
+		//CREATE STRING
 		StringBuilder builder = new StringBuilder();
 		for(int i = 0; i < array.length; i++) {
+			//ADD COMMAS BETWEEN ENTRIES
 			if(i > 0) {
 				builder.append(',');
+				//ADD SPACES FOR INDENT
 				for(int k = 0; k < indent; k++) {
 					builder.append(' ');
 				}
 			}
+			//IF SPECIFIED, CONVERT ENTRIES TO HTML WITH ESCAPE CHARACTERS
 			if(use_html) {
 				builder.append(HtmlProcessing.add_escapes(array[i]));
 			}
@@ -127,6 +104,7 @@ public class ArrayProcessing {
 				builder.append(array[i]);
 			}
 		}
+		//RETURN FORMATTED STRING
 		return builder.toString();
 	}
 	
@@ -138,9 +116,11 @@ public class ArrayProcessing {
 	 * @return String array from array_str
 	 */
 	public static String[] string_to_array(String array_str) {
+		//IF ARRAY STRING IS INVALID, RETURN NULL
 		if(array_str == null) {
 			return null;
 		}
+		//SPLIT STRING INTO ENTRIES
 		String[] array = array_str.split(",");
 		for(int i = 0; i < array.length; i++) {
 			array[i] = HtmlProcessing.replace_escapes(array[i]);
@@ -157,10 +137,13 @@ public class ArrayProcessing {
 	 * @return Whether array contains search
 	 */
 	public static boolean contains(String[] array, String search, boolean case_sensitive) {
+		//IF ARRAY IS NULL, RETURN FALSE
 		if(array == null) {
 			return false;
 		}
+		//RETURN IF ARRAY CONTAINS A GIVEN STRING		
 		if(case_sensitive) {
+			//CASE SENSITIVE
 			for(int i = 0; i < array.length; i++) {
 				if(array[i] != null && array[i].equals(search)) {
 					return true;
@@ -168,6 +151,7 @@ public class ArrayProcessing {
 			}
 		}
 		else {
+			//NOT CASE SENSITIVE
 			String lower = search.toLowerCase();
 			for(int i = 0; i < array.length; i++) {
 				if(array[i] != null && array[i].toLowerCase().equals(lower)) {
@@ -175,6 +159,7 @@ public class ArrayProcessing {
 				}
 			}
 		}
+		//RETURNS FALSE IF ARRAY DOESN'T CONTAIN GIVEN STRING
 		return false;
 	}
 }

@@ -14,7 +14,6 @@ import com.gmail.drakovekmail.dvkarchive.file.Dvk;
 import com.gmail.drakovekmail.dvkarchive.file.DvkException;
 import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
 import com.gmail.drakovekmail.dvkarchive.file.InOut;
-import com.gmail.drakovekmail.dvkarchive.processing.ArrayProcessing;
 import com.gmail.drakovekmail.dvkarchive.processing.StringProcessing;
 import com.gmail.drakovekmail.dvkarchive.web.DConnect;
 
@@ -783,7 +782,7 @@ public class DeviantArt extends ArtistHosting {
 			if(fav_artist != null) {
 				tags.add("Favorite:" + fav_artist);
 			}
-			dvk.set_web_tags(ArrayProcessing.list_to_array(tags));
+			dvk.set_web_tags((String[])tags.toArray());
 			//SET SECONDARY URL
 			try {
 				String second = json.getString("fullsize_url");
