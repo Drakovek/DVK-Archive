@@ -453,11 +453,11 @@ public class Dvk {
 			this.time = "0000/00/00|00:00";
 		}
 		else {
-			String year_str = StringProcessing.extend_int(year, 4);
-			String month_str = StringProcessing.extend_int(month, 2);
-			String day_str = StringProcessing.extend_int(day, 2);
-			String hour_str = StringProcessing.extend_int(hour, 2);
-			String minute_str = StringProcessing.extend_int(minute, 2);
+			String year_str = StringProcessing.pad_int(year, 4);
+			String month_str = StringProcessing.pad_int(month, 2);
+			String day_str = StringProcessing.pad_int(day, 2);
+			String hour_str = StringProcessing.pad_int(hour, 2);
+			String minute_str = StringProcessing.pad_int(minute, 2);
 			String time_str = year_str + "/" + month_str + "/" + day_str;
 			this.time = time_str  + "|" + hour_str + ":" + minute_str;
 		}

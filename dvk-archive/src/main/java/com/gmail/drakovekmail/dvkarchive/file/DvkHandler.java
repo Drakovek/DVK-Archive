@@ -936,7 +936,7 @@ public class DvkHandler implements AutoCloseable {
 				//IF THE VALUE OF THE NUMBER VARIABLE IS SET,
 				//ADD ZERO PADDED VALUE TO THE MODIFIED STRING
 				if(number.length() > 0) {
-					modified.append(StringProcessing.extend_num(number.toString(), 5));
+					modified.append(StringProcessing.pad_num(number.toString(), 5));
 					number = new StringBuilder();
 				}
 				//ADD CURRENT CHARACTER TO THE MODIFIED STRING
@@ -946,7 +946,7 @@ public class DvkHandler implements AutoCloseable {
 		//IF THE VALUE OF THE NUMBER VARIABLE IS SET,
 		//ADD ZERO PADDED VALUE TO THE MODIFIED STRING
 		if(number.length() > 0) {
-			modified.append(StringProcessing.extend_num(number.toString(), 5));
+			modified.append(StringProcessing.pad_num(number.toString(), 5));
 		}
 		//RETURN MODIFIED STRING IN A REDUCED FORM
 		return StringProcessing.get_filename(modified.toString(), -1).toLowerCase();

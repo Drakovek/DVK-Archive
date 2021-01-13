@@ -72,14 +72,14 @@ public class TestArrayProcessing {
 	@SuppressWarnings("static-method")
 	public void test_sort_alphanum() {
 		//SET UP ARRAY
-		String[] input = {"10.05", "a", "5", "010,5"};
+		String[] input = {"Name 1", "Other", "name 2", "thing"};
 		//TEST SORTING ARRAY
 		String[] output = ArrayProcessing.sort_alphanum(input);
 		assertEquals(4, output.length);
-		assertEquals("5", output[0]);
-		assertEquals("10.05", output[1]);
-		assertEquals("010,5", output[2]);
-		assertEquals("a", output[3]);
+		assertEquals("Name 1", output[0]);
+		assertEquals("name 2", output[1]);
+		assertEquals("Other", output[2]);
+		assertEquals("thing", output[3]);
 		//TEST SORTING INVALID ARRAY
 		String[] array = ArrayProcessing.sort_alphanum(null);
 		assertEquals(0, array.length);

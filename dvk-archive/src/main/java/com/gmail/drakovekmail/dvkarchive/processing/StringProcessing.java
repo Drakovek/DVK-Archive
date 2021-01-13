@@ -15,9 +15,9 @@ public class StringProcessing {
 	 * @param length Length of returned String
 	 * @return String for input_int
 	 */
-	public static String extend_int(final int input_int, final int length) {
+	public static String pad_int(final int input_int, final int length) {
 		String int_string = Integer.toString(input_int);
-		return extend_num(int_string, length);
+		return pad_num(int_string, length);
 	}
 	
 	/**
@@ -28,13 +28,16 @@ public class StringProcessing {
 	 * @param length Length of returned String
 	 * @return Extended string
 	 */
-	public static String extend_num(String input, int length) {
-		if(length < 1) {
+	public static String pad_num(String input, int length) {
+		//RETURNS AN EMPTY STRING IF THE GIVEN STRING OR LENGTH IS INVALID
+		if(input == null || length < 1) {
 			return new String();
 		}
+		//IF LENGTH IS LESS THAN THE LENGTH OF INPUT, RETURN STRING OF ZEROS OF THE GIVEN LENGTH
 		if(length < input.length()) {
-			return extend_int(0, length);
+			return pad_num("0", length);
 		}
+		//PAD OUT THE STRING WITH ZEROS TO REACH THE GIVEN STRING LENGTH
 		StringBuilder builder = new StringBuilder();
 		builder.append(input);
 		while(builder.length() < length) {
@@ -50,15 +53,18 @@ public class StringProcessing {
 	 * @return String without whitespace
 	 */
 	public static String remove_whitespace(final String str) {
+		//RETURN AN EMPTY STRING IF THE GIVEN STRING IS INVALID
 		if(str == null) {
 			return new String();
 		}
+		//FIND SPOTS AT BEGINING AND END OF THE STRING WHERE ACTUAL TEXT BEGINS
 		int start = 0;
 		int end = 0;
 		for(start = 0; start < str.length() && str.charAt(start) == ' '; start++);
 		for(end = str.length() - 1; end > -1 && str.charAt(end) == ' '; end--);
 		end++;
 		if(end < start) {
+			//IF END < START, ASSUME THERE'S NO WHITESPACE AT THE END
 			return str.substring(start);
 		}
 		return str.substring(start, end);
@@ -83,6 +89,7 @@ public class StringProcessing {
 	 * @return Filename
 	 */
 	public static String get_filename(final String str, final int length) {
+		//IF GIVEN STRING IS NULL, RETURN STRING "0"
 		if(str == null) {
 			return "0";
 		}
@@ -133,13 +140,13 @@ public class StringProcessing {
 			}
 		}
 		//TRUNCATE STRING
-		//TODO CREATE TEST FOR CHECKING NOT TRUNCATING THE STRING
 		String cleaned = builder.toString();
 		if(length != -1) {
 			cleaned = truncate_string(cleaned, length);
 		}
 		//RETURN CLEANED STRING
 		if(cleaned.length() == 0) {
+			//IF FINAL STRING HAS NO LENGTH, RETURN STRING OF "0"
 			return "0";
 		}
 		return cleaned;
@@ -154,13 +161,16 @@ public class StringProcessing {
 	 * @return Shortened String
 	 */
 	public static String truncate_string(final String str, final int length) {
+		//RETURN AN EMPTY STRING IF GIVEN STRING IS NULL OR EMPTY
 		if(str == null || length < 1) {
 			return new String();
 		}
+		//RETURN GIVEN STRING IF IT'S LENGTH IS <= THE VARIABLE LENGTH
 		if(str.length() <= length) {
 			return str;
 		}
-		// GET INDEX TO REMOVE FROM
+		//FIND INDEX TO START REMOVING CHARACTERS FROM.
+		//ATTEMPTS TO BREAK AT A SPACE OR HYPHEN
 		int index;
 		if(str.contains(" ")) {
 			index = str.lastIndexOf(' ');
@@ -171,7 +181,7 @@ public class StringProcessing {
 		else {
 			index = (int)Math.floor(str.length() / 2);
 		}
-		// DELETE CHARACTERS
+		// DELETE CHARACTERS FROM THE INDEX POSITION
 		StringBuilder tr = new StringBuilder(str);
 		if(index < tr.length() - index) {
 			index++;
@@ -193,7 +203,7 @@ public class StringProcessing {
 				tr.deleteCharAt(index);
 			}
 		}
-		//IF STILL TOO LONG
+		//IF STILL TOO LONG, REMOVE CHARACTERS FROM THE END OF THE STRING
 		if(tr.length() > length) {
 			tr = new StringBuilder(tr.substring(0, length));
 		}
@@ -212,44 +222,29 @@ public class StringProcessing {
 	}
 	
 	/**
-	 * Returns the extension for a given filename.
+	 * Returns the extension for a given filename or direct file URL.
 	 * If extension does not exist, returns empty.
 	 * 
 	 * @param filename Given filename.
 	 * @return Extension for filename
 	 */
 	public static String get_extension(String filename) {
+		//RETURNS AN EMPTY STRING IF THE FILENAME IS NULL
 		if(filename == null) {
 			return new String();
 		}
+		//IF URL HAS A TOKEN MARKED BY A '?', REMOVE THE TOKEN
 		int end = filename.lastIndexOf('?');
 		if(end == -1) {
 			end = filename.length();
 		}
+		//GET TEXT INCLUDING AND PROCEDING THE FINAL '.'
 		int start = filename.lastIndexOf('.', end);
 		if(start == -1 || end - start > 6) {
+			//RETURNS AN EMPTY STRING IF EXTRACTED TEXT IS TOO LONG/SHORT TO BE AN EXTENSION
 			return new String();
 		}
+		//RETURN EXTENSION
 		return filename.substring(start, end);
-	}
-	
-	/**
-	 * Removes a section from given text.
-	 * 
-	 * @param text Text to remove from
-	 * @param start Start index of section to remove (inclusive)
-	 * @param end End index of section to remove (exclusive)
-	 * @return Text with section removed
-	 */
-	public static String remove_section(String text, int start, int end)
-	{
-		StringBuilder builder = new StringBuilder();
-		if(start <= text.length()) {
-			builder.append(text.substring(0, start));
-		}
-		if(end < text.length()) {
-			builder.append(text.substring(end));
-		}
-		return builder.toString();
 	}
 }

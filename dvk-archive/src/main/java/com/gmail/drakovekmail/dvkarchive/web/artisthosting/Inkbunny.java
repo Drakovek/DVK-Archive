@@ -739,15 +739,15 @@ public class Inkbunny extends ArtistHosting {
 			int year = Integer.parseInt(str.substring(start, end));
 			//RETURN STRING
 			StringBuilder time = new StringBuilder();
-			time.append(StringProcessing.extend_int(year, 4));
+			time.append(StringProcessing.pad_int(year, 4));
 			time.append('/');
-			time.append(StringProcessing.extend_int(month, 2));
+			time.append(StringProcessing.pad_int(month, 2));
 			time.append('/');
-			time.append(StringProcessing.extend_int(day, 2));
+			time.append(StringProcessing.pad_int(day, 2));
 			time.append('|');
-			time.append(StringProcessing.extend_int(hour, 2));
+			time.append(StringProcessing.pad_int(hour, 2));
 			time.append(':');
-			time.append(StringProcessing.extend_int(minute, 2));
+			time.append(StringProcessing.pad_int(minute, 2));
 			return time.toString();
 		}
 		catch(Exception e) {}

@@ -67,7 +67,7 @@ public class ArrayProcessing {
 			return new String[0];
 		}
 		String[] return_array = array;
-		Arrays.parallelSort(return_array, new StringCompare());
+		Arrays.sort(array, String.CASE_INSENSITIVE_ORDER);
 		return return_array;
 	}
 	
