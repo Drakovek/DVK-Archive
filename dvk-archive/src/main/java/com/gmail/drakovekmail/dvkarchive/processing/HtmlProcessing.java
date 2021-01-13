@@ -15,19 +15,25 @@ public class HtmlProcessing {
 	 * @return Unicode character
 	 */
 	public static String escape_to_char(final String escape) {
+		//RETURNS EMPTY STRING IF GIVEN STRING IS NOT A VALID HTML ESCAPE CHARACTER
 		if(escape == null || !escape.startsWith("&") || !escape.endsWith(";")) {
 			return new String();
 		}
+		//REMOVE STARTING $ AND ENDING ; FROM THE ESCAPE CHARACTER
 		String mid = escape.substring(1, escape.length() - 1);
+		//IF HTML ESCAPE CHARACTER REFERS TO A UNICODE INDEX
 		if(mid.startsWith("#")) {
 			try {
+				//RETURN UNICODE CHARACTER
 				char out = (char)Integer.parseInt(mid.substring(1));
 				return String.valueOf(out);
 			}
 			catch(Exception e) {
+				//IF UNICODE INDEX ISN'T VALID, RETURN EMPTY STRING
 				return new String();
 			}
 		}
+		//RETURN CHARACTER FOR HTML SPECIFIC ESCAPE CHARACTERS
 		switch(mid) {
 			case "quot": return "\"";
 			case "apos": return "'";
@@ -46,13 +52,16 @@ public class HtmlProcessing {
 	 * @return String with HTML escape characters replaced
 	 */
 	public static String replace_escapes(final String str) {
+		//RETURNS EMPTY STRING IF GIVEN STRING IS NULL
 		if(str == null) {
 			return new String();
 		}
-		String out = str;
+		//RUN WHILE STRING CONTAINS HTML ESCAPE CHARACTERS
 		int end;
+		String out = str;
 		int start = out.indexOf('&');
 		while(start != -1) {
+			//GET AND CONVERT HTML ESCAPE CHARACTER
 			end = out.indexOf(';', start);
 			if(end != -1) {
 				end++;
@@ -77,9 +86,11 @@ public class HtmlProcessing {
 	 * @return String with added HTML escape characters
 	 */
 	public static String add_escapes(final String str) {
+		//RETURNS AN EMPTY STRING IF THE GIVEN STRING IS NULL
 		if(str == null) {
 			return new String();
 		}
+		//RUN THROUGH EACH CHARACTER IN THE GIVEN STRING
 		StringBuilder builder = new StringBuilder();
 		for(int i = 0; i < str.length(); i++) {
 			char value = str.charAt(i);
@@ -87,9 +98,11 @@ public class HtmlProcessing {
 					|| (value > 64 && value < 91)
 					|| (value > 96 && value < 124)
 					|| value == ' ') {
+				//IF CURRENT CHARACTER IS a-z, A-Z, 0-9, or a space, use the original character
 				builder.append(value);
 			}
 			else {
+				//IF CURRENT CHARACTER IS NOT ALPHA-NUMERIC, USE THE HTML ESCAPE CHARACTER
 				builder.append("&#");
 				builder.append(Integer.toString(value));
 				builder.append(";");
@@ -106,13 +119,16 @@ public class HtmlProcessing {
 	 * @return String with added HTML escape characters
 	 */
 	public static String add_escapes_to_html(final String str) {
+		//RETURNS EMPTY STRING IF THE GIVEN STRING IS NULL
 		if(str == null) {
 			return new String();
 		}
+		//RUN THROUGH EACH CHARACTER OF THE GIVEN STRING
 		StringBuilder output = new StringBuilder();
 		for(int i = 0; i < str.length(); i++) {
 			char char_value = str.charAt(i);
 			if (char_value == '"' || char_value == '\'') {
+				//LEAVE TEXT IN QUOTES ALONE
 				int end = str.indexOf('"', i + 1) + 1;
 				if(end == 0) {
 					end = str.indexOf('\'', i + 1) + 1;
@@ -124,14 +140,17 @@ public class HtmlProcessing {
 				i = end - 1;
 			}
 			else if(char_value > 31 && char_value < 127) {
+				//LEAVE ALL LATIN CHARACTERS AND HTML CHARACTERS ALONE
 				output.append(str.charAt(i));
 			}
 			else {
+				//REPLACE NON-STANDARD CHARACTERS
 				output.append("&#");
 				output.append(Integer.toString(char_value));
 				output.append(";");
 			}
 		}
+		//RETURN MODIFIED STRING
 		return output.toString();
 	}
 }
