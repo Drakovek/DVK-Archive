@@ -14,6 +14,7 @@ import com.gmail.drakovekmail.dvkarchive.file.Dvk;
 import com.gmail.drakovekmail.dvkarchive.file.DvkException;
 import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
 import com.gmail.drakovekmail.dvkarchive.file.InOut;
+import com.gmail.drakovekmail.dvkarchive.processing.HtmlProcessing;
 import com.gmail.drakovekmail.dvkarchive.processing.StringProcessing;
 import com.gmail.drakovekmail.dvkarchive.web.DConnect;
 
@@ -732,7 +733,7 @@ public class DeviantArt extends ArtistHosting {
 			xpath = "//div[contains(@class,'legacy-journal')]//script/parent::div|"
 					+ "//div[@class='da-editor-journal']//div[@dir='ltr']";
 			DomElement de = this.connect.get_page().getFirstByXPath(xpath);
-			desc = DConnect.clean_element(de.asXml(), true);
+			desc = HtmlProcessing.clean_element(de.asXml(), true);
 			start = desc.indexOf("<script");
 			if(start != -1) {
 				end = desc.indexOf("</script>", start);

@@ -86,4 +86,43 @@ public class TestHtmlProcessing {
 		//TEST ADDING ESCAPE CHARACTERS TO INVALID STRING
 		assertEquals("", HtmlProcessing.add_escapes_to_html(null));
 	}
+	
+	/**
+	 * Tests the remove_header_footer method.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_clean_element() {
+		//TEST REMOVING LINE BREAKS IN ELEMENTS
+		String in = "<p> Start \r\n <b> \r Mid \n </b> \n\r End </p>";
+		assertEquals("<p> Start <b> Mid </b> End </p>", HtmlProcessing.clean_element(in, false));
+		assertEquals("Start <b> Mid </b> End", HtmlProcessing.clean_element(in, true));
+		//TEST REMOVING WHITESPACE BETWEEN ELEMENT TAGS
+		in = "<div>   Start  <i>  Mid     </i>   End     </div>";
+		assertEquals("<div> Start <i> Mid </i> End </div>", HtmlProcessing.clean_element(in, false));
+		assertEquals("Start <i> Mid </i> End", HtmlProcessing.clean_element(in, true));
+		//TEST REMOVING WHITESPACE AT THE BEGINNING AND END OF THE GIVEN ELEMENT
+		in = "     <span>Start<i>Mid</i>End</span> ";
+		assertEquals("<span>Start<i>Mid</i>End</span>", HtmlProcessing.clean_element(in, false));
+		assertEquals("Start<i>Mid</i>End", HtmlProcessing.clean_element(in, true));
+		//TEST REMOVING TAG ELEMENTS WHEN START AND/OR END TAGS ARE MISSING
+		in = "A normal sentence.";
+		assertEquals("A normal sentence.", HtmlProcessing.clean_element(in, true));
+		in = " Start <b> mid </b> End    ";
+		assertEquals("Start <b> mid </b> End", HtmlProcessing.clean_element(in, true));
+		in = " <p> Start <i> Mid </i> end  ";
+		assertEquals("Start <i> Mid </i> end", HtmlProcessing.clean_element(in, true));
+		in = "  start <b> mid </b> end </p>    ";
+		assertEquals("start <b> mid </b> end", HtmlProcessing.clean_element(in, true));
+		//TEST REMOVING TAG ELEMENTS WITH INVALID TAG
+		in = "  < open   ";
+		assertEquals("< open", HtmlProcessing.clean_element(in, true));
+		in = "    open >  ";
+		assertEquals("open >", HtmlProcessing.clean_element(in, true));
+		in = "< single >";
+		assertEquals("", HtmlProcessing.clean_element(in, true));
+		//TEST CLEANING AN INVALID HTML ELEMENT
+		assertEquals("", HtmlProcessing.clean_element(null, true));
+		assertEquals("", HtmlProcessing.clean_element(null, false));
+	}
 }

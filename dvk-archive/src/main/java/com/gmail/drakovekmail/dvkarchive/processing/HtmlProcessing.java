@@ -153,4 +153,51 @@ public class HtmlProcessing {
 		//RETURN MODIFIED STRING
 		return output.toString();
 	}
+	
+	/**
+	 * Cleans up HTML element.
+	 * Removes whitespace and removes header and footer tags.
+	 * 
+	 * @param html HTML element
+	 * @param remove_ends Whether to remove header and footer tags
+	 * @return Cleaned HTML element
+	 */
+	public static String clean_element(String html, boolean remove_ends) {
+		//RETURNS EMPTY STRING IF GIVEN ELEMENT IS NULL
+		if(html == null) {
+			return new String();
+		}
+		//REMOVE NEW LINE AND CARRIAGE RETURN CHARACTERS
+		String str = html.replace("\n", "");
+		str = str.replace("\r", "");
+		//REMOVE WHITESPACE BETWEEN TAGS
+		while(str.contains("  <")) {
+			str = str.replace("  <", " <");
+		}
+		while(str.contains(">  ")) {
+			str = str.replace(">  ", "> ");
+		}
+		//REMOVE HEADER AND FOOTER, IF SPECIFIED
+		if(remove_ends) {
+			str = StringProcessing.remove_whitespace(str);
+			//REMOVE HEADER
+			if(str.startsWith("<")) {
+				int start = str.indexOf('>');
+				if(start != -1) {
+					str = str.substring(start + 1);
+				}
+			}
+			//REMOVE FOOTER
+			if(str.endsWith(">")) {
+				int end = str.lastIndexOf('<');
+				if(end != -1) {
+					str = str.substring(0, end);
+				}
+			}
+		}
+		
+		//REMOVE WHITESPACE FROM THE START AND END OF STRING
+		str = StringProcessing.remove_whitespace(str);
+		return str;
+	}
 }

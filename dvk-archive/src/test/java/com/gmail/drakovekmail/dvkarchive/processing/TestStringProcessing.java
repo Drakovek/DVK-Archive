@@ -50,10 +50,10 @@ public class TestStringProcessing {
 		//TEST REMOVING WHITESPACE FROM THE BEGINNING AND END OF STRINGS
 		assertEquals("", StringProcessing.remove_whitespace(""));
 		assertEquals("", StringProcessing.remove_whitespace(" "));
-		assertEquals("", StringProcessing.remove_whitespace("   "));
+		assertEquals("", StringProcessing.remove_whitespace(" \t  "));
 		assertEquals("blah", StringProcessing.remove_whitespace("  blah"));
 		assertEquals("blah", StringProcessing.remove_whitespace("blah   "));
-		assertEquals("blah", StringProcessing.remove_whitespace("  blah "));
+		assertEquals("blah", StringProcessing.remove_whitespace(" \t blah  \t"));
 		assertEquals("blah", StringProcessing.remove_whitespace("blah"));
 		//TEST USING INVALID STRING
 		assertEquals("", StringProcessing.remove_whitespace(null));

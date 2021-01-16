@@ -17,12 +17,12 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
 import com.gmail.drakovekmail.dvkarchive.file.DvkException;
 import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
 import com.gmail.drakovekmail.dvkarchive.file.InOut;
+import com.gmail.drakovekmail.dvkarchive.processing.HtmlProcessing;
 import com.gmail.drakovekmail.dvkarchive.processing.StringProcessing;
 import com.gmail.drakovekmail.dvkarchive.web.DConnect;
 
@@ -794,7 +794,7 @@ public class Inkbunny extends ArtistHosting {
 			//SET DESCRPITON
 			xpath = "//div[contains(@class,'elephant_white')]//div[@class='content']//span[contains(@style,'word-wrap')]";
 			de = this.connect.get_page().getFirstByXPath(xpath);
-			dvk.set_description(DConnect.clean_element(de.asXml(), true));
+			dvk.set_description(HtmlProcessing.clean_element(de.asXml(), true));
 			//SET ID
 			dvk.set_dvk_id(journal_id);
 			//SET PAGE URL

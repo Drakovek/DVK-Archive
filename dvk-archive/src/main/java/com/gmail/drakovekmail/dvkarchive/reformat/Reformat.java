@@ -1,5 +1,9 @@
 package com.gmail.drakovekmail.dvkarchive.reformat;
 
+import java.util.ArrayList;
+import com.gmail.drakovekmail.dvkarchive.file.Dvk;
+import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
+import com.gmail.drakovekmail.dvkarchive.processing.HtmlProcessing;
 
 /**
  * Methods for reformatting Dvks and associated media.
@@ -12,65 +16,47 @@ public class Reformat {
 	 * Reformats DVKs to fit the current formatting standard.
 	 * 
 	 * @param dvk_handler Contains DVKs to be formatted
-	 * @param start_gui Used for showing progress, if not null
 	 */
-	//TODO REINSTATE
-	/*
-	public static void reformat_dvks(
-			DvkHandler dvk_handler,
-			StartGUI start_gui) {
-		ArrayList<Dvk> dvks = dvk_handler.get_dvks(0, -1, 'n', false, false);
+	public static void reformat_dvks(DvkHandler dvk_handler) {
+		//GET LIST OF DVKS
+		ArrayList<Dvk> dvks = dvk_handler.get_dvks('a', false, false);
+		//REFORMAT EACH DVK FILE
 		int size = dvks.size();
-		for(int i = 0; i < size; i++) {
-			//UPDATE PROGRESS
-			if(start_gui != null) {
-				start_gui.get_main_pbar().set_progress(false, true, i, size);
-				//BREAK IF CANCELED
-				if(start_gui.get_base_gui().is_canceled()) {
-					break;
-				}
-			}
-			//REFORMAT DVKS
-			Dvk dvk = dvks.get(i);
+		for(int dvk_num = 0; dvk_num < size; dvk_num++) {
+			Dvk dvk = dvks.get(dvk_num);
+			//CLEAN UP HTML IN DVK DESCRIPTIONS
 			String desc = dvk.get_description();
 			if(desc != null) {
-				desc = DConnect.clean_element(desc, false);
+				desc = HtmlProcessing.clean_element(desc, false);
 				dvk.set_description(desc);
 			}
+			//WRITE DVK
 			dvk.write_dvk();
+			//ENSURE EXTENSIONS ARE CORRECT
 			dvk.update_extensions();
+			//UPDATE DVK INFO IN THE DVK HANDLER DATABASE
+			dvk_handler.set_dvk(dvk, dvk.get_sql_id());
 		}
 	}
-	*/
 	
 	/**
 	 * Renames DVKs and associated media to their default names.
 	 * 
 	 * @param dvk_handler Contains DVKs to be renamed
-	 * @param start_gui Used for showing progress, if not null
 	 */
-	//TODO REINSTATE
-	/*
-	public static void rename_files(
-			DvkHandler dvk_handler,
-			StartGUI start_gui) {
-		ArrayList<Dvk> dvks = dvk_handler.get_dvks(0, -1, 'n', false, false);
+	public static void rename_files(DvkHandler dvk_handler) {
+		//GET LIST OF DVKS
+		ArrayList<Dvk> dvks = dvk_handler.get_dvks('a', false, false);
+		//RENAME EACH DVK FILE
 		int size = dvks.size();
-		for(int i = 0; i < size; i++) {
-			//UPDATE PROGRESS
-			if(start_gui != null) {
-				start_gui.get_main_pbar().set_progress(false, true, i, size);
-				//BREAK IF CANCELED
-				if(start_gui.get_base_gui().is_canceled()) {
-					break;
-				}
-			}
-			//RENAME FILES
-			Dvk dvk = dvks.get(i);
+		for(int dvk_num = 0; dvk_num < size; dvk_num++) {
+			//RENAME DVK FILE AND ASSOCIATED MEDIA
+			Dvk dvk = dvks.get(dvk_num);
 			dvk.rename_files(dvk.get_filename(false), dvk.get_filename(true));
+			//ENSURE EXTENSIONS ARE CORRECT
 			dvk.update_extensions();
+			//UPDATE DVK INFO IN THE DVK HANDLER DATABASE
 			dvk_handler.set_dvk(dvk, dvk.get_sql_id());
 		}
 	}
-	*/
 }

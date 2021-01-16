@@ -60,8 +60,8 @@ public class StringProcessing {
 		//FIND SPOTS AT BEGINING AND END OF THE STRING WHERE ACTUAL TEXT BEGINS
 		int start = 0;
 		int end = 0;
-		for(start = 0; start < str.length() && str.charAt(start) == ' '; start++);
-		for(end = str.length() - 1; end > -1 && str.charAt(end) == ' '; end--);
+		for(start = 0; start < str.length() && (str.charAt(start) == ' ' || str.charAt(start) == '\t'); start++);
+		for(end = str.length() - 1; end > -1 && (str.charAt(end) == ' ' || str.charAt(end) == '\t'); end--);
 		end++;
 		if(end < start) {
 			//IF END < START, ASSUME THERE'S NO WHITESPACE AT THE END

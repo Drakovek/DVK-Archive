@@ -401,40 +401,4 @@ public class DConnect implements AutoCloseable {
 			catch(IOException e) {}
 		}
 	}
-
-	/**
-	 * Cleans up HTML element.
-	 * Removes whitespace and removes header and footer tags.
-	 * 
-	 * @param html HTML element
-	 * @param remove_ends Whether to remove header and footer tags
-	 * @return Cleaned HTML element
-	 */
-	public static String clean_element(String html, boolean remove_ends) {
-		String str = html.replace("\n", "");
-		str = str.replace("\r", "");
-		//REMOVE WHITESPACE BETWEEN TAGS
-		while(str.contains("  <")) {
-			str = str.replace("  <", " <");
-		}
-		while(str.contains(">  ")) {
-			str = str.replace(">  ", "> ");
-		}
-		//REMOVE HEADER AND FOOTER
-		if(remove_ends) {
-			int start = str.indexOf('>') + 1;
-			int end = str.lastIndexOf('<');
-			if(start > 0 && start <= end) {
-				str = str.substring(start, end);
-			}
-		}
-		//REMOVE WHITESPACE
-		while(str.startsWith(" ")) {
-			str = str.substring(1);
-		}
-		while(str.endsWith(" ")) {
-			str = str.substring(0, str.length() - 1);
-		}
-		return str;
-	}
 }

@@ -5,8 +5,8 @@ import java.util.concurrent.TimeUnit;
 import com.gargoylesoftware.htmlunit.html.DomAttr;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gmail.drakovekmail.dvkarchive.file.Dvk;
+import com.gmail.drakovekmail.dvkarchive.processing.HtmlProcessing;
 import com.gmail.drakovekmail.dvkarchive.web.DConnect;
-
 
 /**
  * Class for downloading media from MangaDex.
@@ -126,7 +126,7 @@ public class MangaDex {
 				if(ds.get(i).asText().equals("Description:")) {
 					de = ds.get(i).getNextElementSibling();
 					dvk.set_description(
-							DConnect.clean_element(de.asXml(), true));
+							HtmlProcessing.clean_element(de.asXml(), true));
 					break;
 				}
 			}

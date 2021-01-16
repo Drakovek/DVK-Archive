@@ -13,6 +13,7 @@ import com.gmail.drakovekmail.dvkarchive.file.Dvk;
 import com.gmail.drakovekmail.dvkarchive.file.DvkException;
 import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
 import com.gmail.drakovekmail.dvkarchive.file.InOut;
+import com.gmail.drakovekmail.dvkarchive.processing.HtmlProcessing;
 import com.gmail.drakovekmail.dvkarchive.processing.StringProcessing;
 import com.gmail.drakovekmail.dvkarchive.web.DConnect;
 import com.gmail.drakovekmail.dvkarchive.web.DConnectSelenium;
@@ -807,7 +808,7 @@ public class FurAffinity extends ArtistHosting {
 			de = this.connect.get_page().getFirstByXPath(xpath);
 			String description = "";
 			if(de != null) {
-				description = DConnect.clean_element(de.asXml(), true);
+				description = HtmlProcessing.clean_element(de.asXml(), true);
 				dvk.set_description(description);
 			}
 			//SET TAGS
