@@ -66,14 +66,15 @@ public class DConnect implements AutoCloseable {
 	 * @exception DvkException DvkException
 	 */
 	public DConnect(boolean css, boolean javascript) throws DvkException {
-		//Turn off HtmlUnit warnings
-		LogFactory.getFactory().setAttribute(
-				"org.apache.commons.logging.Log",
-				"org.apache.commons.logging.impl.NoOpLog");
-		java.util.logging.Logger
-			.getLogger("com.gargoylesoftware.htmlunit").setLevel(java.util.logging.Level.OFF);
-	    java.util.logging.Logger
-	    	.getLogger("org.apache.http").setLevel(java.util.logging.Level.OFF);
+		//TURN OFF HTMLUNIT WARNINGS
+		String name = "org.apache.commons.logging.Log";
+		String value = "org.apache.commons.logging.impl.NoOpLog";
+		LogFactory.getFactory().setAttribute(name, value);
+		name = "com.gargoylesoftware.htmlunit";
+		java.util.logging.Logger.getLogger(name).setLevel(java.util.logging.Level.OFF);
+		name = "org.apache.http";
+		java.util.logging.Logger.getLogger(name).setLevel(java.util.logging.Level.OFF);
+	    //INITIALIZE THE HTMLUNIT WEBCLIENT
 	    close();
 		initialize_client(css, javascript);
 		this.timeout = 10;
@@ -95,11 +96,11 @@ public class DConnect implements AutoCloseable {
 	 * @param use_css Whether to use CSS styling when loading pages
 	 * @param use_javascript Whether to load Javascript when loading pages
 	 */
-	public void initialize_client(
-			boolean use_css,
-			boolean use_javascript) {
+	public void initialize_client(boolean use_css, boolean use_javascript) {
+		//SET USE_CSS AND USE_JAVASCRIPT VARIABLES
 		this.css = use_css;
 		this.javascript = use_javascript;
+		//INITIALIZE THE HTMLUNIT WEBCLIENT
 		initialize_client();
 	}
 	
@@ -107,49 +108,45 @@ public class DConnect implements AutoCloseable {
 	 * Initializes and opens the web_client.
 	 */
 	public void initialize_client() {
+		//SET THE BROWSER TYPE FOR THE WEBCLIENT TO EMULATE
 		this.web_client = new WebClient(BrowserVersion.BEST_SUPPORTED);
+		//SET WHETHER TO LOAD CSS AND JAVASCRIPT FROM WEB PAGES
 		this.web_client.getOptions().setCssEnabled(this.css);
 		this.web_client.getOptions().setJavaScriptEnabled(this.javascript);
+		//DISABLE THROWING AN EXCEPTION ON A JAVASCRIPT OR HTML RESPONSE ERROR
 		this.web_client.getOptions().setThrowExceptionOnFailingStatusCode(false);
 		this.web_client.getOptions().setThrowExceptionOnScriptError(false);
+		//SET THE AMOUNT OF TIME BEFORE LOADING WEB PAGES OR JAVASCRIPT TIMES OUT
 		this.web_client.setJavaScriptTimeout(this.timeout * 1000);
 		this.web_client.setAjaxController(new NicelyResynchronizingAjaxController());
 		this.web_client.getOptions().setTimeout(this.timeout * 1000);
 	}
 	
 	/**
-	 * Loads a given HTML String as HtmlPage.
-	 * 
-	 * @param html Given HTML formatted String
+	 * Closes all windows from the WebClient while preserving cookies to reduce memory usage.
 	 */
-	public void load_from_string(String html) {
-		if(html == null || html.length() == 0) {
-			this.page = null;
+	private void close_windows() {
+		//GET THE CURRENTLY STORED COOKIES FROM THE WEBCLIENT
+		this.page = null;
+		CookieManager cookies = this.web_client.getCookieManager();
+		//CLOSE ALL THE WEBCLIENT'S WINDOWS
+		List<WebWindow> windows = this.web_client.getWebWindows();
+		for(WebWindow window: windows) {
+			window.getJobManager().removeAllJobs();
+			window.getJobManager().shutdown();
+			window = null;
 		}
-		else {
-			try {
-				List<WebWindow> windows = this.web_client.getWebWindows();
-				for(WebWindow window: windows) {
-					window.getJobManager().removeAllJobs();
-					window.getJobManager().shutdown();
-					window = null;
-				}
-				close();
-				System.gc();
-				initialize_client();
-				HTMLParser parser;
-				parser = this.web_client.getPageCreator().getHtmlParser();
-				URL url = new URL("https://www.notreal.com");
-				StringWebResponse r;
-				r = new StringWebResponse(html, url);
-				this.page = parser.parseHtml(r, this.web_client.getCurrentWindow());
-			}
-			catch (Exception e) {
-				this.page = null;
-			}
+		//CLOSE THE WEBCLIENT TO PREVENT INCREASING MEMORY USE FROM OPENING A NEW WINDOW
+		try {
+			close();
 		}
+		catch(DvkException e) {}
+		System.gc();
+		//RE-INITIALIZE THE WEBCLIENT WITH THE SAME STORED COOKIES
+		initialize_client();
+		this.web_client.setCookieManager(cookies);
 	}
-	
+
 	/**
 	 * Loads a given URL to a HtmlPage object.
 	 * 
@@ -159,8 +156,33 @@ public class DConnect implements AutoCloseable {
 	 */
 	public void load_page(String url, String element, int tries) {
 		load_page(url, element);
+		//IF SPECIFIED AND LOADING PAGE DIDN'T WORK PROPERLY THE FIRST TIME, ATTEMPT LOADING AGAIN
 		for(int i = 0; this.get_page() == null && i < (tries - 1); i++) {
 			load_page(url, element);
+		}
+	}
+	
+	/**
+	 * Loads a given URL to a HtmlPage object.
+	 * 
+	 * @param url Given URL
+	 * @param element XPath element to wait for
+	 */
+	private void load_page(String url, String element) {
+		//CLOSE WINDOWS TO FREE UP WEBCLIENT MEMORY
+		close_windows();
+		//LOAD THE WEBPAGE FOR THE GIVEN URL
+		try {
+			this.page = this.web_client.getPage(url);
+			//IF SPECIFIED, WAIT FOR A GIVEN ELEMENT TO LOAD
+			if(!wait_for_element(element)) {
+				//SET PAGE TO NULL IF THE ELEMENT FAILS TO LOAD OR TIMES OUT
+				this.page = null;
+			}
+		}
+		catch(Exception e) {
+			//SET PAGE TO NULL IF LOADING PAGE FAILS IN SOME WAY
+			this.page = null;
 		}
 	}
 	
@@ -174,6 +196,7 @@ public class DConnect implements AutoCloseable {
 	public JSONObject load_json(String url, int tries) {
 		JSONObject json = null;
 		load_json(url);
+		//IF SPECIFIED AND LOADING PAGE DIDN'T WORK PROPERLY THE FIRST TIME, ATTEMPT LOADING AGAIN
 		for(int i = 0; json == null && i < (tries - 1); i++) {
 			json = load_json(url);
 		}
@@ -187,22 +210,10 @@ public class DConnect implements AutoCloseable {
 	 * @return JSONObject from URL
 	 */
 	private JSONObject load_json(String url) {
-		this.page = null;
-		CookieManager cookies = this.web_client.getCookieManager();
-		List<WebWindow> windows = this.web_client.getWebWindows();
-		for(WebWindow window: windows) {
-			window.getJobManager().removeAllJobs();
-			window.getJobManager().shutdown();
-			window = null;
-		}
+		//CLOSE WINDOWS TO FREE UP WEBCLIENT MEMORY
+		close_windows();
 		try {
-			close();
-		}
-		catch(DvkException e) {}
-		System.gc();
-		initialize_client();
-		this.web_client.setCookieManager(cookies);
-		try {
+			//LOAD GIVEN WEBPAGE AS JSON
 			UnexpectedPage u_page;
 			u_page = (UnexpectedPage)this.web_client.getPage(url.toString());
 			String res = u_page.getWebResponse().getContentAsString();
@@ -211,49 +222,9 @@ public class DConnect implements AutoCloseable {
 			return json;
 		}
 		catch(Exception e) {
+			//RETURN NULL IF LOADING AS JSON FAILS
 			return null;
 		}
-	}
-	
-	/**
-	 * Loads a given URL to a HtmlPage object.
-	 * 
-	 * @param url Given URL
-	 * @param element XPath element to wait for
-	 */
-	private void load_page(String url, String element) {
-		CookieManager cookies = this.web_client.getCookieManager();
-		List<WebWindow> windows = this.web_client.getWebWindows();
-		for(WebWindow window: windows) {
-			window.getJobManager().removeAllJobs();
-			window.getJobManager().shutdown();
-			window = null;
-		}
-		try {
-			close();
-		}
-		catch(DvkException e) {}
-		System.gc();
-		initialize_client();
-		this.web_client.setCookieManager(cookies);
-		try {
-			this.page = this.web_client.getPage(url);
-			if(!wait_for_element(element)) {
-				this.page = null;
-			}
-		}
-		catch(Exception e) {
-			this.page = null;
-		}
-	}
-	
-	/**
-	 * Sets main page of DConnect directly.
-	 * 
-	 * @param page HtmlPage
-	 */
-	public void set_page(HtmlPage page) {
-		this.page = page;
 	}
 	
 	/**
@@ -268,18 +239,23 @@ public class DConnect implements AutoCloseable {
 			boolean exists = false;
 			DomElement de;
 			try {
+				//CHECK EVERY SECOND UNTIL TIMEOUT OR ELEMENT FOUND
 				while(!exists && secs > -1) {
+					//ATTEMPT TO FIND ELEMENT
 					de = get_page().getFirstByXPath(element);
 					if(de == null) {
+						//IF ELEMENT NOT FOUND, WAIT ONE SECOND
 						secs--;
 						try {
 							TimeUnit.MILLISECONDS.sleep(1000);
 						} catch (InterruptedException e) {}
 					}
 					else {
+						//IF ELEMENT IS FOUND, SET THE EXIST VARIABLE TO TRUE
 						exists = true;
 					}
 				}
+				//RETURN WHETHER THE GIVEN ELEMENT WAS FOUND
 				return exists;
 			}
 			catch(Exception e) {
@@ -287,36 +263,6 @@ public class DConnect implements AutoCloseable {
 			}
 		}
 		return true;
-	}
-	
-	/**
-	 * Returns the currently loaded HtmlPage.
-	 * 
-	 * @return Loaded HtmlPage
-	 */
-	public HtmlPage get_page() {
-		return this.page;
-	}
-	
-	/**
-	 * Returns the current web_client.
-	 * 
-	 * @return WebClient
-	 */
-	public WebClient get_client() {
-		return this.web_client;
-	}
-	
-	/**
-	 * Safely closes the WebClient
-	 */
-	@Override
-	public void close() throws DvkException {
-		this.page = null;
-		if(this.web_client != null) {
-			this.web_client.close();
-		}
-		this.web_client = null;
 	}
 	
 	/**
@@ -339,30 +285,36 @@ public class DConnect implements AutoCloseable {
 	 * @param fallback Whether to use basic_download if download fails.
 	 */
 	public void download(String url, File file, boolean fallback) {
-		UnexpectedPage u_page = null;
-		try {
-			u_page = this.web_client.getPage(url);
-		}
-		catch(Exception e) {
-			u_page = null;
-		}
-		if(u_page != null) {
-			try (InputStream is = u_page.getWebResponse().getContentAsStream();
-					OutputStream os = new FileOutputStream(file)){
-				byte[] buffer = new byte[1024];
-				int read;
-				while((read = is.read(buffer)) != -1) {
-					os.write(buffer, 0, read);
-				}
+		if(file != null) {
+			//ATTEMPT TO LOAD MEDIA URL AS AN UNEXPECTED PAGE
+			UnexpectedPage u_page = null;
+			try {
+				u_page = this.web_client.getPage(url);
 			}
 			catch(Exception e) {
-				if(fallback) {
-					basic_download(url, file);
+				u_page = null;
+			}
+			//IF LOADING TO PAGE WORKED, SAVE AS A FILE
+			if(u_page != null) {
+				try (InputStream is = u_page.getWebResponse().getContentAsStream();
+						OutputStream os = new FileOutputStream(file)){
+					byte[] buffer = new byte[1024];
+					int read;
+					while((read = is.read(buffer)) != -1) {
+						os.write(buffer, 0, read);
+					}
+				}
+				catch(Exception e) {
+					//ATTEMPT A DIFFERENT DOWNLOAD TECHNIQUE IF THE DOWNLOAD FAILS
+					if(fallback) {
+						basic_download(url, file);
+					}
 				}
 			}
-		}
-		else if(fallback) {
-			basic_download(url, file);
+			else if(fallback) {
+				//ATTEMPT A DIFFERENT DOWNLOAD TECHNIQUE IF LOADING AS PAGE FAILS
+				basic_download(url, file);
+			}
 		}
 	}
 	
@@ -374,31 +326,91 @@ public class DConnect implements AutoCloseable {
 	 * @param file Given file
 	 */
 	public static void basic_download(String url, File file) {
-		byte[] b = null;
-		byte[] full_data = null;
-		int data = 0;
-		URLConnection connect = null;
-		try {
-			connect = new URL(url).openConnection();
-			connect.setRequestProperty(
-					"User-Agent",
-					"Mozilla/5.0 (X11; Linux x86_64; rv:70.0) Gecko/20100101 Firefox/70.0");
-			connect.connect();
-		}
-		catch(Exception e) {}
-		if(connect != null) {
-			try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
-					FileOutputStream fos = new FileOutputStream(file);
-					InputStream is = new BufferedInputStream(connect.getInputStream())) {
-				b = new byte[1024];
-				data = 0;
-				while(-1 != (data = is.read(b))) {
-					baos.write(b, 0, data);
-				}
-				full_data = baos.toByteArray();
-				fos.write(full_data);
+		//CHECK PARAMETERS ARE VALID
+		if(url != null && file != null) {
+			//INITIALIZE VARIABLES
+			byte[] b = null;
+			byte[] full_data = null;
+			int data = 0;
+			URLConnection connect = null;
+			//ATTEMPT TO OPEN A CONNECTION TO THE GIVEN WEB PAGE
+			try {
+				connect = new URL(url).openConnection();
+				String agent = "Mozilla/5.0 (X11; Linux x86_64; rv:70.0) Gecko/20100101 Firefox/70.0";
+				connect.setRequestProperty("User-Agent", agent);
+				connect.connect();
 			}
-			catch(IOException e) {}
+			catch(Exception e) {}
+			//SAVE CONTENTS OF THE WEB PAGE TO A FILE
+			if(connect != null) {
+				try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+						FileOutputStream fos = new FileOutputStream(file);
+						InputStream is = new BufferedInputStream(connect.getInputStream())) {
+					b = new byte[1024];
+					data = 0;
+					while(-1 != (data = is.read(b))) {
+						baos.write(b, 0, data);
+					}
+					full_data = baos.toByteArray();
+					fos.write(full_data);
+				}
+				catch(IOException e) {}
+			}
 		}
+	}
+	
+	/**
+	 * Loads a given HTML String as HtmlPage.
+	 * 
+	 * @param html Given HTML formatted String
+	 */
+	public void load_from_string(String html) {
+		if(html == null || html.length() == 0) {
+			this.page = null;
+		}
+		else {
+			try {
+				//CLOSE WINDOWS TO REDUCE MEMORY USAGE
+				close_windows();
+				//SET WEBCLIENT LOADED PAGE TO THE GIVEN HTML STRING
+				HTMLParser parser = this.web_client.getPageCreator().getHtmlParser();
+				URL url = new URL("https://www.notreal.com");
+				StringWebResponse resp = new StringWebResponse(html, url);
+				this.page = parser.parseHtml(resp, this.web_client.getCurrentWindow());
+			}
+			catch (Exception e) {
+				this.page = null;
+			}
+		}
+	}
+	
+	/**
+	 * Sets the currently loaded HtmlPage directly.
+	 * 
+	 * @param page HtmlPage to use
+	 */
+	public void set_page(HtmlPage page) {
+		this.page = page;
+	}
+	
+	/**
+	 * Returns the currently loaded HtmlPage.
+	 * 
+	 * @return Loaded HtmlPage
+	 */
+	public HtmlPage get_page() {
+		return this.page;
+	}
+	
+	/**
+	 * Safely closes the WebClient
+	 */
+	@Override
+	public void close() throws DvkException {
+		this.page = null;
+		if(this.web_client != null) {
+			this.web_client.close();
+		}
+		this.web_client = null;
 	}
 }

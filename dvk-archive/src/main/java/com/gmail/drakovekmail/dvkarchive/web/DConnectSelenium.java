@@ -38,15 +38,10 @@ public class DConnectSelenium implements AutoCloseable {
 	 * @exception DvkException DvkException
 	 */
 	public DConnectSelenium(boolean headless) throws DvkException {
-		//DISABLE LOGS
-		java.util.logging.Logger.getLogger("org.openqa.selenium")
-			.setLevel(java.util.logging.Level.OFF);
-		System.setProperty(
-				FirefoxDriver.SystemProperty.DRIVER_USE_MARIONETTE,
-				"true");
-		System.setProperty(
-				FirefoxDriver.SystemProperty.BROWSER_LOGFILE,
-				"/dev/null");
+		//DISABLE SELENIUM LOGS
+		java.util.logging.Logger.getLogger("org.openqa.selenium").setLevel(java.util.logging.Level.OFF);
+		System.setProperty(FirefoxDriver.SystemProperty.DRIVER_USE_MARIONETTE, "true");
+		System.setProperty(FirefoxDriver.SystemProperty.BROWSER_LOGFILE, "/dev/null");
 		//INITIALIZE OBJECT
 		this.connect = new DConnect(false, false);
 		initialize_driver('f', headless);
@@ -125,11 +120,14 @@ public class DConnectSelenium implements AutoCloseable {
 	 */
 	public void load_page(String url, String element, int timeout) {
 		try {
+			//LOAD WEB PAGE FOR THE GIVEN URL
 			this.driver.get(url);
 			boolean loaded = true;
+			//IF SPECIFIED, WAIT FOR A GIVEN ELEMENT TO LOAD
 			if(element != null) {
 				loaded = wait_for_element(element, timeout);
 			}
+			//USE HTML INFO FOR AN HTML UNIT PAGE
 			if(loaded) {
 				this.connect.load_from_string(this.driver.getPageSource());
 			}

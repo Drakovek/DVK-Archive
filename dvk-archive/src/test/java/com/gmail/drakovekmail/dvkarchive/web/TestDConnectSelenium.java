@@ -55,30 +55,29 @@ public class TestDConnectSelenium {
 	 */
 	@Test
 	public void test_load_get_page() {
-		DomElement de;
-		//TEST INVALID URL
-		this.connect.load_page(null, null, 1, 10);
-		assertEquals(null, this.connect.get_page());
-		String url = "lkjslkdjflajs";
-		this.connect.load_page(url, null, 1, 10);
-		assertEquals(null, this.connect.get_page());
-		//TEST VALID URL
-		url = "http://pythonscraping.com/exercises/exercise1.html";
-		this.connect.load_page(url, null, 1, 10);
+		//TEST LOADING ELEMENTS FROM A WEB PAGE
+		String url = "http://pythonscraping.com/exercises/exercise1.html";
+		this.connect.load_page(url, null, 2);
 		assertNotEquals(null, this.connect.get_page());
-		de = this.connect.get_page().getFirstByXPath("//h1");
+		DomElement de = this.connect.get_page().getFirstByXPath("//h1");
 		assertEquals("An Interesting Title", de.asText());
 		de = this.connect.get_page().getFirstByXPath("//title");
 		assertEquals("A Useful Page", de.asText());
-		//TEST AJAX WAITING
+		//TEST WAITING FOR ELEMENT
 		url = "http://pythonscraping.com/pages/javascript/ajaxDemo.html";
-		this.connect.load_page(url, "//button[@id='loadedButton']", 2, 10);
+		this.connect.load_page(url, "//button[@id='loadedButton']", 10);
 		assertNotEquals(null, this.connect.get_page());
 		de = this.connect.get_page().getFirstByXPath("//button[@id='loadedButton']");
 		assertEquals("A button to click!", de.asText());
-		//TEST INVALID ELEMENT
+		//TEST WAITING FOR NON-EXISTANT ELEMENT
 		url = "http://pythonscraping.com/exercises/exercise1.html";
-		this.connect.load_page(url, "//a[href='non-existant']", 2, 10);
+		this.connect.load_page(url, "//a[href='non-existant']", 2);
+		assertEquals(null, this.connect.get_page());
+		//TEST LOADING WITH INVALID URL
+		this.connect.load_page(null, null, 0);
+		assertEquals(null, this.connect.get_page());
+		url = "qwertyuiopasdfghjkl";
+		this.connect.load_page(url, null, 1);
 		assertEquals(null, this.connect.get_page());
 	}
 }
