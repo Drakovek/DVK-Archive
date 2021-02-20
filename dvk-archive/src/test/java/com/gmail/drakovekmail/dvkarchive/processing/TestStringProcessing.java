@@ -15,7 +15,7 @@ public class TestStringProcessing {
 	 */
 	@Test
 	@SuppressWarnings("static-method")
-	public void test_extend_int() {
+	public void test_pad_int() {
 		//TEST PADDING OUT INTEGER STRINGS WITH ZEROS
 		assertEquals("15", StringProcessing.pad_int(15, 2));
 		assertEquals("00012", StringProcessing.pad_int(12, 5));
@@ -30,7 +30,7 @@ public class TestStringProcessing {
 	 */
 	@Test
 	@SuppressWarnings("static-method")
-	public void test_extend_num() {
+	public void test_pad_num() {
 		//TEST PADDING OUT NUMBER STRINGS WITH ZEROS
 		assertEquals("2F", StringProcessing.pad_num("2F", 2));
 		assertEquals("0002E", StringProcessing.pad_num("2E", 5));

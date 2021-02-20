@@ -137,7 +137,7 @@ public class TestErrorFinding {
 		config.set_config_directory(this.no_dvks);
 		try(DvkHandler dvk_handler = new DvkHandler(config)) {
 			dvk_handler.read_dvks(this.temp_dir.getRoot());
-			//ADD DVK WITH LINKED MEDIA SET TO NULL, 
+			//ADD DVK WITH LINKED MEDIA SET TO NULL
 			Dvk null_dvk = new Dvk();
 			null_dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "null.dvk"));
 			null_dvk.set_dvk_id("NLL123");

@@ -16,8 +16,8 @@ public class ArrayProcessing {
 	 * @param array Given String array
 	 * @return String array without duplicate or null entries.
 	 */
-	public static String[] clean_array(final String[] array) {
-		//RETURN AN EMPTY STRING IF GIVEN ARRAY IS NULL
+	public static String[] clean_array(String[] array) {
+		//RETURN AN EMPTY ARRAY IF GIVEN ARRAY IS NULL
 		if(array == null) {
 			return new String[0];
 		}
@@ -33,7 +33,8 @@ public class ArrayProcessing {
 	 * @param list Given ArrayList<String>
 	 * @return ArrayList<String> without duplicate or null entries.
 	 */
-	public static ArrayList<String> clean_list(final ArrayList<String> list) {
+	public static ArrayList<String> clean_list(ArrayList<String> list) {
+		//RETURN AN EMPTY ARRAY LIST IF GIVEN LIST IS NULL
 		if(list == null) {
 			return new ArrayList<>();
 		}

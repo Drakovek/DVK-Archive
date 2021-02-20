@@ -14,7 +14,7 @@ public class HtmlProcessing {
 	 * @param escape HTML escape character
 	 * @return Unicode character
 	 */
-	public static String escape_to_char(final String escape) {
+	public static String escape_to_char(String escape) {
 		//RETURNS EMPTY STRING IF GIVEN STRING IS NOT A VALID HTML ESCAPE CHARACTER
 		if(escape == null || !escape.startsWith("&") || !escape.endsWith(";")) {
 			return new String();
@@ -51,7 +51,7 @@ public class HtmlProcessing {
 	 * @param str Given String
 	 * @return String with HTML escape characters replaced
 	 */
-	public static String replace_escapes(final String str) {
+	public static String replace_escapes(String str) {
 		//RETURNS EMPTY STRING IF GIVEN STRING IS NULL
 		if(str == null) {
 			return new String();
@@ -85,7 +85,7 @@ public class HtmlProcessing {
 	 * @param str Given String
 	 * @return String with added HTML escape characters
 	 */
-	public static String add_escapes(final String str) {
+	public static String add_escapes(String str) {
 		//RETURNS AN EMPTY STRING IF THE GIVEN STRING IS NULL
 		if(str == null) {
 			return new String();
@@ -98,7 +98,7 @@ public class HtmlProcessing {
 					|| (value > 64 && value < 91)
 					|| (value > 96 && value < 124)
 					|| value == ' ') {
-				//IF CURRENT CHARACTER IS a-z, A-Z, 0-9, or a space, use the original character
+				//IF CURRENT CHARACTER IS ALPHA-NUNUMERIC, USE THE SAME CHARACTER
 				builder.append(value);
 			}
 			else {
@@ -118,7 +118,7 @@ public class HtmlProcessing {
 	 * @param str Given HTML String
 	 * @return String with added HTML escape characters
 	 */
-	public static String add_escapes_to_html(final String str) {
+	public static String add_escapes_to_html(String str) {
 		//RETURNS EMPTY STRING IF THE GIVEN STRING IS NULL
 		if(str == null) {
 			return new String();
@@ -195,7 +195,6 @@ public class HtmlProcessing {
 				}
 			}
 		}
-		
 		//REMOVE WHITESPACE FROM THE START AND END OF STRING
 		str = StringProcessing.remove_whitespace(str);
 		return str;

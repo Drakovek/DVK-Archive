@@ -158,7 +158,7 @@ public class Dvk {
 				|| get_dvk_id() == null
 				|| get_title() == null
 				|| get_artists().length == 0
-				|| get_page_url() == null
+				|| get_page_url().length() == 0
 				|| get_media_file() == null) {
 			return false;
 		}
@@ -178,30 +178,24 @@ public class Dvk {
 			info.put("title", get_title());
 			JSONArray array = new JSONArray(get_artists());
 			info.put("artists", array);
-			if(!get_time().equals("0000/00/00|00:00")) {
-				info.put("time", get_time());
-			}
-			if(get_web_tags() != null) {
-				array = new JSONArray(get_web_tags());
-				info.put("web_tags", array);
-			}
-			if(get_description() != null) {
-				info.put("description", get_description());
-			}
+			info.put("time", get_time());
+			array = new JSONArray(get_web_tags());
+			info.put("web_tags", array);
+			info.put("description", get_description());
 			json.put("info", info);
 			//WEB
 			JSONObject web = new JSONObject();
 			web.put("page_url", get_page_url());
-			if(get_page_url() != null) {
-				web.put("direct_url", get_direct_url());
-			}
-			if(get_secondary_url() != null) {
-				web.put("secondary_url", get_secondary_url());
-			}
+			web.put("direct_url", get_direct_url());
+			web.put("secondary_url", get_secondary_url());
 			json.put("web", web);
 			//FILE
 			JSONObject file = new JSONObject();
-			file.put("media_file", get_media_file().getName());
+			file.put("media_file", "");
+			if(get_media_file() != null) {
+				file.put("media_file", get_media_file().getName());
+			}
+			file.put("secondary_file", "");
 			if(get_secondary_file() != null) {
 				file.put("secondary_file", get_secondary_file().getName());
 			}
@@ -224,7 +218,7 @@ public class Dvk {
 			//CHECK IF MEDIA DOWNLOADED
 			if(get_media_file().exists()) {
 				//DOWNLOAD SECONDARY FILE, IF AVAILABLE
-				if(get_secondary_url() != null) {
+				if(get_secondary_url().length() != 0) {
 					connect.download(get_secondary_url(), get_secondary_file());
 					//DELETE FILES IF DOWNLOAD FAILED
 					if(!get_secondary_file().exists()) {
@@ -282,7 +276,7 @@ public class Dvk {
 	 * @param key JSON key
 	 * @return String for JSON key
 	 */
-	private static String get_json_string(final JSONObject json, final String key) {
+	private static String get_json_string(JSONObject json, String key) {
 		try {
 			String str = json.getString(key);
 			return str;
@@ -299,7 +293,7 @@ public class Dvk {
 	 * @param key JSON key
 	 * @return String array for JSON key
 	 */
-	private static String[] get_json_array(final JSONObject json, final String key) {
+	private static String[] get_json_array(JSONObject json, String key) {
 		try {
 			JSONArray array = json.getJSONArray(key);
 			String[] str_array = new String[array.length()];
@@ -318,7 +312,7 @@ public class Dvk {
 	 * 
 	 * @param dvk_file Dvk file
 	 */
-	public void set_dvk_file(final File dvk_file) {
+	public void set_dvk_file(File dvk_file) {
 		this.dvk_file = dvk_file;
 	}
 	
@@ -354,7 +348,7 @@ public class Dvk {
 	 * 
 	 * @param id Dvk ID.
 	 */
-	public void set_dvk_id(final String id) {
+	public void set_dvk_id(String id) {
 		if(id == null || id.length() == 0) {
 			this.dvk_id = null;
 		}
@@ -377,7 +371,7 @@ public class Dvk {
 	 * 
 	 * @param title Dvk title
 	 */
-	public void set_title(final String title) {
+	public void set_title(String title) {
 		this.title = title;
 	}
 	
@@ -395,7 +389,7 @@ public class Dvk {
 	 * 
 	 * @param artist Dvk artist
 	 */
-	public void set_artist(final String artist) {
+	public void set_artist(String artist) {
 		if(artist == null) {
 			this.artists = new String[0];
 		}
@@ -410,7 +404,7 @@ public class Dvk {
 	 * 
 	 * @param artists Dvk artists
 	 */
-	public void set_artists(final String[] artists) {
+	public void set_artists(String[] artists) {
 		if(artists == null) {
 			this.artists = new String[0];
 		}
@@ -469,7 +463,7 @@ public class Dvk {
 	 * 
 	 * @param time Time String, formatted YYYY/MM/DD|hh:mm
 	 */
-	public void set_time(final String time) {
+	public void set_time(String time) {
 		if(time == null || time.length() != 16) {
 			this.time = "0000/00/00|00:00";
 		}
@@ -503,14 +497,14 @@ public class Dvk {
 	 * 
 	 * @param web_tags Dvk web tags.
 	 */
-	public void set_web_tags(final String[] web_tags) {
+	public void set_web_tags(String[] web_tags) {
 		if(web_tags == null || web_tags.length == 0) {
-			this.web_tags = null;
+			this.web_tags = new String[0];
 		}
 		else {
 			String[] tags = ArrayProcessing.clean_array(web_tags);
 			if(tags.length == 0) {
-				this.web_tags = null;
+				this.web_tags = new String[0];
 			}
 			else {
 				this.web_tags = tags;
@@ -532,21 +526,15 @@ public class Dvk {
 	 * 
 	 * @param description Dvk description
 	 */
-	public void set_description(final String description) {
+	public void set_description(String description) {
 		if(description == null) {
-			this.description = null;
+			this.description = "";
 		}
 		else {
 			//REMOVE WHITESPACE
 			String desc = StringProcessing.remove_whitespace(description);
-			if(desc.length() == 0){
-				this.description = null;
-			}
-			else {
-				this.description = HtmlProcessing.add_escapes_to_html(desc);
-			}
+			this.description = HtmlProcessing.add_escapes_to_html(desc);
 		}
-		
 	}
 	
 	/**
@@ -563,9 +551,9 @@ public class Dvk {
 	 * 
 	 * @param page_url Page URL
 	 */
-	public void set_page_url(final String page_url) {
+	public void set_page_url(String page_url) {
 		if(page_url == null || page_url.length() == 0) {
-			this.page_url = null;
+			this.page_url = "";
 		}
 		else {
 			this.page_url = page_url;
@@ -586,9 +574,9 @@ public class Dvk {
 	 * 
 	 * @param direct_url Direct media URL
 	 */
-	public void set_direct_url(final String direct_url) {
+	public void set_direct_url(String direct_url) {
 		if(direct_url == null || direct_url.length() == 0) {
-			this.direct_url = null;
+			this.direct_url = "";
 		}
 		else {
 			this.direct_url = direct_url;
@@ -609,9 +597,9 @@ public class Dvk {
 	 * 
 	 * @param secondary_url Direct secondary media URL
 	 */
-	public void set_secondary_url(final String secondary_url) {
+	public void set_secondary_url(String secondary_url) {
 		if(secondary_url == null || secondary_url.length() == 0) {
-			this.secondary_url = null;
+			this.secondary_url = "";
 		}
 		else {
 			this.secondary_url = secondary_url;
@@ -633,7 +621,7 @@ public class Dvk {
 	 * 
 	 * @param filename Filename for the associated media.
 	 */
-	public void set_media_file(final String filename) {
+	public void set_media_file(String filename) {
 		this.media_file = filename;
 		if(filename == null || filename.length() == 0) {
 			this.media_file = null;
@@ -678,7 +666,7 @@ public class Dvk {
 	 * 
 	 * @param filename Filename for the secondary associated media.
 	 */
-	public void set_secondary_file(final String filename) {
+	public void set_secondary_file(String filename) {
 		this.secondary_file = filename;
 		if(filename == null || filename.length() == 0) {
 			this.secondary_file = null;

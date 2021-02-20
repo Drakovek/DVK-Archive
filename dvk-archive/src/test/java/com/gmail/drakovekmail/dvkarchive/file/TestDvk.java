@@ -26,7 +26,7 @@ public class TestDvk {
 	public TemporaryFolder temp_dir = new TemporaryFolder();
 	
 	/**
-	 * Tests the test_can_write method.
+	 * Tests the can_write method.
 	 */
 	@Test
 	public void test_can_write() {
@@ -157,7 +157,6 @@ public class TestDvk {
 		//TEST SETTING DVK FILE TO NULL
 		dvk.set_dvk_file(null);
 		assertEquals(null, dvk.get_dvk_file());
-		
 		//WRITE DVK FILE
 		dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "new.dvk"));
 		dvk.set_dvk_id("id123");
@@ -192,7 +191,6 @@ public class TestDvk {
 		assertEquals(null, dvk.get_dvk_id());
 		dvk.set_dvk_id("");
 		assertEquals(null, dvk.get_dvk_id());
-
 		//WRITE DVK FILE
 		dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "id_dvk.dvk"));
 		dvk.set_dvk_id("WRITE456");
@@ -239,7 +237,6 @@ public class TestDvk {
 		assertEquals(null, dvk.get_title());
 		dvk.set_title("");
 		assertEquals("", dvk.get_title());
-		
 		//WRITE DVK
 		dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "ttl_dvk.dvk"));
 		dvk.set_dvk_id("id123");
@@ -291,7 +288,6 @@ public class TestDvk {
 		assertEquals(0, dvk.get_artists().length);
 		dvk.set_artists(null);
 		assertEquals(0, dvk.get_artists().length);
-		
 		//WRITE DVK
 		dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "artist.dvk"));
 		dvk.set_dvk_id("id123");
@@ -346,7 +342,6 @@ public class TestDvk {
 		assertEquals("0000/00/00|00:00", dvk.get_time());
 		dvk.set_time_int(2017, 10, 10, 7, 60);
 		assertEquals("0000/00/00|00:00", dvk.get_time());
-		
 		//WRITE DVK
 		dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "time_dvk.dvk"));
 		dvk.set_dvk_id("id123");
@@ -364,7 +359,7 @@ public class TestDvk {
 	}
 	
 	/**
-	 * Tests the get_time() and set_time() methods.
+	 * Tests the get_time and set_time methods.
 	 */
 	@Test
 	public void test_get_set_time() {
@@ -381,7 +376,6 @@ public class TestDvk {
 		assertEquals("0000/00/00|00:00", dvk.get_time());
 		dvk.set_time("yyyy/mm/dd/hh/tt");
 		assertEquals("0000/00/00|00:00", dvk.get_time());
-		
 		//WRITE DVK FILE
 		dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "time.dvk"));
 		dvk.set_dvk_id("id123");
@@ -405,7 +399,7 @@ public class TestDvk {
 	public void test_get_set_web_tags() {
 		//TEST EMPTY WEB TAGS FROM CONSTRUCTOR
 		Dvk dvk = new Dvk();
-		assertTrue(dvk.get_web_tags() == null);
+		assertEquals(0, dvk.get_web_tags().length);
 		//TEST GETTING AND SETTING WEB TAGS
 		String[] tags = {"tag2", "Tag1", "tag2", null};
 		dvk.set_web_tags(tags);
@@ -414,14 +408,13 @@ public class TestDvk {
 		assertEquals("Tag1", dvk.get_web_tags()[1]);
 		//TEST INVALID TAGS
 		dvk.set_web_tags(null);
-		assertTrue(dvk.get_web_tags() == null);
+		assertEquals(0, dvk.get_web_tags().length);
 		dvk.set_web_tags(new String[0]);
-		assertTrue(dvk.get_web_tags() == null);
+		assertEquals(0, dvk.get_web_tags().length);
 		tags = new String[1];
 		tags[0] = null;
 		dvk.set_web_tags(tags);
-		assertTrue(dvk.get_web_tags() == null);
-		
+		assertEquals(0, dvk.get_web_tags().length);
 		//WRITE DVK
 		dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "tags.txt"));
 		dvk.set_dvk_id("id123");
@@ -450,7 +443,7 @@ public class TestDvk {
 	public void test_get_set_description() {
 		//TEST DEFAULT DESCRIPTION FROM CONSTRUCTOR
 		Dvk dvk = new Dvk();
-		assertEquals(null, dvk.get_description());
+		assertEquals("", dvk.get_description());
 		//TEST GETTING AND SETTING DESCRIPTION
 		dvk.set_description("   <i>Baño</i>  ");
 		assertEquals("<i>Ba&#241;o</i>", dvk.get_description());
@@ -458,12 +451,11 @@ public class TestDvk {
 		assertEquals("<i>Ba&#241;o</i>", dvk.get_description());
 		//TEST SETTING EMPTY DESCRIPTION
 		dvk.set_description(null);
-		assertEquals(null, dvk.get_description());
+		assertEquals("", dvk.get_description());
 		dvk.set_description("");
-		assertEquals(null, dvk.get_description());
+		assertEquals("", dvk.get_description());
 		dvk.set_description("   ");
-		assertEquals(null, dvk.get_description());
-		
+		assertEquals("", dvk.get_description());
 		//WRITE DVK
 		dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "desc.dvk"));
 		dvk.set_dvk_id("id123");
@@ -487,16 +479,15 @@ public class TestDvk {
 	public void test_get_set_page_url() {
 		//TEST EMPTY PAGE URL FROM CONSTRUCTOR
 		Dvk dvk = new Dvk();
-		assertEquals(null, dvk.get_page_url());
+		assertEquals("", dvk.get_page_url());
 		//TEST GETTING AND SETTING PAGE URL
 		dvk.set_page_url("/Page/URL");
 		assertEquals("/Page/URL", dvk.get_page_url());
 		//TEST SETTING INVALID URL
 		dvk.set_page_url(null);
-		assertEquals(null, dvk.get_page_url());
+		assertEquals("", dvk.get_page_url());
 		dvk.set_page_url("");
-		assertEquals(null, dvk.get_page_url());
-		
+		assertEquals("", dvk.get_page_url());
 		//WRITE DVK
 		dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "page.dvk"));
 		dvk.set_dvk_id("id123");
@@ -519,16 +510,15 @@ public class TestDvk {
 	public void test_get_set_direct_url() {
 		//TEST EMPTY DIRECT URL FROM CONSTRUCTOR
 		Dvk dvk = new Dvk();
-		assertEquals(null, dvk.get_direct_url());
+		assertEquals("", dvk.get_direct_url());
 		//TEST GETTING AND SETTING DIRECT URL
 		dvk.set_direct_url("/direct/URL");
 		assertEquals("/direct/URL", dvk.get_direct_url());
 		//TEST SETTING INVALID DIRECT URL
 		dvk.set_direct_url(null);
-		assertEquals(null, dvk.get_direct_url());
+		assertEquals("", dvk.get_direct_url());
 		dvk.set_direct_url("");
-		assertEquals(null, dvk.get_direct_url());
-		
+		assertEquals("", dvk.get_direct_url());
 		//WRITE DVK
 		dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "direct.dvk"));
 		dvk.set_dvk_id("id123");
@@ -552,16 +542,15 @@ public class TestDvk {
 	public void test_get_set_secondary_url() {
 		//TEST EMPTY SECONDARY URL FROM CONSTRUCTOR
 		Dvk dvk = new Dvk();
-		assertEquals(dvk.get_secondary_url(), null);
+		assertEquals("", dvk.get_secondary_url());
 		//TEST GETTING AND SETTING SECONDARY URL
 		dvk.set_secondary_url("/Page/URL");
 		assertEquals("/Page/URL", dvk.get_secondary_url());
 		//TEST SETTING INVALID SECONDARY URL
 		dvk.set_secondary_url(null);
-		assertEquals(null, dvk.get_secondary_url());
+		assertEquals("", dvk.get_secondary_url());
 		dvk.set_secondary_url("");
-		assertEquals(null, dvk.get_secondary_url());
-		
+		assertEquals("", dvk.get_secondary_url());
 		//WRITE DVK
 		dvk.set_dvk_file(new File(this.temp_dir.getRoot(), "sec.dvk"));
 		dvk.set_dvk_id("id123");
@@ -619,7 +608,6 @@ public class TestDvk {
 			File sub = this.temp_dir.newFolder("sub");
 			dvk.set_media_file(new File(sub, "file.txt"));
 			assertEquals(null, dvk.get_media_file());
-			
 			//WRITE DVK
 			dvk.set_dvk_file(new File(sub, "media.dvk"));
 			dvk.set_dvk_id("id123");
@@ -681,7 +669,6 @@ public class TestDvk {
 			File sub = this.temp_dir.newFolder("sub");
 			dvk.set_secondary_file(new File(sub, "file.txt"));
 			assertEquals(null, dvk.get_secondary_file());
-			
 			//WRITE DVK
 			dvk.set_dvk_file(new File(sub, "media.dvk"));
 			dvk.set_dvk_id("id123");

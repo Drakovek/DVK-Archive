@@ -15,7 +15,7 @@ public class StringProcessing {
 	 * @param length Length of returned String
 	 * @return String for input_int
 	 */
-	public static String pad_int(final int input_int, final int length) {
+	public static String pad_int(int input_int, int length) {
 		String int_string = Integer.toString(input_int);
 		return pad_num(int_string, length);
 	}
@@ -26,7 +26,7 @@ public class StringProcessing {
 	 * 
 	 * @param input String to extend
 	 * @param length Length of returned String
-	 * @return Extended string
+	 * @return Padded string
 	 */
 	public static String pad_num(String input, int length) {
 		//RETURNS AN EMPTY STRING IF THE GIVEN STRING OR LENGTH IS INVALID
@@ -52,12 +52,12 @@ public class StringProcessing {
 	 * @param str Given String
 	 * @return String without whitespace
 	 */
-	public static String remove_whitespace(final String str) {
+	public static String remove_whitespace(String str) {
 		//RETURN AN EMPTY STRING IF THE GIVEN STRING IS INVALID
 		if(str == null) {
 			return new String();
 		}
-		//FIND SPOTS AT BEGINING AND END OF THE STRING WHERE ACTUAL TEXT BEGINS
+		//FIND WHERE TEXT BEGINS AND ENDS
 		int start = 0;
 		int end = 0;
 		for(start = 0; start < str.length() && (str.charAt(start) == ' ' || str.charAt(start) == '\t'); start++);
@@ -77,7 +77,7 @@ public class StringProcessing {
 	 * @param str Given String
 	 * @return Filename
 	 */
-	public static String get_filename(final String str) {
+	public static String get_filename(String str) {
 		return get_filename(str, 90);
 	}
 	
@@ -88,7 +88,7 @@ public class StringProcessing {
 	 * @param length Maximum length of the returned filename
 	 * @return Filename
 	 */
-	public static String get_filename(final String str, final int length) {
+	public static String get_filename(String str, int length) {
 		//IF GIVEN STRING IS NULL, RETURN STRING "0"
 		if(str == null) {
 			return "0";
@@ -146,7 +146,7 @@ public class StringProcessing {
 		}
 		//RETURN CLEANED STRING
 		if(cleaned.length() == 0) {
-			//IF FINAL STRING HAS NO LENGTH, RETURN STRING OF "0"
+			//IF FINAL STRING HAS NO LENGTH, RETURN STRING "0"
 			return "0";
 		}
 		return cleaned;
@@ -160,7 +160,7 @@ public class StringProcessing {
 	 * @param length Maximum length of the returned String
 	 * @return Shortened String
 	 */
-	public static String truncate_string(final String str, final int length) {
+	public static String truncate_string(String str, int length) {
 		//RETURN AN EMPTY STRING IF GIVEN STRING IS NULL OR EMPTY
 		if(str == null || length < 1) {
 			return new String();
