@@ -52,7 +52,7 @@ public class Reformat {
 		for(int dvk_num = 0; dvk_num < size; dvk_num++) {
 			//RENAME DVK FILE AND ASSOCIATED MEDIA
 			Dvk dvk = dvks.get(dvk_num);
-			dvk.rename_files(dvk.get_filename(false), dvk.get_filename(true));
+			dvk.rename_files(dvk.get_filename(false, null), dvk.get_filename(true, null));
 			//ENSURE EXTENSIONS ARE CORRECT
 			dvk.update_extensions();
 			//UPDATE DVK INFO IN THE DVK HANDLER DATABASE

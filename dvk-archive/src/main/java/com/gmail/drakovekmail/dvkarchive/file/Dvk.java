@@ -2,6 +2,9 @@ package com.gmail.drakovekmail.dvkarchive.file;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Random;
 import org.apache.tika.Tika;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -18,8 +21,7 @@ import com.google.common.io.Files;
  * @author Drakovek
  */
 public class Dvk {
-	
-	//TODO ADD PARAMETERS FOR SINGLE AND FAVORITES TAGS
+
 	//TODO ADD PARAMETERS FOR LOCAL IMAGES TO USE IN HTML DESCRIPTIONS AND MEDIA.
 	//TODO PREVENT OVERWRITING DVK FILES
 	
@@ -82,6 +84,16 @@ public class Dvk {
 	private String[] web_tags;
 	
 	/**
+	 * Array of artists who have favorited this media online
+	 */
+	private String[] favorites;
+	
+	/**
+	 * Whether the Dvk was downloaded as a single file
+	 */
+	private boolean single;
+	
+	/**
 	 * Description for the Dvk.
 	 * In HTML format.
 	 */
@@ -139,6 +151,8 @@ public class Dvk {
 		set_artists(null);
 		set_time(null);
 		set_web_tags(null);
+		set_favorites(null);
+		set_single(false);
 		set_description(null);
 		set_page_url(null);
 		set_direct_url(null);
@@ -158,7 +172,7 @@ public class Dvk {
 				|| get_dvk_id() == null
 				|| get_title() == null
 				|| get_artists().length == 0
-				|| get_page_url().length() == 0
+				|| get_page_url() == null
 				|| get_media_file() == null) {
 			return false;
 		}
@@ -189,6 +203,12 @@ public class Dvk {
 			web.put("direct_url", get_direct_url());
 			web.put("secondary_url", get_secondary_url());
 			json.put("web", web);
+			//DOWNLOAD
+			JSONObject download = new JSONObject();
+			array = new JSONArray(get_favorites());
+			download.put("favorites", array);
+			download.put("is_single", is_single());
+			json.put("download", download);
 			//FILE
 			JSONObject file = new JSONObject();
 			file.put("media_file", "");
@@ -210,15 +230,17 @@ public class Dvk {
 	 * Writes to media_file and secondary_file.
 	 * 
 	 * @param connect DConnect object for downloading media
+	 * @param get_time Whether to get last modified time from the media page
 	 */
-	public void write_media(DConnect connect) {
+	public void write_media(DConnect connect, boolean get_time) {
 		write_dvk();
+		String response_time = "";
 		if(get_dvk_file().exists()) {
-			connect.download(get_direct_url(), get_media_file());
+			response_time = connect.download(get_direct_url(), get_media_file());
 			//CHECK IF MEDIA DOWNLOADED
 			if(get_media_file().exists()) {
 				//DOWNLOAD SECONDARY FILE, IF AVAILABLE
-				if(get_secondary_url().length() != 0) {
+				if(get_secondary_url() != null) {
 					connect.download(get_secondary_url(), get_secondary_file());
 					//DELETE FILES IF DOWNLOAD FAILED
 					if(!get_secondary_file().exists()) {
@@ -231,6 +253,11 @@ public class Dvk {
 				//IF DOWNLOAD FAILED, DELETE DVK
 				get_dvk_file().delete();
 			}
+		}
+		// GETS THE MODIFIED DATE FROM THE DOWNLOADED FILE
+		if(get_time && get_media_file() != null &&get_media_file().exists()) {
+			set_time(DConnect.get_last_modified(response_time));
+			write_dvk();
 		}
 		//UPDATE EXTENSIONS
 		update_extensions();
@@ -262,6 +289,10 @@ public class Dvk {
 				JSONObject file = json.getJSONObject("file");
 				set_media_file(get_json_string(file, "media_file"));
 				set_secondary_file(get_json_string(file, "secondary_file"));
+				//DOWNLOAD
+				JSONObject download = json.getJSONObject("download");
+				set_favorites(get_json_array(download, "favorites"));
+				set_single(get_json_boolean(download, "is_single"));
 			}
 		}
 		catch(JSONException e) {
@@ -269,6 +300,23 @@ public class Dvk {
 		}
 	}
 	
+	/**
+	 * Returns the boolean for a key in a given JSONObject.
+	 * 
+	 * @param json JSONObject to parse
+	 * @param key JSON key
+	 * @return boolean for the JSON key
+	 */
+	private static boolean get_json_boolean(JSONObject json, String key) {
+		try {
+			boolean bool = json.getBoolean(key);
+			return bool;
+		}
+		catch(JSONException e) {
+			return false;
+		}
+	}
+
 	/**
 	 * Returns the String for a key in a given JSONObject.
 	 * 
@@ -528,12 +576,15 @@ public class Dvk {
 	 */
 	public void set_description(String description) {
 		if(description == null) {
-			this.description = "";
+			this.description = null;
 		}
 		else {
 			//REMOVE WHITESPACE
 			String desc = StringProcessing.remove_whitespace(description);
 			this.description = HtmlProcessing.add_escapes_to_html(desc);
+			if(this.description.equals("")) {
+				this.description = null;
+			}
 		}
 	}
 	
@@ -553,7 +604,7 @@ public class Dvk {
 	 */
 	public void set_page_url(String page_url) {
 		if(page_url == null || page_url.length() == 0) {
-			this.page_url = "";
+			this.page_url = null;
 		}
 		else {
 			this.page_url = page_url;
@@ -576,7 +627,7 @@ public class Dvk {
 	 */
 	public void set_direct_url(String direct_url) {
 		if(direct_url == null || direct_url.length() == 0) {
-			this.direct_url = "";
+			this.direct_url = null;
 		}
 		else {
 			this.direct_url = direct_url;
@@ -599,7 +650,7 @@ public class Dvk {
 	 */
 	public void set_secondary_url(String secondary_url) {
 		if(secondary_url == null || secondary_url.length() == 0) {
-			this.secondary_url = "";
+			this.secondary_url = null;
 		}
 		else {
 			this.secondary_url = secondary_url;
@@ -625,21 +676,6 @@ public class Dvk {
 		this.media_file = filename;
 		if(filename == null || filename.length() == 0) {
 			this.media_file = null;
-		}
-	}
-	
-	/**
-	 * Sets the associated media file for the Dvk.
-	 * Assumes media is in the same directory as dvk_file.
-	 * 
-	 * @param file File for the associated media.
-	 */
-	public void set_media_file(File file) {
-		this.media_file = null;
-		if(file != null
-				&& get_dvk_file() != null
-				&& file.getParentFile().equals(get_dvk_file().getParentFile())) {
-			this.media_file = file.getName();
 		}
 	}
 	
@@ -674,21 +710,6 @@ public class Dvk {
 	}
 	
 	/**
-	 * Sets the associated secondary media file for the Dvk.
-	 * Assumes media is in the same directory as dvk_file.
-	 * 
-	 * @param file File for the secondary associated media.
-	 */
-	public void set_secondary_file(File file) {
-		this.secondary_file = null;
-		if(file != null
-				&& get_dvk_file() != null
-				&& file.getParentFile().equals(get_dvk_file().getParentFile())) {
-			this.secondary_file = file.getName();
-		}
-	}
-	
-	/**
 	 * Returns the Dvk's secondary associated media file.
 	 * 
 	 * @return Secondary associated media file.
@@ -706,24 +727,113 @@ public class Dvk {
 	}
 	
 	/**
+	 * Sets an array of artists who favorited this media online.
+	 * 
+	 * @param favorites Array of favorites artists.
+	 */
+	public void set_favorites(String[] favorites) {
+		// GET LEGACY FAVORITES FROM WEB TAGS
+		ArrayList<String> list = new ArrayList<>();
+		String[] tags = get_web_tags();
+		for(int i = 0; i < tags.length; i++) {
+			String lower = tags[i].toLowerCase();
+			if(lower.startsWith("favorite:")) {
+				list.add(tags[i].substring(9));
+				tags[i] = null;
+			}
+		}
+		this.set_web_tags(tags);
+		// ADD GIVEN FAVORITES
+		if(favorites != null) {
+			for(int i = 0; i < favorites.length; i++) {
+				list.add(favorites[i]);
+			}
+		}
+		// SORTS FAVORTITES AND REMOVES DUPLICATES
+		list = ArrayProcessing.clean_list(list);
+		String[] array = Arrays.copyOf(list.toArray(), list.size(), String[].class);
+		this.favorites = ArrayProcessing.sort_alphanum(array);
+	}
+	
+	/**
+	 * Returns array of artists that favorited this piece of media online.
+	 * 
+	 * @return Array of favorites artists
+	 */
+	public String[] get_favorites() {
+		return this.favorites;
+	}
+	
+	/**
+	 * Sets whether the Dvk's media was downloaded as a single file.
+	 * 
+	 * @param single Whether the Dvk is a single file
+	 */
+	public void set_single(boolean single) {
+		// GET LEGACY SINGLE TAG FROM WEB TAGS
+		boolean r_single = false;
+		String[] tags = this.get_web_tags();
+		for(int i = 0; i < tags.length; i++) {
+			String lower = tags[i].toLowerCase();
+			if(lower.equals("dvk:single")) {
+				r_single = true;
+				tags[i] = null;
+			}
+		}
+		set_web_tags(tags);
+		// USE GIVEN SINGLE VALUE IF NOT OVERWRITTEN BY LEGACY TAG
+		if(!r_single) {
+			r_single = single;
+		}
+		this.single = r_single;
+	}
+	
+	/**
+	 * Returns whether the Dvk's media was downloaded as a single file.
+	 * 
+	 * @return Whether Dvk is a single file
+	 */
+	public boolean is_single() {
+		return this.single;
+	}
+	
+	/**
 	 * Returns a filename for the Dvk based on title and id.
 	 * Doesn't include extension.
 	 * 
 	 * @param secondary Whether this is for a secondary file
+	 * @param prefix Prefix for the ID to use if the actual DVK ID is too long
 	 * @return Dvk filename
 	 */
-	public String get_filename(boolean secondary) {
+	public String get_filename(boolean secondary, String prefix) {
+		// RETURN EMPTY STRING IF TITLE OR ID IS INVALID
 		if(get_dvk_id() == null || get_title() == null) {
 			return new String();
 		}
-		StringBuilder filename = new StringBuilder();
-		filename.append(StringProcessing.get_filename(get_title()));
-		filename.append("_");
-		filename.append(get_dvk_id());
-		if(secondary) {
-			filename.append("_S");
+		// GET UNIQUE ID
+		String file_id = get_dvk_id();
+		// IF ACTUAL DVK ID IS TOO LONG, USE A GENERATED ID FOR THE FILENAME
+		if(file_id.length() > 13) {
+			// SET ID PREFIX
+			String id_prefix = prefix;
+			if(prefix == null || prefix.length() < 3) {
+				id_prefix = "DVK";
+			}
+			// GET LONG HASH
+			long hash = 0;
+			for(int i = 0; i < file_id.length(); i++) {
+				hash = 31L*hash + file_id.charAt(i);
+			}
+			// GET RANDOM ID
+			Random random = new Random(hash);
+			file_id = id_prefix.toUpperCase() + Integer.toString(random.nextInt(999999999));
 		}
-		return filename.toString();
+		// SET FILENAME
+		String filename = StringProcessing.get_filename(get_title()) + "_" + file_id;
+		if(secondary) {
+			filename = filename + "_S";
+		}
+		return filename;
 	}
 	
 	/**
@@ -779,6 +889,46 @@ public class Dvk {
 		}
 		//REWRITE DVK FILE
 		write_dvk();
+	}
+	
+	/**
+	 * Moves the DVK file and associated media to the given directory.
+	 * 
+	 * @param directory Directory to move files into
+	 */
+	public void move_dvk(File directory) {
+		// CHECK DIRECTORY IS VALID
+		if(directory != null && directory.isDirectory()) {
+			// GET MEDIA FILES
+			File file = get_dvk_file();
+			File media = get_media_file();
+			File second = get_secondary_file();
+			// CHANGE DVK FILE DIRECTORY
+			String filename = file.getName();
+			set_dvk_file(new File(directory, filename));
+			try {
+				// MOVE MEDIA FILE
+				if(media != null && media.exists()) {
+					filename = media.getName();
+					set_media_file(filename);
+					Files.move(media, get_media_file());
+				}
+				// MOVE SECONDARY FILE
+				if(second != null && second.exists()) {
+					filename = second.getName();
+					set_secondary_file(filename);
+					Files.move(second, get_secondary_file());
+				}
+				// MOVE DVK FILE
+				if(file.exists()) {
+					file.delete();
+				}
+				write_dvk();
+			}
+			catch(IOException e) {
+				set_dvk_file(file);
+			}
+		}
 	}
 
 	/**

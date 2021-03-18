@@ -66,6 +66,9 @@ public class TestDvkHandler {
 			main_dvk_1.set_time_int(2020, 9, 4, 17, 13);
 			String[] tags = {"tag1", "other tag", "Tag 3"};
 			main_dvk_1.set_web_tags(tags);
+			String[] favorites = {"fav1", "Other"};
+			main_dvk_1.set_favorites(favorites);
+			main_dvk_1.set_single(true);
 			main_dvk_1.set_description("<p>Test &amp; such.</p>");
 			main_dvk_1.set_page_url("page/url/");
 			main_dvk_1.set_direct_url("/direct/URL/");
@@ -170,6 +173,10 @@ public class TestDvkHandler {
 			assertEquals("tag1", dvks.get(3).get_web_tags()[0]);
 			assertEquals("other tag", dvks.get(3).get_web_tags()[1]);
 			assertEquals("Tag 3", dvks.get(3).get_web_tags()[2]);
+			assertEquals(2, dvks.get(3).get_favorites().length);
+			assertEquals("fav1", dvks.get(3).get_favorites()[0]);
+			assertEquals("Other", dvks.get(3).get_favorites()[1]);
+			assertTrue(dvks.get(3).is_single());
 			assertEquals("<p>Test &amp; such.</p>", dvks.get(3).get_description());
 			assertEquals("page/url/", dvks.get(3).get_page_url());
 			assertEquals("/direct/URL/", dvks.get(3).get_direct_url());
@@ -348,6 +355,9 @@ public class TestDvkHandler {
 			dvk.set_time_int(1864, 10, 31, 7, 2);
 			String[] web_tags = {"Tag, 1", "Tags! & such"};
 			dvk.set_web_tags(web_tags);
+			String[] favorites = {"Artist", "Other", "seperate!"};
+			dvk.set_favorites(favorites);
+			dvk.set_single(true);
 			dvk.set_description("<p>Description &amp; such</p>");
 			dvk.set_page_url("/page/URL");
 			dvk.set_direct_url("/direct/media/Url");
@@ -369,6 +379,11 @@ public class TestDvkHandler {
 			assertEquals(2, returned.get_web_tags().length);
 			assertEquals("Tag, 1", returned.get_web_tags()[0]);
 			assertEquals("Tags! & such", returned.get_web_tags()[1]);
+			assertEquals(3, returned.get_favorites().length);
+			assertEquals("Artist", returned.get_favorites()[0]);
+			assertEquals("Other", returned.get_favorites()[1]);
+			assertEquals("seperate!", returned.get_favorites()[2]);
+			assertTrue(returned.is_single());
 			assertEquals("<p>Description &amp; such</p>", returned.get_description());
 			assertEquals("/page/URL", returned.get_page_url());
 			assertEquals("/direct/media/Url", returned.get_direct_url());
@@ -395,7 +410,9 @@ public class TestDvkHandler {
 			assertEquals(1, returned.get_artists().length);
 			assertEquals("Name", returned.get_artists()[0]);
 			assertEquals("0000/00/00|00:00", returned.get_time());
-			assertTrue(returned.get_web_tags() == null);
+			assertEquals(0, returned.get_web_tags().length);
+			assertEquals(0, returned.get_favorites().length);
+			assertFalse(returned.is_single());
 			assertEquals(null, returned.get_description());
 			assertEquals("/url/", returned.get_page_url());
 			assertEquals(null, returned.get_direct_url());
@@ -440,6 +457,9 @@ public class TestDvkHandler {
 			dvk.set_time_int(1864, 10, 31, 7, 2);
 			String[] tags = {"tag1", "Other, Tag's"};
 			dvk.set_web_tags(tags);
+			String[] favorites = {"person"};
+			dvk.set_favorites(favorites);
+			dvk.set_single(true);
 			dvk.set_description("<p>Desciption &amp; stuff.</p>");
 			dvk.set_page_url("/URL/page/");
 			dvk.set_direct_url("Direct/Url/thing");
@@ -466,6 +486,9 @@ public class TestDvkHandler {
 			assertEquals(2, returned.get_web_tags().length);
 			assertEquals("tag1", returned.get_web_tags()[0]);
 			assertEquals("Other, Tag's", returned.get_web_tags()[1]);
+			assertEquals(1, returned.get_favorites().length);
+			assertEquals("person", returned.get_favorites()[0]);
+			assertTrue(returned.is_single());
 			assertEquals("<p>Desciption &amp; stuff.</p>", returned.get_description());
 			assertEquals("/URL/page/", returned.get_page_url());
 			assertEquals("Direct/Url/thing", returned.get_direct_url());
@@ -496,7 +519,9 @@ public class TestDvkHandler {
 			assertEquals(1, returned.get_artists().length);
 			assertEquals("Name", returned.get_artists()[0]);
 			assertEquals("0000/00/00|00:00", returned.get_time());
-			assertTrue(returned.get_web_tags() == null);
+			assertEquals(0, returned.get_web_tags().length);
+			assertEquals(0, returned.get_favorites().length);
+			assertFalse(returned.is_single());
 			assertEquals(null, returned.get_description());
 			assertEquals("/url/", returned.get_page_url());
 			assertEquals(null, returned.get_direct_url());

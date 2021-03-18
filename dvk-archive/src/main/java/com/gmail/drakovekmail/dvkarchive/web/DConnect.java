@@ -24,7 +24,9 @@ import com.gargoylesoftware.htmlunit.WebWindow;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.parser.HTMLParser;
+import com.gargoylesoftware.htmlunit.util.NameValuePair;
 import com.gmail.drakovekmail.dvkarchive.file.DvkException;
+import com.gmail.drakovekmail.dvkarchive.processing.StringProcessing;
 
 /**
  * Class containing methods for dealing with web content.
@@ -271,9 +273,10 @@ public class DConnect implements AutoCloseable {
 	 * 
 	 * @param url Given URL
 	 * @param file Given file
+	 * @return Last Modified value from the web page response headers
 	 */
-	public void download(String url, File file) {
-		download(url, file, true);
+	public String download(String url, File file) {
+		return download(url, file, true);
 	}
 	
 	/**
@@ -283,8 +286,9 @@ public class DConnect implements AutoCloseable {
 	 * @param url Given URL
 	 * @param file Given file
 	 * @param fallback Whether to use basic_download if download fails.
+	 * @return Last Modified value from the web page response headers
 	 */
-	public void download(String url, File file, boolean fallback) {
+	public String download(String url, File file, boolean fallback) {
 		if(file != null) {
 			//ATTEMPT TO LOAD MEDIA URL AS AN UNEXPECTED PAGE
 			UnexpectedPage u_page = null;
@@ -296,6 +300,16 @@ public class DConnect implements AutoCloseable {
 			}
 			//IF LOADING TO PAGE WORKED, SAVE AS A FILE
 			if(u_page != null) {
+				// GET LAST MODIFIED VALUE
+				String time = null;
+				List<NameValuePair> headers = u_page.getWebResponse().getResponseHeaders();
+				for(NameValuePair header: headers) {
+					if(header.getName().equals("Last-Modified")) {
+						time = header.getValue();
+						break;
+					}
+				}
+				// DOWNLOAD FILE
 				try (InputStream is = u_page.getWebResponse().getContentAsStream();
 						OutputStream os = new FileOutputStream(file)){
 					byte[] buffer = new byte[1024];
@@ -310,12 +324,14 @@ public class DConnect implements AutoCloseable {
 						basic_download(url, file);
 					}
 				}
+				return time;
 			}
 			else if(fallback) {
 				//ATTEMPT A DIFFERENT DOWNLOAD TECHNIQUE IF LOADING AS PAGE FAILS
 				basic_download(url, file);
 			}
 		}
+		return null;
 	}
 	
 	/**
@@ -412,5 +428,55 @@ public class DConnect implements AutoCloseable {
 			this.web_client.close();
 		}
 		this.web_client = null;
+	}
+	
+	/**
+	 * Returns the time a web page was last modified from String gathered from response headers.
+	 * 
+	 * @param modified Last modified String value from response headers
+	 * @return Last modified date and time in DVK time format
+	 */
+	public static String get_last_modified(String modified) {
+		// RETURNS EMPTY STRING IF GIVEN MODIFIED TIME IS INVALID
+		if(modified == null) {
+			return new String();
+		}
+		// GET LAST MODIFIED TIME
+		try {
+			int day = Integer.parseInt(modified.substring(5, 7));
+			String month_str = modified.substring(8, 11).toLowerCase();
+			int year = Integer.parseInt(modified.substring(12, 16));
+			int hour = Integer.parseInt(modified.substring(17, 19));
+			int minute = Integer.parseInt(modified.substring(20, 22));
+			// GET MONTH
+			String[] months = {"jan", "feb", "mar", "apr", "may", "jun",
+					"jul", "aug", "sep", "oct", "nov", "dec"};
+			int month;
+			for(month = 0; month < 12 && !month_str.equals(months[month]); month++);
+			month++;
+			if(month > 12) {
+				return new String();
+			}
+			// COMPILE TIME STRING
+			StringBuilder time = new StringBuilder();
+			time.append(StringProcessing.pad_int(year, 4));
+			time.append("/");
+			time.append(StringProcessing.pad_int(month, 2));
+			time.append("/");
+			time.append(StringProcessing.pad_int(day, 2));
+			time.append("|");
+			time.append(StringProcessing.pad_int(hour, 2));
+			time.append(":");
+			time.append(StringProcessing.pad_int(minute, 2));
+			return time.toString();
+		}
+		catch(NumberFormatException e) {
+			// RETURNS EMPTY STRING IF GETTING TIME FAILS
+			return new String();
+		}
+		catch(StringIndexOutOfBoundsException f) {
+			// RETURNS EMPTY STRING IF GETTING TIME FAILS
+			return new String();
+		}
 	}
 }

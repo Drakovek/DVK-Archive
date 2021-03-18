@@ -59,6 +59,16 @@ public class DvkHandler implements AutoCloseable {
 	public static final String WEB_TAGS = "web_tags";
 	
 	/**
+	 * Label for the Dvk's favorite artists
+	 */
+	public static final String FAVORITES = "favorites";
+	
+	/**
+	 * Label for whether the Dvk is a single file
+	 */
+	public static final String IS_SINGLE = "is_single";
+	
+	/**
 	 * Label for the Dvk description
 	 */
 	public static final String DESCRIPTION = "description";
@@ -178,7 +188,11 @@ public class DvkHandler implements AutoCloseable {
 			sql.append(TIME);
 			sql.append(" TEXT NOT NULL DEFAULT '0000/00/00|00:00', ");
 			sql.append(WEB_TAGS);
-			sql.append(" TEXT, ");
+			sql.append(" TEXT NOT NULL, ");
+			sql.append(FAVORITES);
+			sql.append(" TEXT NOT NULL, ");
+			sql.append(IS_SINGLE);
+			sql.append(" INTEGER, ");
 			sql.append(DESCRIPTION);
 			sql.append(" TEXT, ");
 			sql.append(PAGE_URL);
@@ -482,6 +496,10 @@ public class DvkHandler implements AutoCloseable {
 		sql.append(',');
 		sql.append(WEB_TAGS);
 		sql.append(',');
+		sql.append(FAVORITES);
+		sql.append(',');
+		sql.append(IS_SINGLE);
+		sql.append(',');
 		sql.append(DESCRIPTION);
 		sql.append(',');
 		sql.append(PAGE_URL);
@@ -497,7 +515,7 @@ public class DvkHandler implements AutoCloseable {
 		sql.append(MEDIA_FILE);
 		sql.append(',');
 		sql.append(SECONDARY_FILE);
-		sql.append(") VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?);");
+		sql.append(") VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);");
 		//ADD DVK INFO TO PREPARED STATEMENT
 		try (PreparedStatement ps = this.connection.prepareStatement(sql.toString())) {
 			ps.setString(1, dvk.get_dvk_id());
@@ -506,17 +524,22 @@ public class DvkHandler implements AutoCloseable {
 			ps.setString(4, ArrayProcessing.array_to_string(dvk.get_artists(), 0, true));
 			ps.setString(5, dvk.get_time());
 			ps.setString(6, ArrayProcessing.array_to_string(dvk.get_web_tags(), 0, true));
-			ps.setString(7, dvk.get_description());
-			ps.setString(8, dvk.get_page_url());
-			ps.setString(9, dvk.get_direct_url());
-			ps.setString(10, dvk.get_secondary_url());
-			ps.setString(11, dvk.get_dvk_file().getParentFile().getAbsolutePath());
-			ps.setString(12, dvk.get_dvk_file().getName());
+			ps.setString(7, ArrayProcessing.array_to_string(dvk.get_favorites(), 0, true));
+			ps.setInt(8, 0);
+			if(dvk.is_single()) {
+				ps.setInt(8, 1);
+			}
+			ps.setString(9, dvk.get_description());
+			ps.setString(10, dvk.get_page_url());
+			ps.setString(11, dvk.get_direct_url());
+			ps.setString(12, dvk.get_secondary_url());
+			ps.setString(13, dvk.get_dvk_file().getParentFile().getAbsolutePath());
+			ps.setString(14, dvk.get_dvk_file().getName());
 			if(dvk.get_media_file() != null) {
-				ps.setString(13, dvk.get_media_file().getName());
+				ps.setString(15, dvk.get_media_file().getName());
 			}
 			if(dvk.get_secondary_file() != null) {
-				ps.setString(14, dvk.get_secondary_file().getName());
+				ps.setString(16, dvk.get_secondary_file().getName());
 			}
 			//EXECUTE PREPARED STATEMENT
 			ps.executeUpdate();
@@ -560,6 +583,10 @@ public class DvkHandler implements AutoCloseable {
 		statement.append("=?,");
 		statement.append(WEB_TAGS);
 		statement.append("=?,");
+		statement.append(FAVORITES);
+		statement.append("=?,");
+		statement.append(IS_SINGLE);
+		statement.append("=?,");
 		statement.append(DESCRIPTION);
 		statement.append("=?,");
 		statement.append(PAGE_URL);
@@ -586,19 +613,24 @@ public class DvkHandler implements AutoCloseable {
 			ps.setString(4, ArrayProcessing.array_to_string(dvk.get_artists(), 0, true));
 			ps.setString(5, dvk.get_time());
 			ps.setString(6, ArrayProcessing.array_to_string(dvk.get_web_tags(), 0, true));
-			ps.setString(7, dvk.get_description());
-			ps.setString(8, dvk.get_page_url());
-			ps.setString(9, dvk.get_direct_url());
-			ps.setString(10, dvk.get_secondary_url());
-			ps.setString(11, dvk.get_dvk_file().getParentFile().getAbsolutePath());
-			ps.setString(12, dvk.get_dvk_file().getName());
+			ps.setString(7, ArrayProcessing.array_to_string(dvk.get_favorites(), 0, true));
+			ps.setInt(8, 0);
+			if(dvk.is_single()) {
+				ps.setInt(8, 1);
+			}
+			ps.setString(9, dvk.get_description());
+			ps.setString(10, dvk.get_page_url());
+			ps.setString(11, dvk.get_direct_url());
+			ps.setString(12, dvk.get_secondary_url());
+			ps.setString(13, dvk.get_dvk_file().getParentFile().getAbsolutePath());
+			ps.setString(14, dvk.get_dvk_file().getName());
 			if(dvk.get_media_file() != null) {
-				ps.setString(13, dvk.get_media_file().getName());
+				ps.setString(15, dvk.get_media_file().getName());
 			}
 			if(dvk.get_secondary_file() != null) {
-				ps.setString(14, dvk.get_secondary_file().getName());
+				ps.setString(16, dvk.get_secondary_file().getName());
 			}
-			ps.setInt(15, sql_id);
+			ps.setInt(17, sql_id);
 			//EXECUTE UPDATE
 			ps.executeUpdate();
 			//IF PARENT DIRECTORY IS IN THE LIST OF DIRECTORIES TO INCLUDE WHEN GETTING DVK ENTRIES
@@ -791,7 +823,17 @@ public class DvkHandler implements AutoCloseable {
 			dvk.set_title(rs.getString(TITLE));
 			dvk.set_artists(ArrayProcessing.string_to_array(rs.getString(ARTISTS)));
 			dvk.set_time(rs.getString(TIME));
-			dvk.set_web_tags(ArrayProcessing.string_to_array(rs.getString(WEB_TAGS)));
+			String tags = rs.getString(WEB_TAGS);
+			if(tags.length() > 0) {
+				dvk.set_web_tags(ArrayProcessing.string_to_array(tags));
+			}
+			String favorites = rs.getString(FAVORITES);
+			if(favorites.length() > 0) {
+				dvk.set_favorites(ArrayProcessing.string_to_array(favorites));
+			}
+			if(rs.getInt(IS_SINGLE) == 1) {
+				dvk.set_single(true);
+			}
 			dvk.set_description(rs.getString(DESCRIPTION));
 			dvk.set_page_url(rs.getString(PAGE_URL));
 			dvk.set_direct_url(rs.getString(DIRECT_URL));

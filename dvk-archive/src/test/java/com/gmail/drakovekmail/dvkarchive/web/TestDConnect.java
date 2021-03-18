@@ -175,4 +175,43 @@ public class TestDConnect {
 		this.connect.load_from_string("");
 		assertEquals(null, this.connect.get_page());
 	}
+	
+	/**
+	 * Tests the get_last_modified method.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	public void test_get_last_modified() {
+		String time = "Udf, 10 Jan 2010 12:05:55 GMT";
+		assertEquals("2010/01/10|12:05", DConnect.get_last_modified(time));
+		time = "Udf, 23 Feb 2015 20:23:55 GMT";
+		assertEquals("2015/02/23|20:23", DConnect.get_last_modified(time));
+		time = "Udf, 01 Mar 2019 12:00:55 GMT";
+		assertEquals("2019/03/01|12:00", DConnect.get_last_modified(time));
+		time = "Udf, 10 Apr 2010 12:05:55 GMT";
+		assertEquals("2010/04/10|12:05", DConnect.get_last_modified(time));
+		time = "Udf, 23 May 2015 20:23:55 GMT";
+		assertEquals("2015/05/23|20:23", DConnect.get_last_modified(time));
+		time = "Udf, 01 Jun 2019 12:00:55 GMT";
+		assertEquals("2019/06/01|12:00", DConnect.get_last_modified(time));
+		time = "Udf, 10 Jul 2010 12:05:55 GMT";
+		assertEquals("2010/07/10|12:05", DConnect.get_last_modified(time));
+		time = "Udf, 23 Aug 2015 20:23:55 GMT";
+		assertEquals("2015/08/23|20:23", DConnect.get_last_modified(time));
+		time = "Udf, 01 Sep 2019 12:00:55 GMT";
+		assertEquals("2019/09/01|12:00", DConnect.get_last_modified(time));
+		time = "Udf, 10 Oct 2010 12:05:55 GMT";
+		assertEquals("2010/10/10|12:05", DConnect.get_last_modified(time));
+		time = "Udf, 23 Nov 2015 20:23:55 GMT";
+		assertEquals("2015/11/23|20:23", DConnect.get_last_modified(time));
+		time = "Udf, 01 Dec 2019 12:00:55 GMT";
+		assertEquals("2019/12/01|12:00", DConnect.get_last_modified(time));
+	    // TEST INVALID TIMES
+		time = "Udf, 10 Nop 2010 12:05:55 GMT";
+		assertEquals("", DConnect.get_last_modified(time));
+		time = "Mon, BB Aug FFFF GG:TT:PP GMT";
+		assertEquals("", DConnect.get_last_modified(time));
+		assertEquals("", DConnect.get_last_modified(""));
+		assertEquals("", DConnect.get_last_modified(null));
+	}
 }
