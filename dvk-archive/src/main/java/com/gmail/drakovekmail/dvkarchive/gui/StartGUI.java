@@ -15,7 +15,6 @@ import com.gmail.drakovekmail.dvkarchive.file.FilePrefs;
 import com.gmail.drakovekmail.dvkarchive.gui.artist.DeviantArtGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.artist.FurAffinityGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.artist.InkbunnyGUI;
-import com.gmail.drakovekmail.dvkarchive.gui.comics.MangaDexGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.error.MissingMediaGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.error.SameIDsGUI;
 import com.gmail.drakovekmail.dvkarchive.gui.error.UnlinkedMediaGUI;
@@ -499,9 +498,6 @@ public class StartGUI implements DActionEvent, Disabler, DWorker {
 				break;
 			case "inkbunny":
 				this.service_pnl = new InkbunnyGUI(this);
-				break;
-			case "mangadex":
-				this.service_pnl = new MangaDexGUI(this);
 				break;
 			case "unlinked_media":
 				this.service_pnl = new UnlinkedMediaGUI(this);

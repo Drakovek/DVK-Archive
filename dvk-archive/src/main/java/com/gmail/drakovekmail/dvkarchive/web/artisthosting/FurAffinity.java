@@ -562,9 +562,9 @@ public class FurAffinity extends ArtistHosting {
 			}
 			//GET DIRECT URL
 			DomAttr da;
-			xpath = "//div[@class='download fullsize']//a[contains(@href,'facdn.net')]/@href|"
-					+ "//a[contains(@class,'mobile-fix')][contains(@href,'facdn.net')]/@href|"
-					+ "//table[@class='maintable']//a[contains(@href,'facdn.net')]/@href";
+			xpath = "//div[@class='download fullsize']//a[contains(@href,'/art/')]/@href|"
+					+ "//a[contains(@class,'mobile-fix')][contains(@href,'/art/')]/@href|"
+					+ "//table[@class='maintable']//a[contains(@href,'/art/')]/@href";
 			da = this.connect.get_page().getFirstByXPath(xpath);
 			dvk.set_direct_url("https:" + da.getNodeValue());
 			String m_ext = StringProcessing.get_extension(
@@ -736,7 +736,9 @@ public class FurAffinity extends ArtistHosting {
 			}
 			return dvk;
 		}
-		catch(Exception e) {}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
 		throw new DvkException();
 	}
 	
