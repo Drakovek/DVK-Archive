@@ -17,6 +17,7 @@ import com.gmail.drakovekmail.dvkarchive.file.DvkException;
 import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
 import com.gmail.drakovekmail.dvkarchive.file.FilePrefs;
 import com.gmail.drakovekmail.dvkarchive.file.InOut;
+import com.gmail.drakovekmail.dvkarchive.processing.ArrayProcessing;
 
 /**
  * Unit tests for the DeviantArt class.
@@ -136,16 +137,16 @@ public class TestDeviantArt {
 		this.dev.login(info[0], info[1]);
 		info = null;
 		assertTrue(this.dev.is_logged_in());
-		//TEST GETTING MEDIA DVK
-		test_get_dvk();
-		//TEST GETTING JOURNAL DVK
-		test_get_journal_dvk();
-		//TEST GETTING MODULE PAGES
-		test_get_module_pages();
 		//TEST GETTING FAVORITES
 		test_get_favorites_pages();
 		//TEST GETTING GALLERY PAGES
 		test_get_pages();
+		//TEST GETTING MODULE PAGES
+		test_get_module_pages();
+		//TEST GETTING JOURNAL DVK
+		test_get_journal_dvk();
+		//TEST GETTING MEDIA DVK
+		test_get_dvk();
 	}
 	
 	/**
@@ -433,14 +434,12 @@ public class TestDeviantArt {
 					+ "OnyxSteelGray1213 </a> <span class=\"user-symbol regular\" data-quicktip-"
 					+ "text=\"\" data-show-tooltip=\"\" data-gruser-type=\"regular\"> </span> </span> </span>";
 			assertEquals(desc, dvk.get_description());
-			url = "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/976aef10-4f8c-47ce-8b7c-073393f2b5cc/"
-					+ "dcuqoyp-7e5578c6-e5be-4ba4-889e-6ec8ed373292.swf?";
-			assertTrue(dvk.get_direct_url().startsWith(url));
+			assertEquals(null, dvk.get_direct_url());
 			url = "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/i/976aef10-4f8c-47ce-"
 					+ "8b7c-073393f2b5cc/dcuqoyp-25c8e83b-3eb8-4834-ad2c-a17b5bff76c0.jpg";
 			assertEquals(url, dvk.get_secondary_url());
 			assertEquals("TF Mask_DVA777228001.dvk", dvk.get_dvk_file().getName());
-			assertEquals("TF Mask_DVA777228001.swf", dvk.get_media_file().getName());
+			assertEquals("TF Mask_DVA777228001", dvk.get_media_file().getName());
 			assertEquals("TF Mask_DVA777228001_S.jpg", dvk.get_secondary_file().getName());
 			//TEST PDF
 			url = "ww.deviantart.com/inkblot123/art/Mind-Your-Manors-Story-742045791";
@@ -492,59 +491,68 @@ public class TestDeviantArt {
 			assertTrue(dvk.get_media_file().exists());
 			assertTrue(dvk.get_secondary_file().exists());
 			//TEST PREMIUM CONTENT
-			url = "https://www.deviantart.com/treehousecharms/art/TC-Natural-Wield-536148032";
+			url = "https://www.deviantart.com/fluffytg/art/Then-Be-A-Girl-30-872563927";
 			dvk = this.dev.get_dvk(url, dvk_handler, "Gallery:Main", dvk_dir, null, 0, false, false);
 			assertEquals(url, dvk.get_page_url());
-			assertEquals("DVA536148032", dvk.get_dvk_id());
-			assertEquals("TC ~ Natural Wield", dvk.get_title());
+			assertEquals("DVA872563927", dvk.get_dvk_id());
+			assertEquals("Then Be A Girl~! #30", dvk.get_title());
 			assertEquals(1, dvk.get_artists().length);
-			assertEquals("TreehouseCharms", dvk.get_artists()[0]);
-			assertEquals("2015/05/29|10:38", dvk.get_time());
-			assertEquals(23, dvk.get_web_tags().length);
+			assertEquals("FluffyTG", dvk.get_artists()[0]);
+			assertEquals("2021/03/07|21:17", dvk.get_time());
+			assertEquals(21, dvk.get_web_tags().length);
 			assertEquals("Rating:General", dvk.get_web_tags()[0]);
 			assertEquals("Gallery:Main", dvk.get_web_tags()[1]);
-			assertEquals("Resources & Stock Images", dvk.get_web_tags()[2]);
-			assertEquals("Application Resources", dvk.get_web_tags()[3]);
-			assertEquals("Photoshop Brushes", dvk.get_web_tags()[4]);
-			assertEquals("application", dvk.get_web_tags()[5]);
-			assertEquals("brushes", dvk.get_web_tags()[6]);
-			assertEquals("charms", dvk.get_web_tags()[7]);
-			assertEquals("clouds", dvk.get_web_tags()[8]);
-			assertEquals("effects", dvk.get_web_tags()[9]);
-			assertEquals("fantasy", dvk.get_web_tags()[10]);
-			assertEquals("fog", dvk.get_web_tags()[11]);
-			assertEquals("gimp", dvk.get_web_tags()[12]);
-			assertEquals("green", dvk.get_web_tags()[13]);
-			assertEquals("lining", dvk.get_web_tags()[14]);
-			assertEquals("mist", dvk.get_web_tags()[15]);
-			assertEquals("nature", dvk.get_web_tags()[16]);
-			assertEquals("photoshop", dvk.get_web_tags()[17]);
-			assertEquals("resources", dvk.get_web_tags()[18]);
-			assertEquals("soft", dvk.get_web_tags()[19]);
-			assertEquals("textures", dvk.get_web_tags()[20]);
-			assertEquals("treehouse", dvk.get_web_tags()[21]);
-			assertEquals("Premium Content", dvk.get_web_tags()[22]);
-			desc = "TC ~ Natural Wield is an artistic brushset with 10 HD Brushes made all "
-					+ "by me Andi of Treehouse Charms with PS 7. <br/> <br/> These brushes are for "
-					+ "brushing and smudging and are extraordinary good to do cloudy structures <img "
-					+ "src=\"https://e.deviantart.net/emoticons/b/biggrin.gif\" width=\"15\" height=\""
-					+ "15\" alt=\":D\" data-embed-type=\"emoticon\" data-embed-id=\"366\" title=\":D "
-					+ "(Big Grin)\"/> <br/> <br/> Compatibility should be 100% with all CS Versions and "
-					+ "GIMP also. <br/> <br/> <b> This brushset costs now 40 Points. After purchasing "
-					+ "it you may use it for your comercial and noncomercial artworks.&#160; <br/> </b> "
-					+ "<br/> 29th May, 2015 <br/> Andi of Treehouse Charms";
+			assertEquals("Visual Art", dvk.get_web_tags()[2]);
+			assertEquals("crossdressing", dvk.get_web_tags()[3]);
+			assertEquals("cuteadorable", dvk.get_web_tags()[4]);
+			assertEquals("femboy", dvk.get_web_tags()[5]);
+			assertEquals("genderbender", dvk.get_web_tags()[6]);
+			assertEquals("genderidentity", dvk.get_web_tags()[7]);
+			assertEquals("kids", dvk.get_web_tags()[8]);
+			assertEquals("manga", dvk.get_web_tags()[9]);
+			assertEquals("tg", dvk.get_web_tags()[10]);
+			assertEquals("trans", dvk.get_web_tags()[11]);
+			assertEquals("transgender", dvk.get_web_tags()[12]);
+			assertEquals("maletofemale", dvk.get_web_tags()[13]);
+			assertEquals("tgtf", dvk.get_web_tags()[14]);
+			assertEquals("slice_of_life", dvk.get_web_tags()[15]);
+			assertEquals("maletofemaletg", dvk.get_web_tags()[16]);
+			assertEquals("toonfawn", dvk.get_web_tags()[17]);
+			assertEquals("fluffytg", dvk.get_web_tags()[18]);
+			assertEquals("fluffy_tg", dvk.get_web_tags()[19]);
+			assertEquals("Premium Content", dvk.get_web_tags()[20]);
+			desc = "<span> Then Be A Girl~! - #30 <br/> <br/> Early Access to this series is only $3 a month "
+					+ "on patreon! <br/> <br/> <br/> =============================== <br/> <p> <b> Then Be A "
+					+ "Girl~!&#160; </b> is both a slice of life and coming of age story, filled with cute " 
+					+ "and fluffy feelings! Rei and Bambi are two kids that have known each other since "
+					+ "kindergarten, who hang out and play almost every day! When Rei blurts out that he wants "
+					+ "to be a girl to her, Bambi wastes no time putting him into her clothes. But neither of "
+					+ "them knew, just how deeply that their lives would begin to change from that one moment. "
+					+ "<br/> <br/> This series will be simple fun revolving around two kids, and a loose story "
+					+ "overall. <br/> </p> <p> Written By&#160; <a target=\"_self\" href=\"https://www.deviantart"
+					+ ".com/fluffytg\"> <img class=\"avatar\" width=\"50\" height=\"50\" src=\"https://a.deviantart"
+					+ ".net/avatars/f/l/fluffytg.png?2\" alt=\":iconfluffytg:\" title=\"FluffyTG\"/> </a> <br/> </p>"
+					+ " <p> Illustrated By&#160; <a target=\"_self\" href=\"https://www.deviantart.com/toon-fawn\"> "
+					+ "<img class=\"avatar\" width=\"50\" height=\"50\" src=\"https://a.deviantart.net/avatars/t/o/"
+					+ "toon-fawn.jpg?3\" alt=\":icontoon-fawn:\" title=\"Toon-Fawn\"/> </a> </p> </span> <div> <div> "
+					+ "<div align=\"-webkit-center\"> <div> <div align=\"-webkit-center\"> &#160;&#160; <br/> For the "
+					+ "early access and special content, support us on Patreon~!&#160; <br/> <a href=\"https://www."
+					+ "deviantart.com/users/outgoing?https://www.patreon.com/MagicalTrans\"> </a> <a href=\"https://www."
+					+ "deviantart.com/users/outgoing?https://www.patreon.com/FluffyTG\"> </a> <a class=\"external\" "
+					+ "href=\"https://www.deviantart.com/users/outgoing?https://www.patreon.com/FluffyTG\"> www.patreon."
+					+ "com/FluffyTG </a> &#160;~ <br/> <br/> <br/> </div> <div align=\"-webkit-center\"> &#160; <br/> "
+					+ "Wanna chat? Get updates? JOIN OUR DISCORD&#160; <a class=\"external\" href=\"https://www.deviantart"
+					+ ".com/users/outgoing?https://discord.gg/fa6J8GWHu9\"> CHANNEL </a> &#160;~ <br/> <br/> &#160; <br/> "
+					+ "<br/> And Don't Forget To Follow Us On Twitter! <br/> <a href=\"https://www.deviantart.com/users"
+					+ "/outgoing?https://twitter.com/Fluffy_TG\"> </a> <a class=\"external\" href=\"https://www.deviantart"
+					+ ".com/users/outgoing?https://twitter.com/Fluffy_TG\"> twitter.com/Fluffy_TG </a> <br/> </div> </div> "
+					+ "<div> <br/> </div> </div> </div> <div> <br/> </div> </div>";
 			assertEquals(desc, dvk.get_description());
-			url = "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/i/ce2d8d7b-af23-47db-"
-					+ "bb11-2157baa4f248/d8v7igw-a6880f9f-5160-4afd-9354-4f36eef50528.jpg";
-			assertEquals(url, dvk.get_direct_url());
-			url = "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/i/ce2d8d7b-af23-47db-"
-					+ "bb11-2157baa4f248/d8v7igw-a6880f9f-5160-4afd-9354-4f36eef50528.jpg/v1/"
-					+ "fill/w_559,h_1429,q_70,strp/tc___natural_wield_by_treehousecharms_d8v7igw"
-					+ "-pre.jpg";
-			assertEquals(url, dvk.get_secondary_url());
-			assertEquals("TC - Natural Wield_DVA536148032.dvk", dvk.get_dvk_file().getName());
-			assertEquals("TC - Natural Wield_DVA536148032.jpg", dvk.get_media_file().getName());
-			assertEquals("TC - Natural Wield_DVA536148032_S.jpg", dvk.get_secondary_file().getName());
+			assertEquals(null, dvk.get_direct_url());
+			assertEquals(null, dvk.get_secondary_url());
+			assertEquals("Then Be A Girl 30_DVA872563927.dvk", dvk.get_dvk_file().getName());
+			assertEquals("Then Be A Girl 30_DVA872563927", dvk.get_media_file().getName());
+			assertEquals(null, dvk.get_secondary_file());
 			//TEST INVALID DVK
 			url = "https://www.deviantart.com/bleh/art/Nonexistant-1729873234598082498510";
 			try {
@@ -562,9 +570,9 @@ public class TestDeviantArt {
 			assertEquals("Interactive dragoness transformation", dvks.get(4).get_title());
 			assertEquals("Mind Your Manors (Story)", dvks.get(5).get_title());
 			assertEquals("Pokeclipse! (TF RP)", dvks.get(6).get_title());
-			assertEquals("TC ~ Natural Wield", dvks.get(7).get_title());
-			assertEquals("Test", dvks.get(8).get_title());
-			assertEquals("TF: Mask", dvks.get(9).get_title());
+			assertEquals("Test", dvks.get(7).get_title());
+			assertEquals("TF: Mask", dvks.get(8).get_title());
+			assertEquals("Then Be A Girl~! #30", dvks.get(9).get_title());
 		}
 		catch(DvkException e) {
 			e.printStackTrace();
@@ -727,6 +735,7 @@ public class TestDeviantArt {
 			assertEquals("Slime Girl TF TG Deal (Closed)", dvks.get(2).get_title());
 		}
 		catch(DvkException e) {
+			e.printStackTrace();
 			assertTrue(false);
 		}
 	}

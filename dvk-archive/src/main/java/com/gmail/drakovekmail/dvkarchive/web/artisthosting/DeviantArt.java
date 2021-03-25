@@ -277,11 +277,6 @@ public class DeviantArt extends ArtistHosting {
 			if(de != null) {
 				dvk.set_description(DConnect.clean_element(de.asXml(), true));
 			}
-			//GET JSON
-			DomAttr da;
-			xpath = "//link[@type='application/json+oembed']/@href";
-			da = this.connect.get_page().getFirstByXPath(xpath);
-			String json_url = da.getNodeValue();
 			//GET TEXT IF LITERATURE PAGE
 			int end;
 			String text = null;
@@ -316,7 +311,7 @@ public class DeviantArt extends ArtistHosting {
 				}
 			}
 			//GET DOWNLOAD LINK
-			da = null;
+			DomAttr da = null;
 			String download = null;
 			xpath = "//a[@data-hook='download_button']/@href";
 			da = this.connect.get_page().getFirstByXPath(xpath);
@@ -368,6 +363,12 @@ public class DeviantArt extends ArtistHosting {
 					}
 				}
 			}
+			// CHECK IF DVK IS PREMIUM CONTENT
+			xpath = "//a[contains(@href,'www.deviantart.com/purchase')]";
+			de = this.connect.get_page().getFirstByXPath(xpath);
+			boolean is_premium = (de != null);
+			// LOAD JSON
+			String json_url = "https://backend.deviantart.com/oembed?url=" + dvk.get_page_url() + "&format=json";
 			JSONObject json = this.connect.load_json(json_url, 2);
 			try {
 				TimeUnit.MILLISECONDS.sleep(SLEEP);
@@ -399,6 +400,10 @@ public class DeviantArt extends ArtistHosting {
 				start = category.indexOf(" > ");
 				tags.add(category.substring(0, start));
 				category = category.substring(start + 3);
+				// REMOVES IMAGE AS DIRECT URL IF MEDIA URL SHOULD BE SWF
+				if(tags.get(tags.size() - 1).toLowerCase().equals("flash")) {
+					image = null;
+				}
 			}
 			tags.add(category);
 			//GET MAIN TAGS
@@ -415,6 +420,10 @@ public class DeviantArt extends ArtistHosting {
 				tags.add(tag_str);
 			}
 			catch (JSONException f) {}
+			// ADD PREMIUM CONTENT TAG
+			if(is_premium) {
+				tags.add("Premium Content");
+			}
 			//SINGLE AND FAVORITE TAGS
 			if(single) {
 				tags.add("DVK:Single");
@@ -422,6 +431,7 @@ public class DeviantArt extends ArtistHosting {
 			if(fav_artist != null) {
 				tags.add("Favorite:" + fav_artist);
 			}
+			dvk.set_web_tags(ArrayProcessing.list_to_array(tags));
 			//SET DIRECT URL
 			String type = json.getString("type");
 			if(video != null) {
@@ -441,9 +451,7 @@ public class DeviantArt extends ArtistHosting {
 			}
 			else if(image !=null && type.equals("link")){
 				dvk.set_direct_url(image);
-				tags.add("Premium Content");
 			}
-			dvk.set_web_tags(ArrayProcessing.list_to_array(tags));
 			//SET SECONDARY URL
 			try {
 				String second = json.getString("fullsize_url");
@@ -741,9 +749,8 @@ public class DeviantArt extends ArtistHosting {
 			}
 			dvk.set_description(desc);
 			//GET JSON
-			xpath = "//link[@type='application/json+oembed']/@href";
-			DomAttr da = this.connect.get_page().getFirstByXPath(xpath);
-			JSONObject json = this.connect.load_json(da.getNodeValue(), 2);
+			String json_url = "https://backend.deviantart.com/oembed?url=" + dvk.get_page_url() + "&format=json";
+			JSONObject json = this.connect.load_json(json_url, 2);
 			try {
 				TimeUnit.MILLISECONDS.sleep(SLEEP);
 			} catch (InterruptedException e) {}
