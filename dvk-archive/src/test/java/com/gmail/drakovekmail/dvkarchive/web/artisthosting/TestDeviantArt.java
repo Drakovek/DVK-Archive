@@ -17,7 +17,6 @@ import com.gmail.drakovekmail.dvkarchive.file.DvkException;
 import com.gmail.drakovekmail.dvkarchive.file.DvkHandler;
 import com.gmail.drakovekmail.dvkarchive.file.FilePrefs;
 import com.gmail.drakovekmail.dvkarchive.file.InOut;
-import com.gmail.drakovekmail.dvkarchive.processing.ArrayProcessing;
 
 /**
  * Unit tests for the DeviantArt class.
@@ -137,14 +136,14 @@ public class TestDeviantArt {
 		this.dev.login(info[0], info[1]);
 		info = null;
 		assertTrue(this.dev.is_logged_in());
+		//TEST GETTING JOURNAL DVK
+		test_get_journal_dvk();
+		//TEST GETTING MODULE PAGES
+		test_get_module_pages();
 		//TEST GETTING FAVORITES
 		test_get_favorites_pages();
 		//TEST GETTING GALLERY PAGES
 		test_get_pages();
-		//TEST GETTING MODULE PAGES
-		test_get_module_pages();
-		//TEST GETTING JOURNAL DVK
-		test_get_journal_dvk();
 		//TEST GETTING MEDIA DVK
 		test_get_dvk();
 	}
@@ -675,38 +674,37 @@ public class TestDeviantArt {
 			assertEquals("Personal", dvk.get_web_tags()[3]);
 			assertEquals("DVK:Single", dvk.get_web_tags()[4]);
 			assertEquals("Favorite:thing", dvk.get_web_tags()[5]);
-			desc = "<div class=\"_23NSK _1zBoF _1KOBw\"> <p id=\"viewer-foo\" class=\"_39lC7 _1Ma_D _1tvZk _1iFR7 "
-					+ "_1zNTb _25QFG public-DraftStyleDefault-block-depth0 public-DraftStyleDefault-text-ltr\"> "
-					+ "Commission update: what to expect </p> <div id=\"viewer-criq1\" class=\"_39lC7 _1Ma_D _1tvZk "
-					+ "_1iFR7 _1zNTb _25QFG public-DraftStyleDefault-block-depth0 public-DraftStyleDefault-text-ltr\"> "
-					+ "<br/> </div> <p id=\"viewer-a9u9i\" class=\"_39lC7 _1Ma_D _1tvZk _1iFR7 _1zNTb _25QFG public-Draft"
-					+ "StyleDefault-block-depth0 public-DraftStyleDefault-text-ltr\"> School hasn't   for me as the "
-					+ "start of my 'internship' will begin shortly around May. The thing is that internship is suspended "
-					+ "and we're supposed to undertake Entrepreneurship, Community or Assigned project. </p> <div id=\""
-					+ "viewer-fner8\" class=\"_39lC7 _1Ma_D _1tvZk _1iFR7 _1zNTb _25QFG public-DraftStyleDefault-block-"
-					+ "depth0 public-DraftStyleDefault-text-ltr\"> <br/> </div> <p id=\"viewer-pbsu\" class=\"_39lC7 _1Ma_D"
-					+ " _1tvZk _1iFR7 _1zNTb _25QFG public-DraftStyleDefault-block-depth0 public-DraftStyleDefault-"
-					+ "text-ltr\"> School hasn't really ended for me as the start of my 'internship' will begin shortly "
-					+ "around May. The thing is that internship is suspended and we're supposed to undertake "
-					+ "Entrepreneurship, Community or Assigned project. </p> <p id=\"viewer-f8sog\" class=\"_39lC7 _1Ma_D"
-					+ " _1tvZk _1iFR7 _1zNTb _25QFG public-DraftStyleDefault-block-depth0 public-DraftStyleDefault-"
-					+ "text-ltr\"> The school says they'll provide projects for is to do, which really sucks because "
-					+ "you're given no time to really enjoy yourself. But the good thing is that I'll be able to have "
-					+ "time to do commissions as part of the entrepreneurship (that which I'll ask my lecture if it's "
-					+ "a possible option) </p> <div id=\"viewer-b1558\" class=\"_39lC7 _1Ma_D _1tvZk _1iFR7 _1zNTb "
-					+ "_25QFG public-DraftStyleDefault-block-depth0 public-DraftStyleDefault-text-ltr\"> <br/> </div> "
-					+ "<p id=\"viewer-86if1\" class=\"_39lC7 _1Ma_D _1tvZk _1iFR7 _1zNTb _25QFG public-DraftStyleDefault-"
-					+ "block-depth0 public-DraftStyleDefault-text-ltr\"> However, here's the catch. I can't be drawing "
-					+ "beans (TFs) all he time. I'll still take some but will not mention that they're part of the "
-					+ "commissions I do unless it's absolutely necessary if there isn't any demand for illustrations. "
-					+ "</p> <div id=\"viewer-68t5v\" class=\"_39lC7 _1Ma_D _1tvZk _1iFR7 _1zNTb _25QFG public-"
-					+ "DraftStyleDefault-block-depth0 public-DraftStyleDefault-text-ltr\"> <br/> </div> "
-					+ "<p id=\"viewer-4v98m\" class=\"_39lC7 _1Ma_D _1tvZk _1iFR7 _1zNTb _25QFG public-DraftStyleDefault"
-					+ "-block-depth0 public-DraftStyleDefault-text-ltr\"> Some possible options of commissions are "
-					+ "character illustration, character sheet reference, storyboarding ideas, animated icons so on and "
-					+ "so forth. I hope some of them would be of interest to you, even thou this account mostly focused "
-					+ "on beans. If not, please spread the message as it would really help to be able to reach a "
-					+ "larger audience. Thank you. </p> </div>";
+			desc = "<div class=\"kaqlz _1zBoF _1KOBw\"> <p id=\"viewer-foo\" class=\"XzvDs _208Ie _1tvZk _1iFR7 _2QAo- "
+					+ "_25MYV public-DraftStyleDefault-block-depth0 public-DraftStyleDefault-text-ltr\"> <span class=\"vkIF2 "
+					+ "public-DraftStyleDefault-ltr\"> Commission update: what to expect </span> </p> <div id=\"viewer-criq1\" "
+					+ "class=\"XzvDs _208Ie _1tvZk _1iFR7 _2QAo- _25MYV public-DraftStyleDefault-block-depth0 public-DraftStyle"
+					+ "Default-text-ltr\"> <span class=\"vkIF2 public-DraftStyleDefault-ltr\"> <br/> </span> </div> <p id=\"viewer-"
+					+ "a9u9i\" class=\"XzvDs _208Ie _1tvZk _1iFR7 _2QAo- _25MYV public-DraftStyleDefault-block-depth0 public-"
+					+ "DraftStyleDefault-text-ltr\"> <span class=\"vkIF2 public-DraftStyleDefault-ltr\"> School hasn't   for me "
+					+ "as the start of my 'internship' will begin shortly around May. The thing is that internship is suspended "
+					+ "and we're supposed to undertake Entrepreneurship, Community or Assigned project. </span> </p> <div id=\"viewer"
+					+ "-fner8\" class=\"XzvDs _208Ie _1tvZk _1iFR7 _2QAo- _25MYV public-DraftStyleDefault-block-depth0 public-Draft"
+					+ "StyleDefault-text-ltr\"> <span class=\"vkIF2 public-DraftStyleDefault-ltr\"> <br/> </span> </div> <p id=\"viewer"
+					+ "-pbsu\" class=\"XzvDs _208Ie _1tvZk _1iFR7 _2QAo- _25MYV public-DraftStyleDefault-block-depth0 public-DraftStyle"
+					+ "Default-text-ltr\"> <span class=\"vkIF2 public-DraftStyleDefault-ltr\"> School hasn't really ended for me as the "
+					+ "start of my 'internship' will begin shortly around May. The thing is that internship is suspended and we're supposed "
+					+ "to undertake Entrepreneurship, Community or Assigned project. </span> </p> <p id=\"viewer-f8sog\" class=\"XzvDs _208Ie"
+					+ " _1tvZk _1iFR7 _2QAo- _25MYV public-DraftStyleDefault-block-depth0 public-DraftStyleDefault-text-ltr\"> <span class=\"vkIF2"
+					+ " public-DraftStyleDefault-ltr\"> The school says they'll provide projects for is to do, which really sucks because you're "
+					+ "given no time to really enjoy yourself. But the good thing is that I'll be able to have time to do commissions as part "
+					+ "of the entrepreneurship (that which I'll ask my lecture if it's a possible option) </span> </p> <div id=\"viewer-b1558\" "
+					+ "class=\"XzvDs _208Ie _1tvZk _1iFR7 _2QAo- _25MYV public-DraftStyleDefault-block-depth0 public-DraftStyleDefault-text-ltr\"> "
+					+ "<span class=\"vkIF2 public-DraftStyleDefault-ltr\"> <br/> </span> </div> <p id=\"viewer-86if1\" class=\"XzvDs _208Ie _1tvZk "
+					+ "_1iFR7 _2QAo- _25MYV public-DraftStyleDefault-block-depth0 public-DraftStyleDefault-text-ltr\"> <span class=\"vkIF2 "
+					+ "public-DraftStyleDefault-ltr\"> However, here's the catch. I can't be drawing beans (TFs) all he time. I'll still take "
+					+ "some but will not mention that they're part of the commissions I do unless it's absolutely necessary if there isn't any "
+					+ "demand for illustrations. </span> </p> <div id=\"viewer-68t5v\" class=\"XzvDs _208Ie _1tvZk _1iFR7 _2QAo- _25MYV public-"
+					+ "DraftStyleDefault-block-depth0 public-DraftStyleDefault-text-ltr\"> <span class=\"vkIF2 public-DraftStyleDefault-ltr\"> "
+					+ "<br/> </span> </div> <p id=\"viewer-4v98m\" class=\"XzvDs _208Ie _1tvZk _1iFR7 _2QAo- _25MYV public-DraftStyleDefault-"
+					+ "block-depth0 public-DraftStyleDefault-text-ltr\"> <span class=\"vkIF2 public-DraftStyleDefault-ltr\"> Some possible "
+					+ "options of commissions are character illustration, character sheet reference, storyboarding ideas, animated icons so "
+					+ "on and so forth. I hope some of them would be of interest to you, even thou this account mostly focused on beans. If "
+					+ "not, please spread the message as it would really help to be able to reach a larger audience. Thank you. </span> </p> </div>";
 			assertEquals(desc, dvk.get_description());
 			url = "https://www.deviantart.com/fujoshiineko/journal/Important-announcement-Future-of-Commissions-839801217";
 			assertEquals(url, dvk.get_page_url());
@@ -1105,14 +1103,14 @@ public class TestDeviantArt {
 		}
 		//CREATE DVK 1
 		Dvk dvk = new Dvk();
-		dvk.set_dvk_id("DVA7283020-P");
+		dvk.set_dvk_id("DVA7924751-P");
 		dvk.set_title("Good TF");
 		dvk.set_artist("FujoshiiNeko");
 		String[] tags = {"Test", "Thing", "Whatever"};
 		dvk.set_web_tags(tags);
-		dvk.set_page_url("https://www.deviantart.com/fujoshiineko/poll/What-makes-a-good-TF-7283020");
-		dvk.set_dvk_file(new File(mod_dir, "good.dvk"));
-		dvk.set_media_file("good.jpg");
+		dvk.set_page_url("https://www.deviantart.com/fujoshiineko/poll/How-do-you-find-comments-like-FIRST-to-be-7924751");
+		dvk.set_dvk_file(new File(mod_dir, "first.dvk"));
+		dvk.set_media_file("first.jpg");
 		dvk.write_dvk();
 		//CREATE DVK 2
 		dvk = new Dvk();
@@ -1158,28 +1156,25 @@ public class TestDeviantArt {
 			ArrayList<Dvk> dvks;
 			dvks = this.dev.get_module_pages(
 					null, "FujoshiiNeko", mod_dir, 'p', handler, false);
-			assertTrue(dvks.size() > 42);
+			assertTrue(dvks.size() == 20);
 			int index = -1;
 			for(int i = 0; i < dvks.size(); i++) {
-				assertNotEquals("https://www.deviantart.com/fujoshiineko/poll/What-makes-a-good-TF-7283020",
+				assertNotEquals("https://www.deviantart.com/fujoshiineko/poll/How-do-you-find-comments-like-FIRST-to-be-7924751",
 						dvks.get(i).get_page_url());
-				if(dvks.get(i).get_page_url().equals(
-						"https://www.deviantart.com/fujoshiineko/poll/Is-there-any-aftermath-drawing-you-"
-						+ "peps-would-want-to-see-as-of-the-recent-posts-7294815")) {
+				if(dvks.get(i).get_page_url().equals("https://www.deviantart.com/fujoshiineko/poll/"
+						+ "Pok-233-mon-Black-and-White-2-is-a-good-game-7625670")) {
 					index = i;
 				}
 			}
 			assertNotEquals(-1, index);
-			assertEquals("https://www.deviantart.com/fujoshiineko/poll/Which-is-your-"
-					+ "favourite-and-what-do-you-think-of-them-7306515", dvks.get(index - 1).get_page_url());
-			assertEquals("https://www.deviantart.com/fujoshiineko/poll/Transformation"
-					+ "-with-mental-changes-7311213", dvks.get(index - 2).get_page_url());
-			dvk = dvks.get(index - 2);
-			assertEquals("Transformation with mental changes?", dvk.get_title());
+			assertEquals("https://www.deviantart.com/fujoshiineko/poll/Luxray-is-a-good-Pok-233-mon-7628901", dvks.get(index - 1).get_page_url());
+			assertEquals("https://www.deviantart.com/fujoshiineko/poll/Which-of-my-characters-do-you-like-more-7639342", dvks.get(index - 2).get_page_url());
+			dvk = dvks.get(index - 1);
+			assertEquals("Luxray is a good Pokémon", dvk.get_title());
 			assertEquals(1, dvk.get_artists().length);
 			assertEquals("FujoshiiNeko", dvk.get_artists()[0]);
-			assertEquals("2018/06/21|10:04", dvk.get_time());
-			String desc = "274<DVK-POLL-SEP>Like<DVK-POLL-SEP>127<DVK-POLL-SEP>Dislike<DVK-POLL-SEP>";
+			assertEquals("2019/06/13|19:09", dvk.get_time());
+			String desc = "479<DVK-POLL-SEP>Yes<DVK-POLL-SEP>24<DVK-POLL-SEP>No<DVK-POLL-SEP>";
 			assertEquals(desc, dvk.get_description());
 			//GET STATUS UPDATES
 			dvks = this.dev.get_module_pages(null, "Pokefan-tf", sub, 's', handler, false);

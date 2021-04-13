@@ -962,12 +962,19 @@ public class DeviantArt extends ArtistHosting {
 				}
 				//CHECK WHETHER TO GET NEXT PAGES
 				return_pages.addAll(cur_pages);
-				boolean more = json.getBoolean("hasMore");
+				boolean more = false;
+				try {
+					more = json.getBoolean("hasMore");
+				}
+				catch(JSONException j) {
+					more = false;
+				}
 				if(!more || (!check_all && !check_next)) {
 					return ArrayProcessing.clean_list(return_pages);
 				}
 			}
 			catch(Exception e) {
+				e.printStackTrace();
 				throw new DvkException();
 			}
 		}
@@ -994,88 +1001,63 @@ public class DeviantArt extends ArtistHosting {
 			char type,
 			DvkHandler dvk_handler,
 			boolean check_all) throws DvkException {
-		String mod_id = null;
+		//GET MODULE ID
 		StringBuilder url;
-		//GET INITIAL URL
-		url = new StringBuilder("https://www.deviantart.com/");
+		url = new StringBuilder("https://www.deviantart.com/_napi/da-user-profile/api/init/posts?username=");
 		url.append(artist);
-		url.append("/posts/journals");
-		//CONNECT
-		if(this.connect == null) {
-			initialize_connect();
-		}
-		String xpath = "//body[contains(@class,'error')]//img[@class='logo']|"
-				+ "//body[contains(@class,'theme')]//a[@href='https://www.deviantart.com']";
-		this.connect.load_page(url.toString(), xpath, 2);
-		boolean failed = this.connect.get_page() == null;
-		xpath = "//div[@id='root']/following-sibling::script";
-		boolean contains = this.connect.wait_for_element(xpath);
-		try {
-			TimeUnit.MILLISECONDS.sleep(SLEEP);
-		} catch (InterruptedException e) {}
-		if(!contains || this.connect.get_page() == null) {
-			if(!failed) {
-				return new ArrayList<>();
-			}
-			throw new DvkException();
-		}
-		//GET ID
-		int end;
-		int start = 0;
-		ArrayList<String> user_ids = new ArrayList<>();
-		String script = ((DomElement)this.connect.get_page().getFirstByXPath(xpath)).asXml();
-		start = script.indexOf("moduleId");
-		while(start != -1) {
-			end = script.indexOf('}', start);
-			user_ids.add(script.substring(start, end));
-			start = script.indexOf("moduleId", end);
-		}
-		String search = "";
+		url.append("&posts_section=");
 		switch(type) {
 			case 'j':
-				search = "journals";
+				url.append("journals");
 				break;
 			case 's':
-				search = "statuses";
+				url.append("statuses");
 				break;
 			case 'p':
-				search = "polls";
+				url.append("polls");
 				break;
 		}
-		for(int i = 0; i < user_ids.size(); i++) {
-			if(user_ids.get(i).contains(search) && !user_ids.get(i).contains("featured")) {
-				start = user_ids.get(i).indexOf(':') + 1;
-				end = user_ids.get(i).indexOf(',', start);
-				mod_id = user_ids.get(i).substring(start, end);
-				break;
-			}
+		url.append("&limit=24&mode=newest&offset=0");
+		//GET MODULE ID
+		String module_id = null;
+		JSONObject json = this.connect.load_json(url.toString(), 2);
+		if(json == null) {
+			return new ArrayList<>();
 		}
-		if(mod_id == null) {
+		try {
+			JSONObject obj = json.getJSONObject("sectionData");
+			JSONArray arr = obj.getJSONArray("modules");
+			obj = arr.getJSONObject(0);
+			module_id = Integer.toString(obj.getInt("id"));
+		}
+		catch(JSONException f) {
+			f.printStackTrace();
 			return new ArrayList<>();
 		}
 		//GET JSON URL
-		url = new StringBuilder("https://www.deviantart.com/_napi/da-user-profile/api/module/");
-		switch(type) {
-			case 'j':
-				url.append("journals?username=");
-				break;
-			case 's':
-				url.append("statuses?username=");
-				break;
-			case 'p':
-				url.append("polls?username=");
-				break;
-		}
+		url = new StringBuilder("https://www.deviantart.com/_napi/da-user-profile/api/module/posts_feed?username=");
 		url.append(artist);
 		url.append("&moduleid=");
-		url.append(mod_id);
-		url.append("&mode=newest&limit=24&offset=");
+		url.append(module_id);
+		url.append("&filter=");
+		switch(type) {
+			case 'j':
+				url.append("journals");
+				break;
+			case 's':
+				url.append("statuses");
+				break;
+			case 'p':
+				url.append("polls");
+				break;
+		}
+		url.append("&limit=24&mode=newest&offset=");
 		//INITIALIZE VARIABLES
 		if(this.connect == null) {
 			initialize_connect();
 		}
 		JSONArray arr;
-		JSONObject json;
+		json = null;
 		ArrayList<Dvk> cur_dvks;
 		ArrayList<Dvk> return_dvks = new ArrayList<>();
 		//RUN THROUGH PAGES
@@ -1086,10 +1068,11 @@ public class DeviantArt extends ArtistHosting {
 				if(start_gui != null && start_gui.get_base_gui().is_canceled()) {
 					return new ArrayList<>();
 				}
+				TimeUnit.MILLISECONDS.sleep(SLEEP);
 				json = this.connect.load_json(url.toString() + Integer.toString(offset), 2);
 				TimeUnit.MILLISECONDS.sleep(SLEEP);
 				if(json == null) {
-					throw new DvkException();
+					return new ArrayList<>();
 				}
 				//GET PAGES
 				cur_dvks = new ArrayList<>();
@@ -1163,6 +1146,7 @@ public class DeviantArt extends ArtistHosting {
 				}
 			}
 			catch(Exception e) {
+				e.printStackTrace();
 				throw new DvkException();
 			}
 		}
